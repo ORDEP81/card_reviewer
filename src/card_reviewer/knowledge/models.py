@@ -11,7 +11,7 @@ import re
 from enum import StrEnum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import AwareDatetime, BaseModel, Field, field_validator
 
 STAGES: tuple[str, ...] = (
     "acquire",
@@ -67,7 +67,7 @@ class Category(StrEnum):
 
 class StageState(BaseModel):
     status: StageStatus = StageStatus.PENDING
-    at: datetime.datetime | None = None
+    at: AwareDatetime | None = None
     error: str | None = None
     detail: dict[str, Any] = Field(default_factory=dict)
 
@@ -121,6 +121,9 @@ class Segment(BaseModel):
     start_s: float = Field(ge=0)
     end_s: float = Field(ge=0)
     score: float
+    # categories is list[str] not list[Category]: the segmentation lexicon emits
+    # categories ("outcomes", "demonstration") that are outside the rule taxonomy.
+    # Category enum is the rule taxonomy only; segment categories are wider.
     categories: list[str] = Field(default_factory=list)
     matched_terms: list[str] = Field(default_factory=list)
     text: str = ""

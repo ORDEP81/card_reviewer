@@ -116,3 +116,17 @@ def test_rule_accepts_notes():
 def test_stage_state_carries_error_on_failure():
     state = StageState(status=StageStatus.FAILED, error="yt-dlp exited 1")
     assert state.error == "yt-dlp exited 1"
+
+
+def test_stage_state_rejects_naive_datetime():
+    """All timestamps in manifests are UTC ISO-8601; naive datetimes are rejected."""
+    naive_dt = datetime.datetime(2026, 8, 29, 12, 0, 0)
+    with pytest.raises(ValidationError):
+        StageState(status=StageStatus.DONE, at=naive_dt)
+
+
+def test_stage_state_accepts_utc_aware_datetime():
+    """UTC-aware datetimes are accepted and Task 3's datetime.now(datetime.UTC) works."""
+    utc_dt = datetime.datetime(2026, 8, 29, 12, 0, 0, tzinfo=datetime.UTC)
+    state = StageState(status=StageStatus.DONE, at=utc_dt)
+    assert state.at == utc_dt
