@@ -20,8 +20,8 @@ NEGATIONS = (
     "never",
     "no",
     "cannot",
-    "won't",
-    "doesn't",
+    "wont",
+    "doesnt",
     "does not",
     "will not",
     "rarely",
@@ -49,9 +49,16 @@ def similarity(a: str, b: str) -> float:
 def is_negated(text: str) -> bool:
     words = set(normalize(text).split())
     phrase = normalize(text)
-    return any(
-        (n in words) if " " not in n else (n in phrase) for n in NEGATIONS
-    )
+    for n in NEGATIONS:
+        if " " not in n:
+            # Single-word negation: check against tokenized words
+            if n in words:
+                return True
+        else:
+            # Multi-word negation: check with word boundaries
+            if re.search(r"\b" + re.escape(n) + r"\b", phrase):
+                return True
+    return False
 
 
 def flags_for(

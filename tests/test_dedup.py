@@ -64,3 +64,26 @@ def test_flags_are_sorted_most_similar_first():
     flags = dedup.flags_for(new, active, threshold=0.5)
     assert flags[0].other_id == "SURFACE_002"
     assert flags[0].score >= flags[1].score
+
+
+def test_is_negated_detects_contraction_negations():
+    # Finding 1 fix: contractions without apostrophes should be detected
+    assert dedup.is_negated("This card won't gem.")
+    assert dedup.is_negated("This card doesn't gem.")
+
+
+def test_is_negated_uses_word_boundaries_for_multi_word_negations():
+    # Finding 2 fix: "does not" should not match inside "does notice"
+    assert not dedup.is_negated("The grader does notice surface wear.")
+    # Verify "does not" still matches correctly when used as a negation
+    assert dedup.is_negated("This card does not gem.")
+
+
+def test_contraction_negation_is_flagged_contradiction():
+    # End-to-end: active affirmative + pending contraction-negated = contradiction
+    new = make("SURFACE_002", "Vertical print lines won't prevent a PSA 10.")
+    active = [make("SURFACE_001", "Vertical print lines prevent a PSA 10.")]
+    flags = dedup.flags_for(new, active)
+    assert len(flags) == 1
+    assert flags[0].kind == "contradiction"
+    assert flags[0].other_id == "SURFACE_001"
