@@ -1,0 +1,5 @@
+# Git worktrees for isolated task execution
+.worktrees/
+
+# SDD scratch workspace
+.superpowers/
