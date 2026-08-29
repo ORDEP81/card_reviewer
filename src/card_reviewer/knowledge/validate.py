@@ -52,11 +52,23 @@ def parse_timestamp(text: str) -> tuple[float, float]:
 
 
 def load_pending(paths: ProjectPaths) -> list[tuple[Path, Rule]]:
+    """Load parseable pending rules, silently skipping ones that don't parse.
+
+    This is for callers who have already run `run()` and refused to proceed
+    unless it reported `ok` — at that point every file already parses and a
+    skip here can never hide an unreported problem. This function itself
+    never raises on a malformed file; per-file error reporting is `run()`'s
+    job, not this one's.
+    """
     out: list[tuple[Path, Rule]] = []
     if not paths.pending_rules.exists():
         return out
     for path in sorted(paths.pending_rules.glob("*.yaml")):
-        out.append((path, Rule.model_validate(yaml.safe_load(path.read_text()))))
+        try:
+            rule = Rule.model_validate(yaml.safe_load(path.read_text()))
+        except (ValidationError, yaml.YAMLError):
+            continue
+        out.append((path, rule))
     return out
 
 

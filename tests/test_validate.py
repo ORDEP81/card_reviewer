@@ -135,3 +135,30 @@ def test_missing_evidence_type_is_reported(project):
     write_pending(project, data)
     report = validate.run(project)
     assert not report.ok
+
+
+def test_load_pending_skips_malformed_file_without_raising(project):
+    write_pending(project, rule_dict())
+    (project.pending_rules / "broken.yaml").write_text("id: [unclosed\n")
+    loaded = validate.load_pending(project)
+    assert [rule.id for _, rule in loaded] == ["SURFACE_PRINT_LINE_001"]
+
+
+def test_load_pending_pairs_paths_with_their_own_rule(project):
+    path = write_pending(project, rule_dict())
+    loaded = validate.load_pending(project)
+    assert loaded == [(path, loaded[0][1])]
+    assert loaded[0][0] == path
+    assert loaded[0][1].id == "SURFACE_PRINT_LINE_001"
+
+
+def test_unparseable_citation_timestamp_is_rejected(project):
+    data = rule_dict()
+    data["sources"][0]["timestamps"] = ["sometime near the end"]
+    write_pending(project, data)
+    report = validate.run(project)
+    assert not report.ok
+    assert any(
+        "sometime near the end" in e
+        for e in report.errors["SURFACE_PRINT_LINE_001"]
+    )
