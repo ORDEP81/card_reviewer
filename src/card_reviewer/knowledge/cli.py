@@ -14,15 +14,19 @@ from .paths import ProjectPaths
 app = typer.Typer(
     help="Turn grading training videos into a versioned knowledge base.",
     invoke_without_command=True,
-    no_args_is_help=True,
 )
 console = Console()
 
 
+# When a Typer app has only one command registered, Typer collapses the app
+# into a single-command interface (Usage: doctor [OPTIONS]) rather than showing
+# subcommands. The callback with invoke_without_command=True forces Typer to
+# treat the registered commands as true subcommands, enabling proper multi-command
+# routing. Without this callback, invoking ["doctor"] fails with exit code 2.
 @app.callback(invoke_without_command=True)
 def _main(ctx: typer.Context) -> None:
     if ctx.invoked_subcommand is None:
-        console.print(app.get_help(ctx))
+        console.print(ctx.get_help())
 
 
 def project_root() -> Path:
