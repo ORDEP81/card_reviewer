@@ -50,6 +50,15 @@ def run_all(
     force: bool = False,
     steps: dict[str, Callable] | None = None,
 ) -> Manifest:
+    """Advance a packet through DETERMINISTIC_STAGES, skipping stages already done.
+
+    Contract for a custom `steps["acquire"]`: the resumability snapshot below
+    is keyed by `acquire.derive_video_id(url=url, file=file)`, computed before
+    `steps["acquire"]` runs. A substitute `acquire` step must assign the same
+    video_id that function would compute for the same `url`/`file`, or the
+    snapshot will miss the packet and every stage will rerun regardless of
+    prior completion.
+    """
     if not url and not file:
         raise ValueError("run_all requires either url or file")
 

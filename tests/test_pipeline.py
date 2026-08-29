@@ -94,6 +94,11 @@ def test_status_for_one_packet(paths):
     assert len(pipeline.status(paths, "yt_a")) == 1
 
 
+def test_status_for_unknown_video_id_raises_packet_not_found(paths):
+    with pytest.raises(mf.PacketNotFound):
+        pipeline.status(paths, "nonexistent")
+
+
 def test_run_all_requires_a_source(paths):
     with pytest.raises(ValueError):
         pipeline.run_all(paths)

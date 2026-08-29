@@ -269,10 +269,15 @@ def run_cmd(
 @app.command(name="status")
 def status_cmd(video_id: str | None = typer.Argument(None)) -> None:
     """Show the stage state of one packet, or of every packet."""
+    from . import manifest as mf
     from . import pipeline as pl
     from .models import STAGES
 
-    manifests = pl.status(paths(), video_id)
+    try:
+        manifests = pl.status(paths(), video_id)
+    except mf.PacketNotFound as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(code=1) from exc
     if not manifests:
         console.print("No work packets.")
         return
