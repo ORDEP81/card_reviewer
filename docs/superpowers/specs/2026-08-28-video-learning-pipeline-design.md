@@ -379,6 +379,8 @@ Verified present: Python 3.14.6, Homebrew 6.0.15, uv 0.11.32, Claude Code 2.1.22
 
 Not installed, required by this subsystem: `yt-dlp`, `ffmpeg`, `mlx-whisper`.
 
-Python 3.14 wheel availability for `mlx-whisper` must be confirmed during
-implementation; if unavailable, pin the project to an older Python via uv rather
-than dropping the transcription fallback.
+**Resolved 2026-08-28:** Python 3.14 wheel availability was verified by dry-run
+resolution. `mlx-whisper==0.4.3`, `mlx==0.32.2`, `pydantic==2.13.5`,
+`typer==0.27.2`, and `imagehash==4.3.2` all resolve on CPython 3.14.6 /
+macOS arm64. No Python version pin is required and the transcription fallback
+is retained.
