@@ -1,3 +1,5 @@
+import subprocess
+
 import pytest
 
 from card_reviewer.knowledge import manifest as mf, transcribe
@@ -45,6 +47,70 @@ def test_parse_vtt_ignores_cue_identifiers_and_notes():
 
 def test_parse_vtt_on_empty_input_returns_no_cues():
     assert transcribe.parse_vtt("WEBVTT\n") == []
+
+
+def test_fetch_captions_returns_none_on_nonzero_returncode(tmp_path):
+    def runner(cmd, **kwargs):
+        return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="no such video")
+
+    assert transcribe.fetch_captions("https://x/video", tmp_path, runner=runner) is None
+
+
+def test_fetch_captions_returns_none_when_no_vtt_written(tmp_path):
+    def runner(cmd, **kwargs):
+        # Succeeds but the video genuinely has no captions.
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    assert transcribe.fetch_captions("https://x/video", tmp_path, runner=runner) is None
+
+
+def test_fetch_captions_returns_parsed_cues_when_vtt_is_written(tmp_path):
+    def runner(cmd, **kwargs):
+        (tmp_path / "captions.en.vtt").write_text(VTT)
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    cues = transcribe.fetch_captions("https://x/video", tmp_path, runner=runner)
+    assert cues is not None
+    assert len(cues) == 2
+    assert cues[0].text == "Look right here at this corner."
+
+
+def test_fetch_captions_returns_none_when_vtt_parses_to_zero_cues(tmp_path):
+    def runner(cmd, **kwargs):
+        (tmp_path / "captions.en.vtt").write_text("WEBVTT\n")
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    assert transcribe.fetch_captions("https://x/video", tmp_path, runner=runner) is None
+
+
+def test_fetch_captions_passes_cookies_from_browser_and_never_a_cookie_file(tmp_path):
+    calls = []
+
+    def runner(cmd, **kwargs):
+        calls.append(cmd)
+        return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="")
+
+    transcribe.fetch_captions(
+        "https://x/video", tmp_path, browser="chrome", runner=runner
+    )
+    flat = " ".join(" ".join(c) for c in calls)
+    assert "--cookies-from-browser chrome" in flat
+    assert "--cookies " not in flat
+    assert "cookies.txt" not in flat
+
+
+def test_fetch_captions_ignores_stale_vtt_left_by_an_earlier_run(tmp_path):
+    # Regression: yt-dlp can exit 0 while writing nothing this invocation
+    # (expired cookies, a re-upload that lost its captions, a subtitle-only
+    # network failure). A caption file left over from a PRIOR run must never
+    # be reported as this run's result -- that would be a false provenance
+    # claim about which captions the transcript came from.
+    (tmp_path / "captions.en.vtt").write_text(VTT)
+
+    def runner(cmd, **kwargs):
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    assert transcribe.fetch_captions("https://x/video", tmp_path, runner=runner) is None
 
 
 @pytest.fixture

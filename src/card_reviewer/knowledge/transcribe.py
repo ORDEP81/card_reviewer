@@ -77,6 +77,13 @@ def fetch_captions(
     if not url:
         return None
     dest_dir.mkdir(parents=True, exist_ok=True)
+    # Clear any caption files left by an earlier run first. yt-dlp can exit 0
+    # while writing nothing this invocation (expired cookies, a re-upload
+    # that lost its captions, a subtitle-specific network failure); without
+    # this, the glob below could pick up a stale file and this run would
+    # falsely report method="captions" sourced from a prior transcript.
+    for stale in dest_dir.glob("captions*.vtt"):
+        stale.unlink()
     cookie = ["--cookies-from-browser", browser] if browser else []
     proc = runner(
         [
