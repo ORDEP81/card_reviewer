@@ -23,6 +23,11 @@ _TIMING = re.compile(
     r"^(?P<start>[\d:.]+)\s*-->\s*(?P<end>[\d:.]+)"
 )
 
+# YouTube auto-captions embed per-word timing inside cue text, e.g.
+# `to<00:00:04.000><c> buy</c><00:00:04.200><c> the</c>`. Strip any such tag.
+_INLINE_TAG = re.compile(r"<[^>]*>")
+_WHITESPACE = re.compile(r"\s+")
+
 
 def _to_seconds(stamp: str) -> float:
     """Accept HH:MM:SS.mmm or MM:SS.mmm."""
@@ -33,23 +38,60 @@ def _to_seconds(stamp: str) -> float:
     return seconds
 
 
+def _strip_inline_tags(line: str) -> str:
+    """Remove YouTube's inline `<...>` word-timing and `<c>` markup."""
+    return _INLINE_TAG.sub("", line)
+
+
 def parse_vtt(text: str) -> list[Cue]:
+    """Parse WebVTT into cues.
+
+    Handles two YouTube auto-caption quirks on top of plain WebVTT:
+    - inline per-word timing tags (`<00:00:04.000>`, `<c>`/`</c>`) in cue text
+    - a rolling caption window that repeats the previous cue's settled text
+      as the first line of the next cue, interspersed with ~10ms "settle"
+      cues that add nothing new
+
+    Rolling-window collapsing only fires when a cue's normalized text begins
+    with the exact text of the previously *emitted* cue -- an anchored,
+    exact-match rule, not a fuzzy one. That keeps genuinely distinct cues
+    (including hand-written VTT, which never repeats text this way) intact:
+    nothing is deleted, only text already emitted by the previous cue is
+    skipped from being emitted a second time.
+    """
     cues: list[Cue] = []
     block_lines: list[str] = []
     timing: tuple[float, float] | None = None
+    previous_text = ""
 
     def flush() -> None:
-        nonlocal timing, block_lines
+        nonlocal timing, block_lines, previous_text
         if timing and block_lines:
-            cues.append(
-                Cue(start_s=timing[0], end_s=timing[1], text=" ".join(block_lines))
-            )
+            joined = " ".join(_strip_inline_tags(l) for l in block_lines)
+            cue_text = _WHITESPACE.sub(" ", joined).strip()
+            if cue_text:
+                if cue_text.startswith(previous_text):
+                    remainder = cue_text[len(previous_text) :].strip()
+                else:
+                    remainder = cue_text
+                if remainder:
+                    cues.append(
+                        Cue(start_s=timing[0], end_s=timing[1], text=remainder)
+                    )
+                    previous_text = remainder
         timing, block_lines = None, []
 
     for raw in text.splitlines():
+        if raw == "":
+            # A truly empty line separates cue blocks. A line that is only
+            # whitespace (YouTube uses a lone space as a placeholder for a
+            # not-yet-populated caption line) is NOT a separator -- it must
+            # not end the block early, or the cue's real content line(s)
+            # that follow would be orphaned with no active timing.
+            flush()
+            continue
         line = raw.strip()
         if not line:
-            flush()
             continue
         if line == "WEBVTT" or line.startswith("NOTE"):
             continue
