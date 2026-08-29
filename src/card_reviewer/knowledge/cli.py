@@ -113,3 +113,18 @@ def segment_cmd(video_id: str) -> None:
             f"  {s.id}  {s.start_s:8.1f}s-{s.end_s:8.1f}s  "
             f"score {s.score:6.1f}  {','.join(s.categories) or '-'}"
         )
+
+
+@app.command(name="extract-frames")
+def extract_frames_cmd(
+    video_id: str,
+    top_n: int = typer.Option(12, "--top-n"),
+    uniform: bool = typer.Option(False, "--uniform", help="Ignore ranking; sample the whole video"),
+    at: float | None = typer.Option(None, "--at", help="Ad-hoc window start, in seconds"),
+    window: float = typer.Option(30.0, "--window", help="Ad-hoc window length, in seconds"),
+) -> None:
+    """Pull frames for the top-ranked segments, or for an ad-hoc window."""
+    from . import frames as fr
+
+    count = fr.run(paths(), video_id, top_n=top_n, uniform=uniform, at=at, window_s=window)
+    console.print(f"[green]{count} frames[/green] kept after deduplication")
