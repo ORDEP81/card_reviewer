@@ -128,3 +128,19 @@ def extract_frames_cmd(
 
     count = fr.run(paths(), video_id, top_n=top_n, uniform=uniform, at=at, window_s=window)
     console.print(f"[green]{count} frames[/green] kept after deduplication")
+
+
+@app.command(name="validate")
+def validate_cmd() -> None:
+    """Check every pending rule for schema, citation, and status errors."""
+    from . import validate as val
+
+    report = val.run(paths())
+    if report.ok:
+        console.print(f"[green]{report.checked} pending rules valid[/green]")
+        return
+    for rule_id, errors in report.errors.items():
+        console.print(f"[red]{rule_id}[/red]")
+        for error in errors:
+            console.print(f"  - {error}")
+    raise typer.Exit(code=1)
