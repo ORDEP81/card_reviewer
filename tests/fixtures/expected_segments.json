@@ -1,0 +1,77 @@
+[
+  {
+    "id": "seg_001",
+    "start_s": 115.0,
+    "end_s": 143.0,
+    "score": 19.0,
+    "categories": [
+      "corners",
+      "edges",
+      "outcomes"
+    ],
+    "matched_terms": [
+      "corner",
+      "corner wear",
+      "edge",
+      "look right here",
+      "psa 10",
+      "right here",
+      "whitening",
+      "you can see"
+    ],
+    "text": "Okay so look right here at this corner. You can see the whitening along that edge, that is corner wear. That is never coming back a PSA 10.",
+    "visual_cue": true
+  },
+  {
+    "id": "seg_002",
+    "start_s": 295.0,
+    "end_s": 356.0,
+    "score": 15.0,
+    "categories": [
+      "centering",
+      "outcomes",
+      "surface"
+    ],
+    "matched_terms": [
+      "60/40",
+      "borders",
+      "centering",
+      "gem",
+      "left to right",
+      "print line",
+      "psa 9",
+      "surface",
+      "tilt it",
+      "under the light",
+      "you can see"
+    ],
+    "text": "Now tilt it under the light and you can see the print line. That print line runs the whole surface, that is a gem killer. I have had these come back a PSA 9 every single time. Centering on this one is about 60/40 left to right. PSA will still gem that, borders are within tolerance.",
+    "visual_cue": true
+  },
+  {
+    "id": "seg_003",
+    "start_s": 356.0,
+    "end_s": 417.0,
+    "score": 15.0,
+    "categories": [
+      "centering",
+      "outcomes",
+      "surface"
+    ],
+    "matched_terms": [
+      "60/40",
+      "borders",
+      "centering",
+      "gem",
+      "left to right",
+      "print line",
+      "psa 9",
+      "surface",
+      "tilt it",
+      "under the light",
+      "you can see"
+    ],
+    "text": "Now tilt it under the light and you can see the print line. That print line runs the whole surface, that is a gem killer. I have had these come back a PSA 9 every single time. Centering on this one is about 60/40 left to right. PSA will still gem that, borders are within tolerance.",
+    "visual_cue": true
+  }
+]

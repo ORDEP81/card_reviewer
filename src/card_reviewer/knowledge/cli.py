@@ -99,3 +99,17 @@ def transcribe_cmd(
     console.print(
         f"[green]Transcript:[/green] {len(t.cues)} cues via {t.method}"
     )
+
+
+@app.command(name="segment")
+def segment_cmd(video_id: str) -> None:
+    """Rank the transcript into candidate windows worth inspecting."""
+    from . import segment as seg
+
+    segments = seg.run(paths(), video_id)
+    console.print(f"[green]{len(segments)} segments[/green] written")
+    for s in segments[:12]:
+        console.print(
+            f"  {s.id}  {s.start_s:8.1f}s-{s.end_s:8.1f}s  "
+            f"score {s.score:6.1f}  {','.join(s.categories) or '-'}"
+        )
