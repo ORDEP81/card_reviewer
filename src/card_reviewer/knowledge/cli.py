@@ -238,3 +238,54 @@ def build_rubric_cmd() -> None:
     path = rb.build(paths())
     r = rb.load_active_rubric(project_root())
     console.print(f"[green]Wrote[/green] {path} — v{r.version}, {len(r.rules)} rules")
+
+
+@app.command(name="run")
+def run_cmd(
+    url: str | None = typer.Argument(None),
+    file: Path | None = typer.Option(None, "--file"),
+    browser: str | None = typer.Option(None, "--browser"),
+    top_n: int = typer.Option(12, "--top-n"),
+    force: bool = typer.Option(False, "--force", help="Re-run stages already done"),
+) -> None:
+    """Advance a video through every deterministic stage, stopping at analyze."""
+    from . import acquire as acq
+    from . import pipeline as pl
+
+    try:
+        m = pl.run_all(paths(), url=url, file=file, browser=browser, top_n=top_n, force=force)
+    except acq.AcquisitionFailed as exc:
+        console.print(f"[red]Acquisition failed:[/red] {exc}")
+        console.print(exc.guidance)
+        raise typer.Exit(code=1) from exc
+
+    console.print(f"[green]Packet ready for analysis:[/green] {m.video_id}")
+    console.print(
+        "Next: start an interactive Claude Code session and invoke the "
+        f"learn-video skill on {m.video_id}."
+    )
+
+
+@app.command(name="status")
+def status_cmd(video_id: str | None = typer.Argument(None)) -> None:
+    """Show the stage state of one packet, or of every packet."""
+    from . import pipeline as pl
+    from .models import STAGES
+
+    manifests = pl.status(paths(), video_id)
+    if not manifests:
+        console.print("No work packets.")
+        return
+
+    table = Table("video_id", "title", *STAGES)
+    for m in manifests:
+        marks = []
+        for stage in STAGES:
+            state = m.stages[stage].status.value
+            marks.append(
+                {"done": "[green]done[/green]", "failed": "[red]failed[/red]"}.get(
+                    state, state
+                )
+            )
+        table.add_row(m.video_id, m.source.title[:30], *marks)
+    console.print(table)
