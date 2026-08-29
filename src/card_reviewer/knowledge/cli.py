@@ -144,3 +144,76 @@ def validate_cmd() -> None:
         for error in errors:
             console.print(f"  - {error}")
     raise typer.Exit(code=1)
+
+
+@app.command(name="review")
+def review_cmd() -> None:
+    """Walk pending rules one at a time and decide each one."""
+    from . import dedup, promote as pr, validate as val, version as ver
+
+    p = paths()
+    report = val.run(p)
+    if not report.ok:
+        console.print("[red]Fix validation errors before reviewing:[/red]")
+        for rule_id, errors in report.errors.items():
+            console.print(f"  {rule_id}: {'; '.join(errors)}")
+        raise typer.Exit(code=1)
+
+    pending = val.load_pending(p)
+    if not pending:
+        console.print("No pending rules.")
+        return
+
+    active = val.load_active(p)
+    accepted = superseded = 0
+
+    for _, rule in pending:
+        console.rule(f"[bold]{rule.id}[/bold]  ({rule.category.value})")
+        console.print(f"[bold]{rule.statement}[/bold]")
+        console.print(
+            f"evidence: {rule.evidence_type.value}   confidence: {rule.confidence.value}"
+        )
+        if rule.applies_to.card_types or rule.applies_to.sets:
+            console.print(
+                f"applies to: {rule.applies_to.card_types or '-'} / {rule.applies_to.sets or '-'}"
+            )
+        for source in rule.sources:
+            console.print(
+                f"  [dim]{source.lesson} {source.video_id} {','.join(source.timestamps)}[/dim]"
+            )
+            if source.quote:
+                console.print(f'    "{source.quote}"')
+
+        for flag in dedup.flags_for(rule, active):
+            colour = "red" if flag.kind == "contradiction" else "yellow"
+            console.print(
+                f"  [{colour}]{flag.kind}[/{colour}] vs {flag.other_id} "
+                f"({flag.score}): {flag.other_statement}"
+            )
+
+        choice = typer.prompt(
+            "accept / reject / supersede <ID> / defer", default="defer"
+        ).strip()
+
+        if choice.startswith("accept"):
+            pr.accept(p, rule, ver.bump(ver.read(p), "minor"))
+            accepted += 1
+        elif choice.startswith("reject"):
+            reason = typer.prompt("reason")
+            pr.reject(p, rule, reason)
+        elif choice.startswith("supersede"):
+            parts = choice.split(maxsplit=1)
+            if len(parts) != 2:
+                console.print("[red]supersede needs a rule id; deferring[/red]")
+                continue
+            pr.supersede(p, rule, parts[1].strip(), ver.bump(ver.read(p), "major"))
+            superseded += 1
+
+    if accepted:
+        ver.write(p, ver.bump(ver.read(p), "minor"))
+    if superseded:
+        ver.write(p, ver.bump(ver.read(p), "major"))
+    console.print(
+        f"[green]{accepted} accepted, {superseded} superseded.[/green] "
+        f"Rubric now {ver.read(p)}. Run `card-knowledge build-rubric`."
+    )
