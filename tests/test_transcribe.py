@@ -1,10 +1,13 @@
 import subprocess
+from pathlib import Path
 
 import pytest
 
 from card_reviewer.knowledge import manifest as mf, transcribe
 from card_reviewer.knowledge.models import Manifest, SourceInfo
 from card_reviewer.knowledge.paths import ProjectPaths
+
+FIXTURES = Path(__file__).parent / "fixtures"
 
 VTT = """WEBVTT
 
@@ -47,6 +50,153 @@ def test_parse_vtt_ignores_cue_identifiers_and_notes():
 
 def test_parse_vtt_on_empty_input_returns_no_cues():
     assert transcribe.parse_vtt("WEBVTT\n") == []
+
+
+def test_parse_vtt_strips_inline_word_timing_markup():
+    body = (
+        "WEBVTT\n\n"
+        "00:00:03.920 --> 00:00:06.790 align:start position:0%\n"
+        "to<00:00:04.000><c> buy</c><00:00:04.200><c> the</c><00:00:04.360><c> card.</c>\n"
+    )
+    cues = transcribe.parse_vtt(body)
+    assert len(cues) == 1
+    assert cues[0].text == "to buy the card."
+    assert "<" not in cues[0].text
+
+
+def test_parse_vtt_tolerates_align_and_position_settings_on_timing_line():
+    # The current _TIMING regex uses .match(), which should already tolerate
+    # trailing cue settings -- confirm rather than assume.
+    body = (
+        "WEBVTT\n\n"
+        "00:00:01.000 --> 00:00:02.000 align:start position:0%\n"
+        "Hello.\n"
+    )
+    cues = transcribe.parse_vtt(body)
+    assert len(cues) == 1
+    assert cues[0].start_s == 1.0
+    assert cues[0].end_s == 2.0
+
+
+def test_parse_vtt_collapses_rolling_window_carry_over():
+    # YouTube auto-captions repeat the previous cue's settled text as the
+    # first line of the next cue. Only the new remainder should be emitted.
+    body = (
+        "WEBVTT\n\n"
+        "00:00:00.000 --> 00:00:02.310 align:start position:0%\n"
+        "So<00:00:00.200><c> what</c><00:00:00.320><c> is</c><00:00:00.400><c> up</c>\n\n"
+        "00:00:02.310 --> 00:00:02.320 align:start position:0%\n"
+        "So what is up\n"
+        " \n\n"
+        "00:00:02.320 --> 00:00:03.910 align:start position:0%\n"
+        "So what is up\n"
+        "today<00:00:02.480><c> friends</c>\n"
+    )
+    cues = transcribe.parse_vtt(body)
+    texts = [c.text for c in cues]
+    assert texts == ["So what is up", "today friends"]
+
+
+def test_parse_vtt_drops_tiny_settle_cue_that_repeats_previous_exactly():
+    body = (
+        "WEBVTT\n\n"
+        "00:00:00.000 --> 00:00:02.310 align:start position:0%\n"
+        "Hello there.\n\n"
+        "00:00:02.310 --> 00:00:02.320 align:start position:0%\n"
+        "Hello there.\n"
+        " \n"
+    )
+    cues = transcribe.parse_vtt(body)
+    assert len(cues) == 1
+    assert cues[0].text == "Hello there."
+    assert cues[0].start_s == 0.0
+    assert cues[0].end_s == 2.31
+
+
+def test_parse_vtt_normalizes_whitespace_left_by_tag_stripping():
+    body = (
+        "WEBVTT\n\n"
+        "00:00:00.000 --> 00:00:01.000 align:start position:0%\n"
+        "one<00:00:00.200><c> two</c><00:00:00.400><c> three</c>\n"
+    )
+    cues = transcribe.parse_vtt(body)
+    assert cues[0].text == "one two three"
+    assert "  " not in cues[0].text
+
+
+def test_parse_vtt_keeps_distinct_consecutive_cues_intact():
+    # Genuinely different consecutive cues must not be merged or truncated
+    # just because collapsing logic exists.
+    cues = transcribe.parse_vtt(VTT)
+    assert [c.text for c in cues] == [
+        "Look right here at this corner.",
+        "You can see the whitening on the edge.",
+    ]
+
+
+def test_parse_vtt_on_real_youtube_auto_caption_excerpt():
+    body = (FIXTURES / "youtube_auto_captions_excerpt.vtt").read_text()
+    cues = transcribe.parse_vtt(body)
+    assert [(c.start_s, c.end_s, c.text) for c in cues] == [
+        (0.0, 2.31, "So what I do instead is I actually start"),
+        (2.32, 3.91, "from the assumption that I'm not going"),
+        (3.92, 6.79, "to buy the card."),
+    ]
+    for c in cues:
+        assert "<" not in c.text
+
+
+def test_parse_vtt_keeps_genuinely_repeated_speech_at_distinct_times():
+    # "No, no, no." said once, then said again two seconds later, is two
+    # real utterances -- not YouTube's rolling window (which never leaves a
+    # gap between the settle cue's end and the next cue's start). The second
+    # utterance must survive with its own timestamp, not be discarded as a
+    # duplicate.
+    body = (
+        "WEBVTT\n\n"
+        "00:00:01.000 --> 00:00:03.000\n"
+        "No, no, no.\n\n"
+        "00:00:05.000 --> 00:00:08.000\n"
+        "No, no, no.\n"
+    )
+    cues = transcribe.parse_vtt(body)
+    assert [(c.start_s, c.end_s, c.text) for c in cues] == [
+        (1.0, 3.0, "No, no, no."),
+        (5.0, 8.0, "No, no, no."),
+    ]
+
+
+def test_parse_vtt_does_not_splice_mid_word_on_shared_opening_phrase():
+    # "I see" is a contiguous, but not a word-boundary, prefix of "I seem".
+    # A naive str.startswith collapse would slice "I see" off the front of
+    # "I seem to notice a crease on the surface.", leaving the fabricated
+    # fragment "m to notice a crease on the surface." -- text the instructor
+    # never said. The full second sentence must survive intact.
+    body = (
+        "WEBVTT\n\n"
+        "00:00:01.000 --> 00:00:03.000\n"
+        "I see\n\n"
+        "00:00:03.000 --> 00:00:08.000\n"
+        "I seem to notice a crease on the surface.\n"
+    )
+    cues = transcribe.parse_vtt(body)
+    texts = [c.text for c in cues]
+    assert "I seem to notice a crease on the surface." in texts
+    assert not any(t.startswith("m to notice") for t in texts)
+
+
+def test_parse_vtt_preserves_literal_angle_brackets_in_speech():
+    # Grading commentary legitimately uses "<" and ">" for ratios (centering
+    # percentages). Only YouTube's own <HH:MM:SS.mmm> and <c>/</c> tag shapes
+    # may be stripped -- a bare "<20/80 ... >15/85" must survive untouched.
+    body = (
+        "WEBVTT\n\n"
+        "00:00:01.000 --> 00:00:04.000\n"
+        "Centering is better than <20/80 or >15/85 here.\n"
+    )
+    cues = transcribe.parse_vtt(body)
+    assert len(cues) == 1
+    assert cues[0].text == "Centering is better than <20/80 or >15/85 here."
 
 
 def test_fetch_captions_returns_none_on_nonzero_returncode(tmp_path):
