@@ -104,3 +104,74 @@ def test_empty_knowledge_base_renders_without_error(tmp_path):
     r = rubric.load_active_rubric(tmp_path)
     assert r.rules == []
     assert "0 active rules" in rubric.render(r)
+
+
+# --- for_card: independent-axis regression (fix round 1) ---
+#
+# The `project` fixture above has no sets-scoped rule, which is exactly why the
+# asymmetry bug (a call that names only one axis silently drops rules scoped on
+# the *other*, unnamed axis) went unnoticed. This fixture adds one unscoped
+# rule, one card_types-scoped rule, and one sets-scoped rule so both axes can be
+# exercised independently.
+
+
+@pytest.fixture
+def scoped_project(tmp_path):
+    p = ProjectPaths(tmp_path)
+    for rule in [
+        make("UNSCOPED_001"),
+        make("TYPESCOPED_001", card_types=["chrome"]),
+        make("SETSCOPED_001", sets=["2023-topps"]),
+    ]:
+        path = p.rules / rule.category.value / f"{rule.id}.yaml"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(yaml.safe_dump(rule.model_dump(mode="json"), sort_keys=False))
+    version.write(p, "0.1.0")
+    return p
+
+
+def test_for_card_naming_only_card_types_keeps_sets_scoped_rule(scoped_project):
+    """Not naming `sets` means 'unknown', not 'empty' -- the sets-scoped rule
+    must not be silently dropped just because the caller hasn't resolved the
+    set yet."""
+    r = rubric.load_active_rubric(scoped_project.root)
+    ids = {rule.id for rule in r.for_card(card_types=["chrome"])}
+    assert ids == {"UNSCOPED_001", "TYPESCOPED_001", "SETSCOPED_001"}
+
+
+def test_for_card_naming_only_sets_keeps_type_scoped_rule(scoped_project):
+    r = rubric.load_active_rubric(scoped_project.root)
+    ids = {rule.id for rule in r.for_card(sets=["2023-topps"])}
+    assert ids == {"UNSCOPED_001", "SETSCOPED_001", "TYPESCOPED_001"}
+
+
+def test_for_card_naming_both_axes_returns_all_matching(scoped_project):
+    r = rubric.load_active_rubric(scoped_project.root)
+    ids = {
+        rule.id
+        for rule in r.for_card(card_types=["chrome"], sets=["2023-topps"])
+    }
+    assert ids == {"UNSCOPED_001", "TYPESCOPED_001", "SETSCOPED_001"}
+
+
+def test_for_card_type_mismatch_still_keeps_sets_scoped_rule(scoped_project):
+    """A non-matching card type excludes the type-scoped rule but must not
+    touch the sets-scoped rule, which that call said nothing about."""
+    r = rubric.load_active_rubric(scoped_project.root)
+    ids = {rule.id for rule in r.for_card(card_types=["paper"])}
+    assert "TYPESCOPED_001" not in ids
+    assert "SETSCOPED_001" in ids
+    assert "UNSCOPED_001" in ids
+
+
+def test_for_card_explicit_empty_card_types_is_a_real_constraint(scoped_project):
+    """`card_types=[]` means 'known to have no card types' -- unlike omitting
+    the argument, this excludes any rule scoped on that axis."""
+    r = rubric.load_active_rubric(scoped_project.root)
+    ids = {rule.id for rule in r.for_card(card_types=[])}
+    assert ids == {"UNSCOPED_001", "SETSCOPED_001"}
+
+
+def test_for_card_no_arguments_returns_everything(scoped_project):
+    r = rubric.load_active_rubric(scoped_project.root)
+    assert len(r.for_card()) == 3

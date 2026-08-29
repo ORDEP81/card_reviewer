@@ -33,19 +33,26 @@ class Rubric:
 
         An unscoped rule applies to every card. A scoped rule applies only when
         its scope intersects what the caller asked for.
-        """
-        if card_types is None and sets is None:
-            return list(self.rules)
 
-        wanted_types = set(card_types or [])
-        wanted_sets = set(sets or [])
+        Each axis is independent. `None` on an axis means "unknown / no
+        constraint" — that axis places no restriction on the result, so a rule
+        scoped only on that axis still passes through. An explicit empty list
+        (`[]`) means "known to be empty" — a real constraint — so a rule scoped
+        on that axis is correctly excluded. `for_card()` with both axes omitted
+        therefore returns every rule, as a natural consequence of both axes
+        being unconstrained.
+        """
 
         def matches(rule: Rule) -> bool:
-            type_ok = not rule.applies_to.card_types or bool(
-                set(rule.applies_to.card_types) & wanted_types
+            type_ok = (
+                card_types is None
+                or not rule.applies_to.card_types
+                or bool(set(rule.applies_to.card_types) & set(card_types))
             )
-            set_ok = not rule.applies_to.sets or bool(
-                set(rule.applies_to.sets) & wanted_sets
+            set_ok = (
+                sets is None
+                or not rule.applies_to.sets
+                or bool(set(rule.applies_to.sets) & set(sets))
             )
             return type_ok and set_ok
 
