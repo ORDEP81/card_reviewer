@@ -58,3 +58,30 @@ def doctor_cmd() -> None:
 # command explicitly. Every later command uses the @app.command(name="...")
 # decorator form instead; this one is written out to show the equivalence.
 app.command(name="doctor")(doctor_cmd)
+
+
+@app.command(name="acquire")
+def acquire_cmd(
+    url: str | None = typer.Argument(None, help="Video URL"),
+    file: Path | None = typer.Option(None, "--file", help="Local video file"),
+    browser: str | None = typer.Option(
+        None,
+        "--browser",
+        help="Read cookies from this browser: chrome, brave, edge, firefox, safari",
+    ),
+) -> None:
+    """Download a video (or adopt a local file) and open its work packet."""
+    from . import acquire as acq
+    from . import version as ver
+
+    p = paths()
+    rubric_version = ver.read(p)
+    try:
+        m = acq.from_file(p, file, rubric_version) if file else acq.from_url(
+            p, url, rubric_version, browser=browser
+        )
+    except acq.AcquisitionFailed as exc:
+        console.print(f"[red]Acquisition failed:[/red] {exc}")
+        console.print(exc.guidance)
+        raise typer.Exit(code=1) from exc
+    console.print(f"[green]Packet ready:[/green] {m.video_id} — {m.source.title}")
