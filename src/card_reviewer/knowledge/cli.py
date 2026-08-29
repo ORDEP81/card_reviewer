@@ -228,3 +228,13 @@ def review_cmd() -> None:
         f"[green]{len(to_accept)} accepted, {len(to_supersede)} superseded.[/green] "
         f"Rubric now {ver.read(p)}. Run `card-knowledge build-rubric`."
     )
+
+
+@app.command(name="build-rubric")
+def build_rubric_cmd() -> None:
+    """Render ACTIVE_RUBRIC.md from the active rule files."""
+    from . import rubric as rb
+
+    path = rb.build(paths())
+    r = rb.load_active_rubric(project_root())
+    console.print(f"[green]Wrote[/green] {path} — v{r.version}, {len(r.rules)} rules")
