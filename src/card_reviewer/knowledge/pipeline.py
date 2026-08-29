@@ -52,37 +52,27 @@ def run_all(
 ) -> Manifest:
     """Advance a packet through DETERMINISTIC_STAGES, skipping stages already done.
 
-    Contract for a custom `steps["acquire"]`: the resumability snapshot below
-    is keyed by `acquire.derive_video_id(url=url, file=file)`, computed before
-    `steps["acquire"]` runs. A substitute `acquire` step must assign the same
-    video_id that function would compute for the same `url`/`file`, or the
-    snapshot will miss the packet and every stage will rerun regardless of
-    prior completion.
+    Contract for a custom `steps["acquire"]`: it must behave like
+    `acquire.from_url`/`acquire.from_file` and preserve `stages` and
+    `lesson_id` when a manifest for this `video_id` already exists, updating
+    only `source`/`file` in place. The skip decision below trusts the
+    manifest `steps["acquire"]` returns; an acquire step that rebuilds the
+    manifest from scratch will make every downstream stage look pending and
+    rerun regardless of prior completion.
     """
     if not url and not file:
         raise ValueError("run_all requires either url or file")
 
-    from . import acquire, version
+    from . import version
 
     steps = steps or _default_steps()
-
-    # `acquire` always re-runs, to locate (or re-download) the packet — but a
-    # fresh acquire call rebuilds the manifest from scratch, wiping whatever
-    # downstream stages had already finished. Snapshot that prior state
-    # *before* calling acquire so the skip check below reflects what was
-    # really done, not what acquire just reset.
-    video_id = acquire.derive_video_id(url=url, file=Path(file) if file else None)
-    try:
-        pre = mf.load(paths, video_id)
-    except mf.PacketNotFound:
-        pre = None
 
     m = steps["acquire"](
         paths, url=url, file=file, browser=browser, rubric_version=version.read(paths)
     )
 
     for stage in DETERMINISTIC_STAGES[1:]:
-        if pre is not None and mf.is_done(pre, stage) and not force:
+        if mf.is_done(m, stage) and not force:
             continue
         steps[stage](paths, m.video_id, browser=browser, top_n=top_n)
 

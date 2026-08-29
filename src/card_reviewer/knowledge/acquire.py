@@ -95,6 +95,24 @@ def _cookie_args(browser: str | None) -> list[str]:
     return ["--cookies-from-browser", browser] if browser else []
 
 
+def _open_manifest(
+    paths: ProjectPaths, video_id: str, source: SourceInfo, rubric_version: str
+) -> Manifest:
+    """Start a fresh manifest, or refresh an existing one in place.
+
+    A packet is resumable work: re-running `acquire` for a `video_id` that
+    already has a manifest must not reset `stages` or `lesson_id` for
+    stages that already ran. Only `source` (and, by the caller, `file`) may
+    legitimately change on a re-acquire — everything else about the packet
+    carries forward untouched.
+    """
+    if paths.manifest(video_id).exists():
+        m = mf.load(paths, video_id)
+        m.source = source
+        return m
+    return Manifest(video_id=video_id, source=source, rubric_version_at_ingest=rubric_version)
+
+
 def from_url(
     paths: ProjectPaths,
     url: str,
@@ -124,9 +142,7 @@ def from_url(
             uploader=None,
             duration_s=0.0,
         )
-        m = Manifest(
-            video_id=video_id, source=placeholder, rubric_version_at_ingest=rubric_version
-        )
+        m = _open_manifest(paths, video_id, placeholder, rubric_version)
         mf.save(paths, m)
         mf.start(paths, m, "acquire")
         mf.fail(paths, m, "acquire", error)
@@ -141,7 +157,7 @@ def from_url(
         duration_s=float(meta.get("duration") or 0),
     )
 
-    m = Manifest(video_id=video_id, source=source, rubric_version_at_ingest=rubric_version)
+    m = _open_manifest(paths, video_id, source, rubric_version)
     mf.save(paths, m)
     mf.start(paths, m, "acquire")
 
@@ -198,15 +214,11 @@ def from_file(
         uploader=None,
         duration_s=_probe_duration(dest, runner),
     )
-    m = Manifest(
-        video_id=video_id,
-        source=source,
-        file=FileInfo(
-            path=str(dest.relative_to(paths.packet(video_id))),
-            sha256=_sha256_file(dest),
-            bytes=dest.stat().st_size,
-        ),
-        rubric_version_at_ingest=rubric_version,
+    m = _open_manifest(paths, video_id, source, rubric_version)
+    m.file = FileInfo(
+        path=str(dest.relative_to(paths.packet(video_id))),
+        sha256=_sha256_file(dest),
+        bytes=dest.stat().st_size,
     )
     mf.save(paths, m)
     return mf.finish(paths, m, "acquire", tool="local-copy", original=str(src))

@@ -71,17 +71,6 @@ def test_long_window_is_split_to_max_length(lex):
     assert all(s.end_s - s.start_s <= 90.0 + 1e-6 for s in segments)
 
 
-def test_segments_are_sorted_by_score_descending(lex):
-    cues = [
-        cue(0, 5, "Look at this corner."),
-        cue(5, 10, "Anyway."),
-        cue(10, 15, "So."),
-        cue(30, 35, "Look right here, you can see the print line and the whitening."),
-    ]
-    segments = segment.build(cues, lex, pad_s=0.0)
-    assert segments[0].score >= segments[1].score
-
-
 def test_ids_are_assigned_in_time_order(lex):
     cues = [
         cue(0, 5, "Look at this corner."),

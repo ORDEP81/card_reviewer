@@ -141,3 +141,33 @@ def test_from_file_adopts_local_video(paths, tmp_path):
     assert paths.manifest(m.video_id).exists()
     # Original is copied into the packet, not moved.
     assert src.exists()
+
+
+def test_from_file_rerun_preserves_downstream_stages(paths, tmp_path):
+    """Critical 1: re-running `acquire` for a packet that has already been
+    transcribed/segmented/etc. must not reset those stages to pending —
+    only `acquire` itself, and `source`/`file`, may legitimately change."""
+    src = tmp_path / "lesson.mp4"
+    src.write_bytes(b"pretend video bytes")
+    runner = recording_runner([], stdout="42.5")
+
+    m = acquire.from_file(paths, src, rubric_version="0.1.0", runner=runner)
+    mf.finish(paths, m, "transcribe")
+    mf.finish(paths, m, "segment")
+    mf.finish(paths, m, "extract_frames")
+    m.lesson_id = "lesson_014"
+    mf.save(paths, m)
+
+    # Re-acquire the same file (e.g. a second `card-knowledge run`).
+    m2 = acquire.from_file(paths, src, rubric_version="0.1.0", runner=runner)
+
+    assert m2.stages["acquire"].status is StageStatus.DONE
+    assert m2.stages["transcribe"].status is StageStatus.DONE
+    assert m2.stages["segment"].status is StageStatus.DONE
+    assert m2.stages["extract_frames"].status is StageStatus.DONE
+    assert m2.lesson_id == "lesson_014"
+
+    reloaded = mf.load(paths, m2.video_id)
+    assert reloaded.stages["transcribe"].status is StageStatus.DONE
+    assert reloaded.stages["segment"].status is StageStatus.DONE
+    assert reloaded.stages["extract_frames"].status is StageStatus.DONE

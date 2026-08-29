@@ -220,3 +220,84 @@ def test_mixed_accept_and_supersede_session_writes_version_once(paths):
     # was stamped with — no rule names a version that never stood on disk.
     assert stamped_accept.rubric_version_added == version.read(paths)
     assert stamped_new.rubric_version_added == version.read(paths)
+
+
+def test_write_rule_refuses_to_overwrite_a_different_rule_with_the_same_id(paths):
+    """Critical 2, belt-and-braces: even if validation were bypassed,
+    `write_rule` itself must never let a reused id destroy a different
+    rule's content."""
+    original = make(statement="A: print lines prevent a PSA 10.")
+    dest = promote.rule_path(paths, original)
+    promote.write_rule(dest, original)
+
+    impostor = make(statement="B: a totally different claim.")
+    with pytest.raises(promote.RuleConflict):
+        promote.write_rule(dest, impostor)
+
+    # The original file is untouched by the refused write.
+    stored = Rule.model_validate(yaml.safe_load(dest.read_text()))
+    assert stored.statement == "A: print lines prevent a PSA 10."
+
+
+def test_write_rule_allows_rewriting_the_same_rule_with_a_new_status(paths):
+    """The legitimate case `write_rule`'s guard must not block: every real
+    transition (accept, reject, supersede) rewrites the *same* rule id with
+    the *same* statement, just a different status."""
+    rule = make()
+    dest = promote.rule_path(paths, rule)
+    promote.write_rule(dest, rule)
+
+    rejected = rule.model_copy(update={"status": RuleStatus.REJECTED, "notes": "rejected: x"})
+    promote.write_rule(dest, rejected)  # must not raise
+
+    stored = Rule.model_validate(yaml.safe_load(dest.read_text()))
+    assert stored.status is RuleStatus.REJECTED
+
+
+def test_accept_then_reject_then_supersede_of_distinct_rules_all_succeed(paths):
+    """The legitimate accept / reject / supersede transitions still work
+    once `write_rule` and `_drop_pending` guard against id reuse — this is
+    the happy path the guards must not break."""
+    accepted = make("SURFACE_PRINT_LINE_001")
+    write_pending(paths, accepted)
+    accept_dest = promote.accept(paths, accepted, "0.1.0")
+    assert Rule.model_validate(yaml.safe_load(accept_dest.read_text())).status is (
+        RuleStatus.ACTIVE
+    )
+
+    rejected = make("SURFACE_PRINT_LINE_002", statement="A claim the grader declines.")
+    write_pending(paths, rejected)
+    reject_dest = promote.reject(paths, rejected, "instructor opinion")
+    assert Rule.model_validate(yaml.safe_load(reject_dest.read_text())).status is (
+        RuleStatus.REJECTED
+    )
+
+    superseding = make(
+        "SURFACE_PRINT_LINE_003", statement="A refinement of the first claim."
+    )
+    write_pending(paths, superseding)
+    new_path, old_path = promote.supersede(
+        paths, superseding, "SURFACE_PRINT_LINE_001", "1.0.0"
+    )
+    assert Rule.model_validate(yaml.safe_load(new_path.read_text())).status is (
+        RuleStatus.ACTIVE
+    )
+    assert Rule.model_validate(yaml.safe_load(old_path.read_text())).status is (
+        RuleStatus.SUPERSEDED
+    )
+
+
+def test_drop_pending_removes_the_actual_path_not_a_reconstruction(paths):
+    """Important 4: a pending file whose name doesn't match its id must
+    still be removed on promotion — by the path `load_pending` returned,
+    not by guessing `pending_rules/<id>.yaml`."""
+    rule = make()
+    mismatched = paths.pending_rules / "totally_different_name.yaml"
+    mismatched.write_text(yaml.safe_dump(rule.model_dump(mode="json"), sort_keys=False))
+
+    promote.accept(paths, rule, "0.2.0", pending_path=mismatched)
+
+    assert not mismatched.exists()
+    # The path validate.check_rule would have guessed from the id must not
+    # have been created or left behind either.
+    assert not (paths.pending_rules / f"{rule.id}.yaml").exists()

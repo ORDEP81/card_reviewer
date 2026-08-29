@@ -22,6 +22,15 @@ STAGES: tuple[str, ...] = (
     "validate",
 )
 
+# `analyze` (Claude, under skills/learn-video/SKILL.md) and `validate` (the
+# mechanical check a human runs via `card-knowledge validate`) are never
+# written to a manifest's `stages` — nothing automated advances them. They
+# stay in STAGES because they are real stages of the pipeline, but callers
+# that render stage status (see `card-knowledge status`) should treat them
+# as "not tracked here" rather than as a stalled "pending". See README.md's
+# Known limitations section.
+MANUAL_STAGES: frozenset[str] = frozenset({"analyze", "validate"})
+
 RULE_ID_RE = re.compile(r"^[A-Z][A-Z0-9_]*[0-9]{3}$")
 
 

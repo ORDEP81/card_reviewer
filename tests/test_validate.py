@@ -113,7 +113,83 @@ def test_id_colliding_with_an_active_rule_is_rejected(project):
     )
     write_pending(project, rule_dict())
     report = validate.run(project)
-    assert any("already active" in e for e in report.errors["SURFACE_PRINT_LINE_001"])
+    assert any(
+        "already exists with status 'active'" in e
+        for e in report.errors["SURFACE_PRINT_LINE_001"]
+    )
+
+
+def test_id_colliding_with_a_rejected_rule_is_rejected(project):
+    """Critical 2: a rejected rule's id must never be silently reused —
+    otherwise the rejection reason (and the fact the grader declined the
+    claim) is destroyed by whatever pending rule reuses the id."""
+    rejected = rule_dict(status="rejected", notes="rejected: instructor opinion")
+    (project.rules / "surface").mkdir(parents=True)
+    (project.rules / "surface" / "SURFACE_PRINT_LINE_001.yaml").write_text(
+        yaml.safe_dump(rejected, sort_keys=False)
+    )
+    write_pending(project, rule_dict(statement="A totally different claim."))
+    report = validate.run(project)
+    assert not report.ok
+    assert any(
+        "already exists with status 'rejected'" in e
+        for e in report.errors["SURFACE_PRINT_LINE_001"]
+    )
+    # The rejected rule on disk must be untouched by the failed validation run.
+    stored = yaml.safe_load(
+        (project.rules / "surface" / "SURFACE_PRINT_LINE_001.yaml").read_text()
+    )
+    assert stored["status"] == "rejected"
+    assert stored["statement"] == rejected["statement"]
+
+
+def test_id_colliding_with_a_superseded_rule_is_rejected(project):
+    superseded = rule_dict(status="superseded", rubric_version_added="0.1.0")
+    (project.rules / "surface").mkdir(parents=True)
+    (project.rules / "surface" / "SURFACE_PRINT_LINE_001.yaml").write_text(
+        yaml.safe_dump(superseded, sort_keys=False)
+    )
+    write_pending(project, rule_dict())
+    report = validate.run(project)
+    assert not report.ok
+    assert any(
+        "already exists with status 'superseded'" in e
+        for e in report.errors["SURFACE_PRINT_LINE_001"]
+    )
+
+
+def test_pending_rule_with_supersedes_set_is_rejected(project):
+    """Important 5: supersession is a review-time human decision, not
+    something a pending rule (written by Claude) can declare for itself."""
+    data = rule_dict(supersedes="CORNERS_OLD_001")
+    write_pending(project, data)
+    report = validate.run(project)
+    assert not report.ok
+    assert any("supersedes" in e for e in report.errors["SURFACE_PRINT_LINE_001"])
+
+
+def test_pending_filename_not_matching_id_is_rejected(project):
+    """Important 4: a mismatched filename lets `_drop_pending` promote the
+    rule while the real file stays behind, wedging every future `review`."""
+    write_pending(project, rule_dict(), name="totally_different_name")
+    report = validate.run(project)
+    assert not report.ok
+    assert any(
+        "does not match id" in e for e in report.errors["totally_different_name.yaml"]
+    )
+
+
+def test_duplicate_pending_id_across_two_files_flags_both(project):
+    """A rule id must map to exactly one pending file; two files claiming
+    the same id are ambiguous about which one promotion should apply."""
+    write_pending(project, rule_dict(), name="first")
+    write_pending(project, rule_dict(), name="second")
+    report = validate.run(project)
+    assert not report.ok
+    assert "first.yaml" in report.errors
+    assert "second.yaml" in report.errors
+    assert any("more than one file" in e for e in report.errors["first.yaml"])
+    assert any("more than one file" in e for e in report.errors["second.yaml"])
 
 
 def test_pending_rule_marked_active_is_rejected(project):

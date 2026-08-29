@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import functools
 from pathlib import Path
 
 import typer
@@ -16,6 +17,39 @@ app = typer.Typer(
     invoke_without_command=True,
 )
 console = Console()
+
+
+def _friendly_errors(fn):
+    """Catch the domain exceptions common to stage/review commands, print
+    them plainly, and exit 1 instead of a raw traceback.
+
+    `PacketNotFound`/`StageNotReady` ("you haven't acquired/transcribed yet")
+    and `UnknownRule` ("no such rule id") are normal, expected conditions —
+    not bugs — and `FileNotFoundError`/`RuntimeError` cover the media- and
+    ffmpeg-shaped failures inside `transcribe`/`frames`. `AcquisitionFailed`
+    is deliberately not here: `acquire_cmd`/`run_cmd` handle it themselves
+    because it carries `.guidance` that this generic handler doesn't know
+    how to print.
+    """
+
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        from .manifest import PacketNotFound, StageNotReady
+        from .promote import UnknownRule
+
+        try:
+            return fn(*args, **kwargs)
+        except (
+            PacketNotFound,
+            StageNotReady,
+            UnknownRule,
+            FileNotFoundError,
+            RuntimeError,
+        ) as exc:
+            console.print(f"[red]{exc}[/red]")
+            raise typer.Exit(code=1) from exc
+
+    return wrapper
 
 
 # When a Typer app has only one command registered, Typer collapses the app
@@ -61,6 +95,7 @@ app.command(name="doctor")(doctor_cmd)
 
 
 @app.command(name="acquire")
+@_friendly_errors
 def acquire_cmd(
     url: str | None = typer.Argument(None, help="Video URL"),
     file: Path | None = typer.Option(None, "--file", help="Local video file"),
@@ -73,6 +108,10 @@ def acquire_cmd(
     """Download a video (or adopt a local file) and open its work packet."""
     from . import acquire as acq
     from . import version as ver
+
+    if not url and not file:
+        console.print("[red]acquire needs either a URL or --file[/red]")
+        raise typer.Exit(code=1)
 
     p = paths()
     rubric_version = ver.read(p)
@@ -88,6 +127,7 @@ def acquire_cmd(
 
 
 @app.command(name="transcribe")
+@_friendly_errors
 def transcribe_cmd(
     video_id: str,
     browser: str | None = typer.Option(None, "--browser"),
@@ -102,6 +142,7 @@ def transcribe_cmd(
 
 
 @app.command(name="segment")
+@_friendly_errors
 def segment_cmd(video_id: str) -> None:
     """Rank the transcript into candidate windows worth inspecting."""
     from . import segment as seg
@@ -116,6 +157,7 @@ def segment_cmd(video_id: str) -> None:
 
 
 @app.command(name="extract-frames")
+@_friendly_errors
 def extract_frames_cmd(
     video_id: str,
     top_n: int = typer.Option(12, "--top-n"),
@@ -147,6 +189,7 @@ def validate_cmd() -> None:
 
 
 @app.command(name="review")
+@_friendly_errors
 def review_cmd() -> None:
     """Walk pending rules one at a time and decide each one."""
     from . import dedup, promote as pr, validate as val, version as ver
@@ -168,7 +211,7 @@ def review_cmd() -> None:
     to_accept = []
     to_supersede = []
 
-    for _, rule in pending:
+    for path, rule in pending:
         console.rule(f"[bold]{rule.id}[/bold]  ({rule.category.value})")
         console.print(f"[bold]{rule.statement}[/bold]")
         console.print(
@@ -197,16 +240,28 @@ def review_cmd() -> None:
         ).strip()
 
         if choice.startswith("accept"):
-            to_accept.append(rule)
+            to_accept.append((path, rule))
         elif choice.startswith("reject"):
             reason = typer.prompt("reason")
-            pr.reject(p, rule, reason)
+            pr.reject(p, rule, reason, pending_path=path)
         elif choice.startswith("supersede"):
             parts = choice.split(maxsplit=1)
             if len(parts) != 2:
                 console.print("[red]supersede needs a rule id; deferring[/red]")
                 continue
-            to_supersede.append((rule, parts[1].strip()))
+            old_id = parts[1].strip()
+            # Validate the target now, before anything in this session is
+            # applied. A bad id caught only when `promote.supersede` runs
+            # (after the accept loop below has already written files and
+            # stamped `new_version` on them) would leave RUBRIC_VERSION
+            # lagging what those already-promoted rules were stamped with,
+            # with no pending rule left to re-run review against.
+            try:
+                pr.find_active(p, old_id)
+            except pr.UnknownRule as exc:
+                console.print(f"[red]{exc}; deferring[/red]")
+                continue
+            to_supersede.append((path, rule, old_id))
 
     # One version for the whole session: every accepted or superseded rule is
     # stamped with the same value, and the version file is written at most
@@ -216,10 +271,10 @@ def review_cmd() -> None:
     level = pr.session_bump_level(bool(to_accept), bool(to_supersede))
     new_version = ver.bump(ver.read(p), level) if level else None
 
-    for rule in to_accept:
-        pr.accept(p, rule, new_version)
-    for rule, old_id in to_supersede:
-        pr.supersede(p, rule, old_id, new_version)
+    for path, rule in to_accept:
+        pr.accept(p, rule, new_version, pending_path=path)
+    for path, rule, old_id in to_supersede:
+        pr.supersede(p, rule, old_id, new_version, pending_path=path)
 
     if new_version:
         ver.write(p, new_version)
@@ -241,6 +296,7 @@ def build_rubric_cmd() -> None:
 
 
 @app.command(name="run")
+@_friendly_errors
 def run_cmd(
     url: str | None = typer.Argument(None),
     file: Path | None = typer.Option(None, "--file"),
@@ -267,17 +323,13 @@ def run_cmd(
 
 
 @app.command(name="status")
+@_friendly_errors
 def status_cmd(video_id: str | None = typer.Argument(None)) -> None:
     """Show the stage state of one packet, or of every packet."""
-    from . import manifest as mf
     from . import pipeline as pl
-    from .models import STAGES
+    from .models import MANUAL_STAGES, STAGES
 
-    try:
-        manifests = pl.status(paths(), video_id)
-    except mf.PacketNotFound as exc:
-        console.print(f"[red]{exc}[/red]")
-        raise typer.Exit(code=1) from exc
+    manifests = pl.status(paths(), video_id)
     if not manifests:
         console.print("No work packets.")
         return
@@ -287,6 +339,13 @@ def status_cmd(video_id: str | None = typer.Argument(None)) -> None:
         marks = []
         for stage in STAGES:
             state = m.stages[stage].status.value
+            # `analyze`/`validate` are never written by anything automated
+            # (see models.MANUAL_STAGES) — showing their untouched "pending"
+            # state as pending would misreport a fully analyzed, promoted
+            # video as stalled. Render honestly instead.
+            if stage in MANUAL_STAGES and state == "pending":
+                marks.append("[dim]n/a[/dim]")
+                continue
             marks.append(
                 {"done": "[green]done[/green]", "failed": "[red]failed[/red]"}.get(
                     state, state

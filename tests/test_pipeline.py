@@ -12,12 +12,18 @@ def paths(tmp_path):
 
 def fake_steps(paths, calls):
     def make_packet(*a, **k):
-        m = Manifest(
-            video_id="yt_abc",
-            source=SourceInfo(type="youtube", url="u", title="t", duration_s=100.0),
-            rubric_version_at_ingest="0.1.0",
-        )
-        mf.save(paths, m)
+        # Mirrors the real acquire contract (see acquire._open_manifest):
+        # re-running acquire for a video_id that already has a manifest must
+        # preserve `stages` and `lesson_id`, not rebuild from scratch.
+        try:
+            m = mf.load(paths, "yt_abc")
+        except mf.PacketNotFound:
+            m = Manifest(
+                video_id="yt_abc",
+                source=SourceInfo(type="youtube", url="u", title="t", duration_s=100.0),
+                rubric_version_at_ingest="0.1.0",
+            )
+            mf.save(paths, m)
         calls.append("acquire")
         return mf.finish(paths, m, "acquire")
 
@@ -58,6 +64,22 @@ def test_completed_stages_are_skipped_on_rerun(paths):
     calls.clear()
     pipeline.run_all(paths, url="https://youtu.be/abc", steps=steps)
     assert calls == ["acquire"]  # acquire re-runs to locate the packet; rest skipped
+
+
+def test_completed_stages_are_still_done_on_disk_after_rerun(paths):
+    """Critical 1: `calls` only proves which steps were invoked, not what the
+    manifest reports afterward. A re-acquire that silently rebuilds the
+    manifest would still pass the old assertion while leaving downstream
+    stages `pending` on disk — which is what `status` and `require_ready`
+    actually read."""
+    calls = []
+    steps = fake_steps(paths, calls)
+    pipeline.run_all(paths, url="https://youtu.be/abc", steps=steps)
+    pipeline.run_all(paths, url="https://youtu.be/abc", steps=steps)
+
+    reloaded = mf.load(paths, "yt_abc")
+    for stage in pipeline.DETERMINISTIC_STAGES:
+        assert mf.is_done(reloaded, stage), f"{stage} is {reloaded.stages[stage].status}"
 
 
 def test_force_reruns_completed_stages(paths):
