@@ -1,0 +1,90 @@
+# Segmentation lexicon — scores transcript cues for grading relevance.
+# This is DATA, not code. Tune it freely; tests/fixtures/expected_segments.json
+# is the regression guard that shows what your tuning changed.
+version: "1"
+
+categories:
+  centering:
+    centering: 2.0
+    center: 1.0
+    borders: 1.5
+    border: 1.0
+    off-center: 3.0
+    off center: 3.0
+    left to right: 1.5
+    top to bottom: 1.5
+    "60/40": 3.0
+    "55/45": 3.0
+    diamond cut: 3.0
+
+  corners:
+    corner: 1.5
+    corners: 1.5
+    soft corner: 3.0
+    ding: 2.5
+    dinged: 2.5
+    fraying: 2.5
+    frayed: 2.5
+    rounded: 2.0
+    corner wear: 3.0
+
+  edges:
+    edge: 1.5
+    edges: 1.5
+    chipping: 3.0
+    chipped: 3.0
+    rough cut: 2.5
+    edge wear: 3.0
+    whitening: 3.0
+    silvering: 2.5
+
+  surface:
+    surface: 1.5
+    print line: 3.5
+    print lines: 3.5
+    scratch: 2.5
+    scratches: 2.5
+    roller mark: 3.0
+    dimple: 2.5
+    orange peel: 3.0
+    gloss: 1.5
+    fisheye: 3.0
+    indentation: 2.5
+    crease: 3.0
+
+  print:
+    print defect: 3.0
+    print dot: 2.5
+    registration: 2.0
+    miscut: 3.0
+
+  handling:
+    top loader: 1.5
+    toploader: 1.5
+    one touch: 1.5
+    penny sleeve: 1.5
+    handling: 1.5
+
+  outcomes:
+    psa 10: 3.0
+    psa 9: 3.0
+    psa 8: 2.5
+    gem mint: 3.0
+    gem: 2.0
+    came back: 2.5
+    bumped: 2.5
+    qualifier: 2.5
+    submission: 1.5
+
+  demonstration:
+    look right here: 2.0
+    look at this: 2.0
+    you can see: 2.0
+    right here: 1.5
+    under the light: 2.5
+    angle the light: 2.5
+    tilt it: 2.0
+    zoom in: 2.0
+    flip it over: 2.0
+    take a look: 1.5
+    notice how: 2.0

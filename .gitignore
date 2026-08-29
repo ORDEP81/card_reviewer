@@ -1,0 +1,33 @@
+# Git worktrees for isolated task execution
+.worktrees/
+
+# SDD scratch workspace
+.superpowers/
+
+# Secrets — never commit (spec §9, plan §4)
+cookies.txt
+*.cookies
+.env
+.env.*
+credentials.json
+*token*.json
+
+# Downloaded media — large, and possibly licensed course material
+training/work/*/source/
+*.mp4
+*.mov
+*.mkv
+*.webm
+*.m4a
+
+# Extracted frames — regenerable from source
+training/work/*/frames/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+*.egg-info/
+dist/
+build/

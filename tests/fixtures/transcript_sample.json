@@ -1,0 +1,21 @@
+{
+  "method": "captions",
+  "model": null,
+  "language": "en",
+  "cues": [
+    {"start_s": 0.0,   "end_s": 6.0,   "text": "What is going on everybody, welcome back to the channel."},
+    {"start_s": 6.0,   "end_s": 12.0,  "text": "Today we are going through a stack of chrome."},
+    {"start_s": 12.0,  "end_s": 18.0,  "text": "Before we start, hit subscribe."},
+    {"start_s": 120.0, "end_s": 126.0, "text": "Okay so look right here at this corner."},
+    {"start_s": 126.0, "end_s": 132.0, "text": "You can see the whitening along that edge, that is corner wear."},
+    {"start_s": 132.0, "end_s": 138.0, "text": "That is never coming back a PSA 10."},
+    {"start_s": 138.0, "end_s": 144.0, "text": "Alright."},
+    {"start_s": 144.0, "end_s": 150.0, "text": "Moving on."},
+    {"start_s": 300.0, "end_s": 306.0, "text": "Now tilt it under the light and you can see the print line."},
+    {"start_s": 306.0, "end_s": 312.0, "text": "That print line runs the whole surface, that is a gem killer."},
+    {"start_s": 312.0, "end_s": 318.0, "text": "I have had these come back a PSA 9 every single time."},
+    {"start_s": 400.0, "end_s": 406.0, "text": "Centering on this one is about 60/40 left to right."},
+    {"start_s": 406.0, "end_s": 412.0, "text": "PSA will still gem that, borders are within tolerance."},
+    {"start_s": 500.0, "end_s": 506.0, "text": "Anyway that is the video, thanks for watching."}
+  ]
+}
