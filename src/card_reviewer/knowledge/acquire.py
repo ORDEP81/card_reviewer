@@ -132,17 +132,29 @@ def from_url(
     )
     if meta_proc.returncode != 0:
         error = (meta_proc.stderr or "").strip()
-        # We don't know the title or duration yet — this is a placeholder record
-        # of the attempt and its failure reason, not a completed packet. A later
-        # successful run overwrites it cleanly (same video_id, same manifest path).
-        placeholder = SourceInfo(
-            type="skool" if video_id.startswith("skool_") else "youtube",
-            url=url,
-            title=video_id,
-            uploader=None,
-            duration_s=0.0,
-        )
-        m = _open_manifest(paths, video_id, placeholder, rubric_version)
+        if paths.manifest(video_id).exists():
+            # A re-acquire of an already-processed packet just failed (e.g.
+            # expired Skool cookies). We still don't know the real title or
+            # duration from *this* attempt, but the packet already has real
+            # values from a prior success — a placeholder must never
+            # overwrite them, or a failed re-acquire silently corrupts
+            # `source` on an otherwise-healthy, fully-staged packet.
+            m = mf.load(paths, video_id)
+        else:
+            # First attempt at this video_id: nothing real is known yet, so
+            # this is a placeholder record of the attempt and its failure
+            # reason, not a completed packet. A later successful run
+            # overwrites it cleanly (same video_id, same manifest path).
+            placeholder = SourceInfo(
+                type="skool" if video_id.startswith("skool_") else "youtube",
+                url=url,
+                title=video_id,
+                uploader=None,
+                duration_s=0.0,
+            )
+            m = Manifest(
+                video_id=video_id, source=placeholder, rubric_version_at_ingest=rubric_version
+            )
         mf.save(paths, m)
         mf.start(paths, m, "acquire")
         mf.fail(paths, m, "acquire", error)

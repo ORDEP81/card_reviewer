@@ -171,3 +171,51 @@ def test_from_file_rerun_preserves_downstream_stages(paths, tmp_path):
     assert reloaded.stages["transcribe"].status is StageStatus.DONE
     assert reloaded.stages["segment"].status is StageStatus.DONE
     assert reloaded.stages["extract_frames"].status is StageStatus.DONE
+
+
+def test_from_url_failed_reacquire_does_not_corrupt_a_completed_packet(paths):
+    """Regression: a failed re-acquire (e.g. expired Skool cookies) must not
+    overwrite a completed packet's real `source` with the failure-path
+    placeholder (title=video_id, duration_s=0.0). Before the fix, the
+    placeholder was written into an *existing* manifest just like a fresh
+    one, silently zeroing `duration_s` on an otherwise fully-staged packet
+    -- which then made `validate`'s timestamp check reject previously-valid
+    citations with a message that is actively false."""
+    url = "https://youtu.be/abcdefghijk"
+    video_id = acquire.derive_video_id(url=url)
+    dest = paths.source_dir(video_id)
+
+    def ok_runner(cmd, **kwargs):
+        if "--dump-json" in cmd:
+            return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps(METADATA), stderr="")
+        dest.mkdir(parents=True, exist_ok=True)
+        (dest / "video.mp4").write_bytes(b"pretend video bytes")
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    m1 = acquire.from_url(paths, url, rubric_version="0.1.0", runner=ok_runner)
+    assert m1.source.title == "Grading 101"
+    assert m1.source.duration_s == 3120.0
+    mf.finish(paths, m1, "transcribe")
+    mf.finish(paths, m1, "segment")
+    mf.finish(paths, m1, "extract_frames")
+    m1.lesson_id = "lesson_007"
+    mf.save(paths, m1)
+
+    def failing_runner(cmd, **kwargs):
+        return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="ERROR: sign in to confirm")
+
+    with pytest.raises(acquire.AcquisitionFailed):
+        acquire.from_url(paths, url, rubric_version="0.1.0", runner=failing_runner)
+
+    reloaded = mf.load(paths, video_id)
+    # The real, previously-recorded source survives the failed re-acquire.
+    assert reloaded.source.title == "Grading 101"
+    assert reloaded.source.duration_s == 3120.0
+    assert reloaded.lesson_id == "lesson_007"
+    # The failure is still recorded honestly.
+    assert reloaded.stages["acquire"].status is StageStatus.FAILED
+    assert "sign in" in reloaded.stages["acquire"].error
+    # Downstream stage states are untouched.
+    assert reloaded.stages["transcribe"].status is StageStatus.DONE
+    assert reloaded.stages["segment"].status is StageStatus.DONE
+    assert reloaded.stages["extract_frames"].status is StageStatus.DONE
