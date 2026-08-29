@@ -146,6 +146,59 @@ def test_parse_vtt_on_real_youtube_auto_caption_excerpt():
         assert "<" not in c.text
 
 
+def test_parse_vtt_keeps_genuinely_repeated_speech_at_distinct_times():
+    # "No, no, no." said once, then said again two seconds later, is two
+    # real utterances -- not YouTube's rolling window (which never leaves a
+    # gap between the settle cue's end and the next cue's start). The second
+    # utterance must survive with its own timestamp, not be discarded as a
+    # duplicate.
+    body = (
+        "WEBVTT\n\n"
+        "00:00:01.000 --> 00:00:03.000\n"
+        "No, no, no.\n\n"
+        "00:00:05.000 --> 00:00:08.000\n"
+        "No, no, no.\n"
+    )
+    cues = transcribe.parse_vtt(body)
+    assert [(c.start_s, c.end_s, c.text) for c in cues] == [
+        (1.0, 3.0, "No, no, no."),
+        (5.0, 8.0, "No, no, no."),
+    ]
+
+
+def test_parse_vtt_does_not_splice_mid_word_on_shared_opening_phrase():
+    # "I see" is a contiguous, but not a word-boundary, prefix of "I seem".
+    # A naive str.startswith collapse would slice "I see" off the front of
+    # "I seem to notice a crease on the surface.", leaving the fabricated
+    # fragment "m to notice a crease on the surface." -- text the instructor
+    # never said. The full second sentence must survive intact.
+    body = (
+        "WEBVTT\n\n"
+        "00:00:01.000 --> 00:00:03.000\n"
+        "I see\n\n"
+        "00:00:03.000 --> 00:00:08.000\n"
+        "I seem to notice a crease on the surface.\n"
+    )
+    cues = transcribe.parse_vtt(body)
+    texts = [c.text for c in cues]
+    assert "I seem to notice a crease on the surface." in texts
+    assert not any(t.startswith("m to notice") for t in texts)
+
+
+def test_parse_vtt_preserves_literal_angle_brackets_in_speech():
+    # Grading commentary legitimately uses "<" and ">" for ratios (centering
+    # percentages). Only YouTube's own <HH:MM:SS.mmm> and <c>/</c> tag shapes
+    # may be stripped -- a bare "<20/80 ... >15/85" must survive untouched.
+    body = (
+        "WEBVTT\n\n"
+        "00:00:01.000 --> 00:00:04.000\n"
+        "Centering is better than <20/80 or >15/85 here.\n"
+    )
+    cues = transcribe.parse_vtt(body)
+    assert len(cues) == 1
+    assert cues[0].text == "Centering is better than <20/80 or >15/85 here."
+
+
 def test_fetch_captions_returns_none_on_nonzero_returncode(tmp_path):
     def runner(cmd, **kwargs):
         return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="no such video")
