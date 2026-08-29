@@ -1,6 +1,8 @@
+import json
 import subprocess
 
 import pytest
+from PIL import Image
 
 from card_reviewer.knowledge import frames, manifest as mf
 from card_reviewer.knowledge.models import Manifest, SourceInfo
@@ -88,3 +90,119 @@ def test_run_blocks_before_segment_stage(tmp_path):
     mf.save(p, m)
     with pytest.raises(mf.StageNotReady):
         frames.run(p, "yt_abc")
+
+
+def test_sample_clears_stale_frames_before_extracting(tmp_path):
+    out_dir = tmp_path / "out"
+    out_dir.mkdir()
+    (out_dir / "frame_0099.jpg").write_bytes(b"stale")
+
+    run = fake_ffmpeg(["frame_0001.jpg", "frame_0002.jpg"])
+    out = frames.sample(tmp_path / "v.mp4", out_dir, 0.0, 10.0, runner=run)
+
+    names = sorted(p.name for p in out_dir.glob("*.jpg"))
+    assert names == ["frame_0001.jpg", "frame_0002.jpg"]
+    assert len(out) == 2
+    assert not (out_dir / "frame_0099.jpg").exists()
+
+
+def test_sample_raises_runtime_error_with_ffmpeg_stderr(tmp_path):
+    def run(cmd, **kwargs):
+        return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="no such filter: bogus")
+
+    with pytest.raises(RuntimeError, match="no such filter: bogus"):
+        frames.sample(tmp_path / "v.mp4", tmp_path / "out", 0.0, 10.0, runner=run)
+
+
+def recording_ffmpeg(images_per_call=1):
+    """Simulate ffmpeg by writing real (tiny, valid) images, so the default
+    perceptual hasher can run against them without invoking real ffmpeg."""
+    calls = []
+
+    def run(cmd, **kwargs):
+        calls.append(cmd)
+        out_pattern = cmd[-1]
+        out_dir = __import__("pathlib").Path(out_pattern).parent
+        out_dir.mkdir(parents=True, exist_ok=True)
+        for i in range(images_per_call):
+            color = ((i * 37) % 256, (i * 61) % 256, (i * 89) % 256)
+            Image.new("RGB", (8, 8), color=color).save(out_dir / f"frame_{i + 1:04d}.jpg")
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    run.calls = calls
+    return run
+
+
+def _ready_manifest(paths_, video_id="yt_abc", duration_s=100.0):
+    """A manifest with every stage before extract_frames marked done, plus a
+    source video file on disk — the minimum frames.run() needs to proceed."""
+    m = Manifest(
+        video_id=video_id,
+        source=SourceInfo(type="youtube", url="u", title="t", duration_s=duration_s),
+        rubric_version_at_ingest="0.1.0",
+    )
+    mf.save(paths_, m)
+    for stage in ("acquire", "transcribe", "segment"):
+        m = mf.finish(paths_, m, stage)
+    paths_.source_dir(video_id).mkdir(parents=True, exist_ok=True)
+    (paths_.source_dir(video_id) / "video.mp4").write_bytes(b"fake-video")
+    return m
+
+
+def _write_segments(paths_, video_id, n):
+    segments = [
+        {"id": f"seg_{i:03d}", "start_s": float(i * 10), "end_s": float(i * 10 + 5), "score": float(n - i)}
+        for i in range(n)
+    ]
+    paths_.segments(video_id).write_text(
+        json.dumps({"lexicon_version": "1.0.0", "total_cues": n, "segments": segments})
+    )
+
+
+def test_run_ranked_branch_honors_top_n_and_marks_stage_done(tmp_path):
+    p = ProjectPaths(tmp_path)
+    _ready_manifest(p, duration_s=200.0)
+    _write_segments(p, "yt_abc", n=5)
+
+    runner = recording_ffmpeg()
+    total = frames.run(p, "yt_abc", top_n=3, runner=runner)
+
+    created = sorted(d.name for d in p.frames("yt_abc").iterdir())
+    assert created == ["seg_000", "seg_001", "seg_002"]
+    assert total == 3  # one distinct frame kept per segment
+
+    reloaded = mf.load(p, "yt_abc")
+    assert mf.is_done(reloaded, "extract_frames")
+
+
+def test_run_at_does_not_mark_stage_done(tmp_path):
+    p = ProjectPaths(tmp_path)
+    _ready_manifest(p, duration_s=200.0)
+
+    runner = recording_ffmpeg()
+    frames.run(p, "yt_abc", at=5.0, window_s=10.0, runner=runner)
+
+    reloaded = mf.load(p, "yt_abc")
+    assert not mf.is_done(reloaded, "extract_frames")
+
+
+def test_run_uniform_branch_stops_at_video_duration(tmp_path):
+    p = ProjectPaths(tmp_path)
+    _ready_manifest(p, duration_s=100.0)
+
+    runner = recording_ffmpeg()
+    frames.run(p, "yt_abc", top_n=12, uniform=True, runner=runner)
+
+    starts = []
+    ends = []
+    for cmd in runner.calls:
+        ss = float(cmd[cmd.index("-ss") + 1])
+        t = float(cmd[cmd.index("-t") + 1])
+        starts.append(ss)
+        ends.append(ss + t)
+
+    # 100s of video at the floor step (30s) fits only 4 windows (0/30/60/90);
+    # a 5th at 120 would start past the end and must not be produced.
+    assert len(runner.calls) == 4
+    assert all(s < 100.0 for s in starts)
+    assert all(e <= 100.0 for e in ends)

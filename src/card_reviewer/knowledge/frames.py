@@ -40,6 +40,11 @@ def sample(
     runner: Runner = subprocess.run,
 ) -> list[Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
+    # A crashed prior attempt or a shorter re-run can leave frames behind that
+    # ffmpeg's -y would not overwrite (it only touches indices it regenerates).
+    # Clear them first so anything found afterward is from this invocation only.
+    for stale in out_dir.glob("frame_*.jpg"):
+        stale.unlink()
     duration = max(0.0, end_s - start_s)
     proc = runner(
         [
@@ -106,11 +111,17 @@ def run(
     if at is not None:
         targets = [Segment(id="seg_adhoc", start_s=at, end_s=at + window_s, score=0.0)]
     elif uniform:
+        # Stop once a window would start at or past the end of the video, and
+        # clamp each window's end to the duration: a short video should yield
+        # fewer than top_n windows rather than seeking past EOF into nothing.
         step = max(30.0, m.source.duration_s / max(top_n, 1))
-        targets = [
-            Segment(id=f"seg_u{i:03d}", start_s=i * step, end_s=i * step + window_s, score=0.0)
-            for i in range(top_n)
-        ]
+        targets = []
+        for i in range(top_n):
+            start = i * step
+            if start >= m.source.duration_s:
+                break
+            end = min(start + window_s, m.source.duration_s)
+            targets.append(Segment(id=f"seg_u{i:03d}", start_s=start, end_s=end, score=0.0))
     else:
         data = json.loads(paths.segments(video_id).read_text())
         targets = [Segment(**s) for s in data["segments"]][:top_n]
