@@ -85,3 +85,17 @@ def acquire_cmd(
         console.print(exc.guidance)
         raise typer.Exit(code=1) from exc
     console.print(f"[green]Packet ready:[/green] {m.video_id} — {m.source.title}")
+
+
+@app.command(name="transcribe")
+def transcribe_cmd(
+    video_id: str,
+    browser: str | None = typer.Option(None, "--browser"),
+) -> None:
+    """Produce a timestamped transcript for a work packet."""
+    from . import transcribe as tr
+
+    t = tr.run(paths(), video_id, browser=browser)
+    console.print(
+        f"[green]Transcript:[/green] {len(t.cues)} cues via {t.method}"
+    )
