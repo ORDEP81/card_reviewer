@@ -165,7 +165,8 @@ def review_cmd() -> None:
         return
 
     active = val.load_active(p)
-    accepted = superseded = 0
+    to_accept = []
+    to_supersede = []
 
     for _, rule in pending:
         console.rule(f"[bold]{rule.id}[/bold]  ({rule.category.value})")
@@ -196,8 +197,7 @@ def review_cmd() -> None:
         ).strip()
 
         if choice.startswith("accept"):
-            pr.accept(p, rule, ver.bump(ver.read(p), "minor"))
-            accepted += 1
+            to_accept.append(rule)
         elif choice.startswith("reject"):
             reason = typer.prompt("reason")
             pr.reject(p, rule, reason)
@@ -206,14 +206,25 @@ def review_cmd() -> None:
             if len(parts) != 2:
                 console.print("[red]supersede needs a rule id; deferring[/red]")
                 continue
-            pr.supersede(p, rule, parts[1].strip(), ver.bump(ver.read(p), "major"))
-            superseded += 1
+            to_supersede.append((rule, parts[1].strip()))
 
-    if accepted:
-        ver.write(p, ver.bump(ver.read(p), "minor"))
-    if superseded:
-        ver.write(p, ver.bump(ver.read(p), "major"))
+    # One version for the whole session: every accepted or superseded rule is
+    # stamped with the same value, and the version file is written at most
+    # once — never a mid-session read-bump-write per decision, which would
+    # let two decisions in one session stamp two different "current" versions
+    # that never both existed on disk.
+    level = pr.session_bump_level(bool(to_accept), bool(to_supersede))
+    new_version = ver.bump(ver.read(p), level) if level else None
+
+    for rule in to_accept:
+        pr.accept(p, rule, new_version)
+    for rule, old_id in to_supersede:
+        pr.supersede(p, rule, old_id, new_version)
+
+    if new_version:
+        ver.write(p, new_version)
+
     console.print(
-        f"[green]{accepted} accepted, {superseded} superseded.[/green] "
+        f"[green]{len(to_accept)} accepted, {len(to_supersede)} superseded.[/green] "
         f"Rubric now {ver.read(p)}. Run `card-knowledge build-rubric`."
     )

@@ -11,7 +11,6 @@ from pathlib import Path
 
 import yaml
 
-from . import validate
 from .models import Rule, RuleStatus
 from .paths import ProjectPaths
 
@@ -62,10 +61,29 @@ def reject(paths: ProjectPaths, rule: Rule, reason: str) -> Path:
     return dest
 
 
+def session_bump_level(accepted: bool, superseded: bool) -> str | None:
+    """The single version bump a review session implies, or None.
+
+    A supersede retracts an active rule — major. An accept alone is minor. A
+    session with neither (all defers/rejects) leaves the rubric version
+    untouched: nothing was added to what the grader believes.
+    """
+    if superseded:
+        return "major"
+    if accepted:
+        return "minor"
+    return None
+
+
 def supersede(
     paths: ProjectPaths, new_rule: Rule, old_id: str, rubric_version: str
 ) -> tuple[Path, Path]:
     old_path, old_rule = _find_active(paths, old_id)
+    if old_rule.status is not RuleStatus.ACTIVE:
+        raise UnknownRule(
+            f"cannot supersede {old_id}: its status is "
+            f"{old_rule.status.value!r}, not 'active'"
+        )
 
     retired = old_rule.model_copy(update={"status": RuleStatus.SUPERSEDED})
     write_rule(old_path, retired)
