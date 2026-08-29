@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import urllib.parse
@@ -34,6 +35,13 @@ class AcquisitionFailed(Exception):
         self.guidance = guidance
 
 
+# Real YouTube video ids are exactly 11 chars from this alphabet. Anything
+# extracted from the URL that doesn't match is untrusted input (e.g. a
+# path-traversal-shaped `v=` parameter) and must not be used to build a
+# filesystem path — fall back to hashing the whole URL instead.
+_SAFE_YT_ID = re.compile(r"[A-Za-z0-9_-]{1,32}")
+
+
 def _sha256_file(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as fh:
@@ -53,10 +61,12 @@ def derive_video_id(url: str | None = None, file: Path | None = None) -> str:
     host = parsed.netloc.lower()
     if "youtube.com" in host:
         qs = urllib.parse.parse_qs(parsed.query)
-        if "v" in qs:
+        if "v" in qs and _SAFE_YT_ID.fullmatch(qs["v"][0]):
             return f"yt_{qs['v'][0]}"
     if "youtu.be" in host:
-        return f"yt_{parsed.path.lstrip('/')}"
+        candidate = parsed.path.lstrip("/")
+        if _SAFE_YT_ID.fullmatch(candidate):
+            return f"yt_{candidate}"
 
     prefix = "skool" if "skool.com" in host else "web"
     return f"{prefix}_{hashlib.sha256(url.encode()).hexdigest()[:12]}"
@@ -103,9 +113,24 @@ def from_url(
         check=False,
     )
     if meta_proc.returncode != 0:
-        raise AcquisitionFailed(
-            f"yt-dlp could not read {url}: {(meta_proc.stderr or '').strip()}"
+        error = (meta_proc.stderr or "").strip()
+        # We don't know the title or duration yet — this is a placeholder record
+        # of the attempt and its failure reason, not a completed packet. A later
+        # successful run overwrites it cleanly (same video_id, same manifest path).
+        placeholder = SourceInfo(
+            type="skool" if video_id.startswith("skool_") else "youtube",
+            url=url,
+            title=video_id,
+            uploader=None,
+            duration_s=0.0,
         )
+        m = Manifest(
+            video_id=video_id, source=placeholder, rubric_version_at_ingest=rubric_version
+        )
+        mf.save(paths, m)
+        mf.start(paths, m, "acquire")
+        mf.fail(paths, m, "acquire", error)
+        raise AcquisitionFailed(f"yt-dlp could not read {url}: {error}")
 
     meta = json.loads(meta_proc.stdout)
     source = SourceInfo(

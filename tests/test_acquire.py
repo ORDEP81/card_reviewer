@@ -56,6 +56,23 @@ def test_derive_video_id_from_local_file_hashes_content(tmp_path):
     assert vid == acquire.derive_video_id(file=f)
 
 
+def test_derive_video_id_rejects_traversal_shaped_v_param():
+    # A `v=` value shaped like a path-traversal payload must never survive
+    # into the id unescaped -- it becomes a directory name via ProjectPaths.
+    vid = acquire.derive_video_id(url="https://www.youtube.com/watch?v=..%2F..%2Fetc")
+    assert "/" not in vid
+    assert "\\" not in vid
+    assert ".." not in vid
+
+
+def test_derive_video_id_youtube_id_round_trips_unchanged():
+    # Ordinary, well-formed YouTube ids are unaffected by the safety check.
+    assert (
+        acquire.derive_video_id(url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+        == "yt_dQw4w9WgXcQ"
+    )
+
+
 def test_from_url_uses_cookies_from_browser_when_requested(paths):
     calls = []
     runner = recording_runner(calls, stdout=json.dumps(METADATA))
@@ -88,10 +105,18 @@ def test_from_url_never_writes_a_cookie_file(paths):
 def test_failed_download_records_failure_and_gives_manual_path(paths):
     calls = []
     runner = recording_runner(calls, fail_on="--dump-json", stdout="")
+    url = "https://www.skool.com/mlp/x"
     with pytest.raises(acquire.AcquisitionFailed) as exc:
-        acquire.from_url(paths, "https://www.skool.com/mlp/x", "0.1.0", runner=runner)
+        acquire.from_url(paths, url, "0.1.0", runner=runner)
     assert "sign in" in str(exc.value)
     assert "--file" in exc.value.guidance
+
+    # The failure must be durable, not just raised: spec §9 requires the
+    # stage to record failed with yt-dlp's stderr before it stops.
+    video_id = acquire.derive_video_id(url=url)
+    recorded = mf.load(paths, video_id)
+    assert recorded.stages["acquire"].status is StageStatus.FAILED
+    assert "sign in" in recorded.stages["acquire"].error
 
 
 def test_failed_download_does_not_retry(paths):
