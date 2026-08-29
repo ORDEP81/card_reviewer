@@ -18,6 +18,7 @@ MIN_SCORE = 2.0
 PAD_S = 5.0
 MAX_LEN_S = 90.0
 GAP_TOLERANCE = 1  # consecutive cold cues allowed inside a run
+MAX_GAP_S = 30.0  # elapsed time since the previous cue that ends a run outright
 
 
 def _split(start: float, end: float, max_len_s: float) -> list[tuple[float, float]]:
@@ -35,14 +36,25 @@ def build(
     min_score: float = MIN_SCORE,
     pad_s: float = PAD_S,
     max_len_s: float = MAX_LEN_S,
+    max_gap_s: float = MAX_GAP_S,
 ) -> list[Segment]:
     scored = [(c, lex.score(c.text)) for c in cues]
 
     runs: list[list[tuple[Cue, lex_mod.CueScore]]] = []
     current: list[tuple[Cue, lex_mod.CueScore]] = []
     cold_streak = 0
+    prev_end: float | None = None
 
     for cue, score in scored:
+        # A long silence (no cues at all, hot or cold) always ends a run,
+        # independent of the cold-cue-count bridging below: one rule
+        # tolerates a brief verbal pause, the other refuses to bridge a
+        # real gap in the transcript (silence, music, a cut edit).
+        if current and prev_end is not None and (cue.start_s - prev_end) > max_gap_s:
+            runs.append(current)
+            current, cold_streak = [], 0
+        prev_end = cue.end_s
+
         if score.score >= min_score:
             current.append((cue, score))
             cold_streak = 0

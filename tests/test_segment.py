@@ -94,6 +94,24 @@ def test_ids_are_assigned_in_time_order(lex):
     assert by_id["seg_001"].start_s < by_id["seg_002"].start_s
 
 
+def test_large_time_gap_ends_a_window_even_with_no_cues_between(lex):
+    cues = [
+        cue(0, 5, "Look at this corner."),
+        cue(5 + segment.MAX_GAP_S + 1, 5 + segment.MAX_GAP_S + 6, "Look right here, you can see the print line and the whitening."),
+    ]
+    segments = segment.build(cues, lex, pad_s=0.0)
+    assert len(segments) == 2
+
+
+def test_small_time_gap_still_merges_into_one_window(lex):
+    cues = [
+        cue(0, 5, "Look at this corner."),
+        cue(5 + segment.MAX_GAP_S - 1, 5 + segment.MAX_GAP_S + 4, "Look right here, you can see the print line and the whitening."),
+    ]
+    segments = segment.build(cues, lex, pad_s=0.0)
+    assert len(segments) == 1
+
+
 def test_segment_records_categories_and_terms(lex):
     cues = [cue(0, 5, "Look right here at the print line on the surface.")]
     seg = segment.build(cues, lex, pad_s=0.0)[0]

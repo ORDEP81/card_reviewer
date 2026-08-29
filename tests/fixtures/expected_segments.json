@@ -1,5 +1,26 @@
 [
   {
+    "id": "seg_002",
+    "start_s": 295.0,
+    "end_s": 323.0,
+    "score": 20.0,
+    "categories": [
+      "outcomes",
+      "surface"
+    ],
+    "matched_terms": [
+      "gem",
+      "print line",
+      "psa 9",
+      "surface",
+      "tilt it",
+      "under the light",
+      "you can see"
+    ],
+    "text": "Now tilt it under the light and you can see the print line. That print line runs the whole surface, that is a gem killer. I have had these come back a PSA 9 every single time.",
+    "visual_cue": true
+  },
+  {
     "id": "seg_001",
     "start_s": 115.0,
     "end_s": 143.0,
@@ -23,55 +44,22 @@
     "visual_cue": true
   },
   {
-    "id": "seg_002",
-    "start_s": 295.0,
-    "end_s": 356.0,
-    "score": 15.0,
-    "categories": [
-      "centering",
-      "outcomes",
-      "surface"
-    ],
-    "matched_terms": [
-      "60/40",
-      "borders",
-      "centering",
-      "gem",
-      "left to right",
-      "print line",
-      "psa 9",
-      "surface",
-      "tilt it",
-      "under the light",
-      "you can see"
-    ],
-    "text": "Now tilt it under the light and you can see the print line. That print line runs the whole surface, that is a gem killer. I have had these come back a PSA 9 every single time. Centering on this one is about 60/40 left to right. PSA will still gem that, borders are within tolerance.",
-    "visual_cue": true
-  },
-  {
     "id": "seg_003",
-    "start_s": 356.0,
+    "start_s": 395.0,
     "end_s": 417.0,
-    "score": 15.0,
+    "score": 10.0,
     "categories": [
       "centering",
-      "outcomes",
-      "surface"
+      "outcomes"
     ],
     "matched_terms": [
       "60/40",
       "borders",
       "centering",
       "gem",
-      "left to right",
-      "print line",
-      "psa 9",
-      "surface",
-      "tilt it",
-      "under the light",
-      "you can see"
+      "left to right"
     ],
-    "text": "Now tilt it under the light and you can see the print line. That print line runs the whole surface, that is a gem killer. I have had these come back a PSA 9 every single time. Centering on this one is about 60/40 left to right. PSA will still gem that, borders are within tolerance.",
-    "visual_cue": true
+    "text": "Centering on this one is about 60/40 left to right. PSA will still gem that, borders are within tolerance.",
+    "visual_cue": false
   }
 ]
