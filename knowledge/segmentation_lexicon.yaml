@@ -2,7 +2,6 @@
 # This is DATA, not code. Tune it freely; tests/fixtures/expected_segments.json
 # is the regression guard that shows what your tuning changed.
 version: "1"
-demonstration_weight: 2.0
 
 categories:
   centering:

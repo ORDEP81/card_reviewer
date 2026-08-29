@@ -7,6 +7,7 @@ inspecting a card right now?
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -27,10 +28,17 @@ class CueScore:
 class Lexicon:
     version: str
     categories: dict[str, dict[str, float]]
-    demonstration_weight: float = 1.0
+    _patterns: dict[str, tuple[re.Pattern, float]] = field(default_factory=dict, init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        """Compile regex patterns once at initialization for performance."""
+        for category, terms in self.categories.items():
+            for term, weight in terms.items():
+                # Compile word-boundary regex for each term
+                pattern = re.compile(r"\b" + re.escape(term) + r"\b", re.IGNORECASE)
+                self._patterns[term] = (pattern, float(weight))
 
     def score(self, text: str) -> CueScore:
-        haystack = text.lower()
         total = 0.0
         matched: list[str] = []
         hit_categories: list[str] = []
@@ -38,10 +46,11 @@ class Lexicon:
 
         for category, terms in self.categories.items():
             category_hit = False
-            for term, weight in terms.items():
-                if term.lower() in haystack:
+            for term in terms.keys():
+                pattern, weight = self._patterns[term]
+                if pattern.search(text):
                     # Counted once per cue: repetition does not add information.
-                    total += float(weight)
+                    total += weight
                     matched.append(term)
                     category_hit = True
             if not category_hit:
@@ -64,5 +73,4 @@ def load(path: Path | str) -> Lexicon:
     return Lexicon(
         version=str(data.get("version", "0")),
         categories=data.get("categories", {}),
-        demonstration_weight=float(data.get("demonstration_weight", 1.0)),
     )

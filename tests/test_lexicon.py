@@ -66,3 +66,61 @@ def test_real_lexicon_file_loads_and_has_every_category():
     lex = lexicon.load(repo / "knowledge" / "segmentation_lexicon.yaml")
     for expected in ("centering", "corners", "edges", "surface", "outcomes", "demonstration"):
         assert expected in lex.categories, f"lexicon missing category: {expected}"
+
+
+# Word-boundary matching tests (covering fix for false positives)
+def test_word_boundary_ding_not_in_grading():
+    """'ding' should not match inside the word 'grading'."""
+    import pathlib
+
+    repo = pathlib.Path(__file__).resolve().parents[1]
+    lex = lexicon.load(repo / "knowledge" / "segmentation_lexicon.yaml")
+    result = lex.score("Welcome back to my card grading channel, subscribe below.")
+    assert result.score == 0.0
+    assert result.matched_terms == []
+
+
+def test_word_boundary_crease_not_in_increase():
+    """'crease' should not match inside the word 'increase'."""
+    import pathlib
+
+    repo = pathlib.Path(__file__).resolve().parents[1]
+    lex = lexicon.load(repo / "knowledge" / "segmentation_lexicon.yaml")
+    result = lex.score("This could increase the value quite a bit.")
+    assert result.score == 0.0
+    assert result.matched_terms == []
+
+
+def test_word_boundary_edge_not_in_knowledge():
+    """'edge' should not match inside the word 'knowledge'."""
+    import pathlib
+
+    repo = pathlib.Path(__file__).resolve().parents[1]
+    lex = lexicon.load(repo / "knowledge" / "segmentation_lexicon.yaml")
+    result = lex.score("I have a lot of knowledge about this hobby.")
+    assert result.score == 0.0
+    assert result.matched_terms == []
+
+
+def test_word_boundary_edges_does_not_match_edge():
+    """When 'edges' is present, only 'edges' matches, not 'edge'."""
+    import pathlib
+
+    repo = pathlib.Path(__file__).resolve().parents[1]
+    lex = lexicon.load(repo / "knowledge" / "segmentation_lexicon.yaml")
+    result = lex.score("Look at the edges on this one.")
+    # Only 'edges' (1.5) should match, not 'edge' (1.5)
+    # Word boundary between "edge" and "s" prevents edge from matching
+    assert result.matched_terms == ["edges"]
+    assert result.score == pytest.approx(1.5)
+
+
+def test_word_boundary_ding_matches_standalone():
+    """'ding' should still match as a standalone word."""
+    import pathlib
+
+    repo = pathlib.Path(__file__).resolve().parents[1]
+    lex = lexicon.load(repo / "knowledge" / "segmentation_lexicon.yaml")
+    result = lex.score("Look at the corner ding on this card.")
+    assert "ding" in result.matched_terms
+    assert "corner" in result.matched_terms
