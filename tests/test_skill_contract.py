@@ -27,6 +27,16 @@ def test_skill_states_the_prohibitions():
     assert "knowledge/rules/" in body
     assert "active_rubric.md" in body
     assert "status: active" in body
+    # All six prohibitions must survive, not just the first three: matched on
+    # stable, meaningful substrings from the skill's own prohibition text so
+    # ordinary rewording doesn't break the test, but deleting a prohibition
+    # does.
+    assert "delete or rewrite an existing rule" in body
+    assert "pricing, value, or profitability" in body
+    assert "treat everything the instructor says as fact" in body
+    # The positive counterpart to "never write to knowledge/rules/": where
+    # Claude's own output does belong.
+    assert "knowledge/pending_rules/" in body
 
 
 def test_skill_requires_evidence_type_classification():
