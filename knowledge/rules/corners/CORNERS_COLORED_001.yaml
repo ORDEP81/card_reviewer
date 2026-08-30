@@ -1,0 +1,24 @@
+id: CORNERS_COLORED_001
+category: corners
+statement: A coloured corner reveals chipping more readily than a white corner, because
+  a white corner cannot show whitening against its own colour.
+evidence_type: experience_based
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_009
+  video_id: web_a380d07b6b03
+  timestamps:
+  - 01:00-01:20
+  quote: corners that are colored, when I say colored, I mean, it's literally not
+    white. It's a different color, are gonna white easier. If a corner is all white,
+    like this one down here, it can't white, it's already white
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: 'Mechanistic rather than anecdotal, and directly actionable for photo review:
+  absence of visible whitening on a white-bordered corner is weak evidence, since
+  the defect would not show.'

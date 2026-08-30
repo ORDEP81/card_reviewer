@@ -1,0 +1,22 @@
+id: PROCESS_BACKLIGHT_ZOOM_001
+category: process
+statement: Inspect corners by backlighting the card and zooming on each of the four
+  corners in turn.
+evidence_type: experience_based
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_004
+  video_id: yt__CjZMweRBdM
+  timestamps:
+  - 06:06-06:27
+  quote: i'll activate the light on this and then i will zoom in on the corner so
+    the first thing i do is i hit all four corners of the card
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: An in-hand technique. Not directly applicable to listing-photo review, but
+  explains why seller photos without angled light under-report defects.

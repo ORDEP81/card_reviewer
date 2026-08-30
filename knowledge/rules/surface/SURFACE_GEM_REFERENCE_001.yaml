@@ -1,0 +1,22 @@
+id: SURFACE_GEM_REFERENCE_001
+category: surface
+statement: A gem-mint reference card shows sharp corners and edges with no whitening
+  anywhere on front or back.
+evidence_type: experience_based
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_002
+  video_id: yt_t28rOSnMcck
+  timestamps:
+  - 06:46-07:16
+  quote: look at the edges right here sharp no bubble links you want to look at the
+    edges no whitening the corners are sharp no whitening
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: Positive criteria rather than a defect. 'bubble links' is an unclear caption
+  artifact.

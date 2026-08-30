@@ -1,0 +1,22 @@
+id: PROCESS_CHECKLIST_001
+category: process
+statement: Inspect in a fixed order - centering, corners, edges, surface - then repeat
+  the whole pass on the back.
+evidence_type: experience_based
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_003
+  video_id: yt_38QhtEziAx4
+  timestamps:
+  - 02:59-03:20
+  quote: go through your checklist, centering, corners, edges, surface, repeat on
+    the back
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: Matches the four PSA subgrade categories; the 'repeat on the back' step is
+  the operative part.

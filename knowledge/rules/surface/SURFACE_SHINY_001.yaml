@@ -1,0 +1,26 @@
+id: SURFACE_SHINY_001
+category: surface
+statement: Shiny, foil and refractor-style surfaces scratch more easily and are harder
+  to assess than plain stock.
+evidence_type: experience_based
+confidence: high
+applies_to:
+  card_types:
+  - chrome
+  - refractor
+  - foil
+  sets: []
+sources:
+- lesson: lesson_011
+  video_id: web_a215e0e689d0
+  timestamps:
+  - 00:35-01:00
+  quote: shiny surface, if a surface is shinier, it's harder to grade, okay? Or scratch
+    is easier because just something that's shiny, it's easier to scratch... like
+    foily cards... These surface scratch easy
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: 'Card-type dependent. Directly relevant: the reviewer should lower surface
+  confidence on chrome/refractor/foil parallels.'

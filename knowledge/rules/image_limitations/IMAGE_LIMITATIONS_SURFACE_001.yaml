@@ -1,0 +1,33 @@
+id: IMAGE_LIMITATIONS_SURFACE_001
+category: image_limitations
+statement: Surface defects frequently cannot be assessed from listing photographs;
+  a card may carry a surface flaw that the listing images do not reveal.
+evidence_type: experience_based
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_001
+  video_id: yt_s46CrXjVwCc
+  timestamps:
+  - 05:36-05:56
+  quote: surface is the tricky one cuz this is where there's all kinds of things that
+    can go wrong, and we can't always see them from internet pictures. So, sometimes
+    we're going to buy a card and there's going to be a surface thing on the back
+    that we just couldn't see.
+- lesson: lesson_011
+  video_id: web_a215e0e689d0
+  timestamps:
+  - 00:05-00:20
+  quote: this is the single hardest subgrade to tell on a card. Okay, it's just not
+    easy to see in pictures.
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: 'Directly relevant to this project: the reviewer grades from listing images
+  and must not claim surface certainty those images cannot support. CORROBORATED by
+  a third independent source. Three separate instructors now agree surface cannot
+  be reliably judged from photographs - the strongest-supported claim in the knowledge
+  base.'

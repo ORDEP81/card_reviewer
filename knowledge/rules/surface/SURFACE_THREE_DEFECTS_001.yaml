@@ -1,0 +1,22 @@
+id: SURFACE_THREE_DEFECTS_001
+category: surface
+statement: The three surface defects to inspect for are factory/print lines, dimples,
+  and scratches.
+evidence_type: experience_based
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_011
+  video_id: web_a215e0e689d0
+  timestamps:
+  - 01:00-01:50
+  quote: these are the three things to look for. So factory and print lines... The
+    next one is dimples. These are hard to see. These are like little circles in the
+    card, like little holes... And the last one is just a scratch.
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: A closed taxonomy for the surface crop, matching the SOP document's own list.

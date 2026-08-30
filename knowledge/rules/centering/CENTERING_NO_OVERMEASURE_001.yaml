@@ -1,0 +1,23 @@
+id: CENTERING_NO_OVERMEASURE_001
+category: centering
+statement: Do not distinguish near-centred ratios such as 51/49; if the borders look
+  even, treat the centering as passing.
+evidence_type: experience_based
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_008
+  video_id: web_f4e13adb5cc1
+  timestamps:
+  - 02:20-02:35
+  quote: I wouldn't be too picky if it looks really good. You're good. Like, you know,
+    I wouldn't measure it to like this is maybe like 51 percent and 49 percent. It's
+    OK.
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: 'Guards against false precision in the OpenCV centering measurement: sub-percent
+  differences are noise, not signal.'

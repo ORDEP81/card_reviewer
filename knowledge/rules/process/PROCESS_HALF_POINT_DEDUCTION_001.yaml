@@ -1,0 +1,27 @@
+id: PROCESS_HALF_POINT_DEDUCTION_001
+category: process
+statement: 'One reviewer''s method: deduct half a point per defective category from
+  a nominal 10 to estimate a grade.'
+evidence_type: opinion
+confidence: low
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_002
+  video_id: yt_t28rOSnMcck
+  timestamps:
+  - 02:36-03:07
+  quote: I'm gonna duct half a point for that and a half a point for the edge wear
+    so this card in my opinion probably grade a 7
+status: rejected
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: null
+notes: 'The instructor''s personal arithmetic, not a PSA rule. Note his own example
+  deducts 0.5+0.5 from 10 and arrives at 7, which does not follow from the stated
+  method.
+
+  rejected: the instructor''s own worked example is internally inconsistent - deducts
+  0.5+0.5 from 10 and arrives at 7; a method whose arithmetic does not hold should
+  not guide a grader'

@@ -1,0 +1,30 @@
+id: EDGES_WHITENING_002
+category: edges
+statement: Whitening visible along a card edge is edge wear and counts against the
+  grade.
+evidence_type: experience_based
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_002
+  video_id: yt_t28rOSnMcck
+  timestamps:
+  - 02:36-03:07
+  quote: you can see there's a little bit of whitening going on on the edge that's
+    considered edge condition
+- lesson: lesson_010
+  video_id: web_9e1801890111
+  timestamps:
+  - 00:20-00:35
+  quote: the whiting on an edge really the only thing to look for This is not the
+    easiest to see but you could see it's black right here black black black and it's
+    white
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: 'Corroborated visually: edge whitening was visible in the sampled frames for
+  this window. CORROBORATED by the MLP course, which additionally notes whitening
+  is essentially the ONLY edge defect.'

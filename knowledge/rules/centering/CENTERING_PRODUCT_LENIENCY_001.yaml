@@ -1,0 +1,27 @@
+id: CENTERING_PRODUCT_LENIENCY_001
+category: centering
+statement: PSA extends centering leeway to products known to be cut off-centre, and
+  withholds it on products known to be well cut; the same off-centre measurement can
+  pass on one product and fail on another.
+evidence_type: experience_based
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_008
+  video_id: web_f4e13adb5cc1
+  timestamps:
+  - 03:50-04:20
+  quote: Prism is traditionally off centered... sometimes the rest of the card is
+    good and it's a little off centered. PSA will give you some leeway with the grade...
+    But if you send in a card like Bowman Chrome, for example, and they're all perfectly
+    centered, but yours is a little off, but the rest is good. They're not going to
+    give you the benefit of the doubt.
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: 'Actionable and product-dependent: a centering ratio alone is insufficient
+  without knowing the product''s typical cut quality. Prizm cited as lenient, Bowman
+  Chrome as strict.'

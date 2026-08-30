@@ -1,0 +1,23 @@
+id: CORNERS_DEFECT_FREQUENCY_001
+category: corners
+statement: 'Corner defects occur in this descending order of frequency: whitening/chipping,
+  then rounding, then bending.'
+evidence_type: experience_based
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_009
+  video_id: web_a380d07b6b03
+  timestamps:
+  - 00:45-00:55
+  quote: the things to look out for are these three. And this is actually in order...
+    whiting is the most common error... the second most common error is rounding...
+    And the last one is bending.
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: 'Useful as a prior when a listing photo is ambiguous: whitening is the more
+  likely reading.'

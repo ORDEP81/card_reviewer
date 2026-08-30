@@ -1,0 +1,23 @@
+id: CENTERING_BORDERLESS_COMPARISON_001
+category: centering
+statement: For a borderless card, judge centering by comparing against the same card
+  already graded PSA 10 rather than by measuring borders.
+evidence_type: experience_based
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_007
+  video_id: yt_ZWtFU4gG8e0
+  timestamps:
+  - 09:50-10:20
+  quote: no border it's just a card that has you know some logos and designs and it's
+    a little bit different so you have to look on ebay again like i said see what
+    a 10 got
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: Operationalises the spec's 'visual centering' mode for borderless designs,
+  and pairs with CENTERING_BORDERLESS_001 from lesson_002.

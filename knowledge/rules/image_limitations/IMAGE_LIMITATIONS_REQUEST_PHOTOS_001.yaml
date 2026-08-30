@@ -1,0 +1,25 @@
+id: IMAGE_LIMITATIONS_REQUEST_PHOTOS_001
+category: image_limitations
+statement: When listing photographs cannot resolve whether an edge is chipped or a
+  surface mark is real, the correct response is to request more photographs rather
+  than assume.
+evidence_type: experience_based
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_006
+  video_id: yt_aA8soPXmsS4
+  timestamps:
+  - 03:58-04:18
+  quote: I would ask for more pictures. Specifically, uh this worries me. I can't
+    really tell if there's some chipping or edgeware here. And then this dot up here
+    worries me.
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: Second independent instructor reaching the same conclusion as IMAGE_LIMITATIONS_SURFACE_001.
+  Directly supports the reviewer emitting recommended_additional_photos rather than
+  a confident grade.

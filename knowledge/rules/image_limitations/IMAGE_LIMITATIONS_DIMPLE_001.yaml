@@ -1,0 +1,21 @@
+id: IMAGE_LIMITATIONS_DIMPLE_001
+category: image_limitations
+statement: A dimple presents differently in a scan than in person, so its scanned
+  appearance must be recognised as a distinct signature.
+evidence_type: experience_based
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_001
+  video_id: yt_s46CrXjVwCc
+  timestamps:
+  - 05:36-05:56
+  quote: a dimple might look one way in person, but it looks a different way in a
+    scan, so you have to understand what that actually looks like to be able to spot
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: No scan or in-person dimple was shown for comparison.

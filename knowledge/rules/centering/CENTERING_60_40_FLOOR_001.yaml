@@ -1,0 +1,33 @@
+id: CENTERING_60_40_FLOOR_001
+category: centering
+statement: 60/40 front centering is a practical floor; at that ratio the card must
+  be flawless in every other category to have a chance at a 10.
+evidence_type: opinion
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_003
+  video_id: yt_38QhtEziAx4
+  timestamps:
+  - 00:26-00:52
+  quote: I use them 60/40 on the front. You know, you need that at the bare minimum.
+    If I see a card and I use my centering tool and it comes out 60/40, it has to
+    be perfect everywhere else
+- lesson: lesson_008
+  video_id: web_f4e13adb5cc1
+  timestamps:
+  - 01:00-01:10
+  quote: if the rest of the card is good, you can get away with 60 40 centering. So
+    like 60 percent, 40 percent one side to another.
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: A submission-selection threshold, not a claim about PSA's published tolerance.
+  CORROBORATED by a second independent source (MLP paid course) stating the same 60/40
+  threshold with the same 'if the rest is good' condition. Originally filed as `opinion`
+  from a single YouTube source; two independent sources agreeing makes it more than
+  one reviewer's personal policy - consider promoting evidence_type to experience_based
+  at review time.

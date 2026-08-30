@@ -1,0 +1,22 @@
+id: CORNERS_THICK_002
+category: corners
+statement: Thick cards, such as patch or premium products, damage at the corners more
+  easily than standard stock.
+evidence_type: experience_based
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_009
+  video_id: web_a380d07b6b03
+  timestamps:
+  - 02:12-02:19
+  quote: Thick cards, like flawless national treasures, if the corner's thicker, it
+    gets damaged way easier, because they're like soft, and like a little touch just
+    damages it.
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: Thickness is a card_type signal the reviewer could condition on.

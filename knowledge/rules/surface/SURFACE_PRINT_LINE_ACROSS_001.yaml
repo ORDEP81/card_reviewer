@@ -1,0 +1,23 @@
+id: SURFACE_PRINT_LINE_ACROSS_001
+category: surface
+statement: A factory or print line running across the face of the card is penalised
+  every time and prevents a high grade.
+evidence_type: experience_based
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_011
+  video_id: web_a215e0e689d0
+  timestamps:
+  - 01:10-01:25
+  quote: You could see across this Luka Donchi, it's going right across in between
+    his mouth and his nose. There's a giant factory line. No good. You're going to
+    get knocked for that every time. It's never going to grade for you.
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: Stated as an outcome rather than a personal submission policy, unlike SURFACE_PRINT_LINE_FRONT_001.
+  Note this describes a prominent line; it does not settle the faint-line case.
