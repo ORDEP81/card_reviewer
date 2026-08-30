@@ -1,0 +1,21 @@
+id: CORNERS_ROUNDED_002
+category: corners
+statement: A corner that shows white and appears rounded is corner wear and counts
+  against the grade.
+evidence_type: experience_based
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_002
+  video_id: yt_t28rOSnMcck
+  timestamps:
+  - 02:36-03:07
+  quote: the coroner has a white rounded corner which is corner wear
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: Caption garbles 'corner' as 'coroner'. Corroborated visually in the sampled
+  frames.

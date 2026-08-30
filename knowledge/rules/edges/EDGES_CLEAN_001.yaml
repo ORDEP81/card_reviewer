@@ -1,0 +1,22 @@
+id: EDGES_CLEAN_001
+category: edges
+statement: Edges should run straight and clean around the whole card; chipping or
+  nicking is a grade-limiting defect.
+evidence_type: experience_based
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_001
+  video_id: yt_s46CrXjVwCc
+  timestamps:
+  - 05:22-05:36
+  quote: Same goes for the edges. Are they chipped? Are they nicked? Or are we seeing
+    edges that really do go straight across that look clean all the way around the
+    card?
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: Asserted verbally; no edge was shown on screen in any sampled frame.

@@ -1,0 +1,21 @@
+id: EDGES_COLORED_001
+category: edges
+statement: A coloured edge reveals whitening; a white edge cannot show it.
+evidence_type: experience_based
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_010
+  video_id: web_9e1801890111
+  timestamps:
+  - 00:20-00:35
+  quote: similar to corners what you're looking out for is Colored edges, okay and
+    the whiting on an edge really the only thing to look for
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: Same mechanism as CORNERS_COLORED_001. Absence of visible edge whitening on
+  a white-edged card is weak evidence.

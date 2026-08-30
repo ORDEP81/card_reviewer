@@ -1,0 +1,21 @@
+id: SURFACE_PRINT_LINE_BACK_001
+category: surface
+statement: Print lines on the back of a card have still received PSA 10 grades.
+evidence_type: experience_based
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_003
+  video_id: yt_38QhtEziAx4
+  timestamps:
+  - 01:45-02:11
+  quote: I have sent cards in with print lines on the back, however, and they have
+    received tens.
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: 'Directly useful: prevents treating any print line anywhere as automatically
+  grade-limiting. Front/back asymmetry.'

@@ -1,0 +1,21 @@
+id: CORNERS_TOUCH_001
+category: corners
+statement: A corner that appears rounded, raised, or touched holds a card back from
+  a PSA 10.
+evidence_type: experience_based
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_001
+  video_id: yt_s46CrXjVwCc
+  timestamps:
+  - 05:11-05:22
+  quote: any corner touches where it's rounded or it looks like it's raised or touched.
+    That's the type of stuff that holds a card back from getting a PSA 10.
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: Asserted verbally; no corner was shown on screen in any sampled frame.

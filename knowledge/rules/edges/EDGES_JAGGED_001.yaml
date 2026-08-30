@@ -1,0 +1,21 @@
+id: EDGES_JAGGED_001
+category: edges
+statement: A jagged or rough-cut edge is an edge defect distinct from whitening.
+evidence_type: experience_based
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_005
+  video_id: yt_W02Wvtq89IM
+  timestamps:
+  - 03:05-03:25
+  quote: you want to make sure you're refraining from seeing the whitening as you
+    can see over here or the jagged edges
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: Distinguishes factory cut quality from handling wear. Both are edge defects
+  but have different causes.

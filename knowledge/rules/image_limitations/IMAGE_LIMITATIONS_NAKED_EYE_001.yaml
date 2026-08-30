@@ -1,0 +1,25 @@
+id: IMAGE_LIMITATIONS_NAKED_EYE_001
+category: image_limitations
+statement: A flaw visible with the naked eye is treated as capping the card at 9 or
+  lower.
+evidence_type: opinion
+confidence: low
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_003
+  video_id: yt_38QhtEziAx4
+  timestamps:
+  - 02:59-03:20
+  quote: the card that my eyes see with the naked eye, I I'm not sending it in. It's
+    an automatic 9.
+status: rejected
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: null
+notes: 'Personal heuristic. Relevant to listing-photo review as a severity threshold,
+  but unverified against outcomes.
+
+  rejected: too vague to act on (''automatic 9'') and is submission-selection policy
+  rather than condition assessment'

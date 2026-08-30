@@ -1,0 +1,26 @@
+id: SURFACE_PRINT_LINE_FRONT_001
+category: surface
+statement: A single faint print line on the front is treated as disqualifying for
+  submission.
+evidence_type: opinion
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_003
+  video_id: yt_38QhtEziAx4
+  timestamps:
+  - 01:45-02:11
+  quote: A single faint print line is a disqualification for me. I do not send that
+    card in.
+status: rejected
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: null
+notes: 'Explicitly personal policy. Pairs with SURFACE_PRINT_LINE_BACK_001, which
+  is the more surprising half.
+
+  rejected: personal submission policy (''a disqualification for me'') rather than
+  a grading outcome; SURFACE_PRINT_LINE_ACROSS_001 states the same ground as an observed
+  outcome and is promoted instead'

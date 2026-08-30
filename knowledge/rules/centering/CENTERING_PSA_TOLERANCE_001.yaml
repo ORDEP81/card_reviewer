@@ -1,0 +1,24 @@
+id: CENTERING_PSA_TOLERANCE_001
+category: centering
+statement: PSA's stated front-centering standard is 55/45 or better.
+evidence_type: unverified
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_001
+  video_id: yt_s46CrXjVwCc
+  timestamps:
+  - 04:16-04:28
+  quote: PSA's standard is that the front of the card has to be 55/45 or better.
+status: rejected
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: null
+notes: 'A claim about PSA''s published standard. NOT checked against PSA documentation
+  - verify against the official grading standards before promoting.
+
+  rejected: unverified claim about PSA''s published 55/45 standard; not checked against
+  PSA documentation. Conflicts with the practically-corroborated 60/40 rule. Verify
+  before promoting.'

@@ -1,0 +1,20 @@
+id: CENTERING_BORDERLESS_001
+category: centering
+statement: On a card with no borders, off-centering is not automatically grade-limiting.
+evidence_type: experience_based
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_002
+  video_id: yt_t28rOSnMcck
+  timestamps:
+  - 05:11-05:41
+  quote: now the carts without borders it's not a deal-breaker if it's off-center
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: 'Matches the spec''s borderless-centering concern: do not penalise an intentionally
+  borderless design by border measurement.'

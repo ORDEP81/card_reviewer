@@ -1,0 +1,22 @@
+id: SURFACE_CLEANABLE_001
+category: surface
+statement: Some light surface marks are cleanable before submission, so a visible
+  light mark is not necessarily a permanent grade limit.
+evidence_type: experience_based
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_011
+  video_id: web_a215e0e689d0
+  timestamps:
+  - 00:20-00:35
+  quote: the good is it's cleanable. Sometimes there will be light scratches and things
+    on a card that are cleanable.
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: 'Caveat for the reviewer: distinguishes surface dirt from surface damage. The
+  reviewer grades the card as photographed and should not assume cleaning.'

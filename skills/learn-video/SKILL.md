@@ -68,6 +68,8 @@ sources:
     video_id: yt_abc123
     timestamps: ["12:04-12:38"]
     quote: "I've never seen one of these gem with a line like that."
+  # A source can instead cite a document/reference rather than a video —
+  # see "Citations" below. A rule may mix both kinds of source.
 status: pending
 supersedes: null
 created: 2026-08-28
@@ -93,10 +95,26 @@ future grade.
 
 ### Citations
 
-Every source needs a real timestamp from `transcript.json`, in `MM:SS` or
-`HH:MM:SS`. `card-knowledge validate` checks each one against the video's
-actual duration and will reject a citation that cannot exist. Do not
-approximate — look it up.
+Every source still traces to a `lesson` record — that never changes. Beyond
+that, a source is EITHER a video citation OR a document/reference citation,
+never both, never neither:
+
+- **Video citation** (`video_id` + `timestamps`): every timestamp must be a
+  real one from `transcript.json`, in `MM:SS` or `HH:MM:SS`.
+  `card-knowledge validate` checks each one against the video's actual
+  duration and will reject a citation that cannot exist. Do not approximate
+  — look it up.
+- **Reference citation** (`reference` + `locator`): use this for a claim
+  that comes from a document rather than a training video — PSA's published
+  grading standards, a course PDF, the project owner's direct domain
+  knowledge. `reference` names the source (e.g. `"PSA Grading Standards"`),
+  `locator` says where inside it (e.g. `"Card Grading Standards, Gem Mint
+  10"` or `"p.2"`). There is no duration to check, but both fields must be
+  filled in — a reference source is still a citation, not an excuse to skip
+  one.
+
+A rule may mix source kinds across its `sources` list — one video source and
+one reference source on the same rule is fine.
 
 ## Prohibitions
 

@@ -1,0 +1,32 @@
+id: CENTERING_FRONT_BACK_TOLERANCE_001
+category: centering
+statement: Back-of-card centering is judged more leniently than the front.
+evidence_type: unverified
+confidence: low
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_007
+  video_id: yt_ZWtFU4gG8e0
+  timestamps:
+  - 05:41-06:15
+  quote: the front of the card is usually 60 40. back of the card i think psa may
+    be like 70 30. it's pretty pretty um big difference between the front and the
+    back
+- lesson: lesson_008
+  video_id: web_f4e13adb5cc1
+  timestamps:
+  - 01:30-01:40
+  quote: the back centering is not as important. But if it's horrible, if it's horrific,
+    it's not going to grade well for you.
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: Speaker hedges with 'i think psa may be'. The direction of the claim (back
+  more lenient) is more reliable than the figures. Potential conflict with CENTERING_PSA_TOLERANCE_001
+  (55/45 front) - verify both against PSA documentation. CORROBORATED unhedged by
+  a second independent source. The original YouTube source hedged ('i think psa may
+  be like 70 30'); this one states the direction plainly without numbers. The DIRECTION
+  (back more lenient) now has two sources; the specific 70/30 figure still has none.

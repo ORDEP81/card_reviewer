@@ -1,0 +1,23 @@
+id: EDGES_NO_ROUNDING_001
+category: edges
+statement: Edges do not round or bend the way corners do; whitening is effectively
+  the only edge defect to look for.
+evidence_type: experience_based
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_010
+  video_id: web_9e1801890111
+  timestamps:
+  - 00:35-00:55
+  quote: edges like corners or unlike corners They're not gonna be rounded. It's an
+    edge doesn't get rounded if that makes sense and it's not gonna bend So like whiting
+    is the thing to look for
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: Narrows what to inspect on an edge crop. Slight tension with EDGES_JAGGED_001,
+  which treats rough factory cut as a distinct edge defect.

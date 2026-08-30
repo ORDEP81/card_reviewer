@@ -1,0 +1,25 @@
+id: CENTERING_PSA10_EVIDENCE_001
+category: centering
+statement: 'Two PSA-slabbed copies of the same card (2020 Panini Prizm #258 Anthony
+  Edwards Silver Prizm) received MINT 9 and GEM MT 10; the 9 shows a visibly wider
+  left border than right while the 10''s borders are even.'
+evidence_type: objective
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_008
+  video_id: web_f4e13adb5cc1
+  timestamps:
+  - 01:43-01:55
+  quote: this nine is not centered well. You could see this left border is bigger
+    than the right.
+status: active
+supersedes: null
+created: '2026-08-29'
+rubric_version_added: 0.2.0
+notes: 'OBJECTIVE: both PSA labels are legible on screen - cert 67658965 (MINT 9)
+  and cert 63790671 (GEM MT 10), same card and parallel. Independently checkable via
+  PSA cert lookup. This is the first rule in the knowledge base not resting on a speaker''s
+  assertion.'
