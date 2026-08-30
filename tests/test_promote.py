@@ -301,3 +301,62 @@ def test_drop_pending_removes_the_actual_path_not_a_reconstruction(paths):
     # The path validate.check_rule would have guessed from the id must not
     # have been created or left behind either.
     assert not (paths.pending_rules / f"{rule.id}.yaml").exists()
+
+
+# --- fix round 2, finding 5: null-field creep in rewritten rule files ---
+#
+# `write_rule` dumped with `model_dump(mode="json")` and no `exclude_none`,
+# so a video-mode source (only lesson/video_id/timestamps/quote populated)
+# gained `reference: null` and `locator: null` the next time the rule was
+# accepted, rejected, or superseded -- noise in an append-only audit trail.
+# `Rule`'s own top-level None fields (`supersedes`, `rubric_version_added`,
+# `notes`) are meaningful and must keep appearing.
+
+
+def test_write_rule_video_mode_source_round_trips_without_gaining_keys(paths):
+    rule = make(sources=[RuleSource(lesson="lesson_001", video_id="yt_a", timestamps=["01:00"])])
+    dest = promote.rule_path(paths, rule)
+
+    promote.write_rule(dest, rule)
+
+    raw = yaml.safe_load(dest.read_text())
+    (source,) = raw["sources"]
+    assert set(source.keys()) == {"lesson", "video_id", "timestamps", "quote"}
+    assert "reference" not in source
+    assert "locator" not in source
+
+
+def test_write_rule_reference_mode_source_round_trips_without_gaining_video_key(paths):
+    rule = make(
+        sources=[
+            RuleSource(
+                lesson="lesson_001",
+                reference="PSA published grading standards",
+                locator="Gem Mint 10 centering requirement",
+            )
+        ]
+    )
+    dest = promote.rule_path(paths, rule)
+
+    promote.write_rule(dest, rule)
+
+    raw = yaml.safe_load(dest.read_text())
+    (source,) = raw["sources"]
+    assert "video_id" not in source
+    assert source["reference"] == "PSA published grading standards"
+    assert source["locator"] == "Gem Mint 10 centering requirement"
+
+
+def test_write_rule_still_writes_meaningful_top_level_nulls(paths):
+    """The fix must be scoped to source dicts -- Rule's own null fields
+    (supersedes, rubric_version_added, notes) are meaningful and must not
+    disappear from the written file."""
+    rule = make()
+    dest = promote.rule_path(paths, rule)
+
+    promote.write_rule(dest, rule)
+
+    raw = yaml.safe_load(dest.read_text())
+    assert raw["supersedes"] is None
+    assert raw["rubric_version_added"] is None
+    assert raw["notes"] is None

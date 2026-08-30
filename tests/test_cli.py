@@ -245,3 +245,90 @@ def test_review_bad_supersede_id_defers_without_corrupting_version(tmp_path, mon
     assert "0 accepted, 0 superseded" in result.output
     assert ver.read(p) == "0.1.0"
     assert (p.pending_rules / "SURFACE_PRINT_LINE_001.yaml").exists()
+
+
+# --- fix round 2, finding 3: review_cmd matched decisions by prefix
+# (`choice.startswith("accept"|"reject"|"supersede")`), so a typo like
+# "acept" silently deferred with no message, "rejectionable" would reject,
+# and "accepted" would accept. The first whitespace-separated token must
+# now match exactly.
+
+
+def test_review_typo_choice_defers_with_a_message(tmp_path, monkeypatch):
+    from card_reviewer.knowledge import validate
+    from card_reviewer.knowledge import version as ver
+
+    p = _review_project(tmp_path)
+    _write_pending(p, _rule_yaml())
+    monkeypatch.setattr(cli, "paths", lambda: p)
+
+    result = runner.invoke(app, ["review"], input="acept\n")
+
+    assert result.exit_code == 0, result.output
+    assert "0 accepted, 0 superseded" in result.output
+    assert "acept" in result.output  # names what was typed
+    assert ver.read(p) == "0.1.0"
+    assert validate.load_active(p) == []
+    assert (p.pending_rules / "SURFACE_PRINT_LINE_001.yaml").exists()
+
+
+def test_review_choice_that_merely_starts_with_reject_does_not_reject(tmp_path, monkeypatch):
+    """'rejectionable' must not match 'reject' by prefix."""
+    from card_reviewer.knowledge import validate
+
+    p = _review_project(tmp_path)
+    _write_pending(p, _rule_yaml())
+    monkeypatch.setattr(cli, "paths", lambda: p)
+
+    result = runner.invoke(app, ["review"], input="rejectionable\n")
+
+    assert result.exit_code == 0, result.output
+    assert "0 accepted, 0 superseded" in result.output
+    assert "rejectionable" in result.output
+    assert validate.load_active(p) == []
+    assert (p.pending_rules / "SURFACE_PRINT_LINE_001.yaml").exists()
+
+
+def test_review_choice_that_merely_starts_with_accept_does_not_accept(tmp_path, monkeypatch):
+    """'accepted' must not match 'accept' by prefix."""
+    from card_reviewer.knowledge import validate
+
+    p = _review_project(tmp_path)
+    _write_pending(p, _rule_yaml())
+    monkeypatch.setattr(cli, "paths", lambda: p)
+
+    result = runner.invoke(app, ["review"], input="accepted\n")
+
+    assert result.exit_code == 0, result.output
+    assert "0 accepted, 0 superseded" in result.output
+    assert validate.load_active(p) == []
+    assert (p.pending_rules / "SURFACE_PRINT_LINE_001.yaml").exists()
+
+
+def test_review_exact_accept_still_accepts(tmp_path, monkeypatch):
+    from card_reviewer.knowledge import validate
+
+    p = _review_project(tmp_path)
+    _write_pending(p, _rule_yaml())
+    monkeypatch.setattr(cli, "paths", lambda: p)
+
+    result = runner.invoke(app, ["review"], input="accept\n")
+
+    assert result.exit_code == 0, result.output
+    assert "1 accepted, 0 superseded" in result.output
+    assert [r.id for r in validate.load_active(p)] == ["SURFACE_PRINT_LINE_001"]
+
+
+def test_review_bare_enter_still_defers_silently_with_no_unrecognised_message(
+    tmp_path, monkeypatch
+):
+    p = _review_project(tmp_path)
+    _write_pending(p, _rule_yaml())
+    monkeypatch.setattr(cli, "paths", lambda: p)
+
+    result = runner.invoke(app, ["review"], input="\n")
+
+    assert result.exit_code == 0, result.output
+    assert "0 accepted, 0 superseded" in result.output
+    assert "unrecognised" not in result.output.lower()
+    assert (p.pending_rules / "SURFACE_PRINT_LINE_001.yaml").exists()

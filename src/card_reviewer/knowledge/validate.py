@@ -73,28 +73,19 @@ def load_pending(paths: ProjectPaths) -> list[tuple[Path, Rule]]:
 
 
 def load_active(paths: ProjectPaths) -> list[Rule]:
-    out: list[Rule] = []
-    if not paths.rules.exists():
-        return out
-    for path in sorted(paths.rules.rglob("*.yaml")):
-        rule = Rule.model_validate(yaml.safe_load(path.read_text()))
-        if rule.status is RuleStatus.ACTIVE:
-            out.append(rule)
-    return out
+    """Every currently-active rule under `knowledge/rules/`.
 
+    Unlike `load_pending`/`load_all`, this raises on the first file that
+    fails to parse or validate rather than skipping it: `validate.run` and
+    `promote` call this directly, and a rule file already promoted into
+    `knowledge/rules/` that has gone corrupt must not become silently
+    invisible to them. The raised `RuntimeError` names the offending file
+    and is chained (`__cause__`) from the underlying pyyaml/pydantic error.
 
-def load_all(paths: ProjectPaths) -> list[Rule]:
-    """Every rule under `knowledge/rules/`, regardless of status.
-
-    Unlike `load_active`, this is not scoped to what the grader currently
-    believes — it exists so id-collision checks can see rejected and
-    superseded rules too. Those statuses live at the same path an id would
-    be promoted to, so a collision check that only knew about active ids
-    would let a new rule silently overwrite a retired one. A file that
-    doesn't parse is skipped rather than raised, matching `load_pending`:
-    `run()` already reports unparseable *pending* files, and a broken file
-    already sitting in `knowledge/rules/` is a pre-existing condition this
-    check is not responsible for surfacing.
+    `rubric.load_active_rubric` is the public seam that wraps this into one
+    documented exception type (`RubricError`) for external callers; this
+    function's raw, path-named error is for internal callers that already
+    know to handle it.
     """
     out: list[Rule] = []
     if not paths.rules.exists():
@@ -102,10 +93,42 @@ def load_all(paths: ProjectPaths) -> list[Rule]:
     for path in sorted(paths.rules.rglob("*.yaml")):
         try:
             rule = Rule.model_validate(yaml.safe_load(path.read_text()))
-        except (ValidationError, yaml.YAMLError):
+        except (ValidationError, yaml.YAMLError) as exc:
+            raise RuntimeError(f"{path}: does not parse as a Rule: {exc}") from exc
+        if rule.status is RuleStatus.ACTIVE:
+            out.append(rule)
+    return out
+
+
+def load_all(paths: ProjectPaths) -> tuple[list[Rule], dict[str, str]]:
+    """Every rule under `knowledge/rules/`, regardless of status.
+
+    Unlike `load_active`, this is not scoped to what the grader currently
+    believes — it exists so id-collision checks can see rejected and
+    superseded rules too. Those statuses live at the same path an id would
+    be promoted to, so a collision check that only knew about active ids
+    would let a new rule silently overwrite a retired one.
+
+    Returns `(rules, errors)`. `rules` is every rule that parses, regardless
+    of status. `errors` maps the string path of each file that failed to
+    parse or validate to a message — a file that doesn't parse is *reported*
+    here, not silently dropped, so `run()` can surface a corrupt file
+    already sitting in `knowledge/rules/` instead of reporting clean. This
+    does not change `load_pending`'s own skip-and-report-separately
+    behaviour; that function is unrelated and untouched.
+    """
+    out: list[Rule] = []
+    errors: dict[str, str] = {}
+    if not paths.rules.exists():
+        return out, errors
+    for path in sorted(paths.rules.rglob("*.yaml")):
+        try:
+            rule = Rule.model_validate(yaml.safe_load(path.read_text()))
+        except (ValidationError, yaml.YAMLError) as exc:
+            errors[str(path)] = f"does not parse as a Rule: {exc}"
             continue
         out.append(rule)
-    return out
+    return out, errors
 
 
 def video_durations(paths: ProjectPaths) -> dict[str, float]:
@@ -194,12 +217,12 @@ def run(paths: ProjectPaths) -> ValidationReport:
     report = ValidationReport()
     durations = video_durations(paths)
 
-    try:
-        existing_rules = {r.id: r for r in load_all(paths)}
-    except (ValidationError, yaml.YAMLError) as exc:
+    all_rules, load_errors = load_all(paths)
+    existing_rules = {r.id: r for r in all_rules}
+    if load_errors:
         report.ok = False
-        report.errors["knowledge/rules"] = [f"active rules are unreadable: {exc}"]
-        return report
+        for path_str, message in load_errors.items():
+            report.errors[path_str] = [message]
 
     if not paths.pending_rules.exists():
         return report

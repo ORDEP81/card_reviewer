@@ -238,13 +238,20 @@ def review_cmd() -> None:
         choice = typer.prompt(
             "accept / reject / supersede <ID> / defer", default="defer"
         ).strip()
+        # Match the first whitespace-separated token exactly, not by
+        # prefix: `choice.startswith("accept")` used to let "accepted" or
+        # "acept" through as a match (or a silent no-op), discarding a
+        # decision the user believed they'd made. `token` being empty
+        # covers a blank prompt, which the "defer" default above already
+        # prevents in practice, but is handled the same way regardless.
+        token = choice.split()[0] if choice.split() else ""
 
-        if choice.startswith("accept"):
+        if token == "accept":
             to_accept.append((path, rule))
-        elif choice.startswith("reject"):
+        elif token == "reject":
             reason = typer.prompt("reason")
             pr.reject(p, rule, reason, pending_path=path)
-        elif choice.startswith("supersede"):
+        elif token == "supersede":
             parts = choice.split(maxsplit=1)
             if len(parts) != 2:
                 console.print("[red]supersede needs a rule id; deferring[/red]")
@@ -262,6 +269,12 @@ def review_cmd() -> None:
                 console.print(f"[red]{exc}; deferring[/red]")
                 continue
             to_supersede.append((path, rule, old_id))
+        elif token in ("defer", ""):
+            pass  # explicit defer, or the "defer" default from a bare Enter
+        else:
+            console.print(
+                f"[yellow]Unrecognised choice {choice!r}; deferring[/yellow]"
+            )
 
     # One version for the whole session: every accepted or superseded rule is
     # stamped with the same value, and the version file is written at most
