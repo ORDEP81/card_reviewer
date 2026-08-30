@@ -1,0 +1,69 @@
+{
+  "video_id": "yt_E9do7O74zM0",
+  "source": {
+    "type": "youtube",
+    "url": "https://www.youtube.com/watch?v=E9do7O74zM0",
+    "title": "What are the PSA Grading Standards for Cards?",
+    "uploader": "PSA Official",
+    "duration_s": 123.0
+  },
+  "file": {
+    "path": "source/video.webm",
+    "sha256": "32e3821dd6fd5172c4fddbe55c1a74ad18c50fc11df585dcf9a6b4488353e99e",
+    "bytes": 33641185
+  },
+  "stages": {
+    "acquire": {
+      "status": "done",
+      "at": "2026-08-30T17:46:39.100590Z",
+      "error": null,
+      "detail": {
+        "tool": "yt-dlp",
+        "browser": null
+      }
+    },
+    "transcribe": {
+      "status": "done",
+      "at": "2026-08-30T17:47:21.402780Z",
+      "error": null,
+      "detail": {
+        "method": "captions",
+        "model": null,
+        "cues": 55
+      }
+    },
+    "segment": {
+      "status": "done",
+      "at": "2026-08-30T17:47:21.408658Z",
+      "error": null,
+      "detail": {
+        "n_segments": 6,
+        "lexicon_version": "1"
+      }
+    },
+    "extract_frames": {
+      "status": "done",
+      "at": "2026-08-30T17:47:28.467565Z",
+      "error": null,
+      "detail": {
+        "n_frames": 58,
+        "uniform": false,
+        "fps": 1.0
+      }
+    },
+    "analyze": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    },
+    "validate": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    }
+  },
+  "lesson_id": null,
+  "rubric_version_at_ingest": "2.0.0"
+}

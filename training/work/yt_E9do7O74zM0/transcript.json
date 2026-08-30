@@ -1,0 +1,282 @@
+{
+  "method": "captions",
+  "model": null,
+  "language": "en",
+  "cues": [
+    {
+      "start_s": 0.08,
+      "end_s": 2.629,
+      "text": "People often ask me what makes a PSA 10"
+    },
+    {
+      "start_s": 2.639,
+      "end_s": 5.59,
+      "text": "a PSA 10. To understand that, we must go"
+    },
+    {
+      "start_s": 5.6,
+      "end_s": 8.549,
+      "text": "back to July 1991 when PSA was founded"
+    },
+    {
+      "start_s": 8.559,
+      "end_s": 10.39,
+      "text": "and introduced the 10point grading"
+    },
+    {
+      "start_s": 10.4,
+      "end_s": 12.31,
+      "text": "scale, which is now the industry"
+    },
+    {
+      "start_s": 12.32,
+      "end_s": 14.87,
+      "text": "standard. The better the condition, the"
+    },
+    {
+      "start_s": 14.88,
+      "end_s": 16.71,
+      "text": "higher the grade, and there's nothing"
+    },
+    {
+      "start_s": 16.72,
+      "end_s": 20.07,
+      "text": "higher than the PSA Gemmin 10. Virtually"
+    },
+    {
+      "start_s": 20.08,
+      "end_s": 22.63,
+      "text": "flawless and essentially perfect. But"
+    },
+    {
+      "start_s": 22.64,
+      "end_s": 25.59,
+      "text": "what makes a card perfect? PSA's expert"
+    },
+    {
+      "start_s": 25.6,
+      "end_s": 27.75,
+      "text": "graders primarily focus on four things"
+    },
+    {
+      "start_s": 27.76,
+      "end_s": 30.23,
+      "text": "when assessing a card. How centered is"
+    },
+    {
+      "start_s": 30.24,
+      "end_s": 32.87,
+      "text": "the image within the card's borders? Are"
+    },
+    {
+      "start_s": 32.88,
+      "end_s": 35.03,
+      "text": "the corners sharp or do they show frame"
+    },
+    {
+      "start_s": 35.04,
+      "end_s": 37.75,
+      "text": "bending or other signs of wear? Are"
+    },
+    {
+      "start_s": 37.76,
+      "end_s": 39.75,
+      "text": "there visible surface imperfections like"
+    },
+    {
+      "start_s": 39.76,
+      "end_s": 41.99,
+      "text": "scratches, creases, or other flaws that"
+    },
+    {
+      "start_s": 42.0,
+      "end_s": 43.51,
+      "text": "might be difficult to see with the naked"
+    },
+    {
+      "start_s": 43.52,
+      "end_s": 46.069,
+      "text": "eye? Are the edges smooth and crisp? Or"
+    },
+    {
+      "start_s": 46.079,
+      "end_s": 47.91,
+      "text": "do they have chipping, tears, or other"
+    },
+    {
+      "start_s": 47.92,
+      "end_s": 50.47,
+      "text": "imperfections? The differences between a"
+    },
+    {
+      "start_s": 50.48,
+      "end_s": 53.67,
+      "text": "PSA 10 and a PSA 9 can be slight. For"
+    },
+    {
+      "start_s": 53.68,
+      "end_s": 55.59,
+      "text": "example, these two cards look nearly"
+    },
+    {
+      "start_s": 55.6,
+      "end_s": 57.67,
+      "text": "identical at first glance with strong"
+    },
+    {
+      "start_s": 57.68,
+      "end_s": 59.59,
+      "text": "corners, smooth edges, and unbllemished"
+    },
+    {
+      "start_s": 59.6,
+      "end_s": 62.229,
+      "text": "surfaces, but this card falls outside"
+    },
+    {
+      "start_s": 62.239,
+      "end_s": 64.39,
+      "text": "the centering threshold for a PSA 10."
+    },
+    {
+      "start_s": 64.4,
+      "end_s": 66.149,
+      "text": "These two cards are well centered and"
+    },
+    {
+      "start_s": 66.159,
+      "end_s": 68.469,
+      "text": "have great eye appeal. At first glance,"
+    },
+    {
+      "start_s": 68.479,
+      "end_s": 70.07,
+      "text": "they both appear to be PSA 10"
+    },
+    {
+      "start_s": 70.08,
+      "end_s": 72.07,
+      "text": "candidates, but closer inspection"
+    },
+    {
+      "start_s": 72.08,
+      "end_s": 73.83,
+      "text": "reveals a small white touch on one"
+    },
+    {
+      "start_s": 73.84,
+      "end_s": 76.39,
+      "text": "corner. A minor defect like this can be"
+    },
+    {
+      "start_s": 76.4,
+      "end_s": 78.87,
+      "text": "enough to bring down the grade. Further"
+    },
+    {
+      "start_s": 78.88,
+      "end_s": 80.469,
+      "text": "down the grading scale, you'll find that"
+    },
+    {
+      "start_s": 80.479,
+      "end_s": 82.469,
+      "text": "lower grades often have more noticeable"
+    },
+    {
+      "start_s": 82.479,
+      "end_s": 85.35,
+      "text": "defects and imperfections. A PSA 5 will"
+    },
+    {
+      "start_s": 85.36,
+      "end_s": 87.429,
+      "text": "usually show a lot more wear than a PSA"
+    },
+    {
+      "start_s": 87.439,
+      "end_s": 89.83,
+      "text": "8, while a PSA 1 will generally display"
+    },
+    {
+      "start_s": 89.84,
+      "end_s": 92.63,
+      "text": "some serious defects. But a card with a"
+    },
+    {
+      "start_s": 92.64,
+      "end_s": 94.22999999999999,
+      "text": "lower grade can still have strong eye"
+    },
+    {
+      "start_s": 94.24000000000001,
+      "end_s": 96.789,
+      "text": "appeal. A grade may be lowered merely"
+    },
+    {
+      "start_s": 96.799,
+      "end_s": 98.71000000000001,
+      "text": "due to a technical defect, like a minor"
+    },
+    {
+      "start_s": 98.72,
+      "end_s": 100.95,
+      "text": "crease or paper loss on the back. It's"
+    },
+    {
+      "start_s": 100.96000000000001,
+      "end_s": 102.87,
+      "text": "important to note that any card could be"
+    },
+    {
+      "start_s": 102.88,
+      "end_s": 104.789,
+      "text": "worth grading regardless of condition,"
+    },
+    {
+      "start_s": 104.799,
+      "end_s": 106.87,
+      "text": "whether due to rarity, scarcity, or"
+    },
+    {
+      "start_s": 106.88,
+      "end_s": 109.03,
+      "text": "sentimental value. Getting your card"
+    },
+    {
+      "start_s": 109.03999999999999,
+      "end_s": 110.71000000000001,
+      "text": "authenticated and graded not only"
+    },
+    {
+      "start_s": 110.72,
+      "end_s": 112.71000000000001,
+      "text": "protects and preserves, it can also"
+    },
+    {
+      "start_s": 112.72,
+      "end_s": 115.749,
+      "text": "increase collectibility and value. So,"
+    },
+    {
+      "start_s": 115.759,
+      "end_s": 117.27000000000001,
+      "text": "are you ready to find out where your"
+    },
+    {
+      "start_s": 117.28,
+      "end_s": 119.83,
+      "text": "card falls on the PSA grading scale? Get"
+    },
+    {
+      "start_s": 119.84,
+      "end_s": 122.19,
+      "text": "started today."
+    },
+    {
+      "start_s": 122.2,
+      "end_s": 124.819,
+      "text": "[Music]"
+    }
+  ]
+}

@@ -4,8 +4,8 @@
      Source of truth is knowledge/rules/. Regenerate with:
        card-knowledge build-rubric -->
 
-**Version:** 2.0.0  
-**Rules:** 28 active rules  
+**Version:** 3.0.0  
+**Rules:** 35 active rules  
 **Built:** 2026-08-30
 
 ## centering
@@ -84,6 +84,22 @@ Corner defects occur in this descending order of frequency: whitening/chipping, 
 - confidence: `medium`  
 - sources: lesson_009 00:45-00:55
 
+### CORNERS_FOUR_SHARP_001
+
+A PSA Gem Mint 10 requires four perfectly sharp corners.
+
+- evidence: `objective`  
+- confidence: `high`  
+- sources: lesson_013 
+
+### CORNERS_MINOR_TOUCH_COSTS_TEN_001
+
+A single small white touch on one corner can be enough to lower a card from PSA 10 to PSA 9.
+
+- evidence: `objective`  
+- confidence: `high`  
+- sources: lesson_013 01:00-01:20
+
 ### CORNERS_ROUNDED_002
 
 A corner that shows white and appears rounded is corner wear and counts against the grade.
@@ -160,6 +176,14 @@ A dimple presents differently in a scan than in person, so its scanned appearanc
 - confidence: `medium`  
 - sources: lesson_001 05:36-05:56
 
+### IMAGE_LIMITATIONS_PSA_SURFACE_001
+
+PSA characterises surface flaws as potentially difficult to see with the naked eye.
+
+- evidence: `objective`  
+- confidence: `high`  
+- sources: lesson_013 00:26-00:47
+
 ### IMAGE_LIMITATIONS_REQUEST_PHOTOS_001
 
 When listing photographs cannot resolve whether an edge is chipped or a surface mark is real, the correct response is to request more photographs rather than assume.
@@ -194,6 +218,14 @@ Inspect in a fixed order - centering, corners, edges, surface - then repeat the 
 - confidence: `medium`  
 - sources: lesson_003 02:59-03:20
 
+### PROCESS_PSA_FOUR_CATEGORIES_001
+
+PSA graders primarily assess four attributes: centering within the borders, corner sharpness, surface imperfections, and edge condition.
+
+- evidence: `objective`  
+- confidence: `high`  
+- sources: lesson_013 00:26-00:47
+
 ## surface
 
 ### SURFACE_CLEANABLE_001
@@ -212,13 +244,29 @@ A gem-mint reference card shows sharp corners and edges with no whitening anywhe
 - confidence: `medium`  
 - sources: lesson_002 06:46-07:16
 
-### SURFACE_PRINT_LINE_ACROSS_001
+### SURFACE_GLOSS_FOCUS_001
 
-A factory or print line running across the face of the card is penalised every time and prevents a high grade.
+A PSA Gem Mint 10 requires sharp focus and full original gloss.
 
-- evidence: `experience_based`  
+- evidence: `objective`  
 - confidence: `high`  
-- sources: lesson_011 01:10-01:25
+- sources: lesson_013 
+
+### SURFACE_NO_STAINING_001
+
+A PSA Gem Mint 10 must be free of staining of any kind.
+
+- evidence: `objective`  
+- confidence: `high`  
+- sources: lesson_013 
+
+### SURFACE_PRINT_ALLOWANCE_001
+
+PSA allows a slight printing imperfection on a Gem Mint 10 provided it does not impair the overall appeal of the card.
+
+- evidence: `objective`  
+- confidence: `high`  
+- sources: lesson_013 
 
 ### SURFACE_PRINT_LINE_BACK_001
 
@@ -235,6 +283,14 @@ Shiny, foil and refractor-style surfaces scratch more easily and are harder to a
 - evidence: `experience_based`  
 - confidence: `high`  
 - sources: lesson_011 00:35-01:00
+
+### SURFACE_TECHNICAL_DEFECT_001
+
+A grade may be lowered by a technical defect such as a minor crease or paper loss on the back even when the card has strong eye appeal.
+
+- evidence: `objective`  
+- confidence: `medium`  
+- sources: lesson_013 01:30-01:40
 
 ### SURFACE_THREE_DEFECTS_001
 

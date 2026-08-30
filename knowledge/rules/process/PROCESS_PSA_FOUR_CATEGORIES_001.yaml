@@ -1,0 +1,27 @@
+id: PROCESS_PSA_FOUR_CATEGORIES_001
+category: process
+statement: 'PSA graders primarily assess four attributes: centering within the borders,
+  corner sharpness, surface imperfections, and edge condition.'
+evidence_type: objective
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_013
+  video_id: yt_E9do7O74zM0
+  timestamps:
+  - 00:26-00:47
+  quote: PSA's expert graders primarily focus on four things when assessing a card.
+    How centered is the image within the card's borders? Are the corners sharp or
+    do they show frame bending or other signs of wear? Are there visible surface imperfections
+    like scratches, creases, or other flaws that might be difficult to see with the
+    naked eye? Are the edges smooth and crisp? Or do they have chipping, tears, or
+    other imperfections?
+status: active
+supersedes: null
+created: '2026-08-30'
+rubric_version_added: 3.0.0
+notes: First-party. Confirms the four categories PROCESS_CHECKLIST_001 records from
+  a practitioner. Note PSA names 'frame bending' as a corner defect, a term absent
+  from every instructor source.

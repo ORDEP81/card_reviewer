@@ -1,0 +1,99 @@
+{
+  "lexicon_version": "1",
+  "total_cues": 55,
+  "segments": [
+    {
+      "id": "seg_003",
+      "start_s": 41.079,
+      "end_s": 58.67,
+      "score": 9.0,
+      "categories": [
+        "edges",
+        "outcomes"
+      ],
+      "matched_terms": [
+        "chipping",
+        "psa 10",
+        "psa 9"
+      ],
+      "text": "do they have chipping, tears, or other imperfections? The differences between a PSA 10 and a PSA 9 can be slight. For",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_004",
+      "start_s": 52.68,
+      "end_s": 69.39,
+      "score": 8.0,
+      "categories": [
+        "centering",
+        "corners",
+        "edges",
+        "outcomes"
+      ],
+      "matched_terms": [
+        "centering",
+        "corners",
+        "edges",
+        "psa 10"
+      ],
+      "text": "corners, smooth edges, and unbllemished surfaces, but this card falls outside the centering threshold for a PSA 10.",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_001",
+      "start_s": 0.0,
+      "end_s": 10.59,
+      "score": 6.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "People often ask me what makes a PSA 10 a PSA 10. To understand that, we must go",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_005",
+      "start_s": 63.479,
+      "end_s": 75.07,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "they both appear to be PSA 10",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_006",
+      "start_s": 93.72,
+      "end_s": 105.95,
+      "score": 3.0,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "crease"
+      ],
+      "text": "crease or paper loss on the back. It's",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_002",
+      "start_s": 34.76,
+      "end_s": 46.99,
+      "score": 2.5,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "scratches"
+      ],
+      "text": "scratches, creases, or other flaws that",
+      "visual_cue": false
+    }
+  ]
+}

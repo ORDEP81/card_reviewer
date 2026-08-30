@@ -1,0 +1,22 @@
+id: CORNERS_MINOR_TOUCH_COSTS_TEN_001
+category: corners
+statement: A single small white touch on one corner can be enough to lower a card
+  from PSA 10 to PSA 9.
+evidence_type: objective
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_013
+  video_id: yt_E9do7O74zM0
+  timestamps:
+  - 01:00-01:20
+  quote: closer inspection reveals a small white touch on one corner. A minor defect
+    like this can be enough to bring down the grade
+status: active
+supersedes: null
+created: '2026-08-30'
+rubric_version_added: 3.0.0
+notes: PSA stating the 10/9 boundary itself, with its own macro photography of the
+  defect. Confirms CORNERS_TOUCH_001, previously experience_based from an instructor.

@@ -1,0 +1,24 @@
+id: SURFACE_PRINT_ALLOWANCE_001
+category: surface
+statement: PSA allows a slight printing imperfection on a Gem Mint 10 provided it
+  does not impair the overall appeal of the card.
+evidence_type: objective
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_013
+  timestamps: []
+  reference: PSA published grading standards (psacard.com/gradingstandards)
+  locator: Grade Definitions, GEM-MT PSA 10
+  quote: an allowance may be made for a slight printing imperfection, if it doesn't
+    impair the overall appeal of the card
+status: active
+supersedes: SURFACE_PRINT_LINE_ACROSS_001
+created: '2026-08-30'
+rubric_version_added: 3.0.0
+notes: SUPERSEDES SURFACE_PRINT_LINE_ACROSS_001, which claimed a print line is penalised
+  'every time'. That overstated a practitioner's observation of a prominent line into
+  an absolute the published standard contradicts. The operative test is severity and
+  effect on overall appeal, not presence.

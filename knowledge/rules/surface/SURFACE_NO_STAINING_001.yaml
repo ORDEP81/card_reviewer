@@ -1,0 +1,20 @@
+id: SURFACE_NO_STAINING_001
+category: surface
+statement: A PSA Gem Mint 10 must be free of staining of any kind.
+evidence_type: objective
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_013
+  timestamps: []
+  reference: PSA published grading standards (psacard.com/gradingstandards)
+  locator: Grade Definitions, GEM-MT PSA 10
+  quote: A PSA Gem Mint 10 card must be free of staining of any kind
+status: active
+supersedes: null
+created: '2026-08-30'
+rubric_version_added: 3.0.0
+notes: Absolute in the published standard - 'of any kind' - unlike the printing-imperfection
+  allowance in the same sentence.

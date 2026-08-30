@@ -1,0 +1,22 @@
+id: SURFACE_TECHNICAL_DEFECT_001
+category: surface
+statement: A grade may be lowered by a technical defect such as a minor crease or
+  paper loss on the back even when the card has strong eye appeal.
+evidence_type: objective
+confidence: medium
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_013
+  video_id: yt_E9do7O74zM0
+  timestamps:
+  - 01:30-01:40
+  quote: A grade may be lowered merely due to a technical defect, like a minor crease
+    or paper loss on the back.
+status: active
+supersedes: null
+created: '2026-08-30'
+rubric_version_added: 3.0.0
+notes: Guards against over-weighting front-side eye appeal. The back carries grade-limiting
+  defects of its own.
