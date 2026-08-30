@@ -1,0 +1,28 @@
+id: CENTERING_PSA10_STANDARD_002
+category: centering
+statement: PSA's published tolerance for a Gem Mint 10 is approximately 55/45 on the
+  front and 75/25 on the reverse, stated as a tolerance not to exceed those figures
+  rather than as an exact cutoff.
+evidence_type: objective
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_014
+  timestamps: []
+  reference: PSA published grading standards (psacard.com/gradingstandards), transcribed
+    at knowledge/psa/grading-standards.md
+  locator: Grade Definitions, GEM-MT PSA 10
+  quote: The image must be centered on the card within a tolerance not to exceed approximately
+    55/45 percent on the front, and 75/25 percent on the reverse.
+status: active
+supersedes: CENTERING_PSA10_STANDARD_001
+created: '2026-08-30'
+rubric_version_added: 4.0.0
+notes: SUPERSEDES CENTERING_PSA10_STANDARD_001, whose quote field held an author paraphrase
+  ('55/45 or better front, 75/25 or better back') rather than PSA's words, and whose
+  statement dropped 'approximately'. A reviewer must not treat 56/44 as an automatic
+  failure. The quote here is verbatim from the transcription committed at knowledge/psa/grading-standards.md;
+  that file is itself a transcription of a screenshot and carries its own provenance
+  warning.

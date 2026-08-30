@@ -1,0 +1,34 @@
+id: SURFACE_PRINT_LINE_PROMINENT_001
+category: surface
+statement: A prominent print or factory line running across the face of a card is
+  grade-limiting and is not covered by PSA's slight-imperfection allowance.
+evidence_type: experience_based
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_011
+  video_id: web_a215e0e689d0
+  timestamps:
+  - 01:10-01:25
+  quote: You could see across this Luka Donchi, it's going right across in between
+    his mouth and his nose. There's a giant factory line. No good. You're going to
+    get knocked for that every time. It's never going to grade for you.
+- lesson: lesson_014
+  timestamps: []
+  reference: PSA published grading standards (psacard.com/gradingstandards), transcribed
+    at knowledge/psa/grading-standards.md
+  locator: Grade Definitions, GEM-MT PSA 10
+  quote: an allowance may be made for a slight printing imperfection, if it doesn't
+    impair the overall appeal of the card
+status: active
+supersedes: null
+created: '2026-08-30'
+rubric_version_added: 4.0.0
+notes: RESTORES the restrictive case lost when SURFACE_PRINT_LINE_ACROSS_001 was superseded.
+  That rule said a print line is penalised 'every time', which the published standard
+  contradicts; but retiring it outright left the rubric with only permissive print-line
+  rules, biasing toward PSA 10 against non-negotiable rule 2. The instructor was describing
+  a giant line across a player's face - prominent, not slight - so his observation
+  and PSA's allowance describe disjoint cases. Cites both, deliberately.

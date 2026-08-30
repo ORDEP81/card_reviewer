@@ -33,4 +33,3 @@ dist/
 build/
 
 # Extracted frames are regenerable from source + segments.json
-training/work/*/frames/

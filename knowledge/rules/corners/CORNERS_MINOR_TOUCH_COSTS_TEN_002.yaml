@@ -1,0 +1,25 @@
+id: CORNERS_MINOR_TOUCH_COSTS_TEN_002
+category: corners
+statement: A single small white touch on one corner can be enough to lower a card
+  from PSA 10 to PSA 9.
+evidence_type: objective
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_014
+  video_id: yt_E9do7O74zM0
+  timestamps:
+  - 00:46-01:20
+  quote: The differences between a PSA 10 and a PSA 9 can be slight... These two cards
+    are well centered and have great eye appeal. At first glance, they both appear
+    to be PSA 10 candidates, but closer inspection reveals a small white touch on
+    one corner. A minor defect like this can be enough to bring down the grade.
+status: active
+supersedes: CORNERS_MINOR_TOUCH_COSTS_TEN_001
+created: '2026-08-30'
+rubric_version_added: 4.0.0
+notes: SUPERSEDES CORNERS_MINOR_TOUCH_COSTS_TEN_001, whose quote stopped at 'bring
+  down the grade' and never reached PSA 9 - the 10-to-9 destination came from surrounding
+  narration the quote did not carry. The widened quote now contains its own support.
