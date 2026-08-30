@@ -105,10 +105,11 @@ So quality splits:
 - **`observability`** — post-geometry, in normalized card coordinates: per-region glare and
   occlusion masks, perspective severity, per-region resolution after rectification, and the
   per-purpose suitabilities (`centering_suitability`, `corner_suitability`,
-  `edge_suitability`, `surface_suitability`) plus per-region **detectability**.
+  `edge_suitability`, `surface_suitability`) plus **detectability per region per defect type**.
 
 Execution remains one card at a time, start to finish. SQLite knows what exists; there is
-no manifest and no parallel workflow state.
+no separate workflow-state file and no parallel execution. (The *evidence manifest* in §12
+is a stage output, not workflow state.)
 
 ---
 
@@ -135,17 +136,24 @@ unchanged and its stored result — including an expensive vision assessment —
 |---|---|---|---|
 | image | `preflight` | image hash | preflight version + config |
 | image | `geometry` | image hash, preflight output | geometry version + config |
-| image | `observability` | image hash, geometry output | observability version + config |
-| image | `cv_measurements` | image hash, geometry output, observability output | CV version + config |
+| image | `observability` | image hash, geometry output | observability version + config + **taxonomy version** |
+| image | `cv_measurements` | image hash, geometry output, observability output | CV version + config + **taxonomy version** |
 | candidate | `role_context` | image hashes, per-image cv/geometry outputs, supplied metadata | resolver version |
 | candidate | `evidence_assembly` | resolved roles/context, per-image outputs consumed | assembly version |
 | candidate | `heuristic` | assembled evidence values, applicable rubric rules | scorer version + weights |
-| candidate | `coverage_provisional` | assembled detectability/observability, applicable rubric rules | coverage policy version |
-| candidate | `routing` | **mode**, heuristic output, provisional coverage, assembled observability, detectability | SMART policy version |
-| candidate | `manifest` | mode budget, assembled evidence, routing decision | manifest-builder version |
+| candidate | `coverage_provisional` | assembled detectability/observability, applicable rubric rules | coverage policy version + taxonomy version |
+| candidate | `routing` | **mode**, heuristic output, provisional coverage, assembled observability, detectability | routing policy version |
+| candidate | `manifest` | mode budget, assembled evidence, routing decision, **applicable rubric rules** | manifest-builder version |
 | candidate | `vision` | the canonical evidence manifest actually sent | provider + model + prompt version + material inference params |
-| candidate | `coverage` | assembled detectability/observability, vision per-category assessability, applicable rubric rules | coverage policy version |
+| candidate | `coverage` | assembled detectability/observability, vision per-category assessability, applicable rubric rules | coverage policy version + taxonomy version |
 | candidate | `combine` | heuristic output, optional vision output, coverage output | combination/decision-policy version |
+
+**The `manifest` stage fingerprints the rubric because it embeds it.** §12 has the manifest
+carry the applicable rubric to the provider. Omitting it from the fingerprint would
+reproduce the `routing` failure one stage over: a rubric bump that adds a surface rule
+would change what *should* be sent, leave the manifest fingerprint unmoved, hit the cached
+manifest, hit the cached `vision` result keyed on it, and never re-ask the provider under
+the new rubric.
 
 **Mode is an input to `routing`, and only to `routing`.** Routing's output *is* the
 decision to call, and that decision is mode-dependent by definition — `OFF` never calls,
@@ -298,6 +306,11 @@ persistence.
 - **`CandidateAdapter`** — resolves external input: fetches images, hashes them, writes them
   to the content-addressed store. **The only component permitted to touch the network.**
 - **`ResolvedCandidate`** — stable metadata plus local content-addressed image references.
+  **It carries no price field of any kind.** The adapter drops asking price when it resolves
+  a `CandidateInput`; the price remains on the `candidate` row as listing provenance and is
+  never visible to `ReviewPipeline.review`. Drawing the boundary at the core's input type,
+  rather than at the evidence manifest, is what makes rule 14 structural instead of a
+  discipline the grading path has to keep remembering.
 
 Core signature: `ReviewPipeline.review(ResolvedCandidate, mode) -> CardReview`. The CV and
 grading core has no dependency on eBay, Flippah, HTTP or any external service.
@@ -341,15 +354,30 @@ severity, per-region effective resolution after rectification, and:
 
 - per-purpose suitability — `centering_suitability`, `corner_suitability`,
   `edge_suitability`, `surface_suitability`
-- per-region **detectability**
+- **detectability**, per region *and per defect type*
 
 ```
-bottom_left.whitening_detectability = LOW   reason = WHITE_BORDER
+bottom_left.whitening_detectability = LOW   reason = WHITE_BORDER          class = structural
 top_right.whitening_detectability   = HIGH  reason = DARK_PRINTED_BACKGROUND
+bottom_right.rounding_detectability = LOW   reason = GLARE                 class = circumstantial
 ```
 
-Detectability is a physical property of the photograph and the card's own design — what
-*could* be seen here, independent of any rubric. `CORNERS_COLORED_001` and
+**Every detectability below `MODERATE` carries a reason code, and every reason code carries
+its class**, taken from the taxonomy. This is the mechanism the coverage policy consumes:
+`observability` never decides whether a shortfall blocks `PASS`, it only reports what
+limited the view and which kind of limitation it is.
+
+Detectability is computed over the **detectability taxonomy** (§13): the declared set of
+defect types, the reason codes explaining why a defect type is or is not detectable, and
+each reason code's class. The taxonomy is a versioned artifact in its own right, and its
+version **is** part of the image-tier producer signatures — unlike rubric version, and for a
+principled reason. Adding a defect type genuinely changes what a pixel measurement must
+compute, so recomputation is correct. Changing a rubric *rule* changes policy about what
+those measurements mean, which is a candidate-tier concern. The taxonomy is the shared
+vocabulary; the rubric is the judgment applied to it.
+
+Detectability is otherwise a physical property of the photograph and the card's own design —
+what *could* be seen here, independent of any rubric. `CORNERS_COLORED_001` and
 `EDGES_COLORED_001` are cited as the provenance of why it is worth measuring, not as its
 contract: **a white corner cannot show whitening.** Because detectability is physics rather
 than policy, rubric version is deliberately *not* part of the image-tier producer
@@ -608,8 +636,9 @@ from satisfying a later `DEEP` lookup.
 
 **The provisional coverage gate.** `SMART` does not call when `coverage_provisional`
 returns `INADEQUATE`: a card whose photographs cannot support an assessment at all has
-nothing for the provider to resolve, and the verdict is already pinned to
-`INSUFFICIENT_IMAGES`. `DEEP` still calls — the owner asked for maximum evidence explicitly,
+nothing for the provider to resolve, and the verdict can only be `INSUFFICIENT_IMAGES` or —
+if the heuristic already holds an adequately evidenced disqualifier — `REJECT`. Neither
+outcome changes with a vision call. `DEEP` still calls — the owner asked for maximum evidence explicitly,
 and a provider occasionally reads a face that CV could not.
 
 ### SMART fires on resolvable ambiguity, not missing information
@@ -669,12 +698,56 @@ The central correction: **detectability is per defect type, not per region.** A 
 cannot show whitening, but it shows rounding and fraying perfectly well. Collapsing a corner
 to one scalar would make an entire class of cards permanently unassessable.
 
-| Category | Defect types assessed |
+The **detectability taxonomy** below is the declared, versioned artifact that
+`observability`, both coverage stages and `combine` share. `promotion` states whether a
+measurement alone may raise a finding of that type to `observed`, or whether it needs the
+vision layer — closing the §9 promotion limit for every type rather than by example.
+
+| Category | Defect type | Promotion |
+|---|---|---|
+| `centering` | border ratio measurement | measurement |
+| `corners` | whitening | measurement |
+| `corners` | rounding / softness | measurement |
+| `corners` | fraying | interpretive |
+| `edges` | whitening | measurement |
+| `edges` | chipping | interpretive |
+| `edges` | roughness | interpretive |
+| `surface` | scratches | interpretive |
+| `surface` | print lines | interpretive |
+| `surface` | dimples | interpretive |
+| `surface` | stains | interpretive |
+| `surface` | gloss break | interpretive |
+
+Whitening is `measurement` because it is a luminance step against a known border
+segmentation — provided detectability clears the bar, which on a white border it does not.
+Fraying, chipping and roughness are interpretive because CV cannot separate them from
+compression artifacts and paper texture. The consequence is deliberate: in `OFF` mode a card
+can be rejected for measurable centering or measurable corner rounding, and never for a
+suspected print line.
+
+### Reason codes and their classes
+
+| Reason code | Class |
 |---|---|
-| `centering` | border ratio measurement |
-| `corners` | whitening, rounding/softness, fraying |
-| `edges` | whitening, chipping, roughness |
-| `surface` | scratches, print lines, dimples, stains, gloss break |
+| `WHITE_BORDER` | structural |
+| `BORDERLESS_DESIGN` | structural |
+| `GLARE` | circumstantial |
+| `BLUR` | circumstantial |
+| `OCCLUSION` (finger, sleeve, top-loader) | circumstantial |
+| `LOW_RESOLUTION` | circumstantial |
+| `SEVERE_PERSPECTIVE` | circumstantial |
+| `MISSING_FACE` | circumstantial |
+| `UNKNOWN_PRODUCT_CONTEXT` | metadata-resolvable |
+
+**A third class exists and matters.** Unknown card context is not a photograph defect — no
+better photograph resolves it, and asking the seller for one would be nonsense. It is
+resolved by *metadata*, so it drives a request to identify the card, never a photo request.
+It counts against coverage exactly as circumstantial does.
+
+Ambiguous cases are resolved by the taxonomy, not by the implementer: a refractor's surface
+under `SURFACE_SHINY_001` is `GLARE` and therefore **circumstantial** — diffuse lighting
+genuinely does resolve it — while a top-loader is `OCCLUSION`, also circumstantial. Only the
+card's own printed design produces a structural code.
 
 ### Structural versus circumstantial undetectability
 
@@ -694,11 +767,21 @@ not block `SUFFICIENT`. They are always reported in `limitations`, so the owner 
 exactly what the photographs could never have shown (non-negotiable rule 3). Circumstantial
 undetectability always counts against coverage.
 
-This is the honest reading of the asymmetry. Demanding evidence that no photograph could
+This is a defensible reading of the asymmetry, and it is a real weakening of I2 at
+defect-type granularity, stated here rather than buried: a card may reach `SUFFICIENT` with
+corner whitening never assessed on any face. Demanding evidence that no photograph could
 ever supply would make `PASS` unreachable for most white-bordered cards — the majority of
 the modern base-card population — which is a false-rejection machine, exactly what the
 governing asymmetry forbids. Demanding evidence a *better photograph* would supply is
 correct and is retained in full.
+
+What limits the exemption is that it removes only the defect types the card's design hides,
+never a whole category: a white corner is still required to be assessed for **rounding and
+fraying**, which is what a grader handling the card is largely reading anyway.
+`CORNERS_COLORED_001` calls absence of whitening on a white corner *weak evidence* rather
+than inapplicable, so a v2 policy could instead cap `estimated_psa_grade` or reduce
+`review_confidence` on structurally exempt cards rather than waiving them outright. v1
+waives, reports the limitation, and leaves that alternative open.
 
 ### When a category counts as assessed
 
@@ -720,20 +803,27 @@ already graded PSA 10 — requires an external reference corpus. That corpus is 
 for this subsystem** (§6 forbids the core from touching the network, and §5 declares no such
 table), so borderless centering is treated as structural and reported as a limitation.
 
-### Required faces
+### Required faces, and why the outcome is scored per face
 
-The policy declares which faces are required: **front and back**.
-`SURFACE_TECHNICAL_DEFECT_001` records that a crease or paper loss on the back is
-grade-limiting, so an unresolved back is a circumstantial coverage failure — not an
-omission, and never a defect.
+The policy declares both faces **required**. `SURFACE_TECHNICAL_DEFECT_001` records that a
+crease or paper loss on the back is grade-limiting, so an unresolved back is a
+circumstantial coverage failure — not an omission, and never a defect.
 
-### The three outcomes
+But scoring coverage as a flat count across both faces would make **every front-only
+listing `INADEQUATE`**, since no category could be assessed on *every* required face — and
+front-only listings are common. That would drop a large share of real input out of ranking
+entirely, which the ranking score exists to serve. Coverage is therefore scored **per face**,
+and `INADEQUATE` is reserved for cards whose *front* cannot be assessed:
 
 | Outcome | Condition (v1) | Consequence |
 |---|---|---|
-| `SUFFICIENT` | all four categories assessed on all required faces | `PASS` permissible |
-| `PARTIAL` | at least two categories assessed, but not all | `PASS` forbidden; verdict floor `REVIEW`; still rankable, score carries its limitations |
-| `INADEQUATE` | fewer than two categories assessed, **or** no image resolves to a usable front | not rankable; `psa10_rank_score` is null |
+| `SUFFICIENT` | all four categories assessed on **both** faces | `PASS` permissible |
+| `PARTIAL` | the front has at least two categories assessed, but the card is not `SUFFICIENT` | `PASS` forbidden; verdict floor `REVIEW`; **rankable**, score carries its limitations |
+| `INADEQUATE` | fewer than two categories assessed on the front, or no image resolves to a front that passed `preflight` and reached at least `inferred` role confidence | not rankable; `psa10_rank_score` is null |
+
+A front-only listing is therefore `PARTIAL`: ranked and forwarded with the back recorded as
+unassessed, never passed and never rejected. That is the recall-correct outcome — the owner
+sees the card and knows exactly what is missing.
 
 **This is the `REVIEW` / `INSUFFICIENT_IMAGES` boundary**, and with the counts above it is a
 declared threshold rather than a judgment call: `PARTIAL` means *we learned something but
@@ -744,6 +834,22 @@ unassessable and therefore biases toward `PARTIAL`.
 Detectability is not a proxy for absence. A corner whose whitening detectability is `LOW`
 because of glare is **not assessed for whitening**, regardless of whether whitening was
 found — "we could not see it" never becomes "it is not there."
+
+### What the policy emits
+
+Beyond the outcome, the policy is the declared owner of two output fields, so they have a
+derivation rather than an author:
+
+- **`limitations`** — one entry per defect type not assessed, carrying its reason code and
+  class. Structural entries are reported and do not affect the outcome; circumstantial and
+  metadata-resolvable entries are reported and do.
+- **`recommended_additional_photos`** — derived from circumstantial entries **only**, by a
+  declared reason-code-to-request mapping: `GLARE` → a diffuse-lit shot of that face,
+  `BLUR` / `LOW_RESOLUTION` → a sharper close-up of that region, `OCCLUSION` → the same face
+  out of the holder or with the obstruction moved, `MISSING_FACE` → a photo of that face,
+  `SEVERE_PERSPECTIVE` → a square-on shot. Metadata-resolvable entries produce a card
+  identification request instead, and structural entries produce nothing — no photograph
+  would resolve them.
 
 Making this an artifact rather than scattered conditionals is what lets I2 be tested
 directly: construct a detectability map plus a set of vision assessability flags, run the
@@ -781,11 +887,6 @@ scale must be able to say so.
 
 ### The four-state verdict
 
-| Verdict | Meaning |
-|---|---|
-`psa10_rank_score` is an integer **0-100** ranking heuristic — explicitly not a
-probability — and is `null` whenever `rankable` is false.
-
 The four states are **mutually exclusive and evaluated in strict order — first match
 wins.** Stating them as independent conditions would leave a card with both an observed
 crease and `PARTIAL` coverage matching two rows at once.
@@ -795,7 +896,13 @@ crease and `PARTIAL` coverage matching two rows at once.
 | 1 | `REJECT` | at least one confidently `observed` PSA-10 disqualifier satisfying I1 |
 | 2 | `INSUFFICIENT_IMAGES` | coverage is `INADEQUATE` |
 | 3 | `REVIEW` | coverage is `PARTIAL`, or any unresolved ambiguity, suspicion or recorded contradiction |
-| 4 | `PASS` | coverage is `SUFFICIENT`, no observed disqualifier, no unresolved ambiguity |
+| 4 | `PASS` | **otherwise** — reached only when coverage is `SUFFICIENT` and rules 1–3 all failed |
+
+Row 4 is `otherwise` rather than a positive condition, which is what makes the function
+**total**. A positively-stated row 4 leaves a hole: an `observed` disqualifier that fails
+I1's adequacy prong, on a card with `SUFFICIENT` coverage and no other ambiguity, would
+match no row at all. Falling through to `PASS` there is also correct on the merits — an
+inadequately evidenced finding is not a reason to reject, and coverage was sufficient.
 
 **Why `REJECT` outranks `INADEQUATE` coverage.** A confidently observed disqualifier is
 knowledge, not absence of it. If the photographs are poor overall but one of them plainly
@@ -831,12 +938,26 @@ Deriving it removes any possibility of the two fields disagreeing.
 PSA-10 disqualifier, adequate evidence for that finding, and no material unresolved
 contradiction undermining it.
 
-A **material unresolved contradiction** is defined concretely, so this is testable rather
-than prose: for the same defect type at the same normalized location, another finding
-reports `not_observed` with detectability at least `MODERATE`, or the heuristic and vision
-layers disagree on the state and neither cites evidence the other lacks. Contradictions are
-recorded (§11), never silently resolved; an unresolved one blocks rule 1 of §14 and the card
-falls through to `REVIEW`.
+**Adequate evidence for that finding** is defined, because it is the sole guard on the only
+verdict that can lose a candidate: the finding's own defect type must reach detectability at
+least `MODERATE` at the finding's location on the image that established it, and the
+finding's confidence must reach the declared `REJECT` confidence floor (v1: `HIGH`). This
+ties `REJECT` to the same scale everything else uses, and it is what actually makes poor
+photographs unable to produce rejections — a finding on a region whose detectability is
+`LOW` cannot satisfy it, no matter how the finding is phrased.
+
+A **material unresolved contradiction** is defined concretely: another finding reports
+`not_observed` for the same defect type at an overlapping location with detectability at
+least `MODERATE`, or the heuristic and vision layers report different states for the same
+defect type and overlapping location. **Overlapping location** means the two findings'
+normalized bounding boxes intersect; findings carry boxes, not points, precisely so this is
+computable. Contradictions are recorded (§11), never silently resolved; an unresolved one
+blocks rule 1 of §14 and the card falls through to `REVIEW`.
+
+Note that the contradiction prong alone would weaken exactly where it is needed — on a badly
+photographed card, no contradicting finding can reach `MODERATE` detectability, so nothing
+contradicts. The adequacy prong above is what carries the guarantee there, and it binds the
+*asserting* finding rather than hoping for a contradicting one.
 
 Evidence that is `suspected`, `not_assessable`, conflicting or low-confidence must never
 independently produce `REJECT`. **Poor photographs are never evidence of card damage.**
@@ -846,8 +967,17 @@ evaluation — the one that ran after vision — to return `SUFFICIENT`. The pro
 evaluation gates spend only and can never license a `PASS`. "We could not see a problem"
 must never become "the card is clean."
 
+I2 binds at **category** granularity, with one declared exemption: defect types the card's
+own design makes structurally undetectable are waived by §13 and reported in `limitations`.
+Circumstantial and metadata-resolvable gaps are never waived. Stating the exemption here is
+required by non-negotiable rule 3 — a reader of the invariant must not conclude that `PASS`
+means everything was assessed.
+
 **I3 — Enhancement alone never confirms.** An anomaly visible only under enhancement may be
-a `suspected` candidate but can never independently reach `observed`.
+a `suspected` candidate, and reaches `observed` only via one of the two corroboration routes
+enumerated in §7.4 — visibility in the preserved original, or a vision finding citing an
+unenhanced artifact, verified by combine rather than trusted. Agreement across enhancement
+paths is explicitly not such a route.
 
 ---
 
@@ -875,7 +1005,8 @@ recommended_additional_photos
 cv_assessment         — stored independently
 vision_assessment     — stored independently, incl. independent gem view; null in OFF
 reasoning             — concise, evidence-anchored
-versions              — preflight, geometry, observability, CV, resolver, assembly,
+versions              — preflight, geometry, observability, CV, detectability taxonomy,
+                        resolver, assembly,
                         rubric, scorer, routing policy, manifest builder, coverage
                         policy, combination policy, canonicalization scheme,
                         provider/model, prompt
@@ -977,13 +1108,20 @@ every pipeline test. `card-review provider-smoke` is the only path to a real cal
 11. A card screened in `OFF` and then in `DEEP` issues a vision call on the second run;
     the `OFF` routing result never satisfies the `DEEP` lookup.
 12. The verdict function is total and unambiguous: every combination of coverage outcome,
-    observed-disqualifier presence and ambiguity maps to exactly one verdict, asserted
-    table-driven over the full cross-product.
+    observed-disqualifier presence, **I1-satisfaction of that disqualifier** and ambiguity
+    maps to exactly one verdict, asserted table-driven over the full cross-product. In
+    particular an `observed` finding that fails I1's adequacy prong on an otherwise
+    `SUFFICIENT` card yields `PASS`, not an unmatched state.
 13. A vision response marking a category `not_assessable` prevents `SUFFICIENT` coverage
     even when CV suitability alone would have allowed it.
 14. The synthetic image generator produces cards with known centering, border colours,
     borderless designs and controlled damage, and its own tests pass independently of the
     CV engine that consumes it.
-15. No price-derived field appears in the evidence manifest, the vision prompt, or the
-    review output, asserted by test.
-16. Test suite green; no test calls the API.
+15. No price-derived field appears on `ResolvedCandidate`, in the evidence manifest, in the
+    vision prompt, or in the review output, asserted by test.
+16. A front-only candidate is `PARTIAL`, rankable, and cannot reach `PASS`; a candidate
+    whose front cannot be assessed is `INADEQUATE` and unrankable.
+17. A rubric bump changes the evidence manifest's fingerprint and causes a fresh vision
+    call; a detectability-taxonomy bump invalidates image-tier results, while a rubric bump
+    does not.
+18. Test suite green; no test calls the API.
