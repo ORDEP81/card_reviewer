@@ -1,0 +1,27 @@
+id: SURFACE_PRINT_ALLOWANCE_002
+category: surface
+statement: PSA may allow a slight printing imperfection on a Gem Mint 10 at its discretion,
+  where the imperfection does not impair the card's overall appeal.
+evidence_type: objective
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_014
+  timestamps: []
+  reference: PSA published grading standards (psacard.com/gradingstandards), transcribed
+    at knowledge/psa/grading-standards.md
+  locator: Grade Definitions, GEM-MT PSA 10
+  quote: A PSA Gem Mint 10 card must be free of staining of any kind, but an allowance
+    may be made for a slight printing imperfection, if it doesn't impair the overall
+    appeal of the card.
+status: active
+supersedes: SURFACE_PRINT_ALLOWANCE_001
+created: '2026-08-30'
+rubric_version_added: 4.0.0
+notes: SUPERSEDES SURFACE_PRINT_ALLOWANCE_001, which read 'PSA allows' where the standard
+  says 'an allowance may be made' - discretionary latitude rendered as entitlement.
+  Note the same sentence makes staining absolute ('of any kind') while making the
+  printing allowance discretionary; the standard distinguishes them and so must the
+  reviewer.

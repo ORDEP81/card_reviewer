@@ -9,7 +9,6 @@ applies_to:
   sets: []
 sources:
 - lesson: lesson_012
-  video_id: null
   timestamps: []
   reference: PSA published grading standards
   locator: Gem Mint 10 centering requirement
@@ -18,10 +17,8 @@ sources:
   video_id: yt_s46CrXjVwCc
   timestamps:
   - 04:16-04:28
-  reference: null
-  locator: null
   quote: PSA's standard is that the front of the card has to be 55/45 or better.
-status: active
+status: superseded
 supersedes: CENTERING_60_40_FLOOR_001
 created: '2026-08-29'
 rubric_version_added: 1.0.0

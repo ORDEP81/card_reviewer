@@ -1,0 +1,24 @@
+id: CORNERS_FOUR_SHARP_002
+category: corners
+statement: PSA describes a Gem Mint 10 as having four perfectly sharp corners.
+evidence_type: objective
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_014
+  timestamps: []
+  reference: PSA published grading standards (psacard.com/gradingstandards), transcribed
+    at knowledge/psa/grading-standards.md
+  locator: Grade Definitions, GEM-MT PSA 10
+  quote: Attributes include four perfectly sharp corners, sharp focus and full original
+    gloss.
+status: active
+supersedes: CORNERS_FOUR_SHARP_001
+created: '2026-08-30'
+rubric_version_added: 4.0.0
+notes: SUPERSEDES CORNERS_FOUR_SHARP_001, which said PSA 'requires' four sharp corners
+  where the standard says attributes 'include' them. 'Include' is descriptive of a
+  virtually perfect card, not an exhaustive requirement list, and the difference matters
+  to an engine deciding whether a single soft corner is disqualifying.

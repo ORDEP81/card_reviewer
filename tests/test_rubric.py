@@ -224,3 +224,95 @@ def test_load_active_rubric_raises_rubric_error_on_schema_violation(tmp_path):
 
     assert str(bad_file) in str(excinfo.value)
     assert excinfo.value.__cause__ is not None
+
+
+def test_render_shows_reference_mode_citations():
+    """A reference-mode source must appear in the rendered rubric.
+
+    render() joined `lesson` with `timestamps`; a reference source has no
+    timestamps, so it rendered as a bare lesson id and the reader could not
+    see which document the rule came from. The rules resting on PSA's
+    published standard are exactly the ones whose provenance matters most.
+    """
+    import datetime
+
+    from card_reviewer.knowledge.models import Rule, RuleSource
+
+    rule = Rule(
+        id="CENTERING_DOC_001",
+        category="centering",
+        statement="A documented centering tolerance.",
+        evidence_type="objective",
+        confidence="high",
+        sources=[
+            RuleSource(
+                lesson="lesson_013",
+                reference="PSA published grading standards",
+                locator="Grade Definitions, GEM-MT PSA 10",
+                quote="within a tolerance not to exceed approximately 55/45 percent",
+            )
+        ],
+        status="active",
+        created=datetime.date(2026, 8, 30),
+        rubric_version_added="3.0.0",
+    )
+    text = rubric.render(rubric.Rubric(version="3.0.0", rules=[rule]))
+    assert "PSA published grading standards" in text
+    assert "Grade Definitions, GEM-MT PSA 10" in text
+
+
+def test_render_still_shows_video_mode_citations():
+    """The video-mode citation format must not regress."""
+    import datetime
+
+    from card_reviewer.knowledge.models import Rule, RuleSource
+
+    rule = Rule(
+        id="CENTERING_VID_001",
+        category="centering",
+        statement="A video-sourced claim.",
+        evidence_type="experience_based",
+        confidence="medium",
+        sources=[
+            RuleSource(lesson="lesson_001", video_id="yt_abc", timestamps=["04:16-04:28"])
+        ],
+        status="active",
+        created=datetime.date(2026, 8, 30),
+        rubric_version_added="3.0.0",
+    )
+    text = rubric.render(rubric.Rubric(version="3.0.0", rules=[rule]))
+    assert "lesson_001" in text
+    assert "04:16-04:28" in text
+
+
+def test_render_uses_the_models_notion_of_an_absent_video_id():
+    """_cite must agree with RuleSource about what "absent" means.
+
+    RuleSource treats a whitespace-only string as absent, so a source with
+    video_id="" is a valid reference-mode source. Branching on
+    `video_id is not None` sent it down the video path and rendered a bare
+    lesson id - the same defect this fix set out to remove.
+    """
+    import datetime
+
+    from card_reviewer.knowledge.models import Rule, RuleSource
+
+    source = RuleSource(
+        lesson="lesson_x",
+        video_id="",
+        reference="PSA published grading standards",
+        locator="Grade Definitions, GEM-MT PSA 10",
+    )
+    rule = Rule(
+        id="CENTERING_BLANKVID_001",
+        category="centering",
+        statement="A reference-mode claim whose video_id is blank rather than absent.",
+        evidence_type="objective",
+        confidence="high",
+        sources=[source],
+        status="active",
+        created=datetime.date(2026, 8, 30),
+        rubric_version_added="4.0.0",
+    )
+    text = rubric.render(rubric.Rubric(version="4.0.0", rules=[rule]))
+    assert "PSA published grading standards" in text

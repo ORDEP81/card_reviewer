@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from . import validate, version
-from .models import Rule
+from .models import Rule, RuleSource
 from .paths import ProjectPaths
 
 
@@ -88,6 +88,20 @@ def load_active_rubric(root: Path | str | None = None) -> Rubric:
     return Rubric(version=version.read(paths), rules=rules)
 
 
+
+def _cite(source: RuleSource) -> str:
+    """One source rendered for the human reading ACTIVE_RUBRIC.md.
+
+    A source is either a video citation or a reference citation. Rendering
+    only `lesson` and `timestamps` left reference-mode sources showing a bare
+    lesson id, hiding which document a rule came from - and the rules resting
+    on a published standard are the ones whose provenance matters most.
+    """
+    if source.reference is not None and source.reference.strip():
+        return f"{source.lesson} {source.reference} - {source.locator}"
+    return f"{source.lesson} {source.video_id} {'/'.join(source.timestamps)}"
+
+
 def render(r: Rubric) -> str:
     lines = [
         "# Active Grading Rubric",
@@ -117,9 +131,7 @@ def render(r: Rubric) -> str:
                 if rule.applies_to.sets:
                     bits.append("sets: " + ", ".join(rule.applies_to.sets))
                 scope = f" _({'; '.join(bits)})_"
-            citations = ", ".join(
-                f"{s.lesson} {'/'.join(s.timestamps)}" for s in rule.sources
-            )
+            citations = " · ".join(_cite(s) for s in rule.sources)
             lines += [
                 f"### {rule.id}{scope}",
                 "",

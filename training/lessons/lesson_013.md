@@ -21,6 +21,12 @@ The published page is served behind bot protection and could not be fetched (HTT
 the fetcher, to a direct request, and with browser cookies). The project owner supplied a
 screenshot; its text is quoted verbatim below and cited in reference mode.
 
+## SOURCE OF RECORD
+
+The PSA text below is also committed at `knowledge/psa/grading-standards.md`, which
+carries the provenance warning and **governs** if these copies ever diverge. It is
+reproduced here so this lesson record is self-contained.
+
 ## THE PUBLISHED DEFINITION, VERBATIM
 
 Under **Grade Definitions - GEM-MT - PSA 10**:
