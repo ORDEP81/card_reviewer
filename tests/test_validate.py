@@ -267,12 +267,16 @@ def test_reference_mode_source_with_missing_lesson_is_reported_not_raised(projec
 
 
 def test_reference_mode_source_requires_nonempty_reference_and_locator(project):
+    """A9: a whitespace-only reference is now rejected by RuleSource's own
+    model validator (treated the same as absent), so the file fails to
+    parse into a Rule at all -- reported keyed by filename, like any other
+    schema violation, rather than reaching this rule's id."""
     data = rule_dict()
     data["sources"] = [reference_source(reference="   ")]
     write_pending(project, data)
     report = validate.run(project)
     assert not report.ok
-    assert any("reference" in e for e in report.errors["SURFACE_PRINT_LINE_001"])
+    assert any("reference" in e for e in report.errors["SURFACE_PRINT_LINE_001.yaml"])
 
 
 def test_video_mode_out_of_bounds_timestamp_still_rejected_with_mixed_sources(project):
@@ -334,6 +338,38 @@ def test_run_reports_corrupt_active_rule_file_keyed_by_its_path(project):
 
     assert report.ok is False
     assert any(str(bad_file) in key for key in report.errors)
+
+
+# --- B3/B4: check_rule's error accumulation and multi-source `continue`
+# scoping were both unguarded by any test.
+
+
+def test_check_rule_accumulates_multiple_errors_on_one_rule(project):
+    data = rule_dict()
+    data["sources"][0]["lesson"] = "lesson_999"
+    data["sources"][0]["timestamps"] = ["59:00-59:30"]  # video is 600s
+    write_pending(project, data)
+    report = validate.run(project)
+    errors = report.errors["SURFACE_PRINT_LINE_001"]
+    assert any("lesson_999" in e for e in errors)
+    assert any("exceeds" in e for e in errors)
+    assert len(errors) >= 2
+
+
+def test_check_rule_continues_checking_other_sources_after_one_bad_video_id(project):
+    """A `continue` inside the per-source loop must only skip the rest of
+    the *bad* source's checks, not abandon every source after it."""
+    data = rule_dict()
+    bad_source = dict(data["sources"][0])
+    bad_source["video_id"] = "yt_nope"
+    good_source = dict(data["sources"][0])
+    good_source["timestamps"] = ["59:00-59:30"]  # out of bounds on yt_abc (600s)
+    data["sources"] = [bad_source, good_source]
+    write_pending(project, data)
+    report = validate.run(project)
+    errors = report.errors["SURFACE_PRINT_LINE_001"]
+    assert any("yt_nope" in e for e in errors)
+    assert any("exceeds" in e for e in errors)
 
 
 def test_run_still_checks_pending_rules_despite_a_corrupt_active_file(project):

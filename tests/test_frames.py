@@ -1,5 +1,6 @@
 import json
 import subprocess
+from pathlib import Path
 
 import pytest
 from PIL import Image
@@ -206,3 +207,168 @@ def test_run_uniform_branch_stops_at_video_duration(tmp_path):
     assert len(runner.calls) == 4
     assert all(s < 100.0 for s in starts)
     assert all(e <= 100.0 for e in ends)
+
+
+# --- A4: locating the media file for frame extraction shares the same
+# `sorted(glob("video.*"))` hazard as acquire.py and transcribe.py.
+
+
+def test_run_ignores_partial_video_artifact_when_locating_media(tmp_path):
+    p = ProjectPaths(tmp_path)
+    _ready_manifest(p, duration_s=200.0)
+    _write_segments(p, "yt_abc", n=1)
+    # "video.mkv.part" sorts before "video.mp4" lexically.
+    (p.source_dir("yt_abc") / "video.mkv.part").write_bytes(b"leftover partial")
+
+    runner = recording_ffmpeg()
+    frames.run(p, "yt_abc", top_n=1, runner=runner)
+
+    video_arg = runner.calls[0][runner.calls[0].index("-i") + 1]
+    assert video_arg.endswith("video.mp4")
+
+
+# --- A5: re-running with a smaller --top-n (or after a re-segment that
+# yields fewer segments) used to leave stale `seg_NNN/` directories behind,
+# which then looked like current output.
+
+
+def test_run_removes_stale_segment_dirs_not_in_current_top_n(tmp_path):
+    p = ProjectPaths(tmp_path)
+    _ready_manifest(p, duration_s=200.0)
+    _write_segments(p, "yt_abc", n=5)
+    stale = p.frames("yt_abc") / "seg_004"
+    stale.mkdir(parents=True)
+    (stale / "frame_0001.jpg").write_bytes(b"x")
+
+    runner = recording_ffmpeg()
+    frames.run(p, "yt_abc", top_n=2, runner=runner)
+
+    assert not stale.exists()
+    created = sorted(d.name for d in p.frames("yt_abc").iterdir())
+    assert created == ["seg_000", "seg_001"]
+
+
+def test_run_never_removes_adhoc_or_at_segment_dirs(tmp_path):
+    p = ProjectPaths(tmp_path)
+    _ready_manifest(p, duration_s=200.0)
+    _write_segments(p, "yt_abc", n=2)
+    adhoc = p.frames("yt_abc") / "seg_adhoc"
+    adhoc.mkdir(parents=True)
+    (adhoc / "frame_0001.jpg").write_bytes(b"x")
+    at_dir = p.frames("yt_abc") / "seg_at_754"
+    at_dir.mkdir(parents=True)
+    (at_dir / "frame_0001.jpg").write_bytes(b"x")
+
+    runner = recording_ffmpeg()
+    frames.run(p, "yt_abc", top_n=1, runner=runner)
+
+    assert adhoc.exists()
+    assert at_dir.exists()
+
+
+# --- review round 2, BLOCKING 1: the cleanup loop was not scoped to
+# `seg_*` names -- it skipped the adhoc/at prefixes and the current
+# top-N ids, then rmtree'd *everything else* in frames/, destroying
+# anything a user had put there (notes, screenshots, whatever).
+
+
+def test_run_never_removes_non_seg_prefixed_directories(tmp_path):
+    p = ProjectPaths(tmp_path)
+    _ready_manifest(p, duration_s=200.0)
+    _write_segments(p, "yt_abc", n=1)
+    notes_dir = p.frames("yt_abc") / "my_notes"
+    notes_dir.mkdir(parents=True)
+    (notes_dir / "keep.jpg").write_bytes(b"x")
+
+    runner = recording_ffmpeg()
+    frames.run(p, "yt_abc", top_n=1, runner=runner)
+
+    assert notes_dir.exists()
+    assert (notes_dir / "keep.jpg").exists()
+
+
+def test_run_skips_symlinked_children_during_cleanup_instead_of_raising(tmp_path):
+    p = ProjectPaths(tmp_path)
+    _ready_manifest(p, duration_s=200.0)
+    _write_segments(p, "yt_abc", n=1)
+    frames_dir = p.frames("yt_abc")
+    frames_dir.mkdir(parents=True, exist_ok=True)
+    real_target = tmp_path / "elsewhere_seg_999"
+    real_target.mkdir()
+    link = frames_dir / "seg_999"
+    link.symlink_to(real_target, target_is_directory=True)
+
+    runner = recording_ffmpeg()
+    # Must not raise (shutil.rmtree refuses a symlink to a directory), and
+    # must not delete through the symlink into its real target.
+    frames.run(p, "yt_abc", top_n=1, runner=runner)
+
+    assert real_target.exists()
+
+
+# --- review round 2, BLOCKING 2: a run that produces zero targets (an
+# empty segments.json, or --uniform against a duration_s of 0.0 -- exactly
+# the state A2's own ffprobe fail-safe leaves) had an empty `keep_ids`, so
+# the cleanup wiped every existing seg_* directory while producing nothing.
+
+
+def test_run_uniform_with_zero_duration_deletes_nothing(tmp_path):
+    """duration_s=0.0 is exactly the state A2's ffprobe fail-safe leaves."""
+    p = ProjectPaths(tmp_path)
+    _ready_manifest(p, duration_s=0.0)
+    existing = p.frames("yt_abc") / "seg_001"
+    existing.mkdir(parents=True)
+    (existing / "frame_0001.jpg").write_bytes(b"x")
+
+    runner = recording_ffmpeg()
+    total = frames.run(p, "yt_abc", top_n=12, uniform=True, runner=runner)
+
+    assert total == 0
+    assert existing.exists()
+    assert (existing / "frame_0001.jpg").exists()
+
+
+def test_run_ranked_branch_with_empty_segments_deletes_nothing(tmp_path):
+    p = ProjectPaths(tmp_path)
+    _ready_manifest(p, duration_s=200.0)
+    _write_segments(p, "yt_abc", n=0)
+    existing = p.frames("yt_abc") / "seg_001"
+    existing.mkdir(parents=True)
+    (existing / "frame_0001.jpg").write_bytes(b"x")
+
+    runner = recording_ffmpeg()
+    total = frames.run(p, "yt_abc", top_n=5, runner=runner)
+
+    assert total == 0
+    assert existing.exists()
+    assert (existing / "frame_0001.jpg").exists()
+
+
+# --- A6: every `--at` run wrote to the same `frames/seg_adhoc` directory,
+# and `sample()` clears the directory first -- a second ad-hoc pull silently
+# destroyed the first with no record of which timestamp it held.
+
+
+def test_run_at_names_directory_by_timestamp(tmp_path):
+    p = ProjectPaths(tmp_path)
+    _ready_manifest(p, duration_s=2000.0)
+
+    runner = recording_ffmpeg()
+    frames.run(p, "yt_abc", at=754.0, window_s=10.0, runner=runner)
+
+    assert (p.frames("yt_abc") / "seg_at_754").exists()
+
+
+def test_successive_at_pulls_coexist_instead_of_overwriting(tmp_path):
+    p = ProjectPaths(tmp_path)
+    _ready_manifest(p, duration_s=2000.0)
+
+    runner = recording_ffmpeg()
+    frames.run(p, "yt_abc", at=100.0, window_s=10.0, runner=runner)
+    frames.run(p, "yt_abc", at=200.0, window_s=10.0, runner=runner)
+
+    dirs = sorted(d.name for d in p.frames("yt_abc").iterdir())
+    assert "seg_at_100" in dirs
+    assert "seg_at_200" in dirs
+    # The first pull's frame must still be on disk -- not wiped by the second.
+    assert list((p.frames("yt_abc") / "seg_at_100").glob("*.jpg"))

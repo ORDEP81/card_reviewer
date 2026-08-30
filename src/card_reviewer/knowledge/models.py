@@ -161,10 +161,18 @@ class RuleSource(BaseModel):
     locator: str | None = None
     quote: str = ""
 
+    @staticmethod
+    def _present(value: str | None) -> bool:
+        """A blank or whitespace-only string counts as absent, the same way
+        None does — otherwise `RuleSource(reference="", locator="")`
+        constructs successfully and only `validate.check_rule` catches the
+        blank fields later."""
+        return value is not None and value.strip() != ""
+
     @model_validator(mode="after")
     def _exactly_one_citation_mode(self) -> RuleSource:
-        is_video = self.video_id is not None or bool(self.timestamps)
-        is_reference = self.reference is not None or self.locator is not None
+        is_video = self._present(self.video_id) or bool(self.timestamps)
+        is_reference = self._present(self.reference) or self._present(self.locator)
 
         if is_video and is_reference:
             raise ValueError(
@@ -174,14 +182,14 @@ class RuleSource(BaseModel):
             )
 
         if is_video:
-            if self.video_id is None or not self.timestamps:
+            if not self._present(self.video_id) or not self.timestamps:
                 raise ValueError(
                     "video-mode source requires both video_id and a non-empty "
                     f"timestamps list — got video_id={self.video_id!r}, "
                     f"timestamps={self.timestamps!r}"
                 )
         elif is_reference:
-            if self.reference is None or self.locator is None:
+            if not self._present(self.reference) or not self._present(self.locator):
                 raise ValueError(
                     "reference-mode source requires both reference and locator "
                     f"— got reference={self.reference!r}, locator={self.locator!r}"

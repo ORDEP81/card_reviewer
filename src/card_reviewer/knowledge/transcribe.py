@@ -12,6 +12,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from . import manifest as mf
+from .acquire import select_media_file
 from .models import Cue, Transcript
 from .paths import ProjectPaths
 
@@ -233,10 +234,10 @@ def run(
     if cues:
         transcript = Transcript(method="captions", model=None, language="en", cues=cues)
     else:
-        videos = sorted(paths.source_dir(video_id).glob("video.*"))
-        if not videos:
+        video = select_media_file(paths.source_dir(video_id))
+        if video is None:
             raise FileNotFoundError(f"no media in {paths.source_dir(video_id)}")
-        cues, model, language = whisper_transcribe(videos[0], transcriber)
+        cues, model, language = whisper_transcribe(video, transcriber)
         transcript = Transcript(
             method="mlx-whisper", model=model, language=language, cues=cues
         )

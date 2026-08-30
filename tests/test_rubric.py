@@ -93,9 +93,16 @@ def test_render_warns_against_hand_editing(project):
 
 
 def test_build_writes_the_rubric_file(project):
-    path = rubric.build(project)
-    assert path == project.rubric_file
-    assert "0.3.0" in path.read_text()
+    """A13: build() now returns the `Rubric` it built (so a caller like
+    build_rubric_cmd doesn't have to re-parse every rule file a second time
+    via load_active_rubric just to report version/count) rather than the
+    Path it wrote."""
+    r = rubric.build(project)
+    assert isinstance(r, rubric.Rubric)
+    assert r.version == "0.3.0"
+    assert len(r.rules) == 3
+    assert project.rubric_file.exists()
+    assert "0.3.0" in project.rubric_file.read_text()
 
 
 def test_empty_knowledge_base_renders_without_error(tmp_path):

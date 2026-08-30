@@ -26,7 +26,9 @@ def _friendly_errors(fn):
     `PacketNotFound`/`StageNotReady` ("you haven't acquired/transcribed yet")
     and `UnknownRule` ("no such rule id") are normal, expected conditions —
     not bugs — and `FileNotFoundError`/`RuntimeError` cover the media- and
-    ffmpeg-shaped failures inside `transcribe`/`frames`. `AcquisitionFailed`
+    ffmpeg-shaped failures inside `transcribe`/`frames`. `RubricError` is the
+    one documented failure mode of `rubric.load_active_rubric`/`rubric.build`
+    (a rule file under `knowledge/rules/` that fails to parse). `AcquisitionFailed`
     is deliberately not here: `acquire_cmd`/`run_cmd` handle it themselves
     because it carries `.guidance` that this generic handler doesn't know
     how to print.
@@ -36,6 +38,7 @@ def _friendly_errors(fn):
     def wrapper(*args, **kwargs):
         from .manifest import PacketNotFound, StageNotReady
         from .promote import UnknownRule
+        from .rubric import RubricError
 
         try:
             return fn(*args, **kwargs)
@@ -45,6 +48,7 @@ def _friendly_errors(fn):
             UnknownRule,
             FileNotFoundError,
             RuntimeError,
+            RubricError,
         ) as exc:
             console.print(f"[red]{exc}[/red]")
             raise typer.Exit(code=1) from exc
@@ -173,6 +177,7 @@ def extract_frames_cmd(
 
 
 @app.command(name="validate")
+@_friendly_errors
 def validate_cmd() -> None:
     """Check every pending rule for schema, citation, and status errors."""
     from . import validate as val
@@ -257,6 +262,20 @@ def review_cmd() -> None:
                 console.print("[red]supersede needs a rule id; deferring[/red]")
                 continue
             old_id = parts[1].strip()
+            # Two pending rules superseding the same id in one session both
+            # pass this prompt-time check (the target is still active when
+            # each is prompted) -- but the second's application-phase
+            # `promote.supersede` would find it already retired by the
+            # first, raising after the accept loop has already stamped
+            # rules and before `ver.write` runs. Reject the duplicate here,
+            # before it can be queued at all.
+            already_targeted = {queued_old_id for _, _, queued_old_id in to_supersede}
+            if old_id in already_targeted:
+                console.print(
+                    f"[red]{old_id} is already targeted for supersession earlier "
+                    "in this session; deferring[/red]"
+                )
+                continue
             # Validate the target now, before anything in this session is
             # applied. A bad id caught only when `promote.supersede` runs
             # (after the accept loop below has already written files and
@@ -299,13 +318,14 @@ def review_cmd() -> None:
 
 
 @app.command(name="build-rubric")
+@_friendly_errors
 def build_rubric_cmd() -> None:
     """Render ACTIVE_RUBRIC.md from the active rule files."""
     from . import rubric as rb
 
-    path = rb.build(paths())
-    r = rb.load_active_rubric(project_root())
-    console.print(f"[green]Wrote[/green] {path} — v{r.version}, {len(r.rules)} rules")
+    p = paths()
+    r = rb.build(p)
+    console.print(f"[green]Wrote[/green] {p.rubric_file} — v{r.version}, {len(r.rules)} rules")
 
 
 @app.command(name="run")

@@ -115,6 +115,51 @@ def test_word_boundary_edges_does_not_match_edge():
     assert result.score == pytest.approx(1.5)
 
 
+# --- A3: a lexicon file missing structure must fail loudly, not silently
+# score everything zero.
+
+
+def test_load_raises_clear_error_when_categories_key_missing(tmp_path):
+    path = tmp_path / "lex.yaml"
+    path.write_text("version: '1'\n")
+    with pytest.raises(lexicon.LexiconError) as excinfo:
+        lexicon.load(path)
+    assert "categories" in str(excinfo.value)
+    assert str(path) in str(excinfo.value)
+
+
+def test_load_raises_clear_error_when_category_value_is_not_a_mapping(tmp_path):
+    path = tmp_path / "lex.yaml"
+    path.write_text("version: '1'\ncategories:\n  corners: not-a-mapping\n")
+    with pytest.raises(lexicon.LexiconError) as excinfo:
+        lexicon.load(path)
+    assert "corners" in str(excinfo.value)
+    assert str(path) in str(excinfo.value)
+
+
+# --- A11: `_patterns` used to be keyed by term alone, so the same term in
+# two categories shared one compiled pattern and both categories were
+# scored from whichever category's weight happened to be inserted last.
+
+
+def test_same_term_in_two_categories_scores_both_independently(tmp_path):
+    path = tmp_path / "lex.yaml"
+    path.write_text(
+        """
+version: "1"
+categories:
+  corners:
+    edge: 1.0
+  edges:
+    edge: 2.0
+"""
+    )
+    lex = lexicon.load(path)
+    result = lex.score("Look at that edge.")
+    assert result.score == pytest.approx(3.0)
+    assert set(result.categories) == {"corners", "edges"}
+
+
 def test_word_boundary_ding_matches_standalone():
     """'ding' should still match as a standalone word."""
     import pathlib

@@ -176,6 +176,25 @@ def test_source_rejects_reference_without_locator():
         RuleSource(lesson="lesson_014", reference="PSA Grading Standards")
 
 
+# --- A9: blank strings must count as "absent" in the exactly-one-mode
+# validator itself, not just in `validate.check_rule` downstream.
+
+
+def test_source_rejects_both_blank_reference_and_locator():
+    with pytest.raises(ValidationError):
+        RuleSource(lesson="lesson_014", reference="", locator="")
+
+
+def test_source_rejects_whitespace_only_reference_and_locator():
+    with pytest.raises(ValidationError):
+        RuleSource(lesson="lesson_014", reference="   ", locator="\t")
+
+
+def test_source_rejects_whitespace_only_video_id_even_with_timestamps():
+    with pytest.raises(ValidationError):
+        RuleSource(lesson="lesson_014", video_id="   ", timestamps=["01:00"])
+
+
 def test_stage_state_accepts_utc_aware_datetime():
     """UTC-aware datetimes are accepted and Task 3's datetime.now(datetime.UTC) works."""
     utc_dt = datetime.datetime(2026, 8, 29, 12, 0, 0, tzinfo=datetime.UTC)

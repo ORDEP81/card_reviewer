@@ -332,3 +332,113 @@ def test_review_bare_enter_still_defers_silently_with_no_unrecognised_message(
     assert "0 accepted, 0 superseded" in result.output
     assert "unrecognised" not in result.output.lower()
     assert (p.pending_rules / "SURFACE_PRINT_LINE_001.yaml").exists()
+
+
+# --- A10: two pending rules superseding the same active id in one review
+# session both pass the prompt-time `find_active` check (the target is still
+# active when each is prompted), but the second's application-phase
+# `promote.supersede` would find it already retired. The second target must
+# be rejected at prompt time instead.
+
+
+def test_review_second_supersede_of_the_same_target_is_rejected_at_prompt_time(
+    tmp_path, monkeypatch
+):
+    import yaml
+
+    from card_reviewer.knowledge import version as ver
+
+    p = _review_project(tmp_path)
+    old = _rule_yaml(status="active", rubric_version_added="0.1.0")
+    (p.rules / "surface").mkdir(parents=True)
+    (p.rules / "surface" / "SURFACE_PRINT_LINE_001.yaml").write_text(
+        yaml.safe_dump(old, sort_keys=False)
+    )
+    _write_pending(
+        p, _rule_yaml("SURFACE_PRINT_LINE_002", statement="A refinement, worded one way.")
+    )
+    _write_pending(
+        p,
+        _rule_yaml(
+            "SURFACE_PRINT_LINE_003", statement="A refinement, worded a second, distinct way."
+        ),
+    )
+    monkeypatch.setattr(cli, "paths", lambda: p)
+
+    result = runner.invoke(
+        app,
+        ["review"],
+        input=(
+            "supersede SURFACE_PRINT_LINE_001\n"
+            "supersede SURFACE_PRINT_LINE_001\n"
+        ),
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "already targeted" in result.output.lower()
+    assert "0 accepted, 1 superseded" in result.output
+    assert ver.read(p) == "1.0.0"
+    old_stored = yaml.safe_load(
+        (p.rules / "surface" / "SURFACE_PRINT_LINE_001.yaml").read_text()
+    )
+    assert old_stored["status"] == "superseded"
+    # The second pending rule was deferred at prompt time -- it must still be
+    # sitting in pending_rules/ for a later session, not lost or half-applied.
+    assert (p.pending_rules / "SURFACE_PRINT_LINE_003.yaml").exists()
+
+
+# --- A1: `validate` and `build-rubric` were not wrapped in
+# `_friendly_errors` -- every other command is.
+
+
+def test_validate_cmd_reports_domain_errors_cleanly_instead_of_a_traceback(
+    tmp_path, monkeypatch
+):
+    from card_reviewer.knowledge import validate as val
+
+    def boom(paths):
+        raise RuntimeError("some_broken_file.yaml: does not parse as a Rule")
+
+    monkeypatch.setattr(val, "run", boom)
+    result = runner.invoke(app, ["validate"])
+
+    assert result.exit_code == 1
+    assert not isinstance(result.exception, RuntimeError)
+    assert "some_broken_file.yaml" in result.output
+
+
+def test_build_rubric_cmd_reports_corrupt_active_rule_cleanly(tmp_path, monkeypatch):
+    from card_reviewer.knowledge import version as ver
+    from card_reviewer.knowledge.paths import ProjectPaths
+
+    p = ProjectPaths(tmp_path)
+    bad_dir = p.rules / "surface"
+    bad_dir.mkdir(parents=True)
+    bad_file = bad_dir / "BROKEN_001.yaml"
+    bad_file.write_text("sources: [not, closed\n")
+    ver.write(p, "0.1.0")
+    monkeypatch.setattr(cli, "paths", lambda: p)
+
+    result = runner.invoke(app, ["build-rubric"])
+
+    assert result.exit_code == 1
+    assert not isinstance(result.exception, RuntimeError)
+    assert "BROKEN_001" in result.output
+
+
+def test_build_rubric_cmd_reports_rubric_error_cleanly(tmp_path, monkeypatch):
+    """Even though build_rubric_cmd no longer calls load_active_rubric
+    directly (A13), RubricError is still part of the public contract
+    _friendly_errors documents handling -- guard it directly against the
+    wrapper rather than relying on it never being reachable."""
+    from card_reviewer.knowledge import rubric as rb
+
+    def boom(paths):
+        raise rb.RubricError("knowledge/rules/surface/BROKEN_001.yaml: does not parse")
+
+    monkeypatch.setattr(rb, "build", boom)
+    result = runner.invoke(app, ["build-rubric"])
+
+    assert result.exit_code == 1
+    assert not isinstance(result.exception, rb.RubricError)
+    assert "BROKEN_001" in result.output

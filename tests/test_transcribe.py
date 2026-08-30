@@ -309,6 +309,32 @@ def test_run_falls_back_to_whisper_when_no_captions(packet, monkeypatch):
     assert t.cues[0].text == "Whisper output."
 
 
+# --- A4: transcribe.run's `sorted(glob("video.*"))` for the whisper
+# fallback could adopt a `.part`/`.ytdl`/`.tmp` leftover from an interrupted
+# acquire, just like acquire.py's own selection did.
+
+
+def test_run_ignores_partial_video_artifact_when_locating_media_for_whisper(
+    packet, monkeypatch
+):
+    p, _ = packet
+    monkeypatch.setattr(transcribe, "fetch_captions", lambda *a, **k: None)
+
+    src_dir = p.source_dir("yt_abc")
+    # "video.mkv.part" sorts before "video.mp4" lexically.
+    (src_dir / "video.mkv.part").write_bytes(b"leftover partial")
+
+    seen_paths = []
+
+    def fake_transcriber(path, **kwargs):
+        seen_paths.append(Path(path))
+        return {"language": "en", "segments": []}
+
+    transcribe.run(p, "yt_abc", transcriber=fake_transcriber)
+
+    assert seen_paths[0].name == "video.mp4"
+
+
 def test_run_blocks_when_acquire_not_done(tmp_path):
     p = ProjectPaths(tmp_path)
     m = Manifest(

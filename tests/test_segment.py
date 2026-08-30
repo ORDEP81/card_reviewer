@@ -109,6 +109,59 @@ def test_segment_records_categories_and_terms(lex):
     assert seg.visual_cue is True
 
 
+# --- B1: segment.run() itself had no test -- only build() was covered.
+
+
+def test_run_blocks_before_transcribe_stage(tmp_path):
+    from card_reviewer.knowledge import manifest as mf
+    from card_reviewer.knowledge.models import Manifest, SourceInfo
+    from card_reviewer.knowledge.paths import ProjectPaths
+
+    p = ProjectPaths(tmp_path)
+    m = Manifest(
+        video_id="yt_abc",
+        source=SourceInfo(type="youtube", url="u", title="t", duration_s=100.0),
+        rubric_version_at_ingest="0.1.0",
+    )
+    mf.save(p, m)  # acquire/transcribe never ran
+    with pytest.raises(mf.StageNotReady):
+        segment.run(p, "yt_abc")
+
+
+def test_run_reads_transcript_writes_segments_and_records_detail(tmp_path, lex):
+    from card_reviewer.knowledge import manifest as mf
+    from card_reviewer.knowledge.models import Manifest, SourceInfo, Transcript
+    from card_reviewer.knowledge.paths import ProjectPaths
+
+    p = ProjectPaths(tmp_path)
+    m = Manifest(
+        video_id="yt_abc",
+        source=SourceInfo(type="youtube", url="u", title="t", duration_s=100.0),
+        rubric_version_at_ingest="0.1.0",
+    )
+    mf.save(p, m)
+    mf.finish(p, m, "acquire")
+    mf.finish(p, m, "transcribe")
+
+    transcript = Transcript(
+        method="captions",
+        cues=[cue(0, 5, "Look right here at this corner.")],
+    )
+    p.transcript("yt_abc").write_text(transcript.model_dump_json())
+
+    segments = segment.run(p, "yt_abc", lex=lex)
+
+    assert len(segments) == 1
+    on_disk = json.loads(p.segments("yt_abc").read_text())
+    assert "segments" in on_disk
+    assert on_disk["segments"][0]["id"] == segments[0].id
+    assert on_disk["total_cues"] == 1
+
+    reloaded = mf.load(p, "yt_abc")
+    assert mf.is_done(reloaded, "segment")
+    assert reloaded.stages["segment"].detail["n_segments"] == 1
+
+
 def test_golden_fixture_matches_expected_segments(lex):
     """Regression guard on the lexicon. If you tune the lexicon and this fails,
     inspect the diff and update the fixture deliberately — do not auto-accept."""
