@@ -3,9 +3,42 @@ lesson_id: lesson_014
 source: correction pass following an independent retrospective review
 date_processed: 2026-08-30
 topics: [centering, corners, surface, process]
+video_id: yt_E9do7O74zM0
+references:
+  - knowledge/psa/grading-standards.md
+  - training/lessons/lesson_013.md
 ---
 
 # Correction pass: three commits that bypassed review
+
+## THE SOURCE TEXT THIS PASS CITES
+
+Rules corrected here cite this lesson, so the text they rest on is reproduced in full.
+It is identical to the block in `knowledge/psa/grading-standards.md` and in lesson_013;
+that file carries the provenance warning and governs.
+
+**PSA, Grade Definitions → GEM-MT → PSA 10:**
+
+> A PSA Gem Mint 10 card is a virtually perfect card.
+>
+> Attributes include four perfectly sharp corners, sharp focus and full original gloss.
+> A PSA Gem Mint 10 card must be free of staining of any kind, but an allowance may be
+> made for a slight printing imperfection, if it doesn't impair the overall appeal of
+> the card. The image must be centered on the card within a tolerance not to exceed
+> approximately 55/45 percent on the front, and 75/25 percent on the reverse.
+
+**PSA Official video** (`yt_E9do7O74zM0`, 00:46-01:20), cited by
+CORNERS_MINOR_TOUCH_COSTS_TEN_002:
+
+> The differences between a PSA 10 and a PSA 9 can be slight. For example, these two
+> cards look nearly identical at first glance with strong corners, smooth edges, and
+> unbllemished surfaces, but this card falls outside the centering threshold for a PSA
+> 10. These two cards are well centered and have great eye appeal. At first glance, they
+> both appear to be PSA 10 candidates, but closer inspection reveals a small white touch
+> on one corner. A minor defect like this can be enough to bring down the grade.
+
+That rule's quote elides the centering pair with an ellipsis. The framing sentence covers
+both examples and the conclusion is unaffected, but the elision is recorded here.
 
 ## WHY THIS LESSON EXISTS
 
@@ -81,6 +114,18 @@ did not.
   under TDD.
 
 ## WHAT IS STILL OUTSTANDING
+
+**The slight/prominent boundary is now load-bearing and undefined.** PSA allows a
+"slight" printing imperfection; SURFACE_PRINT_LINE_PROMINENT_001 restricts a "prominent"
+one. Neither term is operationalised, and an engine must decide which side a given line
+falls on. The rule's quote carries a calibrating example — a line running between a
+player's mouth and nose — but that is an anchor, not a threshold.
+
+**SURFACE_NO_STAINING_001 was not updated.** Its statement and quote are faithful, so it
+had no wording defect, but it is the one of the six screenshot-derived rules that still
+cites the standard without pointing at `knowledge/psa/grading-standards.md`. Left as-is
+deliberately: superseding a correct rule to improve a pointer would cost a major version
+for cosmetics. Worth folding into the next substantive centering change.
 
 Only PSA's PSA 10 definition was transcribed. The definitions for PSA 9 and below sit on
 the same page and are not recorded, so the rubric still cannot say what centering a 9 or

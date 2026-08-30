@@ -21,6 +21,10 @@ Only (2) can be checked from this repository alone. For (1), open the URL above 
 normal browser, where the page loads without difficulty. If the live page and this file
 disagree, **the live page governs** and every rule citing this file must be re-examined.
 
+**Also reproduced in** `training/lessons/lesson_013.md` and `training/lessons/lesson_014.md`.
+Those copies exist so a lesson record is self-contained; **this file governs** if they
+ever diverge.
+
 ---
 
 ## GEM-MT — PSA 10

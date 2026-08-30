@@ -97,9 +97,9 @@ def _cite(source: RuleSource) -> str:
     lesson id, hiding which document a rule came from - and the rules resting
     on a published standard are the ones whose provenance matters most.
     """
-    if source.video_id is not None:
-        return f"{source.lesson} {source.video_id} {'/'.join(source.timestamps)}"
-    return f"{source.lesson} {source.reference} - {source.locator}"
+    if source.reference is not None and source.reference.strip():
+        return f"{source.lesson} {source.reference} - {source.locator}"
+    return f"{source.lesson} {source.video_id} {'/'.join(source.timestamps)}"
 
 
 def render(r: Rubric) -> str:
@@ -131,7 +131,7 @@ def render(r: Rubric) -> str:
                 if rule.applies_to.sets:
                     bits.append("sets: " + ", ".join(rule.applies_to.sets))
                 scope = f" _({'; '.join(bits)})_"
-            citations = ", ".join(_cite(s) for s in rule.sources)
+            citations = " · ".join(_cite(s) for s in rule.sources)
             lines += [
                 f"### {rule.id}{scope}",
                 "",

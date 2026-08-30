@@ -16,7 +16,7 @@ Back centering is held to a materially looser tolerance than the front.
 
 - evidence: `objective`  
 - confidence: `high`  
-- sources: lesson_014 PSA published grading standards (psacard.com/gradingstandards), transcribed at knowledge/psa/grading-standards.md - Grade Definitions, GEM-MT PSA 10, lesson_008 web_f4e13adb5cc1 01:30-01:40
+- sources: lesson_014 PSA published grading standards (psacard.com/gradingstandards), transcribed at knowledge/psa/grading-standards.md - Grade Definitions, GEM-MT PSA 10 · lesson_008 web_f4e13adb5cc1 01:30-01:40
 
 ### CENTERING_BORDERLESS_001
 
@@ -164,7 +164,7 @@ Whitening visible along a card edge is edge wear and counts against the grade.
 
 - evidence: `experience_based`  
 - confidence: `high`  
-- sources: lesson_002 yt_t28rOSnMcck 02:36-03:07, lesson_010 web_9e1801890111 00:20-00:35
+- sources: lesson_002 yt_t28rOSnMcck 02:36-03:07 · lesson_010 web_9e1801890111 00:20-00:35
 
 ## image_limitations
 
@@ -198,7 +198,7 @@ Surface defects frequently cannot be assessed from listing photographs; a card m
 
 - evidence: `experience_based`  
 - confidence: `high`  
-- sources: lesson_001 yt_s46CrXjVwCc 05:36-05:56, lesson_011 web_a215e0e689d0 00:05-00:20
+- sources: lesson_001 yt_s46CrXjVwCc 05:36-05:56 · lesson_011 web_a215e0e689d0 00:05-00:20
 
 ## process
 
@@ -282,7 +282,7 @@ A prominent print or factory line running across the face of a card is grade-lim
 
 - evidence: `experience_based`  
 - confidence: `high`  
-- sources: lesson_011 web_a215e0e689d0 01:10-01:25, lesson_014 PSA published grading standards (psacard.com/gradingstandards), transcribed at knowledge/psa/grading-standards.md - Grade Definitions, GEM-MT PSA 10
+- sources: lesson_011 web_a215e0e689d0 01:10-01:25 · lesson_014 PSA published grading standards (psacard.com/gradingstandards), transcribed at knowledge/psa/grading-standards.md - Grade Definitions, GEM-MT PSA 10
 
 ### SURFACE_SHINY_001 _(card types: chrome, refractor, foil)_
 
