@@ -1,3 +1,28 @@
+# Working agreement for this repo
+
+The Superpowers skills are a **requirement for producing this application**, not
+an optional aid. Invoke them; do not substitute judgement for them.
+
+## Before writing code
+
+**`superpowers:using-git-worktrees`** — branch first. Never start implementation
+on `main`.
+
+**`superpowers:test-driven-development`** — write the failing test, watch it
+fail, then implement.
+
+## Before merging
+
+**`superpowers:requesting-code-review`** — dispatch an independent reviewer
+subagent. **Self-review does not count.** Its own text makes this mandatory
+before merge to main.
+
+## When review comes back
+
+**`superpowers:receiving-code-review`** — verify each finding before
+implementing it. Push back with reasoning when a finding is wrong; do not
+perform agreement.
+
 # Card Reviewer
 
 Two subsystems joined only by `knowledge/`:
