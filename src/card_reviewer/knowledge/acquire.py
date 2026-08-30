@@ -197,12 +197,23 @@ def from_url(
         raise AcquisitionFailed(f"yt-dlp could not read {url}: {error}")
 
     meta = json.loads(meta_proc.stdout)
+    # Same class of defect as `_probe_duration`'s ffprobe failure: a missing
+    # `duration` field here used to silently become 0.0 with no warning and
+    # no manifest flag, which then makes `validate` blame every citation for
+    # this video rather than the metadata that produced it.
+    raw_duration = meta.get("duration")
+    duration_probe_failed = raw_duration is None
+    if duration_probe_failed:
+        print(
+            f"warning: yt-dlp metadata for {url} has no duration field",
+            file=sys.stderr,
+        )
     source = SourceInfo(
         type="skool" if video_id.startswith("skool_") else "youtube",
         url=url,
         title=meta.get("title", video_id),
         uploader=meta.get("uploader"),
-        duration_s=float(meta.get("duration") or 0),
+        duration_s=float(raw_duration or 0),
     )
 
     m = _open_manifest(paths, video_id, source, rubric_version)
@@ -235,7 +246,10 @@ def from_url(
         sha256=_sha256_file(path),
         bytes=path.stat().st_size,
     )
-    return mf.finish(paths, m, "acquire", tool="yt-dlp", browser=browser)
+    detail: dict[str, object] = {"tool": "yt-dlp", "browser": browser}
+    if duration_probe_failed:
+        detail["duration_probe_failed"] = True
+    return mf.finish(paths, m, "acquire", **detail)
 
 
 def from_file(

@@ -284,6 +284,55 @@ def test_probe_duration_success_is_not_flagged(paths, tmp_path):
     assert "duration_probe_failed" not in m.stages["acquire"].detail
 
 
+# --- review round 2, non-blocking: from_url's own duration source
+# (yt-dlp's --dump-json metadata) had the exact same defect A2 fixed on the
+# ffprobe path -- a missing `duration` field silently became 0.0 with no
+# warning and no manifest flag.
+
+
+def test_from_url_missing_duration_field_is_logged_and_recorded(paths, capsys):
+    url = "https://youtu.be/abcdefghijk"
+    video_id = acquire.derive_video_id(url=url)
+    dest = paths.source_dir(video_id)
+    meta_without_duration = {k: v for k, v in METADATA.items() if k != "duration"}
+
+    def runner(cmd, **kwargs):
+        if "--dump-json" in cmd:
+            return subprocess.CompletedProcess(
+                cmd, 0, stdout=json.dumps(meta_without_duration), stderr=""
+            )
+        dest.mkdir(parents=True, exist_ok=True)
+        (dest / "video.mp4").write_bytes(b"real video bytes")
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    m = acquire.from_url(paths, url, rubric_version="0.1.0", runner=runner)
+
+    assert m.source.duration_s == 0.0
+    assert m.stages["acquire"].detail.get("duration_probe_failed") is True
+
+    captured = capsys.readouterr()
+    output = captured.err + captured.out
+    assert "duration" in output.lower()
+    assert url in output
+
+
+def test_from_url_present_duration_field_is_not_flagged(paths):
+    url = "https://youtu.be/abcdefghijk"
+    dest = paths.source_dir(acquire.derive_video_id(url=url))
+
+    def runner(cmd, **kwargs):
+        if "--dump-json" in cmd:
+            return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps(METADATA), stderr="")
+        dest.mkdir(parents=True, exist_ok=True)
+        (dest / "video.mp4").write_bytes(b"real video bytes")
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    m = acquire.from_url(paths, url, rubric_version="0.1.0", runner=runner)
+
+    assert m.source.duration_s == 3120.0
+    assert "duration_probe_failed" not in m.stages["acquire"].detail
+
+
 def test_from_url_failed_reacquire_does_not_corrupt_a_completed_packet(paths):
     """Regression: a failed re-acquire (e.g. expired Skool cookies) must not
     overwrite a completed packet's real `source` with the failure-path

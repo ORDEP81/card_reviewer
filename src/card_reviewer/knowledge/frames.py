@@ -138,22 +138,36 @@ def run(
         produced = sample(video, out_dir, seg.start_s, seg.end_s, fps=fps, runner=runner)
         total += len(dedupe(produced))
 
-    if at is None:
+    if at is None and targets:
         # Remove segment directories from a prior ranked/uniform run that
         # aren't part of *this* run (a smaller --top-n, or a re-segment that
         # produced fewer segments) -- otherwise they linger and look like
-        # current output. Ad-hoc (`seg_adhoc`/`seg_at_*`) directories are a
-        # separate, deliberately-persistent namespace and are never touched
-        # here.
+        # current output.
+        #
+        # Scoped strictly to `seg_*` names: anything else under frames/ (a
+        # user's own notes, screenshots, whatever) is never a candidate for
+        # removal, even if it isn't in `keep_ids`. Ad-hoc (`seg_adhoc`/
+        # `seg_at_*`) directories are a separate, deliberately-persistent
+        # namespace and are excluded too. A symlinked child is skipped
+        # rather than removed: `shutil.rmtree` refuses a symlink to a
+        # directory outright, and letting that raise would abort cleanup
+        # partway through.
+        #
+        # Guarded on `targets` being non-empty: a run producing zero targets
+        # (an empty segments.json, or --uniform against a duration_s of 0.0)
+        # must be a no-op here, not a wipe of every existing seg_* directory.
         keep_ids = {seg.id for seg in targets}
         frames_dir = paths.frames(video_id)
         if frames_dir.exists():
             for existing in frames_dir.iterdir():
-                if not existing.is_dir():
+                if not existing.name.startswith("seg_"):
+                    continue
+                if existing.is_symlink() or not existing.is_dir():
                     continue
                 if existing.name.startswith("seg_adhoc") or existing.name.startswith("seg_at_"):
                     continue
                 if existing.name not in keep_ids:
                     shutil.rmtree(existing)
+    if at is None:
         mf.finish(paths, m, "extract_frames", n_frames=total, uniform=uniform, fps=fps)
     return total
