@@ -1,0 +1,327 @@
+{
+  "method": "mlx-whisper",
+  "model": "mlx-community/whisper-medium-mlx",
+  "language": "en",
+  "cues": [
+    {
+      "start_s": 0.0,
+      "end_s": 4.12,
+      "text": "Okay, in this video, I'm gonna go over the most common error"
+    },
+    {
+      "start_s": 4.12,
+      "end_s": 7.16,
+      "text": "with a card, and that would be the corners, okay?"
+    },
+    {
+      "start_s": 7.16,
+      "end_s": 11.040000000000001,
+      "text": "So the reason why corners are the most common error"
+    },
+    {
+      "start_s": 11.040000000000001,
+      "end_s": 12.84,
+      "text": "with a card is because think about it."
+    },
+    {
+      "start_s": 12.84,
+      "end_s": 15.14,
+      "text": "These cards come from packs and cases,"
+    },
+    {
+      "start_s": 15.14,
+      "end_s": 17.76,
+      "text": "and they're in these packs, and they're not being protected."
+    },
+    {
+      "start_s": 17.76,
+      "end_s": 19.240000000000002,
+      "text": "They're just kind of moving around."
+    },
+    {
+      "start_s": 19.240000000000002,
+      "end_s": 21.96,
+      "text": "And what is the easiest thing to get damaged, right?"
+    },
+    {
+      "start_s": 21.96,
+      "end_s": 24.400000000000002,
+      "text": "Not the autograph, not the surface, the corners, right?"
+    },
+    {
+      "start_s": 24.400000000000002,
+      "end_s": 26.900000000000002,
+      "text": "Because there's four corners, and they're very flimsy,"
+    },
+    {
+      "start_s": 26.900000000000002,
+      "end_s": 29.86,
+      "text": "and if they hit a little thing, it'll get chipped, right?"
+    },
+    {
+      "start_s": 29.86,
+      "end_s": 32.14,
+      "text": "These cards are really, really thin."
+    },
+    {
+      "start_s": 32.14,
+      "end_s": 35.22,
+      "text": "So they get damaged very easy."
+    },
+    {
+      "start_s": 35.22,
+      "end_s": 38.7,
+      "text": "Now, the things to look out for are these three."
+    },
+    {
+      "start_s": 38.7,
+      "end_s": 39.980000000000004,
+      "text": "And this is actually in order."
+    },
+    {
+      "start_s": 39.980000000000004,
+      "end_s": 42.86,
+      "text": "So what I mean by that is the most common error"
+    },
+    {
+      "start_s": 42.86,
+      "end_s": 44.86,
+      "text": "to the least common error with corners."
+    },
+    {
+      "start_s": 44.86,
+      "end_s": 48.04,
+      "text": "So whiting is the most common error,"
+    },
+    {
+      "start_s": 48.04,
+      "end_s": 50.66,
+      "text": "and this is what a card looks like if it's whiting."
+    },
+    {
+      "start_s": 50.66,
+      "end_s": 53.06,
+      "text": "And if you think about it logically,"
+    },
+    {
+      "start_s": 53.06,
+      "end_s": 55.34,
+      "text": "corners that are colored, when I say colored,"
+    },
+    {
+      "start_s": 55.34,
+      "end_s": 57.019999999999996,
+      "text": "I mean, it's literally not white."
+    },
+    {
+      "start_s": 57.019999999999996,
+      "end_s": 59.620000000000005,
+      "text": "It's a different color, are gonna white easier."
+    },
+    {
+      "start_s": 59.66,
+      "end_s": 62.339999999999996,
+      "text": "If a corner is all white, like this one down here,"
+    },
+    {
+      "start_s": 62.339999999999996,
+      "end_s": 64.88,
+      "text": "it can't white, it's already white, right?"
+    },
+    {
+      "start_s": 64.88,
+      "end_s": 68.94,
+      "text": "So the paint chipping is super key."
+    },
+    {
+      "start_s": 68.94,
+      "end_s": 73.34,
+      "text": "So you can call this whiting or chipping, same thing."
+    },
+    {
+      "start_s": 74.5,
+      "end_s": 75.75999999999999,
+      "text": "This is the most common error."
+    },
+    {
+      "start_s": 75.75999999999999,
+      "end_s": 78.86,
+      "text": "Now, the second most common error is rounding."
+    },
+    {
+      "start_s": 78.86,
+      "end_s": 81.78,
+      "text": "If a corner's rounded, and you can see right here,"
+    },
+    {
+      "start_s": 81.78,
+      "end_s": 83.94,
+      "text": "this corner is not sharp, right?"
+    },
+    {
+      "start_s": 83.94,
+      "end_s": 85.97999999999999,
+      "text": "You need the corner to be sharp."
+    },
+    {
+      "start_s": 85.97999999999999,
+      "end_s": 88.86,
+      "text": "This is rounded, okay?"
+    },
+    {
+      "start_s": 88.86,
+      "end_s": 90.86,
+      "text": "Now, if I show you an example,"
+    },
+    {
+      "start_s": 90.86,
+      "end_s": 93.14,
+      "text": "so this is a random example of a card,"
+    },
+    {
+      "start_s": 93.14,
+      "end_s": 95.53999999999999,
+      "text": "you can see how these corners are crisp, it's sharp,"
+    },
+    {
+      "start_s": 95.53999999999999,
+      "end_s": 98.62,
+      "text": "it's a nice right angle, boom, boom, boom."
+    },
+    {
+      "start_s": 98.62,
+      "end_s": 100.96,
+      "text": "This is not, it's rounded."
+    },
+    {
+      "start_s": 100.96,
+      "end_s": 103.36,
+      "text": "So this will cause the card not to grade well."
+    },
+    {
+      "start_s": 103.36,
+      "end_s": 105.68,
+      "text": "And the last one is bending."
+    },
+    {
+      "start_s": 105.68,
+      "end_s": 109.34,
+      "text": "So if it bends up or bends down, these are hard to see,"
+    },
+    {
+      "start_s": 109.34,
+      "end_s": 110.9,
+      "text": "and this is the least common error,"
+    },
+    {
+      "start_s": 110.9,
+      "end_s": 113.26,
+      "text": "but you can see it right here slightly."
+    },
+    {
+      "start_s": 113.26,
+      "end_s": 114.82,
+      "text": "You can see, it just doesn't look right."
+    },
+    {
+      "start_s": 114.82,
+      "end_s": 116.78,
+      "text": "It looks like the corners lifted up a little bit."
+    },
+    {
+      "start_s": 116.78,
+      "end_s": 118.18,
+      "text": "This is actually a fixable issue"
+    },
+    {
+      "start_s": 118.18,
+      "end_s": 119.98,
+      "text": "if you're really good."
+    },
+    {
+      "start_s": 119.98,
+      "end_s": 122.06,
+      "text": "Sometimes it's fixable, not every time."
+    },
+    {
+      "start_s": 122.06,
+      "end_s": 126.7,
+      "text": "But this is what a corner looks like if it's bent."
+    },
+    {
+      "start_s": 126.7,
+      "end_s": 130.58,
+      "text": "So these are the three things to look for,"
+    },
+    {
+      "start_s": 130.58,
+      "end_s": 132.54000000000002,
+      "text": "and some things to keep in mind."
+    },
+    {
+      "start_s": 132.54000000000002,
+      "end_s": 135.62,
+      "text": "Thick cards, like flawless national treasures,"
+    },
+    {
+      "start_s": 135.62,
+      "end_s": 139.02,
+      "text": "if the corner's thicker, it gets damaged way easier,"
+    },
+    {
+      "start_s": 139.02,
+      "end_s": 140.02,
+      "text": "because they're like soft,"
+    },
+    {
+      "start_s": 140.02,
+      "end_s": 142.82,
+      "text": "and like a little touch just damages it."
+    },
+    {
+      "start_s": 142.82,
+      "end_s": 144.28,
+      "text": "And kind of like I said,"
+    },
+    {
+      "start_s": 144.28,
+      "end_s": 148.08,
+      "text": "colored corners are naturally going to get damaged easier,"
+    },
+    {
+      "start_s": 148.08,
+      "end_s": 149.28,
+      "text": "because they're colored, right?"
+    },
+    {
+      "start_s": 149.28,
+      "end_s": 152.3,
+      "text": "It's easier to chip something that's colored."
+    },
+    {
+      "start_s": 152.3,
+      "end_s": 154.0,
+      "text": "So these are corners."
+    },
+    {
+      "start_s": 154.0,
+      "end_s": 154.92000000000002,
+      "text": "Hopefully this makes sense."
+    },
+    {
+      "start_s": 154.92000000000002,
+      "end_s": 155.96,
+      "text": "Any questions, let me know."
+    },
+    {
+      "start_s": 155.96,
+      "end_s": 157.96,
+      "text": "The doc is below this video,"
+    },
+    {
+      "start_s": 157.96,
+      "end_s": 159.56,
+      "text": "and I'll see you guys in the next."
+    }
+  ]
+}

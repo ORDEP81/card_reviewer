@@ -1,0 +1,191 @@
+{
+  "lexicon_version": "1",
+  "total_cues": 93,
+  "segments": [
+    {
+      "id": "seg_013",
+      "start_s": 189.72,
+      "end_s": 222.68,
+      "score": 14.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "look at this",
+        "psa 10"
+      ],
+      "text": "Maybe what I do is I will look at another PSA 10 and compare to see or look at other PSA 10 to see if I could find any that are slightly off centered and look like mine, because if I can find a PSA 10 that looks like mine, that means mine could possibly get a 10. OK, and this is a good example that I would look at this card. All right. It's the same exact card, but a PSA 10.",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_009",
+      "start_s": 122.8,
+      "end_s": 136.4,
+      "score": 4.5,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "border",
+        "right here",
+        "you can see"
+      ],
+      "text": "You can see this border right here aligns with this border.",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_001",
+      "start_s": 0.0,
+      "end_s": 12.96,
+      "score": 4.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "Okay, in this video, I'm going to talk about centering. Okay, centering is an important subgrade of how cards are graded.",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_004",
+      "start_s": 37.28,
+      "end_s": 57.8,
+      "score": 4.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "Now, if the rest of the card is good, you can get away with 60 40 centering. So like 60 percent, 40 percent one side to another. Now, some things to note about centering, you can't change it.",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_008",
+      "start_s": 113.16,
+      "end_s": 126.8,
+      "score": 3.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "border",
+        "you can see"
+      ],
+      "text": "You can see the top border and bottom border are pretty even,",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_010",
+      "start_s": 153.6,
+      "end_s": 167.0,
+      "score": 3.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "border",
+        "you can see"
+      ],
+      "text": "So you can see this top border and bottom border.",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_002",
+      "start_s": 7.68,
+      "end_s": 19.56,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "People care about the centering the most.",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_003",
+      "start_s": 21.92,
+      "end_s": 36.88,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "Ones with nine centering are just far less desirable to traditional collectors.",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_005",
+      "start_s": 68.36,
+      "end_s": 80.12,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "cards to see other measuring the centering.",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_006",
+      "start_s": 83.84,
+      "end_s": 97.8,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "Now, the back centering is not as important.",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_007",
+      "start_s": 100.76,
+      "end_s": 112.64,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "you can see"
+      ],
+      "text": "And you can see both these cards are in",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_011",
+      "start_s": 173.72,
+      "end_s": 188.04,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "But this is a good example of something I do when it comes to centering.",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_012",
+      "start_s": 182.16,
+      "end_s": 195.4,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "This centering, this left is a little bit smaller than the right.",
+      "visual_cue": false
+    }
+  ]
+}

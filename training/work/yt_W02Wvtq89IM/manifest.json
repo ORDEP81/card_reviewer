@@ -1,0 +1,69 @@
+{
+  "video_id": "yt_W02Wvtq89IM",
+  "source": {
+    "type": "youtube",
+    "url": "https://youtu.be/W02Wvtq89IM",
+    "title": "Should I Grade My Sports Cards? Grading Recommendation Tool.",
+    "uploader": "SportsCardsPro",
+    "duration_s": 586.0
+  },
+  "file": {
+    "path": "source/video.webm",
+    "sha256": "5fea706fd2b51632e2a4b68721e5046b4ab153fcf10a0cea55c47074e1513608",
+    "bytes": 48262079
+  },
+  "stages": {
+    "acquire": {
+      "status": "done",
+      "at": "2026-08-29T19:30:47.262727Z",
+      "error": null,
+      "detail": {
+        "tool": "yt-dlp",
+        "browser": null
+      }
+    },
+    "transcribe": {
+      "status": "done",
+      "at": "2026-08-29T19:30:50.322182Z",
+      "error": null,
+      "detail": {
+        "method": "captions",
+        "model": null,
+        "cues": 241
+      }
+    },
+    "segment": {
+      "status": "done",
+      "at": "2026-08-29T19:30:50.333391Z",
+      "error": null,
+      "detail": {
+        "n_segments": 10,
+        "lexicon_version": "1"
+      }
+    },
+    "extract_frames": {
+      "status": "done",
+      "at": "2026-08-29T19:30:54.784199Z",
+      "error": null,
+      "detail": {
+        "n_frames": 74,
+        "uniform": false,
+        "fps": 1.0
+      }
+    },
+    "analyze": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    },
+    "validate": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    }
+  },
+  "lesson_id": null,
+  "rubric_version_at_ingest": "0.1.0"
+}

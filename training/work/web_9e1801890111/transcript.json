@@ -1,0 +1,87 @@
+{
+  "method": "mlx-whisper",
+  "model": "mlx-community/whisper-medium-mlx",
+  "language": "en",
+  "cues": [
+    {
+      "start_s": 0.0,
+      "end_s": 4.34,
+      "text": "Alright, this is gonna be a quickie and this is on edges. So edge"
+    },
+    {
+      "start_s": 5.04,
+      "end_s": 10.82,
+      "text": "Problems are the least common error with cards. Okay, it happens, but it's not too rare and"
+    },
+    {
+      "start_s": 11.88,
+      "end_s": 14.84,
+      "text": "similar to corners what you're looking out for is"
+    },
+    {
+      "start_s": 15.66,
+      "end_s": 20.34,
+      "text": "Colored edges, okay and the whiting on an edge really the only thing to look for"
+    },
+    {
+      "start_s": 20.52,
+      "end_s": 26.42,
+      "text": "This is not the easiest to see but you could see it's black right here black black black and it's white"
+    },
+    {
+      "start_s": 26.42,
+      "end_s": 33.14,
+      "text": "Right, you can see the whiting on this edge, you know edges like corners or unlike corners"
+    },
+    {
+      "start_s": 33.14,
+      "end_s": 39.08,
+      "text": "They're not gonna be rounded. It's an edge doesn't get rounded if that makes sense and it's not gonna bend"
+    },
+    {
+      "start_s": 39.18,
+      "end_s": 45.38,
+      "text": "So like whiting is the thing to look for and really when an edge is colored when it's not white"
+    },
+    {
+      "start_s": 46.260000000000005,
+      "end_s": 49.1,
+      "text": "Then you look for this. Okay and similar to"
+    },
+    {
+      "start_s": 49.94,
+      "end_s": 51.94,
+      "text": "I'll type this"
+    },
+    {
+      "start_s": 52.7,
+      "end_s": 54.7,
+      "text": "Thicker cards"
+    },
+    {
+      "start_s": 55.42,
+      "end_s": 56.7,
+      "text": "Edges"
+    },
+    {
+      "start_s": 56.7,
+      "end_s": 61.18000000000001,
+      "text": "Get damaged easier. Right? There's just more surface area to damage"
+    },
+    {
+      "start_s": 61.18000000000001,
+      "end_s": 65.48,
+      "text": "It's just damage is easier to thicker cards with patches and stuff. Keep that in mind"
+    },
+    {
+      "start_s": 65.48,
+      "end_s": 68.06,
+      "text": "I don't know how much of that stuff you'll be buying but"
+    },
+    {
+      "start_s": 68.62,
+      "end_s": 72.7,
+      "text": "This is um, this is edges quick video. But yeah, just look out for the whiting"
+    }
+  ]
+}

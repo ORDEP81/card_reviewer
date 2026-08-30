@@ -1,0 +1,252 @@
+{
+  "method": "mlx-whisper",
+  "model": "mlx-community/whisper-medium-mlx",
+  "language": "en",
+  "cues": [
+    {
+      "start_s": 0.0,
+      "end_s": 5.44,
+      "text": "Okay, so in this video I'm going to go over the surface of a card."
+    },
+    {
+      "start_s": 5.44,
+      "end_s": 9.92,
+      "text": "Now this is the single hardest subgrade to tell on a card."
+    },
+    {
+      "start_s": 9.92,
+      "end_s": 13.200000000000001,
+      "text": "Okay, it's just not easy to see in pictures."
+    },
+    {
+      "start_s": 13.200000000000001,
+      "end_s": 15.92,
+      "text": "That's the bad, but the good is it's cleanable."
+    },
+    {
+      "start_s": 15.92,
+      "end_s": 19.0,
+      "text": "Sometimes there will be light scratches and things on a card that are cleanable."
+    },
+    {
+      "start_s": 19.0,
+      "end_s": 22.400000000000002,
+      "text": "So when you send them in for grading, if you use our service or send it elsewhere, make"
+    },
+    {
+      "start_s": 22.400000000000002,
+      "end_s": 25.64,
+      "text": "sure they're cleaning the cards, okay?"
+    },
+    {
+      "start_s": 25.64,
+      "end_s": 34.16,
+      "text": "Now shiny surface, if a surface is shinier, it's harder to grade, okay?"
+    },
+    {
+      "start_s": 34.16,
+      "end_s": 39.04,
+      "text": "Or scratch is easier because just something that's shiny, it's easier to scratch."
+    },
+    {
+      "start_s": 39.04,
+      "end_s": 43.16,
+      "text": "It's just like, you know, physics, I guess, or whatever."
+    },
+    {
+      "start_s": 43.16,
+      "end_s": 49.120000000000005,
+      "text": "So keep that in mind and like foily cards, like cards that like, you know, look like"
+    },
+    {
+      "start_s": 49.120000000000005,
+      "end_s": 54.08,
+      "text": "this, like something like this."
+    },
+    {
+      "start_s": 54.16,
+      "end_s": 59.36,
+      "text": "These surface scratch, these surface scratch easy, like these like foily looking cards"
+    },
+    {
+      "start_s": 59.36,
+      "end_s": 62.4,
+      "text": "that aren't just like plain white."
+    },
+    {
+      "start_s": 62.4,
+      "end_s": 64.08,
+      "text": "Keep that in mind."
+    },
+    {
+      "start_s": 64.08,
+      "end_s": 66.67999999999999,
+      "text": "Now these are the three things to look for."
+    },
+    {
+      "start_s": 66.67999999999999,
+      "end_s": 70.16,
+      "text": "So once again, it's not going to be that easy to see these things, but this is what you're"
+    },
+    {
+      "start_s": 70.16,
+      "end_s": 71.16,
+      "text": "looking for."
+    },
+    {
+      "start_s": 71.16,
+      "end_s": 73.2,
+      "text": "So factory and print lines."
+    },
+    {
+      "start_s": 73.2,
+      "end_s": 74.2,
+      "text": "So that's down here."
+    },
+    {
+      "start_s": 74.2,
+      "end_s": 75.96,
+      "text": "This is a thick one."
+    },
+    {
+      "start_s": 75.96,
+      "end_s": 79.8,
+      "text": "You could see across this Luka Donchi, it's going right across in between his mouth and"
+    },
+    {
+      "start_s": 79.8,
+      "end_s": 80.8,
+      "text": "his nose."
+    },
+    {
+      "start_s": 80.8,
+      "end_s": 83.14,
+      "text": "There's a giant factory line."
+    },
+    {
+      "start_s": 83.14,
+      "end_s": 84.14,
+      "text": "No good."
+    },
+    {
+      "start_s": 84.14,
+      "end_s": 85.82000000000001,
+      "text": "You're going to get knocked for that every time."
+    },
+    {
+      "start_s": 85.82000000000001,
+      "end_s": 87.86,
+      "text": "It's never going to grade for you."
+    },
+    {
+      "start_s": 87.86,
+      "end_s": 88.86,
+      "text": "The next one is dimples."
+    },
+    {
+      "start_s": 88.86,
+      "end_s": 89.86,
+      "text": "These are hard to see."
+    },
+    {
+      "start_s": 89.86,
+      "end_s": 92.9,
+      "text": "These are like little circles in the card, like little holes."
+    },
+    {
+      "start_s": 92.9,
+      "end_s": 97.22,
+      "text": "And you can see a dimple on this card right over here around my mouse."
+    },
+    {
+      "start_s": 97.22,
+      "end_s": 98.78,
+      "text": "It's a dimple."
+    },
+    {
+      "start_s": 98.78,
+      "end_s": 100.5,
+      "text": "And the last one is just a scratch."
+    },
+    {
+      "start_s": 100.5,
+      "end_s": 102.74000000000001,
+      "text": "These are a little bit easier to see."
+    },
+    {
+      "start_s": 102.74000000000001,
+      "end_s": 107.0,
+      "text": "And you can see this scratch on this card right here towards the end."
+    },
+    {
+      "start_s": 107.0,
+      "end_s": 111.34,
+      "text": "So once again, these things are faint, not that easy to see."
+    },
+    {
+      "start_s": 111.38000000000001,
+      "end_s": 114.74000000000001,
+      "text": "I'm giving you examples here so you know what to look for, but that's the bad."
+    },
+    {
+      "start_s": 114.74000000000001,
+      "end_s": 115.74000000000001,
+      "text": "It's hard to see."
+    },
+    {
+      "start_s": 115.74000000000001,
+      "end_s": 121.94,
+      "text": "But the good is either before or after this, you're going to learn a script to say to people,"
+    },
+    {
+      "start_s": 121.94,
+      "end_s": 125.02000000000001,
+      "text": "to ask them about the condition to get a truthful answer."
+    },
+    {
+      "start_s": 125.02000000000001,
+      "end_s": 127.62,
+      "text": "Sometimes people will lie to you about the condition of a card."
+    },
+    {
+      "start_s": 127.62,
+      "end_s": 129.44,
+      "text": "They'll know there's a surface scratch on it."
+    },
+    {
+      "start_s": 129.44,
+      "end_s": 134.26,
+      "text": "They know you can't see it in a picture and they'll say it's a good card."
+    },
+    {
+      "start_s": 134.26,
+      "end_s": 136.92000000000002,
+      "text": "It's good, but it's not."
+    },
+    {
+      "start_s": 136.92000000000002,
+      "end_s": 141.14000000000001,
+      "text": "So I'm going to teach you guys how to get that out of people."
+    },
+    {
+      "start_s": 141.54,
+      "end_s": 142.54,
+      "text": "This is Surface."
+    },
+    {
+      "start_s": 142.54,
+      "end_s": 144.54,
+      "text": "These are the three things to look for."
+    },
+    {
+      "start_s": 145.33999999999997,
+      "end_s": 147.33999999999997,
+      "text": "Any questions, ask your coach."
+    },
+    {
+      "start_s": 147.33999999999997,
+      "end_s": 149.33999999999997,
+      "text": "And yeah, I'll see you guys in the next video."
+    }
+  ]
+}

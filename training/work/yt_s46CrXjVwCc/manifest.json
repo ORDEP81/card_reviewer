@@ -1,0 +1,69 @@
+{
+  "video_id": "yt_s46CrXjVwCc",
+  "source": {
+    "type": "youtube",
+    "url": "https://www.youtube.com/watch?v=s46CrXjVwCc",
+    "title": "How to Find Clean Raw Cards to Grade on eBay",
+    "uploader": "Cardboard Profit",
+    "duration_s": 1571.0
+  },
+  "file": {
+    "path": "source/video.webm",
+    "sha256": "3149aae3f185ffa9467c57d4552971733ce7406b23c2dc1fd86b45cb587bc0d1",
+    "bytes": 548604511
+  },
+  "stages": {
+    "acquire": {
+      "status": "done",
+      "at": "2026-08-29T18:23:37.247135Z",
+      "error": null,
+      "detail": {
+        "tool": "yt-dlp",
+        "browser": null
+      }
+    },
+    "transcribe": {
+      "status": "done",
+      "at": "2026-08-29T18:53:16.148737Z",
+      "error": null,
+      "detail": {
+        "method": "captions",
+        "model": null,
+        "cues": 865
+      }
+    },
+    "segment": {
+      "status": "done",
+      "at": "2026-08-29T18:53:16.335405Z",
+      "error": null,
+      "detail": {
+        "n_segments": 50,
+        "lexicon_version": "1"
+      }
+    },
+    "extract_frames": {
+      "status": "done",
+      "at": "2026-08-29T18:53:23.324366Z",
+      "error": null,
+      "detail": {
+        "n_frames": 83,
+        "uniform": false,
+        "fps": 1.0
+      }
+    },
+    "analyze": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    },
+    "validate": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    }
+  },
+  "lesson_id": null,
+  "rubric_version_at_ingest": "0.1.0"
+}

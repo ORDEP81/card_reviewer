@@ -1,0 +1,41 @@
+{
+  "lexicon_version": "1",
+  "total_cues": 16,
+  "segments": [
+    {
+      "id": "seg_002",
+      "start_s": 10.66,
+      "end_s": 44.08,
+      "score": 14.5,
+      "categories": [
+        "corners",
+        "edges"
+      ],
+      "matched_terms": [
+        "corners",
+        "edge",
+        "edges",
+        "right here",
+        "rounded",
+        "you can see"
+      ],
+      "text": "Colored edges, okay and the whiting on an edge really the only thing to look for This is not the easiest to see but you could see it's black right here black black black and it's white Right, you can see the whiting on this edge, you know edges like corners or unlike corners They're not gonna be rounded. It's an edge doesn't get rounded if that makes sense and it's not gonna bend",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_001",
+      "start_s": 0.0,
+      "end_s": 9.34,
+      "score": 3.0,
+      "categories": [
+        "edges"
+      ],
+      "matched_terms": [
+        "edge",
+        "edges"
+      ],
+      "text": "Alright, this is gonna be a quickie and this is on edges. So edge",
+      "visual_cue": false
+    }
+  ]
+}

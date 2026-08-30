@@ -1,0 +1,95 @@
+{
+  "lexicon_version": "1",
+  "total_cues": 49,
+  "segments": [
+    {
+      "id": "seg_005",
+      "start_s": 87.9,
+      "end_s": 112.0,
+      "score": 15.5,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "dimple",
+        "right here",
+        "scratch",
+        "you can see"
+      ],
+      "text": "And you can see a dimple on this card right over here around my mouse. It's a dimple. And the last one is just a scratch. These are a little bit easier to see. And you can see this scratch on this card right here towards the end.",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_003",
+      "start_s": 49.16,
+      "end_s": 64.36,
+      "score": 4.0,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "scratch",
+        "surface"
+      ],
+      "text": "These surface scratch, these surface scratch easy, like these like foily looking cards",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_006",
+      "start_s": 122.62,
+      "end_s": 134.44,
+      "score": 4.0,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "scratch",
+        "surface"
+      ],
+      "text": "They'll know there's a surface scratch on it.",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_004",
+      "start_s": 66.16,
+      "end_s": 78.2,
+      "score": 3.5,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "print lines"
+      ],
+      "text": "So factory and print lines.",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_001",
+      "start_s": 10.92,
+      "end_s": 24.0,
+      "score": 2.5,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "scratches"
+      ],
+      "text": "Sometimes there will be light scratches and things on a card that are cleanable.",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_002",
+      "start_s": 29.16,
+      "end_s": 44.04,
+      "score": 2.5,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "scratch"
+      ],
+      "text": "Or scratch is easier because just something that's shiny, it's easier to scratch.",
+      "visual_cue": false
+    }
+  ]
+}

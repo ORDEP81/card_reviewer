@@ -1,0 +1,69 @@
+{
+  "video_id": "yt_aA8soPXmsS4",
+  "source": {
+    "type": "youtube",
+    "url": "https://youtu.be/aA8soPXmsS4",
+    "title": "How I Find PSA 10 Gem Mint Pokémon Cards on eBay 💎🔥",
+    "uploader": "TierOneCollections",
+    "duration_s": 689.0
+  },
+  "file": {
+    "path": "source/video.webm",
+    "sha256": "44315d456c64c84e7bb04311739f2a8905ad78f2cfc704219e377a3d325f4ee8",
+    "bytes": 113325653
+  },
+  "stages": {
+    "acquire": {
+      "status": "done",
+      "at": "2026-08-29T19:29:49.840185Z",
+      "error": null,
+      "detail": {
+        "tool": "yt-dlp",
+        "browser": null
+      }
+    },
+    "transcribe": {
+      "status": "done",
+      "at": "2026-08-29T19:29:52.197403Z",
+      "error": null,
+      "detail": {
+        "method": "captions",
+        "model": null,
+        "cues": 315
+      }
+    },
+    "segment": {
+      "status": "done",
+      "at": "2026-08-29T19:29:52.211197Z",
+      "error": null,
+      "detail": {
+        "n_segments": 9,
+        "lexicon_version": "1"
+      }
+    },
+    "extract_frames": {
+      "status": "done",
+      "at": "2026-08-29T19:30:00.621483Z",
+      "error": null,
+      "detail": {
+        "n_frames": 45,
+        "uniform": false,
+        "fps": 1.0
+      }
+    },
+    "analyze": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    },
+    "validate": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    }
+  },
+  "lesson_id": null,
+  "rubric_version_at_ingest": "0.1.0"
+}

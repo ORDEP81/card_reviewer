@@ -1,0 +1,69 @@
+{
+  "video_id": "yt__CjZMweRBdM",
+  "source": {
+    "type": "youtube",
+    "url": "https://youtu.be/_CjZMweRBdM",
+    "title": "How I Grade My Sports Cards Using This Tool and Consistently Get Gem 9 or 10. USE THIS TOOL!",
+    "uploader": "Isekai Chronicles",
+    "duration_s": 1049.0
+  },
+  "file": {
+    "path": "source/video.mkv",
+    "sha256": "87e1cebf1a8059db71e85961d9e75a59d65c4180565f27cb8de7d0e0aa940616",
+    "bytes": 227237779
+  },
+  "stages": {
+    "acquire": {
+      "status": "done",
+      "at": "2026-08-29T19:29:02.327588Z",
+      "error": null,
+      "detail": {
+        "tool": "yt-dlp",
+        "browser": null
+      }
+    },
+    "transcribe": {
+      "status": "done",
+      "at": "2026-08-29T19:29:05.055036Z",
+      "error": null,
+      "detail": {
+        "method": "captions",
+        "model": null,
+        "cues": 547
+      }
+    },
+    "segment": {
+      "status": "done",
+      "at": "2026-08-29T19:29:05.072346Z",
+      "error": null,
+      "detail": {
+        "n_segments": 29,
+        "lexicon_version": "1"
+      }
+    },
+    "extract_frames": {
+      "status": "done",
+      "at": "2026-08-29T19:29:08.095454Z",
+      "error": null,
+      "detail": {
+        "n_frames": 137,
+        "uniform": false,
+        "fps": 1.0
+      }
+    },
+    "analyze": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    },
+    "validate": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    }
+  },
+  "lesson_id": null,
+  "rubric_version_at_ingest": "0.1.0"
+}

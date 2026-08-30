@@ -1,0 +1,98 @@
+{
+  "lexicon_version": "1",
+  "total_cues": 64,
+  "segments": [
+    {
+      "id": "seg_001",
+      "start_s": 16.96,
+      "end_s": 34.86,
+      "score": 7.5,
+      "categories": [
+        "corners",
+        "edges",
+        "surface"
+      ],
+      "matched_terms": [
+        "chipped",
+        "corners",
+        "surface"
+      ],
+      "text": "Not the autograph, not the surface, the corners, right? Because there's four corners, and they're very flimsy, and if they hit a little thing, it'll get chipped, right?",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_003",
+      "start_s": 73.86,
+      "end_s": 86.78,
+      "score": 7.0,
+      "categories": [
+        "corners"
+      ],
+      "matched_terms": [
+        "corner",
+        "right here",
+        "rounded",
+        "you can see"
+      ],
+      "text": "If a corner's rounded, and you can see right here,",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_002",
+      "start_s": 59.88,
+      "end_s": 78.34,
+      "score": 6.0,
+      "categories": [
+        "edges"
+      ],
+      "matched_terms": [
+        "chipping"
+      ],
+      "text": "So the paint chipping is super key. So you can call this whiting or chipping, same thing.",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_005",
+      "start_s": 88.14,
+      "end_s": 105.96,
+      "score": 5.5,
+      "categories": [
+        "corners"
+      ],
+      "matched_terms": [
+        "corners",
+        "rounded",
+        "you can see"
+      ],
+      "text": "you can see how these corners are crisp, it's sharp, it's a nice right angle, boom, boom, boom. This is not, it's rounded.",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_006",
+      "start_s": 105.9,
+      "end_s": 119.82,
+      "score": 5.5,
+      "categories": [],
+      "matched_terms": [
+        "right here",
+        "you can see"
+      ],
+      "text": "but you can see it right here slightly. You can see, it just doesn't look right.",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_004",
+      "start_s": 80.98,
+      "end_s": 93.86,
+      "score": 2.0,
+      "categories": [
+        "corners"
+      ],
+      "matched_terms": [
+        "rounded"
+      ],
+      "text": "This is rounded, okay?",
+      "visual_cue": false
+    }
+  ]
+}

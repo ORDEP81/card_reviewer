@@ -1,0 +1,477 @@
+{
+  "lexicon_version": "1",
+  "total_cues": 376,
+  "segments": [
+    {
+      "id": "seg_019",
+      "start_s": 409.94,
+      "end_s": 445.73,
+      "score": 30.5,
+      "categories": [
+        "corners",
+        "edges",
+        "outcomes"
+      ],
+      "matched_terms": [
+        "corners",
+        "edges",
+        "gem",
+        "gem mint",
+        "psa 10",
+        "right here",
+        "whitening"
+      ],
+      "text": "blow up this Michael Jordan PSA 10 okay check it out this is a gem mint 10 okay this isn't my card I pull it off eBay look at the core the edges right here sharp no bubble links you want to look at the edges no whitening the corners are sharp no whitening look at how sharp that is look at the edges no whitening whatsoever so the front is impeccable okay let's look at the back do we see any whitening on the back very little this is very minimal whitening",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_006",
+      "start_s": 159.22,
+      "end_s": 187.66,
+      "score": 19.0,
+      "categories": [
+        "corners",
+        "edges"
+      ],
+      "matched_terms": [
+        "corner",
+        "corner wear",
+        "edge",
+        "edge wear",
+        "rounded",
+        "whitening",
+        "you can see"
+      ],
+      "text": "backs so you can see there's a little bit of whitening going on on the edge that's considered edge condition okay and then the coroner has a white rounded corner which is corner wear and I'm gonna duct half a point for that and a half a point for the edge wear so this",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_014",
+      "start_s": 316.71,
+      "end_s": 346.22,
+      "score": 17.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "borders",
+        "center",
+        "centering",
+        "off-center"
+      ],
+      "text": "that the centering on this is going to be based on the width of these borders okay and you can tell it's off-center now there's no wall not too bad but it's off-center not terrible though now the carts without borders it's not a deal-breaker if it's off-center",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_026",
+      "start_s": 531.27,
+      "end_s": 556.04,
+      "score": 17.0,
+      "categories": [
+        "centering",
+        "edges",
+        "outcomes"
+      ],
+      "matched_terms": [
+        "center",
+        "centering",
+        "edges",
+        "left to right",
+        "off-center",
+        "psa 9",
+        "whitening",
+        "you can see"
+      ],
+      "text": "the edges look good no whitening so simply from the centering on the back and the front you have to grade the front as well you can see it's a little off-center left to right just a little bit it's good this is gonna be a PSA 9",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_008",
+      "start_s": 219.13,
+      "end_s": 239.11,
+      "score": 11.0,
+      "categories": [
+        "corners",
+        "edges"
+      ],
+      "matched_terms": [
+        "corner",
+        "edge",
+        "whitening",
+        "you can see"
+      ],
+      "text": "whitening it's not round the left edge no whitening no bubbling no folding on that bottom left corner you can see",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_016",
+      "start_s": 364.73,
+      "end_s": 387.5,
+      "score": 10.5,
+      "categories": [
+        "corners",
+        "edges"
+      ],
+      "matched_terms": [
+        "corner",
+        "whitening"
+      ],
+      "text": "whitening looks good very fairly sharp corner there's a little bit of whitening going on right there but nothing too crazy a little bit whitening going on",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_015",
+      "start_s": 342.68,
+      "end_s": 358.28,
+      "score": 8.5,
+      "categories": [
+        "centering",
+        "corners",
+        "edges",
+        "surface"
+      ],
+      "matched_terms": [
+        "center",
+        "corners",
+        "edges",
+        "off-center",
+        "surface"
+      ],
+      "text": "surface the corners and the edges of but that all checks out and but it looks a little off-center I still cement it okay",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_028",
+      "start_s": 668.6,
+      "end_s": 692.48,
+      "score": 8.5,
+      "categories": [
+        "centering",
+        "corners",
+        "edges",
+        "outcomes",
+        "surface"
+      ],
+      "matched_terms": [
+        "centering",
+        "corners",
+        "edges",
+        "gem",
+        "surface"
+      ],
+      "text": "that's a gem intense surface right there look at that shine beautiful coat edges beautiful corners and back beautiful other than the centering let's go ahead and do these",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_010",
+      "start_s": 254.01,
+      "end_s": 272.159,
+      "score": 8.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "border",
+        "center",
+        "centering",
+        "off-center"
+      ],
+      "text": "centering is off is this right border compared to this bottom border are they even and whit's if not it's off-center",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_004",
+      "start_s": 113.509,
+      "end_s": 127.969,
+      "score": 6.5,
+      "categories": [
+        "edges"
+      ],
+      "matched_terms": [
+        "edge",
+        "whitening",
+        "you can see"
+      ],
+      "text": "fairly nope nevermind yeah you can see there's whitening on the edge right",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_005",
+      "start_s": 130.28,
+      "end_s": 147.02,
+      "score": 6.5,
+      "categories": [
+        "corners",
+        "edges"
+      ],
+      "matched_terms": [
+        "corner",
+        "rounded",
+        "whitening"
+      ],
+      "text": "looks really good no whitening the corner looks nice and sharp it's not soft and rounded so that that's the",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_003",
+      "start_s": 94.99,
+      "end_s": 109.66,
+      "score": 6.0,
+      "categories": [
+        "edges"
+      ],
+      "matched_terms": [
+        "chipping",
+        "whitening"
+      ],
+      "text": "flag you don't want that more chipping and another white whitening on the",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_029",
+      "start_s": 860.509,
+      "end_s": 877.61,
+      "score": 6.0,
+      "categories": [
+        "corners",
+        "edges"
+      ],
+      "matched_terms": [
+        "corners",
+        "edges",
+        "whitening"
+      ],
+      "text": "black edges black corners if you make a small error if you you're not paying attention you can cause whitening on",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_009",
+      "start_s": 234.02,
+      "end_s": 247.94,
+      "score": 5.0,
+      "categories": [
+        "edges"
+      ],
+      "matched_terms": [
+        "whitening",
+        "you can see"
+      ],
+      "text": "you can see a little bit of whitening",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_020",
+      "start_s": 440.69,
+      "end_s": 454.7,
+      "score": 5.0,
+      "categories": [
+        "edges"
+      ],
+      "matched_terms": [
+        "whitening",
+        "you can see"
+      ],
+      "text": "overtime just wears off like you can see a little bit the whitening going on",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_021",
+      "start_s": 456.59,
+      "end_s": 469.17,
+      "score": 5.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "gem",
+        "gem mint"
+      ],
+      "text": "so this is a gem mint ten guys in and",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_001",
+      "start_s": 71.71,
+      "end_s": 83.89,
+      "score": 4.5,
+      "categories": [
+        "edges"
+      ],
+      "matched_terms": [
+        "chipping",
+        "edges"
+      ],
+      "text": "chipping on the edges okay so very tough",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_025",
+      "start_s": 525.18,
+      "end_s": 537.0,
+      "score": 4.5,
+      "categories": [
+        "edges"
+      ],
+      "matched_terms": [
+        "edge",
+        "whitening"
+      ],
+      "text": "edge where as they're whitening going on",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_022",
+      "start_s": 498.75,
+      "end_s": 511.32,
+      "score": 4.0,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "scratches",
+        "surface"
+      ],
+      "text": "surface marks are there scuffs scratches",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_024",
+      "start_s": 519.21,
+      "end_s": 531.57,
+      "score": 3.5,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering",
+        "top to bottom"
+      ],
+      "text": "good centering top to bottom looks okay",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_002",
+      "start_s": 85.27,
+      "end_s": 97.87,
+      "score": 3.0,
+      "categories": [
+        "edges"
+      ],
+      "matched_terms": [
+        "whitening"
+      ],
+      "text": "this card is the whitening down here at",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_017",
+      "start_s": 394.19,
+      "end_s": 406.54,
+      "score": 3.0,
+      "categories": [
+        "edges"
+      ],
+      "matched_terms": [
+        "whitening"
+      ],
+      "text": "whitening so you guys can see not much",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_018",
+      "start_s": 401.36,
+      "end_s": 414.11,
+      "score": 3.0,
+      "categories": [
+        "edges"
+      ],
+      "matched_terms": [
+        "whitening"
+      ],
+      "text": "think because of the small whitening and",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_007",
+      "start_s": 203.25,
+      "end_s": 217.539,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "you can see"
+      ],
+      "text": "you can see the top is very flat the",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_011",
+      "start_s": 278.46,
+      "end_s": 291.81,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "that's ideally will be perfect centering",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_012",
+      "start_s": 290.669,
+      "end_s": 303.719,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "difficult to have perfect centering and",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_013",
+      "start_s": 308.49,
+      "end_s": 321.15,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "centering last unless it's a dead",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_023",
+      "start_s": 510.66,
+      "end_s": 522.57,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "can tell if the centering is off left to",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_027",
+      "start_s": 601.63,
+      "end_s": 619.23,
+      "score": 2.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "gem"
+      ],
+      "text": "going to get a gem at 10:00 okay because",
+      "visual_cue": false
+    }
+  ]
+}

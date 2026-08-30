@@ -1,0 +1,724 @@
+{
+  "lexicon_version": "1",
+  "total_cues": 865,
+  "segments": [
+    {
+      "id": "seg_017",
+      "start_s": 294.48,
+      "end_s": 309.87,
+      "score": 12.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "center",
+        "off-center"
+      ],
+      "text": "through off-center, off-center, off-center. Oh, this one looks good. Click into it, check the other stuff. Nope, off-center, off-center, you know.",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_019",
+      "start_s": 311.88,
+      "end_s": 330.51,
+      "score": 9.5,
+      "categories": [
+        "corners",
+        "edges",
+        "outcomes"
+      ],
+      "matched_terms": [
+        "chipped",
+        "edges",
+        "psa 10",
+        "rounded"
+      ],
+      "text": "rounded or it looks like it's raised or touched. That's the type of stuff that holds a card back from getting a PSA 10. Same goes for the edges. Are they chipped? Are they nicked? Or are we",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_005",
+      "start_s": 109.2,
+      "end_s": 127.55,
+      "score": 9.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "gem",
+        "gem mint"
+      ],
+      "text": "seven PSA 10s or gem mint grades, that means my gem rate is 7 divided by 10 or 70%. So, pretty straightforward. Now, it's important to note that gem rate is",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_004",
+      "start_s": 92.68,
+      "end_s": 114.87,
+      "score": 8.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "gem",
+        "you can see"
+      ],
+      "text": "look at the cards gem rates. A really good site to use for this is gemrate.com but you can see all kinds of grading data and what I like to do is figure out which of the sets have a higher gem rate. Now the gem rate is just like the",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_030",
+      "start_s": 827.6,
+      "end_s": 848.07,
+      "score": 8.0,
+      "categories": [
+        "centering",
+        "outcomes"
+      ],
+      "matched_terms": [
+        "centering",
+        "psa 10"
+      ],
+      "text": "centering of a card, I can go into uh site like 130point and see if I can find an Otani Best Pixel PSA 10. So, we find a PSA 10 copy. All right, so I like this",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_006",
+      "start_s": 126.64,
+      "end_s": 143.949,
+      "score": 7.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "gem",
+        "psa 10"
+      ],
+      "text": "have a card that has a 100% gem rate, if your copy is ripped in half, it's definitely not going to get a PSA 10, I can promise you that. But, where gem",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_026",
+      "start_s": 671.48,
+      "end_s": 688.03,
+      "score": 7.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "gem",
+        "psa 10",
+        "you can see"
+      ],
+      "text": "So you can see the PSA 10 multiplier, the raw price, the graded price here, the gem rate. So it's got all the data",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_025",
+      "start_s": 649.04,
+      "end_s": 665.39,
+      "score": 6.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "going to add a second filter for PSA 10 margin. So that's like the amount of margin that's created by the PSA 10",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_007",
+      "start_s": 145.36,
+      "end_s": 159.39,
+      "score": 5.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "gem",
+        "psa 10"
+      ],
+      "text": "this is I want cards with high PSA 10 upside and a high gem rate. And that's",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_013",
+      "start_s": 255.6,
+      "end_s": 269.59,
+      "score": 5.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "55/45",
+        "centering"
+      ],
+      "text": "has to be 55/45 or better. And so, when I'm talking about centering, I'm talking",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_014",
+      "start_s": 275.08,
+      "end_s": 288.75,
+      "score": 5.0,
+      "categories": [
+        "centering",
+        "outcomes"
+      ],
+      "matched_terms": [
+        "centering",
+        "psa 10"
+      ],
+      "text": "ideal centering looks like, I usually like to just go and find a PSA 10 copy",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_031",
+      "start_s": 845.24,
+      "end_s": 856.71,
+      "score": 4.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering",
+        "you can see"
+      ],
+      "text": "centering and you can see it's kind of",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_032",
+      "start_s": 852.04,
+      "end_s": 866.63,
+      "score": 4.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering",
+        "you can see"
+      ],
+      "text": "same. On the back side, you can see kind of the centering here, too. And that",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_035",
+      "start_s": 911.92,
+      "end_s": 923.87,
+      "score": 4.0,
+      "categories": [
+        "corners",
+        "edges"
+      ],
+      "matched_terms": [
+        "edge",
+        "frayed"
+      ],
+      "text": "left edge. See how that's kind of frayed",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_046",
+      "start_s": 1377.08,
+      "end_s": 1388.87,
+      "score": 4.0,
+      "categories": [
+        "centering",
+        "edges"
+      ],
+      "matched_terms": [
+        "border",
+        "whitening"
+      ],
+      "text": "whitening around the border or on the",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_047",
+      "start_s": 1444.84,
+      "end_s": 1456.47,
+      "score": 4.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering",
+        "you can see"
+      ],
+      "text": "cuz you can see the centering up close",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_001",
+      "start_s": 38.36,
+      "end_s": 50.95,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "focus on cards that have high PSA 10",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_002",
+      "start_s": 50.36,
+      "end_s": 62.55,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "card back, get a PSA 10 and make like",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_003",
+      "start_s": 68.32,
+      "end_s": 80.51,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "a PSA 10 on both of them and the first",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_018",
+      "start_s": 306.64,
+      "end_s": 317.99,
+      "score": 3.0,
+      "categories": [
+        "corners",
+        "edges"
+      ],
+      "matched_terms": [
+        "corners",
+        "edges"
+      ],
+      "text": "corners and the edges. And what we're",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_027",
+      "start_s": 761.04,
+      "end_s": 773.07,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "dollars of PSA 10 margin here. So, the",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_041",
+      "start_s": 1164.92,
+      "end_s": 1177.51,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "Even a PSA 10 can have a few tiny little",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_042",
+      "start_s": 1270.2,
+      "end_s": 1282.55,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "for 300 plus as a PSA 10. So, really",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_044",
+      "start_s": 1302.0,
+      "end_s": 1313.19,
+      "score": 3.0,
+      "categories": [
+        "edges"
+      ],
+      "matched_terms": [
+        "chipping"
+      ],
+      "text": "a little bit of chipping up here. So,",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_049",
+      "start_s": 1476.88,
+      "end_s": 1489.07,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "is going to be a PSA 10, but the way I",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_050",
+      "start_s": 1494.32,
+      "end_s": 1506.19,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "grading and get a PSA 10. Now, the thing",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_020",
+      "start_s": 343.44,
+      "end_s": 355.87,
+      "score": 2.5,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "dimple"
+      ],
+      "text": "a dimple might look one way in person,",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_029",
+      "start_s": 816.52,
+      "end_s": 828.31,
+      "score": 2.5,
+      "categories": [
+        "corners"
+      ],
+      "matched_terms": [
+        "ding"
+      ],
+      "text": "and obvious ding that this seller has",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_040",
+      "start_s": 1088.48,
+      "end_s": 1100.67,
+      "score": 2.5,
+      "categories": [
+        "corners"
+      ],
+      "matched_terms": [
+        "ding"
+      ],
+      "text": "a pretty obvious ding there. So, this is",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_008",
+      "start_s": 155.32,
+      "end_s": 166.87,
+      "score": 2.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "gem"
+      ],
+      "text": "card's going to gem. What we're trying",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_009",
+      "start_s": 203.08,
+      "end_s": 214.79,
+      "score": 2.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "gem"
+      ],
+      "text": "gem rate, the next step is to go and",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_010",
+      "start_s": 208.48,
+      "end_s": 220.229,
+      "score": 2.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "gem"
+      ],
+      "text": "gem rate does not mean that every single",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_011",
+      "start_s": 237.32,
+      "end_s": 249.35,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "zoom in"
+      ],
+      "text": "do the pinch thing and zoom in to see",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_012",
+      "start_s": 245.8,
+      "end_s": 257.35,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "centering because this is the thing that",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_015",
+      "start_s": 281.919,
+      "end_s": 293.75,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "centering alone, we should be able to",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_016",
+      "start_s": 287.48,
+      "end_s": 299.59,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "bit because usually we can see centering",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_021",
+      "start_s": 496.44,
+      "end_s": 507.75,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "centering for this card, this is what I",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_022",
+      "start_s": 571.36,
+      "end_s": 582.99,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "the centering's just only a little bit",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_023",
+      "start_s": 591.68,
+      "end_s": 602.79,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "saying, \"Well, hold on, the centering",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_024",
+      "start_s": 641.28,
+      "end_s": 653.87,
+      "score": 2.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "gem"
+      ],
+      "text": "the first one is gem rate. I like gem",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_028",
+      "start_s": 782.2,
+      "end_s": 794.11,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "centering like. And for this, the clear",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_033",
+      "start_s": 860.2,
+      "end_s": 871.67,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "we're judging the centering the right",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_034",
+      "start_s": 896.839,
+      "end_s": 908.71,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "look at this"
+      ],
+      "text": "clean to me. So, I may look at this and",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_036",
+      "start_s": 937.72,
+      "end_s": 949.71,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "look at this"
+      ],
+      "text": "I bought this. But, look at this. They",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_037",
+      "start_s": 979.08,
+      "end_s": 990.71,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "you can see"
+      ],
+      "text": "one up here. If I zoom, you can see this",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_038",
+      "start_s": 1041.64,
+      "end_s": 1053.189,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "The centering looks fine based on that",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_039",
+      "start_s": 1050.6,
+      "end_s": 1061.79,
+      "score": 2.0,
+      "categories": [
+        "corners"
+      ],
+      "matched_terms": [
+        "rounded"
+      ],
+      "text": "little bit rounded to me, too, though.",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_043",
+      "start_s": 1283.84,
+      "end_s": 1295.27,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "to tell the centering compared to some",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_045",
+      "start_s": 1349.6,
+      "end_s": 1361.43,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "centering standpoint. Now, the problem",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_048",
+      "start_s": 1455.48,
+      "end_s": 1467.39,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "centering look like? As soon as I find",
+      "visual_cue": false
+    }
+  ]
+}

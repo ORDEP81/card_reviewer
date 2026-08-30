@@ -1,0 +1,2742 @@
+{
+  "method": "captions",
+  "model": null,
+  "language": "en",
+  "cues": [
+    {
+      "start_s": 1.52,
+      "end_s": 3.35,
+      "text": "what's up who fans is gary with hobby"
+    },
+    {
+      "start_s": 3.36,
+      "end_s": 5.19,
+      "text": "lottery and today i'm doing a tutorial"
+    },
+    {
+      "start_s": 5.2,
+      "end_s": 6.23,
+      "text": "for you i'm just going to walk you"
+    },
+    {
+      "start_s": 6.24,
+      "end_s": 8.15,
+      "text": "through the process on how i inspect my"
+    },
+    {
+      "start_s": 8.16,
+      "end_s": 9.27,
+      "text": "cards for grading"
+    },
+    {
+      "start_s": 9.28,
+      "end_s": 11.91,
+      "text": "uh prior to sending them off so i kind"
+    },
+    {
+      "start_s": 11.92,
+      "end_s": 13.43,
+      "text": "of needed a hobby i've been back in for"
+    },
+    {
+      "start_s": 13.44,
+      "end_s": 15.35,
+      "text": "just a little under a year and a half"
+    },
+    {
+      "start_s": 15.36,
+      "end_s": 16.63,
+      "text": "and i figured like if i'm going to make"
+    },
+    {
+      "start_s": 16.64,
+      "end_s": 18.23,
+      "text": "it the one thing i got to do is teach"
+    },
+    {
+      "start_s": 18.24,
+      "end_s": 18.79,
+      "text": "myself"
+    },
+    {
+      "start_s": 18.8,
+      "end_s": 20.71,
+      "text": "how to grade cards and what to look for"
+    },
+    {
+      "start_s": 20.72,
+      "end_s": 23.109,
+      "text": "so i watched videos i bought a tool to"
+    },
+    {
+      "start_s": 23.119,
+      "end_s": 24.31,
+      "text": "help out and i'm going to show you"
+    },
+    {
+      "start_s": 24.32,
+      "end_s": 26.87,
+      "text": "beginning to end and basically how i can"
+    },
+    {
+      "start_s": 26.88,
+      "end_s": 29.75,
+      "text": "inspect the car within about a minute um"
+    },
+    {
+      "start_s": 29.76,
+      "end_s": 30.23,
+      "text": "and"
+    },
+    {
+      "start_s": 30.24,
+      "end_s": 31.91,
+      "text": "get back pretty decent results so i"
+    },
+    {
+      "start_s": 31.92,
+      "end_s": 34.43,
+      "text": "actually tallied it up so so far i sent"
+    },
+    {
+      "start_s": 34.44,
+      "end_s": 35.83,
+      "text": "120"
+    },
+    {
+      "start_s": 35.84,
+      "end_s": 39.11,
+      "text": "cards to gma and out of those 120 i've"
+    },
+    {
+      "start_s": 39.12,
+      "end_s": 42.069,
+      "text": "had a total of nine come back as nines"
+    },
+    {
+      "start_s": 42.079,
+      "end_s": 44.47,
+      "text": "and one of them was a pc card and the"
+    },
+    {
+      "start_s": 44.48,
+      "end_s": 45.83,
+      "text": "other ones were just some print lines"
+    },
+    {
+      "start_s": 45.84,
+      "end_s": 47.59,
+      "text": "that i missed all the others came back"
+    },
+    {
+      "start_s": 47.6,
+      "end_s": 47.99,
+      "text": "as"
+    },
+    {
+      "start_s": 48.0,
+      "end_s": 51.27,
+      "text": "tins uh most of them are in my my repack"
+    },
+    {
+      "start_s": 51.28,
+      "end_s": 53.83,
+      "text": "products um in my ebay store i got a few"
+    },
+    {
+      "start_s": 53.84,
+      "end_s": 56.549,
+      "text": "that are for sale singles and then just"
+    },
+    {
+      "start_s": 56.559,
+      "end_s": 57.99,
+      "text": "most of these are actually some pc"
+    },
+    {
+      "start_s": 58.0,
+      "end_s": 60.549,
+      "text": "cards also and then i get it i know"
+    },
+    {
+      "start_s": 60.559,
+      "end_s": 62.47,
+      "text": "people aren't they think gma is too"
+    },
+    {
+      "start_s": 62.48,
+      "end_s": 63.99,
+      "text": "lenient and you know they're stricter"
+    },
+    {
+      "start_s": 64.0,
+      "end_s": 65.59,
+      "text": "than most give them credit for but"
+    },
+    {
+      "start_s": 65.6,
+      "end_s": 66.71,
+      "text": "some people think they have no"
+    },
+    {
+      "start_s": 66.72,
+      "end_s": 68.87,
+      "text": "credibility when they do and when i got"
+    },
+    {
+      "start_s": 68.88,
+      "end_s": 70.789,
+      "text": "my sgc results back"
+    },
+    {
+      "start_s": 70.799,
+      "end_s": 72.87,
+      "text": "i'm like okay i feel like i've done okay"
+    },
+    {
+      "start_s": 72.88,
+      "end_s": 74.31,
+      "text": "enough to where i feel comfortable like"
+    },
+    {
+      "start_s": 74.32,
+      "end_s": 76.149,
+      "text": "presenting how i go about doing it"
+    },
+    {
+      "start_s": 76.15899999999999,
+      "end_s": 78.07,
+      "text": "because it seems to you know at least"
+    },
+    {
+      "start_s": 78.08,
+      "end_s": 79.59,
+      "text": "work at least for me so"
+    },
+    {
+      "start_s": 79.6,
+      "end_s": 81.67,
+      "text": "though it may be a small sample size"
+    },
+    {
+      "start_s": 81.68,
+      "end_s": 83.83,
+      "text": "compared to some bulk submitters"
+    },
+    {
+      "start_s": 83.84,
+      "end_s": 86.55,
+      "text": "this is what i got so these videos are"
+    },
+    {
+      "start_s": 86.56,
+      "end_s": 88.469,
+      "text": "on my channel but in case you didn't see"
+    },
+    {
+      "start_s": 88.479,
+      "end_s": 88.87,
+      "text": "them"
+    },
+    {
+      "start_s": 88.88,
+      "end_s": 90.39,
+      "text": "you know we got tens um in the"
+    },
+    {
+      "start_s": 90.4,
+      "end_s": 92.22999999999999,
+      "text": "background here the lebrons the"
+    },
+    {
+      "start_s": 92.24000000000001,
+      "end_s": 94.63,
+      "text": "pascal the john moran those are all tins"
+    },
+    {
+      "start_s": 94.64,
+      "end_s": 95.50999999999999,
+      "text": "from sgc"
+    },
+    {
+      "start_s": 95.52000000000001,
+      "end_s": 97.67,
+      "text": "and they are a tough grade as we all"
+    },
+    {
+      "start_s": 97.68,
+      "end_s": 98.71000000000001,
+      "text": "know so"
+    },
+    {
+      "start_s": 98.72,
+      "end_s": 100.069,
+      "text": "with that being said i'm just going to"
+    },
+    {
+      "start_s": 100.07900000000001,
+      "end_s": 101.27000000000001,
+      "text": "kind of clear out some of this"
+    },
+    {
+      "start_s": 101.28,
+      "end_s": 102.469,
+      "text": "background here"
+    },
+    {
+      "start_s": 102.479,
+      "end_s": 103.749,
+      "text": "i'm going to walk you through how i"
+    },
+    {
+      "start_s": 103.759,
+      "end_s": 105.429,
+      "text": "taught myself how to grade cards and i'm"
+    },
+    {
+      "start_s": 105.439,
+      "end_s": 106.63,
+      "text": "going to show you"
+    },
+    {
+      "start_s": 106.64,
+      "end_s": 109.50999999999999,
+      "text": "quick like one one and a half minute how"
+    },
+    {
+      "start_s": 109.52000000000001,
+      "end_s": 110.87,
+      "text": "i do it and then"
+    },
+    {
+      "start_s": 110.88,
+      "end_s": 112.63,
+      "text": "boom whether it goes on a card saver and"
+    },
+    {
+      "start_s": 112.64,
+      "end_s": 113.99000000000001,
+      "text": "gets grating or if it goes"
+    },
+    {
+      "start_s": 114.0,
+      "end_s": 116.069,
+      "text": "back into the pile as not going to get a"
+    },
+    {
+      "start_s": 116.07900000000001,
+      "end_s": 120.87,
+      "text": "tin so let's cut to this next clip"
+    },
+    {
+      "start_s": 120.88,
+      "end_s": 122.31,
+      "text": "okay guys now for this clip here i'm"
+    },
+    {
+      "start_s": 122.32,
+      "end_s": 123.51,
+      "text": "just going to walk you through the"
+    },
+    {
+      "start_s": 123.52,
+      "end_s": 126.55,
+      "text": "actual materials that i use so all i use"
+    },
+    {
+      "start_s": 126.56,
+      "end_s": 129.029,
+      "text": "a microfiber cloth i mean you could find"
+    },
+    {
+      "start_s": 129.039,
+      "end_s": 130.15,
+      "text": "a lot of these"
+    },
+    {
+      "start_s": 130.16,
+      "end_s": 132.47,
+      "text": "for cheap on ebay amazon as well i mean"
+    },
+    {
+      "start_s": 132.48,
+      "end_s": 134.47,
+      "text": "like 50 cents to a dollar a piece go"
+    },
+    {
+      "start_s": 134.48,
+      "end_s": 136.22899999999998,
+      "text": "ahead and pick you up five of them"
+    },
+    {
+      "start_s": 136.239,
+      "end_s": 138.07,
+      "text": "and um it only cost you a few bucks a"
+    },
+    {
+      "start_s": 138.07999999999998,
+      "end_s": 139.75,
+      "text": "good investment it's just a microfiber"
+    },
+    {
+      "start_s": 139.76,
+      "end_s": 141.51,
+      "text": "fiber cloth no chemicals or anything"
+    },
+    {
+      "start_s": 141.52,
+      "end_s": 143.67000000000002,
+      "text": "there this is the loop that i use so i"
+    },
+    {
+      "start_s": 143.68,
+      "end_s": 145.19,
+      "text": "know you won't be able to see through it"
+    },
+    {
+      "start_s": 145.2,
+      "end_s": 146.55,
+      "text": "but i like it because it does have a"
+    },
+    {
+      "start_s": 146.56,
+      "end_s": 147.589,
+      "text": "built-in light"
+    },
+    {
+      "start_s": 147.599,
+      "end_s": 149.19,
+      "text": "it helps good though you can't tell on"
+    },
+    {
+      "start_s": 149.2,
+      "end_s": 150.869,
+      "text": "camera it actually has measuring lines"
+    },
+    {
+      "start_s": 150.879,
+      "end_s": 152.949,
+      "text": "on the inside in millimeter increments"
+    },
+    {
+      "start_s": 152.959,
+      "end_s": 154.55,
+      "text": "so you can kind of get idea of looking"
+    },
+    {
+      "start_s": 154.56,
+      "end_s": 156.55,
+      "text": "through this loop as to how the"
+    },
+    {
+      "start_s": 156.56,
+      "end_s": 158.309,
+      "text": "centering looks and how the borders look"
+    },
+    {
+      "start_s": 158.31900000000002,
+      "end_s": 158.869,
+      "text": "but"
+    },
+    {
+      "start_s": 158.879,
+      "end_s": 160.22899999999998,
+      "text": "you really i don't really use that"
+    },
+    {
+      "start_s": 160.239,
+      "end_s": 162.71,
+      "text": "function of this loop too much and um"
+    },
+    {
+      "start_s": 162.72,
+      "end_s": 165.27,
+      "text": "i picked this one up for 14.99 on ebay"
+    },
+    {
+      "start_s": 165.28,
+      "end_s": 166.63,
+      "text": "if i can find the link i'll try and put"
+    },
+    {
+      "start_s": 166.64,
+      "end_s": 168.47,
+      "text": "it in the description"
+    },
+    {
+      "start_s": 168.48,
+      "end_s": 170.79,
+      "text": "it comes in this nice case here i never"
+    },
+    {
+      "start_s": 170.8,
+      "end_s": 171.82999999999998,
+      "text": "take it out of the case"
+    },
+    {
+      "start_s": 171.84,
+      "end_s": 173.67000000000002,
+      "text": "at all i try to keep it as lint free as"
+    },
+    {
+      "start_s": 173.68,
+      "end_s": 175.82999999999998,
+      "text": "possible whenever i do lay it down it's"
+    },
+    {
+      "start_s": 175.84,
+      "end_s": 176.869,
+      "text": "on its side just so"
+    },
+    {
+      "start_s": 176.879,
+      "end_s": 178.949,
+      "text": "it never gets in there or in through"
+    },
+    {
+      "start_s": 178.959,
+      "end_s": 180.949,
+      "text": "this portion as well"
+    },
+    {
+      "start_s": 180.959,
+      "end_s": 182.71,
+      "text": "and now this this is the most important"
+    },
+    {
+      "start_s": 182.72,
+      "end_s": 184.869,
+      "text": "thing i use so i feel confident though i"
+    },
+    {
+      "start_s": 184.879,
+      "end_s": 185.75,
+      "text": "can't guarantee"
+    },
+    {
+      "start_s": 185.76,
+      "end_s": 188.63,
+      "text": "anything um i believe this tool can get"
+    },
+    {
+      "start_s": 188.64,
+      "end_s": 190.71,
+      "text": "you just about a hundred percent"
+    },
+    {
+      "start_s": 190.72,
+      "end_s": 193.43,
+      "text": "centering uh almost every time it's so"
+    },
+    {
+      "start_s": 193.44,
+      "end_s": 194.63,
+      "text": "well designed"
+    },
+    {
+      "start_s": 194.64,
+      "end_s": 196.149,
+      "text": "and you know i don't endorse i don't"
+    },
+    {
+      "start_s": 196.159,
+      "end_s": 197.67000000000002,
+      "text": "know the guy that made it or anything"
+    },
+    {
+      "start_s": 197.68,
+      "end_s": 199.19,
+      "text": "i'm just telling you what i did to help"
+    },
+    {
+      "start_s": 199.2,
+      "end_s": 200.63,
+      "text": "me out and i don't even know if it's"
+    },
+    {
+      "start_s": 200.64,
+      "end_s": 201.589,
+      "text": "showing up"
+    },
+    {
+      "start_s": 201.599,
+      "end_s": 203.43,
+      "text": "but it's actually here's is the"
+    },
+    {
+      "start_s": 203.44,
+      "end_s": 205.03,
+      "text": "information that comes on"
+    },
+    {
+      "start_s": 205.04,
+      "end_s": 207.27,
+      "text": "what i bought it uh when i when i bought"
+    },
+    {
+      "start_s": 207.28,
+      "end_s": 208.309,
+      "text": "it off ebay"
+    },
+    {
+      "start_s": 208.319,
+      "end_s": 210.949,
+      "text": "so there you go you can read i won't"
+    },
+    {
+      "start_s": 210.959,
+      "end_s": 212.22899999999998,
+      "text": "read it back to you"
+    },
+    {
+      "start_s": 212.239,
+      "end_s": 214.22899999999998,
+      "text": "you can email to look for or again i"
+    },
+    {
+      "start_s": 214.239,
+      "end_s": 215.589,
+      "text": "will try to see if the listing's still"
+    },
+    {
+      "start_s": 215.599,
+      "end_s": 217.50900000000001,
+      "text": "active and send it to you on ebay"
+    },
+    {
+      "start_s": 217.519,
+      "end_s": 220.39,
+      "text": "but this was 14.99 and it has this is"
+    },
+    {
+      "start_s": 220.4,
+      "end_s": 221.75,
+      "text": "going to be very difficult to see"
+    },
+    {
+      "start_s": 221.76,
+      "end_s": 223.67000000000002,
+      "text": "i may get some thumbs downs as i try to"
+    },
+    {
+      "start_s": 223.68,
+      "end_s": 225.19,
+      "text": "zoom in on the card to walk you through"
+    },
+    {
+      "start_s": 225.2,
+      "end_s": 226.63,
+      "text": "what i do"
+    },
+    {
+      "start_s": 226.64,
+      "end_s": 228.47,
+      "text": "but i'm doing my best to try and present"
+    },
+    {
+      "start_s": 228.48,
+      "end_s": 230.63,
+      "text": "it to you but it has a grid"
+    },
+    {
+      "start_s": 230.64,
+      "end_s": 233.67000000000002,
+      "text": "of numbers outlined here to measure"
+    },
+    {
+      "start_s": 233.68,
+      "end_s": 235.99,
+      "text": "the centering of it and then on here"
+    },
+    {
+      "start_s": 236.0,
+      "end_s": 237.589,
+      "text": "depending on how the numbers line up"
+    },
+    {
+      "start_s": 237.599,
+      "end_s": 239.67000000000002,
+      "text": "it tells you if you're 50 50 centering"
+    },
+    {
+      "start_s": 239.68,
+      "end_s": 240.869,
+      "text": "or not"
+    },
+    {
+      "start_s": 240.879,
+      "end_s": 243.11,
+      "text": "so i will explain that to you so those"
+    },
+    {
+      "start_s": 243.12,
+      "end_s": 244.309,
+      "text": "are the tools that i use"
+    },
+    {
+      "start_s": 244.319,
+      "end_s": 245.50900000000001,
+      "text": "now let me just walk you through the"
+    },
+    {
+      "start_s": 245.519,
+      "end_s": 247.50900000000001,
+      "text": "process"
+    },
+    {
+      "start_s": 247.519,
+      "end_s": 249.67,
+      "text": "okay guys so first thing i do pretty"
+    },
+    {
+      "start_s": 249.68,
+      "end_s": 250.71,
+      "text": "much uh"
+    },
+    {
+      "start_s": 250.72,
+      "end_s": 252.949,
+      "text": "i have a poster board that i grade on i"
+    },
+    {
+      "start_s": 252.959,
+      "end_s": 254.39,
+      "text": "use one cloth"
+    },
+    {
+      "start_s": 254.4,
+      "end_s": 256.069,
+      "text": "and they stay in their packages all the"
+    },
+    {
+      "start_s": 256.079,
+      "end_s": 258.39,
+      "text": "time i wipe the surface clean"
+    },
+    {
+      "start_s": 258.4,
+      "end_s": 261.509,
+      "text": "just the whole little area i plan to use"
+    },
+    {
+      "start_s": 261.519,
+      "end_s": 264.79,
+      "text": "brush it off get rid of that and then i"
+    },
+    {
+      "start_s": 264.8,
+      "end_s": 266.55,
+      "text": "use um a compressor"
+    },
+    {
+      "start_s": 266.56,
+      "end_s": 269.189,
+      "text": "um dang compressed air cans to kind of"
+    },
+    {
+      "start_s": 269.199,
+      "end_s": 270.23,
+      "text": "clean these after"
+    },
+    {
+      "start_s": 270.24,
+      "end_s": 272.55,
+      "text": "each uses so once i clean area free of"
+    },
+    {
+      "start_s": 272.56,
+      "end_s": 273.99,
+      "text": "all dust i have another one that i'll"
+    },
+    {
+      "start_s": 274.0,
+      "end_s": 275.59000000000003,
+      "text": "use to wipe down the car"
+    },
+    {
+      "start_s": 275.6,
+      "end_s": 278.87,
+      "text": "okay now let's say this is the car we'll"
+    },
+    {
+      "start_s": 278.88,
+      "end_s": 280.87,
+      "text": "start off with mosaic first so i've done"
+    },
+    {
+      "start_s": 280.88,
+      "end_s": 282.71,
+      "text": "really well mosaic don rust bass and"
+    },
+    {
+      "start_s": 282.72,
+      "end_s": 284.629,
+      "text": "then optic these are all 1920 sets for"
+    },
+    {
+      "start_s": 284.639,
+      "end_s": 285.909,
+      "text": "basketball"
+    },
+    {
+      "start_s": 285.919,
+      "end_s": 287.59000000000003,
+      "text": "i'll take the card out of my penny"
+    },
+    {
+      "start_s": 287.6,
+      "end_s": 289.189,
+      "text": "sleeve"
+    },
+    {
+      "start_s": 289.199,
+      "end_s": 291.59000000000003,
+      "text": "and you know we'll just assume that this"
+    },
+    {
+      "start_s": 291.6,
+      "end_s": 293.11,
+      "text": "is spotless i know the centering is"
+    },
+    {
+      "start_s": 293.12,
+      "end_s": 294.629,
+      "text": "perfect on the two cards that i'm using"
+    },
+    {
+      "start_s": 294.639,
+      "end_s": 295.59000000000003,
+      "text": "for this video"
+    },
+    {
+      "start_s": 295.6,
+      "end_s": 297.27,
+      "text": "but we're just gonna assume again just"
+    },
+    {
+      "start_s": 297.28,
+      "end_s": 299.189,
+      "text": "for video sakes that everything else is"
+    },
+    {
+      "start_s": 299.199,
+      "end_s": 300.15,
+      "text": "perfect on it"
+    },
+    {
+      "start_s": 300.16,
+      "end_s": 302.15,
+      "text": "so i'll get the card i immediately i"
+    },
+    {
+      "start_s": 302.16,
+      "end_s": 303.51,
+      "text": "look at the four corners"
+    },
+    {
+      "start_s": 303.52,
+      "end_s": 306.79,
+      "text": "i'll look there there there there"
+    },
+    {
+      "start_s": 306.8,
+      "end_s": 309.43,
+      "text": "is a sharp for chrome cards i don't ever"
+    },
+    {
+      "start_s": 309.44,
+      "end_s": 310.87,
+      "text": "inspect them with the magnifier"
+    },
+    {
+      "start_s": 310.88,
+      "end_s": 312.629,
+      "text": "i give them a little harlem shake in the"
+    },
+    {
+      "start_s": 312.639,
+      "end_s": 314.95,
+      "text": "light looking for dents and dimples"
+    },
+    {
+      "start_s": 314.96,
+      "end_s": 317.11,
+      "text": "and scratches and print lines because"
+    },
+    {
+      "start_s": 317.12,
+      "end_s": 319.67,
+      "text": "oftentimes it depends a lot on the angle"
+    },
+    {
+      "start_s": 319.68,
+      "end_s": 320.95,
+      "text": "when you're holding the chrome card if"
+    },
+    {
+      "start_s": 320.96,
+      "end_s": 322.39,
+      "text": "you pick up on the defects you won't"
+    },
+    {
+      "start_s": 322.4,
+      "end_s": 323.99,
+      "text": "find them for simply zooming in"
+    },
+    {
+      "start_s": 324.0,
+      "end_s": 326.79,
+      "text": "i used to zoom again on my loop for the"
+    },
+    {
+      "start_s": 326.8,
+      "end_s": 329.189,
+      "text": "cardboard cards like the don russ here"
+    },
+    {
+      "start_s": 329.199,
+      "end_s": 331.749,
+      "text": "okay so we'll get to that card next once"
+    },
+    {
+      "start_s": 331.759,
+      "end_s": 333.909,
+      "text": "i've done that i basically will flip it"
+    },
+    {
+      "start_s": 333.919,
+      "end_s": 334.87,
+      "text": "over"
+    },
+    {
+      "start_s": 334.88,
+      "end_s": 336.55,
+      "text": "i'm sorry i actually skipped the step i"
+    },
+    {
+      "start_s": 336.56,
+      "end_s": 338.39,
+      "text": "look at the four corners on the back as"
+    },
+    {
+      "start_s": 338.4,
+      "end_s": 338.87,
+      "text": "well"
+    },
+    {
+      "start_s": 338.88,
+      "end_s": 341.27,
+      "text": "before i ever wipe it down to check the"
+    },
+    {
+      "start_s": 341.28,
+      "end_s": 342.31,
+      "text": "the um"
+    },
+    {
+      "start_s": 342.32,
+      "end_s": 344.31,
+      "text": "centering so i look at the back i make"
+    },
+    {
+      "start_s": 344.32,
+      "end_s": 345.99,
+      "text": "sure there's nothing there"
+    },
+    {
+      "start_s": 346.0,
+      "end_s": 347.189,
+      "text": "and then i'm going to walk you through"
+    },
+    {
+      "start_s": 347.199,
+      "end_s": 348.79,
+      "text": "the centering process for mosaic and"
+    },
+    {
+      "start_s": 348.8,
+      "end_s": 354.07,
+      "text": "then i'll walk you through on don russ"
+    },
+    {
+      "start_s": 354.08,
+      "end_s": 355.67,
+      "text": "okay guys you're just going to bear with"
+    },
+    {
+      "start_s": 355.68,
+      "end_s": 356.79,
+      "text": "me on this i was going to try and"
+    },
+    {
+      "start_s": 356.8,
+      "end_s": 358.23,
+      "text": "painters tape it down and try some"
+    },
+    {
+      "start_s": 358.24,
+      "end_s": 359.749,
+      "text": "different ways but no matter what the"
+    },
+    {
+      "start_s": 359.759,
+      "end_s": 361.11,
+      "text": "thing moves out of the way"
+    },
+    {
+      "start_s": 361.12,
+      "end_s": 363.749,
+      "text": "so i just have to do it live holding my"
+    },
+    {
+      "start_s": 363.759,
+      "end_s": 364.15,
+      "text": "hand"
+    },
+    {
+      "start_s": 364.16,
+      "end_s": 366.469,
+      "text": "on top itself but if you can see there's"
+    },
+    {
+      "start_s": 366.479,
+      "end_s": 368.07,
+      "text": "a dot here in the middle which i always"
+    },
+    {
+      "start_s": 368.08,
+      "end_s": 369.83,
+      "text": "use to put my pointer finger on"
+    },
+    {
+      "start_s": 369.84,
+      "end_s": 371.59,
+      "text": "and then what i'll do so we're assuming"
+    },
+    {
+      "start_s": 371.6,
+      "end_s": 374.07,
+      "text": "it's past everything else it looks good"
+    },
+    {
+      "start_s": 374.08,
+      "end_s": 375.67,
+      "text": "edges look good corners look sharp"
+    },
+    {
+      "start_s": 375.68,
+      "end_s": 377.35,
+      "text": "there's no blemishes we're focusing just"
+    },
+    {
+      "start_s": 377.36,
+      "end_s": 378.309,
+      "text": "on centering"
+    },
+    {
+      "start_s": 378.319,
+      "end_s": 380.469,
+      "text": "what i'll do i'll activate the light on"
+    },
+    {
+      "start_s": 380.479,
+      "end_s": 382.87,
+      "text": "this and then i will zoom in on the"
+    },
+    {
+      "start_s": 382.88,
+      "end_s": 384.629,
+      "text": "corner so the first thing i do is i hit"
+    },
+    {
+      "start_s": 384.639,
+      "end_s": 387.749,
+      "text": "all four corners of the card and i'm"
+    },
+    {
+      "start_s": 387.759,
+      "end_s": 389.27,
+      "text": "doing this just for exaggeration"
+    },
+    {
+      "start_s": 389.28,
+      "end_s": 391.27,
+      "text": "purposes on camera but i loop the four"
+    },
+    {
+      "start_s": 391.28,
+      "end_s": 394.07,
+      "text": "corners to make sure it's lined up"
+    },
+    {
+      "start_s": 394.08,
+      "end_s": 397.189,
+      "text": "on this grid so if you can see and again"
+    },
+    {
+      "start_s": 397.199,
+      "end_s": 398.79,
+      "text": "bear with me i mean"
+    },
+    {
+      "start_s": 398.8,
+      "end_s": 401.67,
+      "text": "best i can do with my camera setup let"
+    },
+    {
+      "start_s": 401.68,
+      "end_s": 402.71,
+      "text": "me get the pin here"
+    },
+    {
+      "start_s": 402.72,
+      "end_s": 404.87,
+      "text": "so it has four corners for each border"
+    },
+    {
+      "start_s": 404.88,
+      "end_s": 406.30899999999997,
+      "text": "the main thing you need to do"
+    },
+    {
+      "start_s": 406.319,
+      "end_s": 407.67,
+      "text": "when i use this tool i make sure the"
+    },
+    {
+      "start_s": 407.68,
+      "end_s": 409.51,
+      "text": "corners hit exactly"
+    },
+    {
+      "start_s": 409.52,
+      "end_s": 411.67,
+      "text": "in all the spots it's evenly centered"
+    },
+    {
+      "start_s": 411.68,
+      "end_s": 413.43,
+      "text": "and then i have my index finger down"
+    },
+    {
+      "start_s": 413.44,
+      "end_s": 415.35,
+      "text": "over the dot in the middle"
+    },
+    {
+      "start_s": 415.36,
+      "end_s": 418.71,
+      "text": "and what i've done it has all these grid"
+    },
+    {
+      "start_s": 418.72,
+      "end_s": 420.07,
+      "text": "lines i don't know how well it's picking"
+    },
+    {
+      "start_s": 420.08,
+      "end_s": 420.629,
+      "text": "up for you guys"
+    },
+    {
+      "start_s": 420.639,
+      "end_s": 423.43,
+      "text": "there's a three here on this grid okay"
+    },
+    {
+      "start_s": 423.44,
+      "end_s": 424.07,
+      "text": "so"
+    },
+    {
+      "start_s": 424.08,
+      "end_s": 425.27,
+      "text": "once i look through like hundreds of"
+    },
+    {
+      "start_s": 425.28,
+      "end_s": 426.71,
+      "text": "these cards i started to learn the"
+    },
+    {
+      "start_s": 426.72,
+      "end_s": 427.51,
+      "text": "pattern"
+    },
+    {
+      "start_s": 427.52,
+      "end_s": 429.589,
+      "text": "the three for mosaic at least on this"
+    },
+    {
+      "start_s": 429.599,
+      "end_s": 430.79,
+      "text": "tool the three should hit"
+    },
+    {
+      "start_s": 430.8,
+      "end_s": 433.589,
+      "text": "right outside of the mosaic emblem and"
+    },
+    {
+      "start_s": 433.599,
+      "end_s": 434.71,
+      "text": "then"
+    },
+    {
+      "start_s": 434.72,
+      "end_s": 437.029,
+      "text": "i'm sorry if it defocuses folks but i'm"
+    },
+    {
+      "start_s": 437.039,
+      "end_s": 437.83,
+      "text": "gonna try"
+    },
+    {
+      "start_s": 437.84,
+      "end_s": 440.309,
+      "text": "to get you a little closer to the action"
+    },
+    {
+      "start_s": 440.319,
+      "end_s": 440.95,
+      "text": "here"
+    },
+    {
+      "start_s": 440.96,
+      "end_s": 444.55,
+      "text": "okay so the three it wraps right around"
+    },
+    {
+      "start_s": 444.56,
+      "end_s": 448.95,
+      "text": "the mosaic emblem"
+    },
+    {
+      "start_s": 448.96,
+      "end_s": 451.589,
+      "text": "and then it hits right at the top of the"
+    },
+    {
+      "start_s": 451.599,
+      "end_s": 453.67,
+      "text": "mosaic emblem this grid line"
+    },
+    {
+      "start_s": 453.68,
+      "end_s": 455.43,
+      "text": "and it usually goes right across the top"
+    },
+    {
+      "start_s": 455.44,
+      "end_s": 456.95,
+      "text": "of the player's head"
+    },
+    {
+      "start_s": 456.96,
+      "end_s": 459.749,
+      "text": "and then it circles around the card and"
+    },
+    {
+      "start_s": 459.759,
+      "end_s": 461.83,
+      "text": "mosaic is a lot harder of course than"
+    },
+    {
+      "start_s": 461.84000000000003,
+      "end_s": 462.30899999999997,
+      "text": "like"
+    },
+    {
+      "start_s": 462.319,
+      "end_s": 465.51,
+      "text": "don russ or optic just for the fact that"
+    },
+    {
+      "start_s": 465.52,
+      "end_s": 467.43,
+      "text": "the borders aren't clear but this tool"
+    },
+    {
+      "start_s": 467.44,
+      "end_s": 468.79,
+      "text": "makes it pretty clear"
+    },
+    {
+      "start_s": 468.8,
+      "end_s": 471.43,
+      "text": "and then as we go down to this portion"
+    },
+    {
+      "start_s": 471.44,
+      "end_s": 473.189,
+      "text": "here"
+    },
+    {
+      "start_s": 473.199,
+      "end_s": 476.30899999999997,
+      "text": "the bottom"
+    },
+    {
+      "start_s": 476.319,
+      "end_s": 479.27,
+      "text": "doing my absolute best for you folks so"
+    },
+    {
+      "start_s": 479.28,
+      "end_s": 480.95,
+      "text": "remember that three"
+    },
+    {
+      "start_s": 480.96,
+      "end_s": 485.189,
+      "text": "i think it's defocusing now"
+    },
+    {
+      "start_s": 485.199,
+      "end_s": 487.029,
+      "text": "oh i think that's a good shot actually"
+    },
+    {
+      "start_s": 487.039,
+      "end_s": 488.55,
+      "text": "so remember that three"
+    },
+    {
+      "start_s": 488.56,
+      "end_s": 491.43,
+      "text": "that hit the mosaic emblem notice how it"
+    },
+    {
+      "start_s": 491.44,
+      "end_s": 491.99,
+      "text": "falls right"
+    },
+    {
+      "start_s": 492.0,
+      "end_s": 494.39,
+      "text": "below chris paul's name and then the the"
+    },
+    {
+      "start_s": 494.4,
+      "end_s": 495.83,
+      "text": "four this is like i think millimeter"
+    },
+    {
+      "start_s": 495.84,
+      "end_s": 496.55,
+      "text": "increments"
+    },
+    {
+      "start_s": 496.56,
+      "end_s": 497.909,
+      "text": "the four is in the middle it's this"
+    },
+    {
+      "start_s": 497.919,
+      "end_s": 499.589,
+      "text": "dotted line and then there's the five"
+    },
+    {
+      "start_s": 499.599,
+      "end_s": 501.749,
+      "text": "so this card is actually perfectly"
+    },
+    {
+      "start_s": 501.759,
+      "end_s": 502.79,
+      "text": "centered"
+    },
+    {
+      "start_s": 502.8,
+      "end_s": 504.469,
+      "text": "the name usually falls right between the"
+    },
+    {
+      "start_s": 504.479,
+      "end_s": 506.23,
+      "text": "five and the three"
+    },
+    {
+      "start_s": 506.24,
+      "end_s": 507.589,
+      "text": "it's like perfectly in that little"
+    },
+    {
+      "start_s": 507.599,
+      "end_s": 510.07,
+      "text": "square there and then as i kind of went"
+    },
+    {
+      "start_s": 510.08,
+      "end_s": 515.19,
+      "text": "around the card"
+    },
+    {
+      "start_s": 515.2,
+      "end_s": 519.509,
+      "text": "that three line i'll draw my lost my pin"
+    },
+    {
+      "start_s": 519.519,
+      "end_s": 521.19,
+      "text": "that three line it hits the side of the"
+    },
+    {
+      "start_s": 521.2,
+      "end_s": 523.029,
+      "text": "mosaic emblem and then the top"
+    },
+    {
+      "start_s": 523.039,
+      "end_s": 524.55,
+      "text": "and then it goes across the top of the"
+    },
+    {
+      "start_s": 524.56,
+      "end_s": 526.63,
+      "text": "player's name now this is how you do"
+    },
+    {
+      "start_s": 526.64,
+      "end_s": 528.87,
+      "text": "mosaic it is a little different for"
+    },
+    {
+      "start_s": 528.88,
+      "end_s": 531.269,
+      "text": "the nba debut cards if you guys recall"
+    },
+    {
+      "start_s": 531.279,
+      "end_s": 533.509,
+      "text": "those i didn't have any on standby"
+    },
+    {
+      "start_s": 533.519,
+      "end_s": 534.87,
+      "text": "it's a little different and then the"
+    },
+    {
+      "start_s": 534.88,
+      "end_s": 537.19,
+      "text": "rookie cards that the rookie card"
+    },
+    {
+      "start_s": 537.2,
+      "end_s": 538.389,
+      "text": "emblem i believe it's actually an"
+    },
+    {
+      "start_s": 538.399,
+      "end_s": 540.23,
+      "text": "opposite direction but the rookie card"
+    },
+    {
+      "start_s": 540.24,
+      "end_s": 542.31,
+      "text": "emblem hits the same spot on the three"
+    },
+    {
+      "start_s": 542.32,
+      "end_s": 544.63,
+      "text": "and then it it matches up and aligns"
+    },
+    {
+      "start_s": 544.64,
+      "end_s": 545.35,
+      "text": "itself"
+    },
+    {
+      "start_s": 545.36,
+      "end_s": 547.91,
+      "text": "with the mosaic emblem the rc and the"
+    },
+    {
+      "start_s": 547.92,
+      "end_s": 549.03,
+      "text": "mosaic emblem"
+    },
+    {
+      "start_s": 549.04,
+      "end_s": 551.11,
+      "text": "so that's how i tell for mosaic cards it"
+    },
+    {
+      "start_s": 551.12,
+      "end_s": 552.23,
+      "text": "is a little different for the inserts"
+    },
+    {
+      "start_s": 552.24,
+      "end_s": 554.31,
+      "text": "like i said the hall of fame and the nba"
+    },
+    {
+      "start_s": 554.32,
+      "end_s": 555.59,
+      "text": "debut it's"
+    },
+    {
+      "start_s": 555.6,
+      "end_s": 557.67,
+      "text": "slightly different here oh and then"
+    },
+    {
+      "start_s": 557.68,
+      "end_s": 559.03,
+      "text": "another thing too"
+    },
+    {
+      "start_s": 559.04,
+      "end_s": 560.55,
+      "text": "you may have heard some people mention"
+    },
+    {
+      "start_s": 560.56,
+      "end_s": 562.23,
+      "text": "how and i think i've knocked this a"
+    },
+    {
+      "start_s": 562.24,
+      "end_s": 563.59,
+      "text": "little off since i've been moving the"
+    },
+    {
+      "start_s": 563.6,
+      "end_s": 564.71,
+      "text": "camera around"
+    },
+    {
+      "start_s": 564.72,
+      "end_s": 567.91,
+      "text": "but for mosaic this border the name"
+    },
+    {
+      "start_s": 567.92,
+      "end_s": 569.509,
+      "text": "that centering kind of gives it away too"
+    },
+    {
+      "start_s": 569.519,
+      "end_s": 571.269,
+      "text": "but what i've noticed with this tool the"
+    },
+    {
+      "start_s": 571.279,
+      "end_s": 571.67,
+      "text": "six"
+    },
+    {
+      "start_s": 571.68,
+      "end_s": 573.99,
+      "text": "lines up perfectly with the top of the"
+    },
+    {
+      "start_s": 574.0,
+      "end_s": 575.67,
+      "text": "the text box i guess you could say"
+    },
+    {
+      "start_s": 575.68,
+      "end_s": 578.71,
+      "text": "it should go six four two that usually"
+    },
+    {
+      "start_s": 578.72,
+      "end_s": 580.71,
+      "text": "means perfect centering for a mosaic"
+    },
+    {
+      "start_s": 580.72,
+      "end_s": 581.43,
+      "text": "card"
+    },
+    {
+      "start_s": 581.44,
+      "end_s": 583.269,
+      "text": "so that's how i kind of learned i"
+    },
+    {
+      "start_s": 583.279,
+      "end_s": 585.59,
+      "text": "basically"
+    },
+    {
+      "start_s": 585.6,
+      "end_s": 587.03,
+      "text": "i'm like alright i'm gonna teach myself"
+    },
+    {
+      "start_s": 587.04,
+      "end_s": 589.35,
+      "text": "i basically had a stack"
+    },
+    {
+      "start_s": 589.36,
+      "end_s": 592.87,
+      "text": "of mosaic cards and i just went through"
+    },
+    {
+      "start_s": 592.88,
+      "end_s": 594.389,
+      "text": "each and every one of them no matter how"
+    },
+    {
+      "start_s": 594.399,
+      "end_s": 596.15,
+      "text": "basic or valuable it was"
+    },
+    {
+      "start_s": 596.16,
+      "end_s": 598.31,
+      "text": "just to teach myself the pattern that's"
+    },
+    {
+      "start_s": 598.32,
+      "end_s": 600.47,
+      "text": "mosaic don russ is a lot easier i'm"
+    },
+    {
+      "start_s": 600.48,
+      "end_s": 601.829,
+      "text": "going to show you that real quick"
+    },
+    {
+      "start_s": 601.839,
+      "end_s": 602.79,
+      "text": "and then i'll walk you through how i"
+    },
+    {
+      "start_s": 602.8,
+      "end_s": 607.19,
+      "text": "basically do a quick scan"
+    },
+    {
+      "start_s": 607.2,
+      "end_s": 609.11,
+      "text": "okay guys now i'm back with a don rust"
+    },
+    {
+      "start_s": 609.12,
+      "end_s": 611.19,
+      "text": "example this malcolm brogdon card"
+    },
+    {
+      "start_s": 611.2,
+      "end_s": 613.509,
+      "text": "so understand my hand may move these"
+    },
+    {
+      "start_s": 613.519,
+      "end_s": 615.11,
+      "text": "borders as i'm filming"
+    },
+    {
+      "start_s": 615.12,
+      "end_s": 616.71,
+      "text": "but i just hope the concept is getting"
+    },
+    {
+      "start_s": 616.72,
+      "end_s": 618.949,
+      "text": "through to you so like i stated you make"
+    },
+    {
+      "start_s": 618.959,
+      "end_s": 622.15,
+      "text": "sure the card is online i only loop"
+    },
+    {
+      "start_s": 622.16,
+      "end_s": 623.99,
+      "text": "the the four corners once i'm ready to"
+    },
+    {
+      "start_s": 624.0,
+      "end_s": 625.509,
+      "text": "inspect it for grading"
+    },
+    {
+      "start_s": 625.519,
+      "end_s": 627.35,
+      "text": "to make sure the card is dead center and"
+    },
+    {
+      "start_s": 627.36,
+      "end_s": 628.949,
+      "text": "like i said it's gonna definitely move"
+    },
+    {
+      "start_s": 628.959,
+      "end_s": 630.87,
+      "text": "as i'm filming this without question"
+    },
+    {
+      "start_s": 630.88,
+      "end_s": 632.71,
+      "text": "so this is a perfectly centered card i"
+    },
+    {
+      "start_s": 632.72,
+      "end_s": 634.23,
+      "text": "know now here's the thing"
+    },
+    {
+      "start_s": 634.24,
+      "end_s": 636.069,
+      "text": "so this malcolm brogdon here's how you"
+    },
+    {
+      "start_s": 636.079,
+      "end_s": 637.99,
+      "text": "it's easier on cards with borders like"
+    },
+    {
+      "start_s": 638.0,
+      "end_s": 639.43,
+      "text": "don rust synoptic"
+    },
+    {
+      "start_s": 639.44,
+      "end_s": 642.63,
+      "text": "the three it hits right at the top of"
+    },
+    {
+      "start_s": 642.64,
+      "end_s": 643.509,
+      "text": "this"
+    },
+    {
+      "start_s": 643.519,
+      "end_s": 645.829,
+      "text": "like above the don rust box at the top"
+    },
+    {
+      "start_s": 645.8389999999999,
+      "end_s": 646.79,
+      "text": "of the card"
+    },
+    {
+      "start_s": 646.8,
+      "end_s": 648.389,
+      "text": "and then of course there's no this is a"
+    },
+    {
+      "start_s": 648.399,
+      "end_s": 650.389,
+      "text": "blank area up here and then if you look"
+    },
+    {
+      "start_s": 650.399,
+      "end_s": 652.949,
+      "text": "down bottom"
+    },
+    {
+      "start_s": 652.9590000000001,
+      "end_s": 655.829,
+      "text": "come on i gotta hold my finger right i"
+    },
+    {
+      "start_s": 655.8389999999999,
+      "end_s": 657.11,
+      "text": "think i did it okay"
+    },
+    {
+      "start_s": 657.12,
+      "end_s": 666.23,
+      "text": "without moving three hits"
+    },
+    {
+      "start_s": 666.24,
+      "end_s": 668.15,
+      "text": "right down at the bottom so it's perfect"
+    },
+    {
+      "start_s": 668.16,
+      "end_s": 671.03,
+      "text": "centering up to down you're with me guys"
+    },
+    {
+      "start_s": 671.04,
+      "end_s": 674.31,
+      "text": "now this three let's walk with it around"
+    },
+    {
+      "start_s": 674.32,
+      "end_s": 675.03,
+      "text": "the corner"
+    },
+    {
+      "start_s": 675.04,
+      "end_s": 677.03,
+      "text": "up the top this is where the three is"
+    },
+    {
+      "start_s": 677.04,
+      "end_s": 679.03,
+      "text": "right here and i'm sorry i do"
+    },
+    {
+      "start_s": 679.04,
+      "end_s": 681.03,
+      "text": "loop i loop the four corners make sure"
+    },
+    {
+      "start_s": 681.04,
+      "end_s": 682.31,
+      "text": "it's even underneath and then i will"
+    },
+    {
+      "start_s": 682.32,
+      "end_s": 684.069,
+      "text": "loop the numbers to make sure it's even"
+    },
+    {
+      "start_s": 684.079,
+      "end_s": 686.069,
+      "text": "so the three line lines up on the border"
+    },
+    {
+      "start_s": 686.079,
+      "end_s": 687.11,
+      "text": "of the left"
+    },
+    {
+      "start_s": 687.12,
+      "end_s": 689.19,
+      "text": "let's go to the right as best as i can"
+    },
+    {
+      "start_s": 689.2,
+      "end_s": 691.91,
+      "text": "for you"
+    },
+    {
+      "start_s": 691.92,
+      "end_s": 694.389,
+      "text": "ah i don't want to knock it more but the"
+    },
+    {
+      "start_s": 694.399,
+      "end_s": 695.11,
+      "text": "three"
+    },
+    {
+      "start_s": 695.12,
+      "end_s": 698.15,
+      "text": "where's the pin the three is over here"
+    },
+    {
+      "start_s": 698.16,
+      "end_s": 698.71,
+      "text": "as well"
+    },
+    {
+      "start_s": 698.72,
+      "end_s": 700.63,
+      "text": "so you guys with me it's three all the"
+    },
+    {
+      "start_s": 700.64,
+      "end_s": 702.15,
+      "text": "way around now"
+    },
+    {
+      "start_s": 702.16,
+      "end_s": 704.47,
+      "text": "it's a whole lot easier with with don"
+    },
+    {
+      "start_s": 704.48,
+      "end_s": 706.069,
+      "text": "rustin optic and then of course as you"
+    },
+    {
+      "start_s": 706.079,
+      "end_s": 707.43,
+      "text": "can see here i don't know if you notice"
+    },
+    {
+      "start_s": 707.44,
+      "end_s": 708.949,
+      "text": "the malcolm brogdon's name i just want"
+    },
+    {
+      "start_s": 708.9590000000001,
+      "end_s": 710.47,
+      "text": "to show you this real quick how"
+    },
+    {
+      "start_s": 710.48,
+      "end_s": 712.47,
+      "text": "the star is kind of lined with this his"
+    },
+    {
+      "start_s": 712.48,
+      "end_s": 714.069,
+      "text": "name is like in between perfectly like"
+    },
+    {
+      "start_s": 714.079,
+      "end_s": 714.55,
+      "text": "the 10"
+    },
+    {
+      "start_s": 714.56,
+      "end_s": 716.31,
+      "text": "and like the eight line just about you"
+    },
+    {
+      "start_s": 716.32,
+      "end_s": 717.829,
+      "text": "notice these patterns the more you look"
+    },
+    {
+      "start_s": 717.8389999999999,
+      "end_s": 719.269,
+      "text": "through these cards"
+    },
+    {
+      "start_s": 719.279,
+      "end_s": 720.87,
+      "text": "ah i'm gonna relieve my finger of"
+    },
+    {
+      "start_s": 720.88,
+      "end_s": 722.71,
+      "text": "stretching that out now that's when this"
+    },
+    {
+      "start_s": 722.72,
+      "end_s": 725.99,
+      "text": "tool"
+    },
+    {
+      "start_s": 726.0,
+      "end_s": 727.43,
+      "text": "i hope this is coming through good for"
+    },
+    {
+      "start_s": 727.44,
+      "end_s": 730.15,
+      "text": "you guys so that's when this tool"
+    },
+    {
+      "start_s": 730.16,
+      "end_s": 732.069,
+      "text": "that um this gentleman designed here"
+    },
+    {
+      "start_s": 732.079,
+      "end_s": 733.19,
+      "text": "comes into effect"
+    },
+    {
+      "start_s": 733.2,
+      "end_s": 736.55,
+      "text": "so you can see 3 3 is 50 50 centering"
+    },
+    {
+      "start_s": 736.56,
+      "end_s": 738.389,
+      "text": "now when you look at prism cards it's a"
+    },
+    {
+      "start_s": 738.399,
+      "end_s": 739.75,
+      "text": "little different i haven't"
+    },
+    {
+      "start_s": 739.76,
+      "end_s": 741.03,
+      "text": "honestly i haven't hardly find any"
+    },
+    {
+      "start_s": 741.04,
+      "end_s": 743.509,
+      "text": "perfect centering of 1920 prism"
+    },
+    {
+      "start_s": 743.519,
+      "end_s": 745.03,
+      "text": "but they get a little different you know"
+    },
+    {
+      "start_s": 745.04,
+      "end_s": 746.949,
+      "text": "it gets you know how it's like wide at"
+    },
+    {
+      "start_s": 746.959,
+      "end_s": 748.31,
+      "text": "the bottom and then it's like thicker at"
+    },
+    {
+      "start_s": 748.32,
+      "end_s": 750.71,
+      "text": "the top type deal with those prism cards"
+    },
+    {
+      "start_s": 750.72,
+      "end_s": 754.31,
+      "text": "um let's see if i got an example"
+    },
+    {
+      "start_s": 754.32,
+      "end_s": 756.069,
+      "text": "thank god i had this nearby how it's"
+    },
+    {
+      "start_s": 756.079,
+      "end_s": 757.91,
+      "text": "like wide at the bottom and then up at"
+    },
+    {
+      "start_s": 757.92,
+      "end_s": 759.67,
+      "text": "the top so you'd be looking at two sets"
+    },
+    {
+      "start_s": 759.68,
+      "end_s": 761.269,
+      "text": "of numbers but basically"
+    },
+    {
+      "start_s": 761.279,
+      "end_s": 763.03,
+      "text": "instead of a three three the border"
+    },
+    {
+      "start_s": 763.04,
+      "end_s": 764.23,
+      "text": "might be different it might be like a"
+    },
+    {
+      "start_s": 764.24,
+      "end_s": 764.79,
+      "text": "seven"
+    },
+    {
+      "start_s": 764.8,
+      "end_s": 766.31,
+      "text": "and then you know it just kind of tells"
+    },
+    {
+      "start_s": 766.32,
+      "end_s": 768.389,
+      "text": "you here so this tool breaks down the"
+    },
+    {
+      "start_s": 768.399,
+      "end_s": 769.59,
+      "text": "centering and let's say it was"
+    },
+    {
+      "start_s": 769.6,
+      "end_s": 770.949,
+      "text": "slightly off let's say you had like a"
+    },
+    {
+      "start_s": 770.9590000000001,
+      "end_s": 772.71,
+      "text": "four well that's badly off"
+    },
+    {
+      "start_s": 772.72,
+      "end_s": 774.31,
+      "text": "but let's say you had like a three two"
+    },
+    {
+      "start_s": 774.32,
+      "end_s": 775.67,
+      "text": "or something like that let you know it's"
+    },
+    {
+      "start_s": 775.68,
+      "end_s": 777.269,
+      "text": "60 40 centering"
+    },
+    {
+      "start_s": 777.279,
+      "end_s": 779.829,
+      "text": "so that's kind of how this tool comes"
+    },
+    {
+      "start_s": 779.8389999999999,
+      "end_s": 780.47,
+      "text": "into"
+    },
+    {
+      "start_s": 780.48,
+      "end_s": 783.35,
+      "text": "effect um the gr the grades it gives you"
+    },
+    {
+      "start_s": 783.36,
+      "end_s": 785.11,
+      "text": "in terms of making sure it's aligned"
+    },
+    {
+      "start_s": 785.12,
+      "end_s": 786.71,
+      "text": "and then the grid though it's not really"
+    },
+    {
+      "start_s": 786.72,
+      "end_s": 788.79,
+      "text": "visible held up to the air"
+    },
+    {
+      "start_s": 788.8,
+      "end_s": 790.47,
+      "text": "i hope that it made sense with you guys"
+    },
+    {
+      "start_s": 790.48,
+      "end_s": 791.99,
+      "text": "seeing it through the cards and it came"
+    },
+    {
+      "start_s": 792.0,
+      "end_s": 792.629,
+      "text": "through"
+    },
+    {
+      "start_s": 792.639,
+      "end_s": 795.99,
+      "text": "now when i do inspect cardboard cards"
+    },
+    {
+      "start_s": 796.0,
+      "end_s": 798.23,
+      "text": "i do use the loop for those because"
+    },
+    {
+      "start_s": 798.24,
+      "end_s": 799.509,
+      "text": "here's what will happen"
+    },
+    {
+      "start_s": 799.519,
+      "end_s": 803.19,
+      "text": "like the ink the gold stamp"
+    },
+    {
+      "start_s": 803.2,
+      "end_s": 805.509,
+      "text": "on these cards here there will be like"
+    },
+    {
+      "start_s": 805.519,
+      "end_s": 807.19,
+      "text": "gold flakes in different parts of the"
+    },
+    {
+      "start_s": 807.2,
+      "end_s": 807.91,
+      "text": "card"
+    },
+    {
+      "start_s": 807.92,
+      "end_s": 809.35,
+      "text": "and you're doing it in the light giving"
+    },
+    {
+      "start_s": 809.36,
+      "end_s": 811.19,
+      "text": "a little harlem shake you won't pick up"
+    },
+    {
+      "start_s": 811.2,
+      "end_s": 812.55,
+      "text": "on it so i will loop"
+    },
+    {
+      "start_s": 812.56,
+      "end_s": 815.67,
+      "text": "cardboard cards um the chronicles cards"
+    },
+    {
+      "start_s": 815.68,
+      "end_s": 816.23,
+      "text": "the the"
+    },
+    {
+      "start_s": 816.24,
+      "end_s": 819.11,
+      "text": "nba hoops and don rust but chrome cards"
+    },
+    {
+      "start_s": 819.12,
+      "end_s": 820.15,
+      "text": "i don't loop for"
+    },
+    {
+      "start_s": 820.16,
+      "end_s": 822.069,
+      "text": "defects i just harlem shake like i"
+    },
+    {
+      "start_s": 822.079,
+      "end_s": 823.509,
+      "text": "stated earlier"
+    },
+    {
+      "start_s": 823.519,
+      "end_s": 826.31,
+      "text": "and that's it i see if there's a dimple"
+    },
+    {
+      "start_s": 826.32,
+      "end_s": 828.389,
+      "text": "or scratch or a lime like that"
+    },
+    {
+      "start_s": 828.399,
+      "end_s": 830.31,
+      "text": "so that i hope that was helpful for the"
+    },
+    {
+      "start_s": 830.32,
+      "end_s": 832.31,
+      "text": "don russ and then this last clip will"
+    },
+    {
+      "start_s": 832.32,
+      "end_s": 833.189,
+      "text": "just mean"
+    },
+    {
+      "start_s": 833.199,
+      "end_s": 835.189,
+      "text": "i basically can do it in like one to two"
+    },
+    {
+      "start_s": 835.199,
+      "end_s": 836.629,
+      "text": "minutes now"
+    },
+    {
+      "start_s": 836.639,
+      "end_s": 840.47,
+      "text": "as i'm preparing like bulk submissions"
+    },
+    {
+      "start_s": 840.48,
+      "end_s": 841.67,
+      "text": "all right and this is how i keep a"
+    },
+    {
+      "start_s": 841.68,
+      "end_s": 843.43,
+      "text": "rhythm and inspect quickly so i got my"
+    },
+    {
+      "start_s": 843.44,
+      "end_s": 845.829,
+      "text": "team break results"
+    },
+    {
+      "start_s": 845.839,
+      "end_s": 848.23,
+      "text": "one cloth wipe my area down make sure"
+    },
+    {
+      "start_s": 848.24,
+      "end_s": 851.829,
+      "text": "there's no dust there"
+    },
+    {
+      "start_s": 851.839,
+      "end_s": 855.189,
+      "text": "get out a cloth for the card take it out"
+    },
+    {
+      "start_s": 855.199,
+      "end_s": 860.15,
+      "text": "of take the card out of my penny sleeve"
+    },
+    {
+      "start_s": 860.16,
+      "end_s": 863.269,
+      "text": "four corners sharp sharp sharp"
+    },
+    {
+      "start_s": 863.279,
+      "end_s": 866.23,
+      "text": "look at the back four corners any white"
+    },
+    {
+      "start_s": 866.24,
+      "end_s": 868.55,
+      "text": "sharp sharp it passes the corners test"
+    },
+    {
+      "start_s": 868.56,
+      "end_s": 870.949,
+      "text": "flip it back over harlow shake from top"
+    },
+    {
+      "start_s": 870.959,
+      "end_s": 871.99,
+      "text": "to bottom"
+    },
+    {
+      "start_s": 872.0,
+      "end_s": 874.87,
+      "text": "any pimples dents scratches fingerprints"
+    },
+    {
+      "start_s": 874.88,
+      "end_s": 876.23,
+      "text": "there's actually one there but for the"
+    },
+    {
+      "start_s": 876.24,
+      "end_s": 878.15,
+      "text": "sake of the video"
+    },
+    {
+      "start_s": 878.16,
+      "end_s": 880.31,
+      "text": "lay it down it passed all that portion"
+    },
+    {
+      "start_s": 880.32,
+      "end_s": 881.91,
+      "text": "time for centering"
+    },
+    {
+      "start_s": 881.92,
+      "end_s": 885.75,
+      "text": "so i'll give it a quick wipe down there"
+    },
+    {
+      "start_s": 885.76,
+      "end_s": 889.189,
+      "text": "bust out the centering tool"
+    },
+    {
+      "start_s": 889.199,
+      "end_s": 890.55,
+      "text": "line it up underneath this is the"
+    },
+    {
+      "start_s": 890.56,
+      "end_s": 892.949,
+      "text": "longest part"
+    },
+    {
+      "start_s": 892.9590000000001,
+      "end_s": 895.35,
+      "text": "loop the four corners magnifying end"
+    },
+    {
+      "start_s": 895.36,
+      "end_s": 896.79,
+      "text": "make sure it's perfectly lined up"
+    },
+    {
+      "start_s": 896.8,
+      "end_s": 898.71,
+      "text": "inside the grid while pressing down of"
+    },
+    {
+      "start_s": 898.72,
+      "end_s": 901.67,
+      "text": "course"
+    },
+    {
+      "start_s": 901.68,
+      "end_s": 903.59,
+      "text": "it passes the centering test that i just"
+    },
+    {
+      "start_s": 903.6,
+      "end_s": 905.43,
+      "text": "walked you through"
+    },
+    {
+      "start_s": 905.44,
+      "end_s": 907.35,
+      "text": "i use the sleeve that i picked it up"
+    },
+    {
+      "start_s": 907.36,
+      "end_s": 908.47,
+      "text": "with"
+    },
+    {
+      "start_s": 908.48,
+      "end_s": 911.59,
+      "text": "or that i had it in to flip it over okay"
+    },
+    {
+      "start_s": 911.6,
+      "end_s": 913.509,
+      "text": "and then for the back i don't lay it"
+    },
+    {
+      "start_s": 913.519,
+      "end_s": 915.91,
+      "text": "back down on the chrome"
+    },
+    {
+      "start_s": 915.92,
+      "end_s": 919.11,
+      "text": "i'll lay it back down on the sleeve"
+    },
+    {
+      "start_s": 919.12,
+      "end_s": 920.71,
+      "text": "kind of look it over again make sure"
+    },
+    {
+      "start_s": 920.72,
+      "end_s": 923.99,
+      "text": "there's nothing on the back"
+    },
+    {
+      "start_s": 924.0,
+      "end_s": 927.829,
+      "text": "gentle wipe down there take the card"
+    },
+    {
+      "start_s": 927.8389999999999,
+      "end_s": 931.35,
+      "text": "sleeve it up"
+    },
+    {
+      "start_s": 931.36,
+      "end_s": 934.71,
+      "text": "put it in the card saver which i sucked"
+    },
+    {
+      "start_s": 934.72,
+      "end_s": 936.15,
+      "text": "at putting cards and card savers at"
+    },
+    {
+      "start_s": 936.16,
+      "end_s": 937.59,
+      "text": "first i used to almost bend the card"
+    },
+    {
+      "start_s": 937.6,
+      "end_s": 938.629,
+      "text": "while putting it in"
+    },
+    {
+      "start_s": 938.639,
+      "end_s": 940.389,
+      "text": "but i've gotten better basically you"
+    },
+    {
+      "start_s": 940.399,
+      "end_s": 942.23,
+      "text": "just want to squeeze them tight"
+    },
+    {
+      "start_s": 942.24,
+      "end_s": 943.99,
+      "text": "not too tight but use your index finger"
+    },
+    {
+      "start_s": 944.0,
+      "end_s": 948.069,
+      "text": "like that to open the card saver"
+    },
+    {
+      "start_s": 948.079,
+      "end_s": 949.43,
+      "text": "then you kind of just put the card right"
+    },
+    {
+      "start_s": 949.44,
+      "end_s": 951.829,
+      "text": "there it'll slide in mostly"
+    },
+    {
+      "start_s": 951.8389999999999,
+      "end_s": 953.35,
+      "text": "ease it in sorry i think a lot of that"
+    },
+    {
+      "start_s": 953.36,
+      "end_s": 955.189,
+      "text": "was off camera and then you don't have"
+    },
+    {
+      "start_s": 955.199,
+      "end_s": 956.389,
+      "text": "to worry about getting well that one"
+    },
+    {
+      "start_s": 956.399,
+      "end_s": 957.749,
+      "text": "actually worked out it went pretty far"
+    },
+    {
+      "start_s": 957.759,
+      "end_s": 960.629,
+      "text": "down but sometimes it might stick out"
+    },
+    {
+      "start_s": 960.639,
+      "end_s": 962.23,
+      "text": "you bang it on the palm of your hand it"
+    },
+    {
+      "start_s": 962.24,
+      "end_s": 963.829,
+      "text": "gets it deep in there you don't have to"
+    },
+    {
+      "start_s": 963.839,
+      "end_s": 965.59,
+      "text": "worry about bending or damaging the car"
+    },
+    {
+      "start_s": 965.6,
+      "end_s": 967.59,
+      "text": "because i was not very good at putting"
+    },
+    {
+      "start_s": 967.6,
+      "end_s": 968.87,
+      "text": "cards and card savers"
+    },
+    {
+      "start_s": 968.88,
+      "end_s": 970.629,
+      "text": "uh when i first started this but that's"
+    },
+    {
+      "start_s": 970.639,
+      "end_s": 973.99,
+      "text": "how you do it and that's how"
+    },
+    {
+      "start_s": 974.0,
+      "end_s": 976.23,
+      "text": "i get tens man that's how i get gym so"
+    },
+    {
+      "start_s": 976.24,
+      "end_s": 977.509,
+      "text": "that's how i learn"
+    },
+    {
+      "start_s": 977.519,
+      "end_s": 979.99,
+      "text": "basically what you need to do pick up"
+    },
+    {
+      "start_s": 980.0,
+      "end_s": 981.829,
+      "text": "this centering tool i would suggest it"
+    },
+    {
+      "start_s": 981.8389999999999,
+      "end_s": 983.03,
+      "text": "again i'm not in"
+    },
+    {
+      "start_s": 983.04,
+      "end_s": 985.269,
+      "text": "i don't work with this this guy get"
+    },
+    {
+      "start_s": 985.279,
+      "end_s": 986.629,
+      "text": "yourself a pile of"
+    },
+    {
+      "start_s": 986.639,
+      "end_s": 988.629,
+      "text": "mosaic or don russ teach yourself one"
+    },
+    {
+      "start_s": 988.639,
+      "end_s": 989.829,
+      "text": "brand of card first"
+    },
+    {
+      "start_s": 989.8389999999999,
+      "end_s": 991.91,
+      "text": "you know get a pattern get a rhythm and"
+    },
+    {
+      "start_s": 991.92,
+      "end_s": 993.749,
+      "text": "just go through every single card"
+    },
+    {
+      "start_s": 993.759,
+      "end_s": 995.509,
+      "text": "lining it up with the tool wiping them"
+    },
+    {
+      "start_s": 995.519,
+      "end_s": 997.509,
+      "text": "down get yourself an eye for centering"
+    },
+    {
+      "start_s": 997.519,
+      "end_s": 998.629,
+      "text": "with using this"
+    },
+    {
+      "start_s": 998.639,
+      "end_s": 999.67,
+      "text": "the only thing that seems very"
+    },
+    {
+      "start_s": 999.68,
+      "end_s": 1002.15,
+      "text": "subjective to me is is as edges"
+    },
+    {
+      "start_s": 1002.16,
+      "end_s": 1004.47,
+      "text": "like that that's just like up in the air"
+    },
+    {
+      "start_s": 1004.48,
+      "end_s": 1006.23,
+      "text": "you know but you can look at corners you"
+    },
+    {
+      "start_s": 1006.24,
+      "end_s": 1006.87,
+      "text": "can tell"
+    },
+    {
+      "start_s": 1006.88,
+      "end_s": 1008.71,
+      "text": "with this tool you can definitely get"
+    },
+    {
+      "start_s": 1008.72,
+      "end_s": 1010.71,
+      "text": "centers right and you can definitely you"
+    },
+    {
+      "start_s": 1010.72,
+      "end_s": 1011.509,
+      "text": "know of course"
+    },
+    {
+      "start_s": 1011.519,
+      "end_s": 1013.43,
+      "text": "with magnifying and the perf the right"
+    },
+    {
+      "start_s": 1013.44,
+      "end_s": 1014.55,
+      "text": "lighting you can see if there's any"
+    },
+    {
+      "start_s": 1014.56,
+      "end_s": 1015.91,
+      "text": "defects on the cards"
+    },
+    {
+      "start_s": 1015.92,
+      "end_s": 1017.269,
+      "text": "so you know i hope this is definitely"
+    },
+    {
+      "start_s": 1017.279,
+      "end_s": 1019.43,
+      "text": "helpful to sub um i think it's the first"
+    },
+    {
+      "start_s": 1019.44,
+      "end_s": 1020.31,
+      "text": "yeah this is definitely the first"
+    },
+    {
+      "start_s": 1020.32,
+      "end_s": 1021.749,
+      "text": "tutorial i've ever done but"
+    },
+    {
+      "start_s": 1021.759,
+      "end_s": 1023.509,
+      "text": "that's how i expect my cards for grading"
+    },
+    {
+      "start_s": 1023.519,
+      "end_s": 1025.59,
+      "text": "i got some team break results for like i"
+    },
+    {
+      "start_s": 1025.6,
+      "end_s": 1027.59,
+      "text": "bought like half the nba out in optic"
+    },
+    {
+      "start_s": 1027.6,
+      "end_s": 1029.51,
+      "text": "team breaks uh those should be coming in"
+    },
+    {
+      "start_s": 1029.52,
+      "end_s": 1030.63,
+      "text": "this week we'll do a break and a"
+    },
+    {
+      "start_s": 1030.64,
+      "end_s": 1031.59,
+      "text": "giveaway on that"
+    },
+    {
+      "start_s": 1031.6,
+      "end_s": 1033.189,
+      "text": "but i do thank you all for watching"
+    },
+    {
+      "start_s": 1033.199,
+      "end_s": 1034.47,
+      "text": "really hope this was helped let me know"
+    },
+    {
+      "start_s": 1034.48,
+      "end_s": 1036.23,
+      "text": "in the comments down below was this"
+    },
+    {
+      "start_s": 1036.24,
+      "end_s": 1038.309,
+      "text": "video helpful to you"
+    },
+    {
+      "start_s": 1038.319,
+      "end_s": 1040.15,
+      "text": "yes or no and then if you have anything"
+    },
+    {
+      "start_s": 1040.16,
+      "end_s": 1041.669,
+      "text": "you'd like for me to try to help you out"
+    },
+    {
+      "start_s": 1041.679,
+      "end_s": 1043.75,
+      "text": "with i'm open to creating those video"
+    },
+    {
+      "start_s": 1043.76,
+      "end_s": 1046.789,
+      "text": "ideas as well but stay safe be blessed"
+    },
+    {
+      "start_s": 1046.799,
+      "end_s": 1051.12,
+      "text": "keep on collecting"
+    }
+  ]
+}

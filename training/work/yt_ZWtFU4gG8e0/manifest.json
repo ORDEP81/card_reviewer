@@ -1,0 +1,69 @@
+{
+  "video_id": "yt_ZWtFU4gG8e0",
+  "source": {
+    "type": "youtube",
+    "url": "https://youtu.be/ZWtFU4gG8e0",
+    "title": "Get Better Grades! Card Pre-Grading Tutorial with Gem Mint John!",
+    "uploader": "Nothing But Cardboard",
+    "duration_s": 733.0
+  },
+  "file": {
+    "path": "source/video.mkv",
+    "sha256": "4a84bd0766e08329fada86d7d5e144c59259eed6c500a39dba1a8868b1e2524c",
+    "bytes": 222491578
+  },
+  "stages": {
+    "acquire": {
+      "status": "done",
+      "at": "2026-08-29T19:30:21.427035Z",
+      "error": null,
+      "detail": {
+        "tool": "yt-dlp",
+        "browser": null
+      }
+    },
+    "transcribe": {
+      "status": "done",
+      "at": "2026-08-29T19:30:23.754675Z",
+      "error": null,
+      "detail": {
+        "method": "captions",
+        "model": null,
+        "cues": 343
+      }
+    },
+    "segment": {
+      "status": "done",
+      "at": "2026-08-29T19:30:23.776411Z",
+      "error": null,
+      "detail": {
+        "n_segments": 13,
+        "lexicon_version": "1"
+      }
+    },
+    "extract_frames": {
+      "status": "done",
+      "at": "2026-08-29T19:30:28.742099Z",
+      "error": null,
+      "detail": {
+        "n_frames": 110,
+        "uniform": false,
+        "fps": 1.0
+      }
+    },
+    "analyze": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    },
+    "validate": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    }
+  },
+  "lesson_id": null,
+  "rubric_version_at_ingest": "0.1.0"
+}

@@ -1,0 +1,1722 @@
+{
+  "method": "captions",
+  "model": null,
+  "language": "en",
+  "cues": [
+    {
+      "start_s": 0.07,
+      "end_s": 4.37,
+      "text": "[Music]"
+    },
+    {
+      "start_s": 4.38,
+      "end_s": 11.749,
+      "text": "[Applause]"
+    },
+    {
+      "start_s": 11.759,
+      "end_s": 13.749,
+      "text": "all right guys how you doing john from"
+    },
+    {
+      "start_s": 13.759,
+      "end_s": 16.15,
+      "text": "nothing but cardboard jim meant john"
+    },
+    {
+      "start_s": 16.16,
+      "end_s": 17.83,
+      "text": "from nothing but cardboard"
+    },
+    {
+      "start_s": 17.84,
+      "end_s": 19.189,
+      "text": "if you saw the last video you'll know"
+    },
+    {
+      "start_s": 19.199,
+      "end_s": 21.349,
+      "text": "what that's about in our"
+    },
+    {
+      "start_s": 21.359,
+      "end_s": 23.99,
+      "text": "131 bulk card submission"
+    },
+    {
+      "start_s": 24.0,
+      "end_s": 27.509,
+      "text": "and the pre-grade challenge that we did"
+    },
+    {
+      "start_s": 27.519,
+      "end_s": 28.79,
+      "text": "everybody did really well on the"
+    },
+    {
+      "start_s": 28.8,
+      "end_s": 30.87,
+      "text": "pre-grades i was just a little bit"
+    },
+    {
+      "start_s": 30.88,
+      "end_s": 31.75,
+      "text": "better"
+    },
+    {
+      "start_s": 31.76,
+      "end_s": 33.43,
+      "text": "um"
+    },
+    {
+      "start_s": 33.44,
+      "end_s": 35.03,
+      "text": "just worked out that way this time so"
+    },
+    {
+      "start_s": 35.04,
+      "end_s": 37.43,
+      "text": "i'm gonna do a video on how i"
+    },
+    {
+      "start_s": 37.44,
+      "end_s": 41.19,
+      "text": "pre-grade cards my game plan and my uh"
+    },
+    {
+      "start_s": 41.2,
+      "end_s": 42.63,
+      "text": "thought process"
+    },
+    {
+      "start_s": 42.64,
+      "end_s": 45.11,
+      "text": "so a few things you'll need"
+    },
+    {
+      "start_s": 45.12,
+      "end_s": 46.95,
+      "text": "good light"
+    },
+    {
+      "start_s": 46.96,
+      "end_s": 49.59,
+      "text": "good bright light to see the cards"
+    },
+    {
+      "start_s": 49.6,
+      "end_s": 51.11,
+      "text": "i have a magnifying glass that has a"
+    },
+    {
+      "start_s": 51.12,
+      "end_s": 52.389,
+      "text": "light on it"
+    },
+    {
+      "start_s": 52.399,
+      "end_s": 55.11,
+      "text": "my eyes are old so it helps me to see"
+    },
+    {
+      "start_s": 55.12,
+      "end_s": 57.67,
+      "text": "i have a jeweler's loop"
+    },
+    {
+      "start_s": 57.68,
+      "end_s": 60.63,
+      "text": "all this stuff can be purchased on ebay"
+    },
+    {
+      "start_s": 60.64,
+      "end_s": 63.028999999999996,
+      "text": "microfiber towel"
+    },
+    {
+      "start_s": 63.039,
+      "end_s": 65.83,
+      "text": "like a auto parts door"
+    },
+    {
+      "start_s": 65.84,
+      "end_s": 69.19,
+      "text": "a glass eyeglass cleaning"
+    },
+    {
+      "start_s": 69.2,
+      "end_s": 71.59,
+      "text": "um rag"
+    },
+    {
+      "start_s": 71.6,
+      "end_s": 74.469,
+      "text": "for me i use these labels to pre-grade"
+    },
+    {
+      "start_s": 74.479,
+      "end_s": 77.59,
+      "text": "my cards so that later i'll know"
+    },
+    {
+      "start_s": 77.6,
+      "end_s": 79.59,
+      "text": "what they pre-graded"
+    },
+    {
+      "start_s": 79.6,
+      "end_s": 80.789,
+      "text": "for scale"
+    },
+    {
+      "start_s": 80.799,
+      "end_s": 83.429,
+      "text": "i use those because i do a lot of"
+    },
+    {
+      "start_s": 83.439,
+      "end_s": 85.03,
+      "text": "pre-grading when i get the cards in i"
+    },
+    {
+      "start_s": 85.03999999999999,
+      "end_s": 86.71000000000001,
+      "text": "try to get them done"
+    },
+    {
+      "start_s": 86.72,
+      "end_s": 89.10900000000001,
+      "text": "put up and then i have them ready psa"
+    },
+    {
+      "start_s": 89.119,
+      "end_s": 92.069,
+      "text": "was closed down for a long time so"
+    },
+    {
+      "start_s": 92.07900000000001,
+      "end_s": 93.749,
+      "text": "pre-grading my cards and getting them"
+    },
+    {
+      "start_s": 93.759,
+      "end_s": 95.749,
+      "text": "ready so that when they opened i would"
+    },
+    {
+      "start_s": 95.759,
+      "end_s": 97.59,
+      "text": "be ready to submit especially if they"
+    },
+    {
+      "start_s": 97.6,
+      "end_s": 99.19,
+      "text": "dropped down to a lower price you know"
+    },
+    {
+      "start_s": 99.2,
+      "end_s": 100.55,
+      "text": "we thought they maybe were gonna drop"
+    },
+    {
+      "start_s": 100.56,
+      "end_s": 102.55,
+      "text": "down to twenty twenty five dollars it"
+    },
+    {
+      "start_s": 102.56,
+      "end_s": 104.069,
+      "text": "might have had a few cards to submit to"
+    },
+    {
+      "start_s": 104.07900000000001,
+      "end_s": 106.069,
+      "text": "them but with the value you know still"
+    },
+    {
+      "start_s": 106.07900000000001,
+      "end_s": 108.149,
+      "text": "20 bucks for the grading fee"
+    },
+    {
+      "start_s": 108.15899999999999,
+      "end_s": 110.22999999999999,
+      "text": "nowhere near ready to submit any of my"
+    },
+    {
+      "start_s": 110.24000000000001,
+      "end_s": 111.35,
+      "text": "cards"
+    },
+    {
+      "start_s": 111.36,
+      "end_s": 114.22999999999999,
+      "text": "and then uh this is a gem meant tool for"
+    },
+    {
+      "start_s": 114.24000000000001,
+      "end_s": 116.069,
+      "text": "centering just to help centering so"
+    },
+    {
+      "start_s": 116.07900000000001,
+      "end_s": 118.95,
+      "text": "that's that's things you'll need to do"
+    },
+    {
+      "start_s": 118.96000000000001,
+      "end_s": 121.35,
+      "text": "pre-grading like i do it"
+    },
+    {
+      "start_s": 121.36,
+      "end_s": 123.19,
+      "text": "so let's get into it and i'll show you"
+    },
+    {
+      "start_s": 123.2,
+      "end_s": 125.51,
+      "text": "also you're going to need some"
+    },
+    {
+      "start_s": 125.52,
+      "end_s": 127.429,
+      "text": "clean"
+    },
+    {
+      "start_s": 127.439,
+      "end_s": 129.99,
+      "text": "sleeves"
+    },
+    {
+      "start_s": 130.0,
+      "end_s": 131.35,
+      "text": "penny sleeves"
+    },
+    {
+      "start_s": 131.36,
+      "end_s": 132.79,
+      "text": "you don't want to take old ones that"
+    },
+    {
+      "start_s": 132.8,
+      "end_s": 135.27,
+      "text": "you've had try to blow them out clean"
+    },
+    {
+      "start_s": 135.28,
+      "end_s": 137.27,
+      "text": "cards stick them back in there get hair"
+    },
+    {
+      "start_s": 137.28,
+      "end_s": 138.79,
+      "text": "on them or whatever it's just not worth"
+    },
+    {
+      "start_s": 138.8,
+      "end_s": 139.43,
+      "text": "it"
+    },
+    {
+      "start_s": 139.44,
+      "end_s": 141.51,
+      "text": "put them in a brand new"
+    },
+    {
+      "start_s": 141.52,
+      "end_s": 143.43,
+      "text": "card sleeve and put them in either a top"
+    },
+    {
+      "start_s": 143.44,
+      "end_s": 145.99,
+      "text": "loader or a"
+    },
+    {
+      "start_s": 146.0,
+      "end_s": 147.91,
+      "text": "hard case"
+    },
+    {
+      "start_s": 147.92000000000002,
+      "end_s": 150.949,
+      "text": "to get them ready to be submitted"
+    },
+    {
+      "start_s": 150.959,
+      "end_s": 153.03,
+      "text": "so i'll show you what i do all right so"
+    },
+    {
+      "start_s": 153.04,
+      "end_s": 157.19,
+      "text": "first thing i do with the card is"
+    },
+    {
+      "start_s": 157.2,
+      "end_s": 159.19,
+      "text": "i'll center it"
+    },
+    {
+      "start_s": 159.2,
+      "end_s": 161.19,
+      "text": "first i'm going to clean it"
+    },
+    {
+      "start_s": 161.2,
+      "end_s": 164.55,
+      "text": "so i'll show you how i clean the card"
+    },
+    {
+      "start_s": 164.56,
+      "end_s": 165.67000000000002,
+      "text": "got to be careful when you're cleaning"
+    },
+    {
+      "start_s": 165.68,
+      "end_s": 167.19,
+      "text": "the cards because you can do a lot more"
+    },
+    {
+      "start_s": 167.2,
+      "end_s": 168.39,
+      "text": "damage"
+    },
+    {
+      "start_s": 168.4,
+      "end_s": 170.47,
+      "text": "i will grab the bottom of the card and"
+    },
+    {
+      "start_s": 170.48,
+      "end_s": 172.39,
+      "text": "you always want to go away"
+    },
+    {
+      "start_s": 172.4,
+      "end_s": 174.949,
+      "text": "from the edges"
+    },
+    {
+      "start_s": 174.959,
+      "end_s": 176.55,
+      "text": "so you don't ever want to go in the"
+    },
+    {
+      "start_s": 176.56,
+      "end_s": 177.99,
+      "text": "edges you want to go away from that way"
+    },
+    {
+      "start_s": 178.0,
+      "end_s": 179.67000000000002,
+      "text": "there's no chance of catching the edge"
+    },
+    {
+      "start_s": 179.68,
+      "end_s": 181.35,
+      "text": "or less chance"
+    },
+    {
+      "start_s": 181.36,
+      "end_s": 183.35,
+      "text": "so i'll wipe the card"
+    },
+    {
+      "start_s": 183.36,
+      "end_s": 186.55,
+      "text": "not much pressure"
+    },
+    {
+      "start_s": 186.56,
+      "end_s": 188.79,
+      "text": "wipe it down flip it over do the same on"
+    },
+    {
+      "start_s": 188.8,
+      "end_s": 191.19,
+      "text": "the other side so i'll clean it"
+    },
+    {
+      "start_s": 191.2,
+      "end_s": 193.19,
+      "text": "then i will"
+    },
+    {
+      "start_s": 193.2,
+      "end_s": 195.83,
+      "text": "center it first there's four criteria"
+    },
+    {
+      "start_s": 195.84,
+      "end_s": 197.67000000000002,
+      "text": "for grading"
+    },
+    {
+      "start_s": 197.68,
+      "end_s": 201.19,
+      "text": "centering"
+    },
+    {
+      "start_s": 201.2,
+      "end_s": 204.149,
+      "text": "edges"
+    },
+    {
+      "start_s": 204.159,
+      "end_s": 205.99,
+      "text": "corners"
+    },
+    {
+      "start_s": 206.0,
+      "end_s": 207.91,
+      "text": "and the surface the actual like surface"
+    },
+    {
+      "start_s": 207.92000000000002,
+      "end_s": 209.03,
+      "text": "of the card"
+    },
+    {
+      "start_s": 209.04,
+      "end_s": 210.39,
+      "text": "so that's that's the four things that"
+    },
+    {
+      "start_s": 210.4,
+      "end_s": 212.789,
+      "text": "we're going to be"
+    },
+    {
+      "start_s": 212.799,
+      "end_s": 214.55,
+      "text": "looking at to"
+    },
+    {
+      "start_s": 214.56,
+      "end_s": 216.22899999999998,
+      "text": "get the grade"
+    },
+    {
+      "start_s": 216.239,
+      "end_s": 217.589,
+      "text": "anytime you do the centering you want to"
+    },
+    {
+      "start_s": 217.599,
+      "end_s": 219.50900000000001,
+      "text": "make sure it's in a"
+    },
+    {
+      "start_s": 219.519,
+      "end_s": 222.07,
+      "text": "like i said a top loader or a hard case"
+    },
+    {
+      "start_s": 222.07999999999998,
+      "end_s": 223.27,
+      "text": "so that you don't have the card and"
+    },
+    {
+      "start_s": 223.28,
+      "end_s": 224.55,
+      "text": "you're not just you know going to be"
+    },
+    {
+      "start_s": 224.56,
+      "end_s": 228.07,
+      "text": "able to damage or bend the card"
+    },
+    {
+      "start_s": 228.07999999999998,
+      "end_s": 229.589,
+      "text": "so you can tell by looking at this card"
+    },
+    {
+      "start_s": 229.599,
+      "end_s": 231.75,
+      "text": "that's off centered"
+    },
+    {
+      "start_s": 231.76,
+      "end_s": 233.589,
+      "text": "more over here than over here so it's"
+    },
+    {
+      "start_s": 233.599,
+      "end_s": 235.35,
+      "text": "off centered"
+    },
+    {
+      "start_s": 235.36,
+      "end_s": 237.67000000000002,
+      "text": "from left to right i don't know how they"
+    },
+    {
+      "start_s": 237.68,
+      "end_s": 239.91,
+      "text": "say that if it's from right to left this"
+    },
+    {
+      "start_s": 239.92000000000002,
+      "end_s": 242.63,
+      "text": "side is thicker than this side"
+    },
+    {
+      "start_s": 242.64,
+      "end_s": 244.47,
+      "text": "anyway you would measure it so you try"
+    },
+    {
+      "start_s": 244.48,
+      "end_s": 247.27,
+      "text": "to center it the best you can"
+    },
+    {
+      "start_s": 247.28,
+      "end_s": 249.03,
+      "text": "hold it in place"
+    },
+    {
+      "start_s": 249.04,
+      "end_s": 251.03,
+      "text": "just want to get it on the corners"
+    },
+    {
+      "start_s": 251.04,
+      "end_s": 252.07,
+      "text": "there's numbers and you're going to"
+    },
+    {
+      "start_s": 252.08,
+      "end_s": 256.069,
+      "text": "count the number so this side is a five"
+    },
+    {
+      "start_s": 256.079,
+      "end_s": 258.71,
+      "text": "this side is a three three and a half"
+    },
+    {
+      "start_s": 258.72,
+      "end_s": 260.71,
+      "text": "i like to use the magnifying glass like"
+    },
+    {
+      "start_s": 260.72,
+      "end_s": 262.15,
+      "text": "i said my eyes are old and i can"
+    },
+    {
+      "start_s": 262.16,
+      "end_s": 265.27,
+      "text": "actually see it really well"
+    },
+    {
+      "start_s": 265.28,
+      "end_s": 267.35,
+      "text": "so after you center it"
+    },
+    {
+      "start_s": 267.36,
+      "end_s": 268.79,
+      "text": "left to right and you're doing up and"
+    },
+    {
+      "start_s": 268.8,
+      "end_s": 270.07,
+      "text": "down"
+    },
+    {
+      "start_s": 270.08,
+      "end_s": 272.15,
+      "text": "then you want to do front and back"
+    },
+    {
+      "start_s": 272.15999999999997,
+      "end_s": 274.469,
+      "text": "so first tip right here is"
+    },
+    {
+      "start_s": 274.479,
+      "end_s": 276.71,
+      "text": "you need to know the companies"
+    },
+    {
+      "start_s": 276.72,
+      "end_s": 279.03,
+      "text": "each company has different"
+    },
+    {
+      "start_s": 279.04,
+      "end_s": 280.15,
+      "text": "rules"
+    },
+    {
+      "start_s": 280.15999999999997,
+      "end_s": 283.43,
+      "text": "different ways that they grade a"
+    },
+    {
+      "start_s": 283.44,
+      "end_s": 284.629,
+      "text": "card"
+    },
+    {
+      "start_s": 284.639,
+      "end_s": 286.95,
+      "text": "psa is known for not being as harsh on"
+    },
+    {
+      "start_s": 286.96,
+      "end_s": 289.03,
+      "text": "the back of the card as they are on the"
+    },
+    {
+      "start_s": 289.04,
+      "end_s": 290.55,
+      "text": "front of the card"
+    },
+    {
+      "start_s": 290.56,
+      "end_s": 293.59000000000003,
+      "text": "so it's possible to submit certain cards"
+    },
+    {
+      "start_s": 293.6,
+      "end_s": 295.83,
+      "text": "to certain companies and get a better"
+    },
+    {
+      "start_s": 295.84000000000003,
+      "end_s": 296.79,
+      "text": "grade"
+    },
+    {
+      "start_s": 296.8,
+      "end_s": 299.189,
+      "text": "so once you"
+    },
+    {
+      "start_s": 299.199,
+      "end_s": 301.99,
+      "text": "pre-grade and you get"
+    },
+    {
+      "start_s": 302.0,
+      "end_s": 303.83,
+      "text": "decent at it"
+    },
+    {
+      "start_s": 303.84,
+      "end_s": 306.55,
+      "text": "write down your pre-grades send them to"
+    },
+    {
+      "start_s": 306.56,
+      "end_s": 308.469,
+      "text": "the company get them back you're going"
+    },
+    {
+      "start_s": 308.479,
+      "end_s": 310.71,
+      "text": "to see how you do you're going to learn"
+    },
+    {
+      "start_s": 310.72,
+      "end_s": 312.629,
+      "text": "each company and how they"
+    },
+    {
+      "start_s": 312.639,
+      "end_s": 315.029,
+      "text": "grade based on how you have pre-graded"
+    },
+    {
+      "start_s": 315.039,
+      "end_s": 316.629,
+      "text": "the cards"
+    },
+    {
+      "start_s": 316.639,
+      "end_s": 317.909,
+      "text": "you're dealing with different graders"
+    },
+    {
+      "start_s": 317.919,
+      "end_s": 320.15,
+      "text": "there some guys have bad days some guys"
+    },
+    {
+      "start_s": 320.16,
+      "end_s": 321.51,
+      "text": "have good days we've all heard those"
+    },
+    {
+      "start_s": 321.52,
+      "end_s": 323.43,
+      "text": "stories but you're going to learn pretty"
+    },
+    {
+      "start_s": 323.44,
+      "end_s": 325.029,
+      "text": "much how"
+    },
+    {
+      "start_s": 325.039,
+      "end_s": 326.79,
+      "text": "you pre-grade the card compared to how"
+    },
+    {
+      "start_s": 326.8,
+      "end_s": 327.99,
+      "text": "the company"
+    },
+    {
+      "start_s": 328.0,
+      "end_s": 329.67,
+      "text": "is"
+    },
+    {
+      "start_s": 329.68,
+      "end_s": 330.79,
+      "text": "grading"
+    },
+    {
+      "start_s": 330.8,
+      "end_s": 332.31,
+      "text": "your card so you're going to learn and"
+    },
+    {
+      "start_s": 332.32,
+      "end_s": 333.67,
+      "text": "you're going to be able to do a better"
+    },
+    {
+      "start_s": 333.68,
+      "end_s": 335.43,
+      "text": "job of pre-grading"
+    },
+    {
+      "start_s": 335.44,
+      "end_s": 336.83,
+      "text": "so then you check"
+    },
+    {
+      "start_s": 336.84000000000003,
+      "end_s": 339.43,
+      "text": "the score"
+    },
+    {
+      "start_s": 339.44,
+      "end_s": 341.43,
+      "text": "so we said this side was five this side"
+    },
+    {
+      "start_s": 341.44,
+      "end_s": 344.87,
+      "text": "was three so that's 63 37"
+    },
+    {
+      "start_s": 344.88,
+      "end_s": 346.95,
+      "text": "so it's not in"
+    },
+    {
+      "start_s": 346.96,
+      "end_s": 348.469,
+      "text": "line with"
+    },
+    {
+      "start_s": 348.479,
+      "end_s": 350.87,
+      "text": "the company to get a 10 bold numbers are"
+    },
+    {
+      "start_s": 350.88,
+      "end_s": 353.029,
+      "text": "likely to grade a nine or better the"
+    },
+    {
+      "start_s": 353.039,
+      "end_s": 356.30899999999997,
+      "text": "front of the card is usually 60 40."
+    },
+    {
+      "start_s": 356.319,
+      "end_s": 358.39,
+      "text": "back of the card i think"
+    },
+    {
+      "start_s": 358.4,
+      "end_s": 362.15,
+      "text": "psa may be like 70 30. it's pretty"
+    },
+    {
+      "start_s": 362.16,
+      "end_s": 363.35,
+      "text": "pretty um"
+    },
+    {
+      "start_s": 363.36,
+      "end_s": 364.71,
+      "text": "big difference between the front and the"
+    },
+    {
+      "start_s": 364.72,
+      "end_s": 366.55,
+      "text": "back"
+    },
+    {
+      "start_s": 366.56,
+      "end_s": 369.83,
+      "text": "so centering is the first part"
+    },
+    {
+      "start_s": 369.84,
+      "end_s": 371.189,
+      "text": "you should do centering last because"
+    },
+    {
+      "start_s": 371.199,
+      "end_s": 372.87,
+      "text": "it's back in the sleeve usually you"
+    },
+    {
+      "start_s": 372.88,
+      "end_s": 375.35,
+      "text": "won't have to card out i'll do the other"
+    },
+    {
+      "start_s": 375.36,
+      "end_s": 377.83,
+      "text": "thing so you're not handling the card"
+    },
+    {
+      "start_s": 377.84,
+      "end_s": 379.27,
+      "text": "the reason we clean the card is because"
+    },
+    {
+      "start_s": 379.28,
+      "end_s": 381.11,
+      "text": "it could have fingerprints on it"
+    },
+    {
+      "start_s": 381.12,
+      "end_s": 382.87,
+      "text": "it could have issues that cause you to"
+    },
+    {
+      "start_s": 382.88,
+      "end_s": 383.99,
+      "text": "think that there's something wrong with"
+    },
+    {
+      "start_s": 384.0,
+      "end_s": 385.99,
+      "text": "the card it's not if you see this jordan"
+    },
+    {
+      "start_s": 386.0,
+      "end_s": 387.59,
+      "text": "card you can see there's like a light in"
+    },
+    {
+      "start_s": 387.6,
+      "end_s": 388.95,
+      "text": "the background"
+    },
+    {
+      "start_s": 388.96,
+      "end_s": 391.83,
+      "text": "almost like a half moon"
+    },
+    {
+      "start_s": 391.84,
+      "end_s": 394.39,
+      "text": "this old shack card here there's a"
+    },
+    {
+      "start_s": 394.4,
+      "end_s": 395.749,
+      "text": "a dot here"
+    },
+    {
+      "start_s": 395.759,
+      "end_s": 398.23,
+      "text": "it almost looks like something on his"
+    },
+    {
+      "start_s": 398.24,
+      "end_s": 400.71,
+      "text": "leg or pants or maybe you know a problem"
+    },
+    {
+      "start_s": 400.72,
+      "end_s": 403.27,
+      "text": "with the card"
+    },
+    {
+      "start_s": 403.28,
+      "end_s": 405.189,
+      "text": "here's another tip"
+    },
+    {
+      "start_s": 405.199,
+      "end_s": 408.23,
+      "text": "check online look on ebay put in these"
+    },
+    {
+      "start_s": 408.24,
+      "end_s": 410.71,
+      "text": "cards 1990"
+    },
+    {
+      "start_s": 410.72,
+      "end_s": 411.749,
+      "text": "jordan"
+    },
+    {
+      "start_s": 411.759,
+      "end_s": 415.35,
+      "text": "number 65 if that's on the card then you"
+    },
+    {
+      "start_s": 415.36,
+      "end_s": 417.43,
+      "text": "know it's an issue with it's not an"
+    },
+    {
+      "start_s": 417.44,
+      "end_s": 418.95,
+      "text": "issue with the card it's part of the"
+    },
+    {
+      "start_s": 418.96,
+      "end_s": 420.55,
+      "text": "card same thing with this one if you"
+    },
+    {
+      "start_s": 420.56,
+      "end_s": 422.309,
+      "text": "look online and you see that dot is on"
+    },
+    {
+      "start_s": 422.319,
+      "end_s": 423.83,
+      "text": "there then you know okay"
+    },
+    {
+      "start_s": 423.84,
+      "end_s": 426.39,
+      "text": "that's not a problem with the card"
+    },
+    {
+      "start_s": 426.4,
+      "end_s": 428.87,
+      "text": "something else to do is put in"
+    },
+    {
+      "start_s": 428.88,
+      "end_s": 430.23,
+      "text": "the card"
+    },
+    {
+      "start_s": 430.24,
+      "end_s": 432.469,
+      "text": "psa 10 and"
+    },
+    {
+      "start_s": 432.479,
+      "end_s": 433.909,
+      "text": "look at it to see"
+    },
+    {
+      "start_s": 433.919,
+      "end_s": 437.35,
+      "text": "how your card looks compared to that 10."
+    },
+    {
+      "start_s": 437.36,
+      "end_s": 439.43,
+      "text": "so it's next thing i do is check the"
+    },
+    {
+      "start_s": 439.44,
+      "end_s": 440.87,
+      "text": "card overall"
+    },
+    {
+      "start_s": 440.88,
+      "end_s": 443.11,
+      "text": "i use this to look it over to see if"
+    },
+    {
+      "start_s": 443.12,
+      "end_s": 444.71,
+      "text": "there's any issues"
+    },
+    {
+      "start_s": 444.72,
+      "end_s": 446.309,
+      "text": "front and back"
+    },
+    {
+      "start_s": 446.319,
+      "end_s": 447.909,
+      "text": "i'll check the corners really good with"
+    },
+    {
+      "start_s": 447.919,
+      "end_s": 449.029,
+      "text": "the d-loop"
+    },
+    {
+      "start_s": 449.039,
+      "end_s": 450.95,
+      "text": "this is not going to show up in here but"
+    },
+    {
+      "start_s": 450.96,
+      "end_s": 453.27,
+      "text": "when you look through this"
+    },
+    {
+      "start_s": 453.28,
+      "end_s": 455.99,
+      "text": "it brings out any little folded edges"
+    },
+    {
+      "start_s": 456.0,
+      "end_s": 456.87,
+      "text": "any"
+    },
+    {
+      "start_s": 456.88,
+      "end_s": 458.95,
+      "text": "any marks especially cards that have"
+    },
+    {
+      "start_s": 458.96,
+      "end_s": 460.23,
+      "text": "color on them"
+    },
+    {
+      "start_s": 460.24,
+      "end_s": 463.11,
+      "text": "it'll bring out the"
+    },
+    {
+      "start_s": 463.12,
+      "end_s": 465.99,
+      "text": "defects in there the graders use these"
+    },
+    {
+      "start_s": 466.0,
+      "end_s": 468.39,
+      "text": "so it's a good idea for you to use them"
+    },
+    {
+      "start_s": 468.4,
+      "end_s": 470.71,
+      "text": "especially for the edges and"
+    },
+    {
+      "start_s": 470.72,
+      "end_s": 473.749,
+      "text": "the corners you want to check those"
+    },
+    {
+      "start_s": 473.759,
+      "end_s": 475.749,
+      "text": "next thing i do is the good light like i"
+    },
+    {
+      "start_s": 475.759,
+      "end_s": 478.869,
+      "text": "said you want to use the light"
+    },
+    {
+      "start_s": 478.879,
+      "end_s": 481.909,
+      "text": "to check the surface of the card"
+    },
+    {
+      "start_s": 481.919,
+      "end_s": 483.43,
+      "text": "so here's a card that i pre-graded"
+    },
+    {
+      "start_s": 483.44,
+      "end_s": 486.07,
+      "text": "before"
+    },
+    {
+      "start_s": 486.08,
+      "end_s": 489.51,
+      "text": "and when you hold it in the light"
+    },
+    {
+      "start_s": 489.52,
+      "end_s": 490.83,
+      "text": "it'll show"
+    },
+    {
+      "start_s": 490.84,
+      "end_s": 492.79,
+      "text": "defects i don't know if it's going to"
+    },
+    {
+      "start_s": 492.8,
+      "end_s": 494.629,
+      "text": "show up for you guys or not but i can"
+    },
+    {
+      "start_s": 494.639,
+      "end_s": 498.23,
+      "text": "see it right there by his by his head"
+    },
+    {
+      "start_s": 498.24,
+      "end_s": 499.909,
+      "text": "right above his head when you're looking"
+    },
+    {
+      "start_s": 499.919,
+      "end_s": 501.43,
+      "text": "on them straight on sometimes you don't"
+    },
+    {
+      "start_s": 501.44,
+      "end_s": 502.79,
+      "text": "see that"
+    },
+    {
+      "start_s": 502.8,
+      "end_s": 504.79,
+      "text": "so i'll check each card and hold it in"
+    },
+    {
+      "start_s": 504.8,
+      "end_s": 508.629,
+      "text": "the light you can see any dings lines"
+    },
+    {
+      "start_s": 508.639,
+      "end_s": 510.15,
+      "text": "anything that's on the card by holding"
+    },
+    {
+      "start_s": 510.16,
+      "end_s": 511.99,
+      "text": "it in the light and just turning it a"
+    },
+    {
+      "start_s": 512.0,
+      "end_s": 513.269,
+      "text": "certain way"
+    },
+    {
+      "start_s": 513.279,
+      "end_s": 515.269,
+      "text": "so that helps you to see a different"
+    },
+    {
+      "start_s": 515.279,
+      "end_s": 517.829,
+      "text": "aspect of the card"
+    },
+    {
+      "start_s": 517.8389999999999,
+      "end_s": 519.909,
+      "text": "once i pre-grade the card i will put it"
+    },
+    {
+      "start_s": 519.919,
+      "end_s": 522.7090000000001,
+      "text": "in a"
+    },
+    {
+      "start_s": 522.719,
+      "end_s": 524.149,
+      "text": "sleeve"
+    },
+    {
+      "start_s": 524.159,
+      "end_s": 526.55,
+      "text": "i put a color coat on it"
+    },
+    {
+      "start_s": 526.56,
+      "end_s": 528.47,
+      "text": "this is how i was doing my psa now it's"
+    },
+    {
+      "start_s": 528.48,
+      "end_s": 529.269,
+      "text": "going to be different because"
+    },
+    {
+      "start_s": 529.279,
+      "end_s": 531.03,
+      "text": "everything's half grades except for them"
+    },
+    {
+      "start_s": 531.04,
+      "end_s": 534.07,
+      "text": "but i put a color code on it if it was"
+    },
+    {
+      "start_s": 534.08,
+      "end_s": 536.15,
+      "text": "grade worthy"
+    },
+    {
+      "start_s": 536.16,
+      "end_s": 538.63,
+      "text": "then i would file it in my"
+    },
+    {
+      "start_s": 538.64,
+      "end_s": 541.269,
+      "text": "box"
+    },
+    {
+      "start_s": 541.279,
+      "end_s": 543.269,
+      "text": "according to"
+    },
+    {
+      "start_s": 543.279,
+      "end_s": 544.71,
+      "text": "sports"
+    },
+    {
+      "start_s": 544.72,
+      "end_s": 546.47,
+      "text": "and the grade that it pulled and then"
+    },
+    {
+      "start_s": 546.48,
+      "end_s": 548.07,
+      "text": "when it's time to submit or i'm looking"
+    },
+    {
+      "start_s": 548.08,
+      "end_s": 549.829,
+      "text": "to submit some cards i can go through"
+    },
+    {
+      "start_s": 549.839,
+      "end_s": 552.15,
+      "text": "here and pull out the ones and i know"
+    },
+    {
+      "start_s": 552.16,
+      "end_s": 554.389,
+      "text": "which ones i pre-graded"
+    },
+    {
+      "start_s": 554.399,
+      "end_s": 555.91,
+      "text": "it's not grade worthy i'll put it in"
+    },
+    {
+      "start_s": 555.92,
+      "end_s": 558.47,
+      "text": "another pile for to sell raw cards or to"
+    },
+    {
+      "start_s": 558.48,
+      "end_s": 561.269,
+      "text": "put it in a"
+    },
+    {
+      "start_s": 561.279,
+      "end_s": 563.509,
+      "text": "a lot or something that i'm doing and"
+    },
+    {
+      "start_s": 563.519,
+      "end_s": 566.389,
+      "text": "mix them all together"
+    },
+    {
+      "start_s": 566.399,
+      "end_s": 568.31,
+      "text": "so that's that's my process going"
+    },
+    {
+      "start_s": 568.32,
+      "end_s": 571.19,
+      "text": "through pre-grading"
+    },
+    {
+      "start_s": 571.2,
+      "end_s": 573.67,
+      "text": "check ebay for sure to see how they"
+    },
+    {
+      "start_s": 573.68,
+      "end_s": 575.99,
+      "text": "pre-grade we've also been doing some"
+    },
+    {
+      "start_s": 576.0,
+      "end_s": 577.67,
+      "text": "cracking of cards"
+    },
+    {
+      "start_s": 577.68,
+      "end_s": 579.11,
+      "text": "you can see how this card looks like"
+    },
+    {
+      "start_s": 579.12,
+      "end_s": 580.47,
+      "text": "it's really off"
+    },
+    {
+      "start_s": 580.48,
+      "end_s": 583.11,
+      "text": "i mean it really looks like it's off"
+    },
+    {
+      "start_s": 583.12,
+      "end_s": 584.389,
+      "text": "left to right"
+    },
+    {
+      "start_s": 584.399,
+      "end_s": 588.31,
+      "text": "some of these cards are hard to"
+    },
+    {
+      "start_s": 588.32,
+      "end_s": 590.23,
+      "text": "get centering on because there's there's"
+    },
+    {
+      "start_s": 590.24,
+      "end_s": 591.67,
+      "text": "no border"
+    },
+    {
+      "start_s": 591.68,
+      "end_s": 594.87,
+      "text": "it's just a card that has"
+    },
+    {
+      "start_s": 594.88,
+      "end_s": 597.59,
+      "text": "you know some logos and designs and it's"
+    },
+    {
+      "start_s": 597.6,
+      "end_s": 599.03,
+      "text": "a little bit different so you have to"
+    },
+    {
+      "start_s": 599.04,
+      "end_s": 601.35,
+      "text": "look on ebay again like i said see what"
+    },
+    {
+      "start_s": 601.36,
+      "end_s": 602.949,
+      "text": "a 10"
+    },
+    {
+      "start_s": 602.959,
+      "end_s": 605.03,
+      "text": "got us a grade"
+    },
+    {
+      "start_s": 605.04,
+      "end_s": 606.79,
+      "text": "so this card you can see it says nine"
+    },
+    {
+      "start_s": 606.8,
+      "end_s": 608.389,
+      "text": "centering"
+    },
+    {
+      "start_s": 608.399,
+      "end_s": 610.23,
+      "text": "well we looked online and found the same"
+    },
+    {
+      "start_s": 610.24,
+      "end_s": 613.829,
+      "text": "card it was joe burrow it wasn't tua"
+    },
+    {
+      "start_s": 613.839,
+      "end_s": 616.15,
+      "text": "that pulled a psa 10"
+    },
+    {
+      "start_s": 616.16,
+      "end_s": 619.509,
+      "text": "and it has the same same border"
+    },
+    {
+      "start_s": 619.519,
+      "end_s": 621.67,
+      "text": "it looks it looks off like this side is"
+    },
+    {
+      "start_s": 621.68,
+      "end_s": 623.99,
+      "text": "thicker than this side is"
+    },
+    {
+      "start_s": 624.0,
+      "end_s": 626.069,
+      "text": "so when we're cracking cards and again"
+    },
+    {
+      "start_s": 626.079,
+      "end_s": 628.87,
+      "text": "it goes back to how each company grades"
+    },
+    {
+      "start_s": 628.88,
+      "end_s": 630.47,
+      "text": "this one says centering and you can kind"
+    },
+    {
+      "start_s": 630.48,
+      "end_s": 634.55,
+      "text": "of tell we've had 9.5 before sgc"
+    },
+    {
+      "start_s": 634.56,
+      "end_s": 636.55,
+      "text": "if the deficiency or the problem the"
+    },
+    {
+      "start_s": 636.56,
+      "end_s": 638.15,
+      "text": "defect whatever the problem is on the"
+    },
+    {
+      "start_s": 638.16,
+      "end_s": 639.91,
+      "text": "back of the card"
+    },
+    {
+      "start_s": 639.92,
+      "end_s": 643.91,
+      "text": "psa does not grade harshly on the back"
+    },
+    {
+      "start_s": 643.92,
+      "end_s": 646.31,
+      "text": "so if you submit that card to psa and it"
+    },
+    {
+      "start_s": 646.32,
+      "end_s": 649.35,
+      "text": "was a 9.5 it could pull a 10"
+    },
+    {
+      "start_s": 649.36,
+      "end_s": 651.59,
+      "text": "and it goes up in value and it's worth"
+    },
+    {
+      "start_s": 651.6,
+      "end_s": 654.069,
+      "text": "more money 10 just is better than a 9.5"
+    },
+    {
+      "start_s": 654.079,
+      "end_s": 656.47,
+      "text": "and psa is better than"
+    },
+    {
+      "start_s": 656.48,
+      "end_s": 658.55,
+      "text": "all the other companies right now for"
+    },
+    {
+      "start_s": 658.56,
+      "end_s": 660.31,
+      "text": "pre-grading"
+    },
+    {
+      "start_s": 660.32,
+      "end_s": 662.23,
+      "text": "so that's how i do"
+    },
+    {
+      "start_s": 662.24,
+      "end_s": 663.59,
+      "text": "pre-grading"
+    },
+    {
+      "start_s": 663.6,
+      "end_s": 665.03,
+      "text": "i don't like it"
+    },
+    {
+      "start_s": 665.04,
+      "end_s": 666.47,
+      "text": "it's tedious"
+    },
+    {
+      "start_s": 666.48,
+      "end_s": 668.63,
+      "text": "it's a pain"
+    },
+    {
+      "start_s": 668.64,
+      "end_s": 670.949,
+      "text": "but when i get cards in"
+    },
+    {
+      "start_s": 670.959,
+      "end_s": 673.35,
+      "text": "i will try to pre-grade them i put them"
+    },
+    {
+      "start_s": 673.36,
+      "end_s": 676.31,
+      "text": "in my filing system and get them going"
+    },
+    {
+      "start_s": 676.32,
+      "end_s": 678.79,
+      "text": "so i hope this helps you guys"
+    },
+    {
+      "start_s": 678.8,
+      "end_s": 681.03,
+      "text": "again leave any comments down below"
+    },
+    {
+      "start_s": 681.04,
+      "end_s": 683.509,
+      "text": "anything that you're doing that um"
+    },
+    {
+      "start_s": 683.519,
+      "end_s": 684.87,
+      "text": "maybe it's different"
+    },
+    {
+      "start_s": 684.88,
+      "end_s": 685.829,
+      "text": "something"
+    },
+    {
+      "start_s": 685.8389999999999,
+      "end_s": 687.43,
+      "text": "that you"
+    },
+    {
+      "start_s": 687.44,
+      "end_s": 689.67,
+      "text": "like to do something that works for you"
+    },
+    {
+      "start_s": 689.68,
+      "end_s": 690.79,
+      "text": "and"
+    },
+    {
+      "start_s": 690.8,
+      "end_s": 693.269,
+      "text": "hope you like subscribe to the channel"
+    },
+    {
+      "start_s": 693.279,
+      "end_s": 695.35,
+      "text": "we're looking to get over 500 by the end"
+    },
+    {
+      "start_s": 695.36,
+      "end_s": 696.63,
+      "text": "of the year we want to get to a thousand"
+    },
+    {
+      "start_s": 696.64,
+      "end_s": 697.99,
+      "text": "so we're really trying to put some more"
+    },
+    {
+      "start_s": 698.0,
+      "end_s": 700.63,
+      "text": "time and effort into"
+    },
+    {
+      "start_s": 700.64,
+      "end_s": 703.269,
+      "text": "videos weekly good content not just"
+    },
+    {
+      "start_s": 703.279,
+      "end_s": 705.91,
+      "text": "throwing out any videos so if you have"
+    },
+    {
+      "start_s": 705.92,
+      "end_s": 707.67,
+      "text": "any suggestions for us please leave that"
+    },
+    {
+      "start_s": 707.68,
+      "end_s": 709.829,
+      "text": "down below also for um"
+    },
+    {
+      "start_s": 709.8389999999999,
+      "end_s": 711.829,
+      "text": "always looking for ideas and things to"
+    },
+    {
+      "start_s": 711.8389999999999,
+      "end_s": 712.71,
+      "text": "do"
+    },
+    {
+      "start_s": 712.72,
+      "end_s": 714.23,
+      "text": "we've got some more challenges coming up"
+    },
+    {
+      "start_s": 714.24,
+      "end_s": 715.99,
+      "text": "that we're trying to"
+    },
+    {
+      "start_s": 716.0,
+      "end_s": 717.43,
+      "text": "put together"
+    },
+    {
+      "start_s": 717.44,
+      "end_s": 719.75,
+      "text": "just makes it exciting for us so"
+    },
+    {
+      "start_s": 719.76,
+      "end_s": 721.91,
+      "text": "hey we appreciate you guys thanks a lot"
+    },
+    {
+      "start_s": 721.92,
+      "end_s": 732.79,
+      "text": "take care"
+    },
+    {
+      "start_s": 732.8,
+      "end_s": 734.88,
+      "text": "you"
+    }
+  ]
+}

@@ -1,0 +1,502 @@
+{
+  "method": "captions",
+  "model": null,
+  "language": "en",
+  "cues": [
+    {
+      "start_s": 0.0,
+      "end_s": 3.07,
+      "text": "Hey everybody, this is Ralphie boy here."
+    },
+    {
+      "start_s": 3.08,
+      "end_s": 5.47,
+      "text": "Today I just want to talk briefly about"
+    },
+    {
+      "start_s": 5.48,
+      "end_s": 7.91,
+      "text": "my process on pre-grading. I'm just to"
+    },
+    {
+      "start_s": 7.92,
+      "end_s": 10.03,
+      "text": "give you a couple couple of things that"
+    },
+    {
+      "start_s": 10.04,
+      "end_s": 12.39,
+      "text": "I've learned grading cards. So, let's"
+    },
+    {
+      "start_s": 12.4,
+      "end_s": 14.91,
+      "text": "talk about this. I created checklist. I"
+    },
+    {
+      "start_s": 14.92,
+      "end_s": 17.75,
+      "text": "do. I keep my checklist beside the area"
+    },
+    {
+      "start_s": 17.76,
+      "end_s": 20.83,
+      "text": "where I do a lot of my pre-grading and"
+    },
+    {
+      "start_s": 20.84,
+      "end_s": 22.27,
+      "text": "it's a pretty simple checklist, right?"
+    },
+    {
+      "start_s": 22.28,
+      "end_s": 24.11,
+      "text": "It says centering, corners, edges,"
+    },
+    {
+      "start_s": 24.12,
+      "end_s": 26.47,
+      "text": "surface and repeat on the back. And I"
+    },
+    {
+      "start_s": 26.48,
+      "end_s": 28.99,
+      "text": "make sure I hit all those before I would"
+    },
+    {
+      "start_s": 29.0,
+      "end_s": 31.19,
+      "text": "ever consider putting any card into my"
+    },
+    {
+      "start_s": 31.2,
+      "end_s": 33.91,
+      "text": "box to send off to PSA. So, let's talk a"
+    },
+    {
+      "start_s": 33.92,
+      "end_s": 35.39,
+      "text": "little bit. Get yourself a centering"
+    },
+    {
+      "start_s": 35.4,
+      "end_s": 38.55,
+      "text": "tool. I use them 60/40 on the front. You"
+    },
+    {
+      "start_s": 38.56,
+      "end_s": 40.55,
+      "text": "know, you need that at the bare minimum."
+    },
+    {
+      "start_s": 40.56,
+      "end_s": 43.59,
+      "text": "If I see a card and I use my centering"
+    },
+    {
+      "start_s": 43.6,
+      "end_s": 45.99,
+      "text": "tool and it comes out 60/40, it has to"
+    },
+    {
+      "start_s": 46.0,
+      "end_s": 47.83,
+      "text": "be perfect everywhere else because I"
+    },
+    {
+      "start_s": 47.84,
+      "end_s": 49.95,
+      "text": "think with a 60/40 at the bare minimum,"
+    },
+    {
+      "start_s": 49.96,
+      "end_s": 52.59,
+      "text": "you are really rolling the dice. You"
+    },
+    {
+      "start_s": 52.6,
+      "end_s": 53.79,
+      "text": "really want to see your centering a"
+    },
+    {
+      "start_s": 53.8,
+      "end_s": 55.75,
+      "text": "little bit better than that to be safe,"
+    },
+    {
+      "start_s": 55.76,
+      "end_s": 58.67,
+      "text": "okay? Well, on the back it says 90/10. I"
+    },
+    {
+      "start_s": 58.68,
+      "end_s": 60.51,
+      "text": "don't believe it. I've sent cards in"
+    },
+    {
+      "start_s": 60.52,
+      "end_s": 62.23,
+      "text": "with a 90/10 on the back and they've not"
+    },
+    {
+      "start_s": 62.24,
+      "end_s": 64.189,
+      "text": "received a 10. So, I would make sure my"
+    },
+    {
+      "start_s": 64.199,
+      "end_s": 66.15,
+      "text": "back is better centered than what they"
+    },
+    {
+      "start_s": 66.16,
+      "end_s": 67.31,
+      "text": "are telling you is the minimum"
+    },
+    {
+      "start_s": 67.32,
+      "end_s": 69.39,
+      "text": "requirements. That's just me. You be"
+    },
+    {
+      "start_s": 69.4,
+      "end_s": 71.75,
+      "text": "you, all right? Corners, any frayed"
+    },
+    {
+      "start_s": 71.76,
+      "end_s": 75.19,
+      "text": "corners, any white at all, even a little"
+    },
+    {
+      "start_s": 75.2,
+      "end_s": 77.19,
+      "text": "bit that I can see naked eye, I will not"
+    },
+    {
+      "start_s": 77.2,
+      "end_s": 78.91,
+      "text": "send that card in. You will not get the"
+    },
+    {
+      "start_s": 78.92,
+      "end_s": 81.78999999999999,
+      "text": "10. Corners are a big big part of what"
+    },
+    {
+      "start_s": 81.8,
+      "end_s": 84.75,
+      "text": "PSA looks at. We all forget about edges."
+    },
+    {
+      "start_s": 84.76,
+      "end_s": 86.83,
+      "text": "If I'm going to pick one thing that I"
+    },
+    {
+      "start_s": 86.84,
+      "end_s": 89.03,
+      "text": "forget about every time I send in not"
+    },
+    {
+      "start_s": 89.03999999999999,
+      "end_s": 90.51,
+      "text": "every time, but actually when I send"
+    },
+    {
+      "start_s": 90.52,
+      "end_s": 93.11,
+      "text": "cards in, it's edges, all right? So,"
+    },
+    {
+      "start_s": 93.12,
+      "end_s": 94.59,
+      "text": "make sure you take the time to check"
+    },
+    {
+      "start_s": 94.6,
+      "end_s": 96.91,
+      "text": "that off your list. Look for any kind of"
+    },
+    {
+      "start_s": 96.92,
+      "end_s": 99.35,
+      "text": "nick along these frames, especially if"
+    },
+    {
+      "start_s": 99.36,
+      "end_s": 100.71000000000001,
+      "text": "the frame of your card is a different"
+    },
+    {
+      "start_s": 100.72,
+      "end_s": 102.11,
+      "text": "color than white. You know, you're"
+    },
+    {
+      "start_s": 102.12,
+      "end_s": 103.39,
+      "text": "really going to see that. It's really"
+    },
+    {
+      "start_s": 103.4,
+      "end_s": 105.35,
+      "text": "going to show up. So, just be careful"
+    },
+    {
+      "start_s": 105.36,
+      "end_s": 106.67,
+      "text": "that you're not seeing that and again,"
+    },
+    {
+      "start_s": 106.68,
+      "end_s": 108.63,
+      "text": "do it on the back, right? And the big"
+    },
+    {
+      "start_s": 108.64,
+      "end_s": 110.47,
+      "text": "thing, I mean, the one thing that can"
+    },
+    {
+      "start_s": 110.47999999999999,
+      "end_s": 113.71000000000001,
+      "text": "really drop your card multiple grades is"
+    },
+    {
+      "start_s": 113.72,
+      "end_s": 114.87,
+      "text": "surface."
+    },
+    {
+      "start_s": 114.88,
+      "end_s": 116.63,
+      "text": "I do not send in any cards that have a"
+    },
+    {
+      "start_s": 116.64,
+      "end_s": 118.78999999999999,
+      "text": "print line on the on the front. A single"
+    },
+    {
+      "start_s": 118.8,
+      "end_s": 121.67,
+      "text": "faint print line is a disqualification"
+    },
+    {
+      "start_s": 121.68,
+      "end_s": 123.99,
+      "text": "for me. I do not send that card in. I"
+    },
+    {
+      "start_s": 124.0,
+      "end_s": 125.79,
+      "text": "have sent cards in with print lines on"
+    },
+    {
+      "start_s": 125.8,
+      "end_s": 127.31,
+      "text": "the back, however, and they have"
+    },
+    {
+      "start_s": 127.32,
+      "end_s": 128.95,
+      "text": "received tens."
+    },
+    {
+      "start_s": 128.96,
+      "end_s": 131.39,
+      "text": "However, it's got to be it's got to be,"
+    },
+    {
+      "start_s": 131.4,
+      "end_s": 133.31,
+      "text": "you know, not a lot of them and it's got"
+    },
+    {
+      "start_s": 133.32,
+      "end_s": 135.47,
+      "text": "to be really hard to see with the naked"
+    },
+    {
+      "start_s": 135.48,
+      "end_s": 137.67000000000002,
+      "text": "eye. If you have multiple print lines"
+    },
+    {
+      "start_s": 137.68,
+      "end_s": 139.59,
+      "text": "coming across a colored area on the back"
+    },
+    {
+      "start_s": 139.6,
+      "end_s": 141.51,
+      "text": "of your card, you are more than likely"
+    },
+    {
+      "start_s": 141.52,
+      "end_s": 143.15,
+      "text": "not going to get the 10. At least that's"
+    },
+    {
+      "start_s": 143.16,
+      "end_s": 145.15,
+      "text": "what my have experienced in my days"
+    },
+    {
+      "start_s": 145.16,
+      "end_s": 147.27,
+      "text": "grading cards. All right, so kind of"
+    },
+    {
+      "start_s": 147.28,
+      "end_s": 149.82999999999998,
+      "text": "keep that in mind as well. Any pop marks"
+    },
+    {
+      "start_s": 149.84,
+      "end_s": 153.43,
+      "text": "that I get, if there is one pop mark on"
+    },
+    {
+      "start_s": 153.44,
+      "end_s": 155.51,
+      "text": "certain cards, and those certain cards"
+    },
+    {
+      "start_s": 155.52,
+      "end_s": 156.75,
+      "text": "are the ones that are, you know, the"
+    },
+    {
+      "start_s": 156.76,
+      "end_s": 159.19,
+      "text": "real shiny ones, right? The Optic Rated"
+    },
+    {
+      "start_s": 159.2,
+      "end_s": 162.35,
+      "text": "Rookies, the Mosaic, um some of these"
+    },
+    {
+      "start_s": 162.36,
+      "end_s": 163.71,
+      "text": "other ones that have that kind of a"
+    },
+    {
+      "start_s": 163.72,
+      "end_s": 166.23,
+      "text": "sheen to it. If I have one pop mark"
+    },
+    {
+      "start_s": 166.24,
+      "end_s": 168.82999999999998,
+      "text": "that's not in a bad spot that my eyes"
+    },
+    {
+      "start_s": 168.84,
+      "end_s": 170.59,
+      "text": "don't go directly to when I look at that"
+    },
+    {
+      "start_s": 170.6,
+      "end_s": 172.91,
+      "text": "card, well then I'll send that card in"
+    },
+    {
+      "start_s": 172.92000000000002,
+      "end_s": 174.67000000000002,
+      "text": "because I've gotten 10s that way. I've"
+    },
+    {
+      "start_s": 174.68,
+      "end_s": 177.35,
+      "text": "also gotten 9s, but I've gotten 10s. But"
+    },
+    {
+      "start_s": 177.36,
+      "end_s": 179.07,
+      "text": "other than that, if I have pop marks on"
+    },
+    {
+      "start_s": 179.07999999999998,
+      "end_s": 181.11,
+      "text": "the card that my eyes see with the naked"
+    },
+    {
+      "start_s": 181.12,
+      "end_s": 183.47,
+      "text": "eye, I I'm not sending it in. It's an"
+    },
+    {
+      "start_s": 183.48,
+      "end_s": 185.63,
+      "text": "automatic 9. Could be even worse if you"
+    },
+    {
+      "start_s": 185.64,
+      "end_s": 187.67,
+      "text": "miss something else, okay? So, again, go"
+    },
+    {
+      "start_s": 187.68,
+      "end_s": 189.39,
+      "text": "through your checklist, centering,"
+    },
+    {
+      "start_s": 189.4,
+      "end_s": 191.79,
+      "text": "corners, edges, surface, repeat on the"
+    },
+    {
+      "start_s": 191.8,
+      "end_s": 194.27,
+      "text": "back, use your centering tool, use your"
+    },
+    {
+      "start_s": 194.28,
+      "end_s": 197.19,
+      "text": "magnifying glass cuz who knows if PSA is"
+    },
+    {
+      "start_s": 197.2,
+      "end_s": 198.949,
+      "text": "using these at all. I'm sure if they"
+    },
+    {
+      "start_s": 198.959,
+      "end_s": 200.22899999999998,
+      "text": "find something on your card they don't"
+    },
+    {
+      "start_s": 200.239,
+      "end_s": 202.27,
+      "text": "like, uh they're going to look at it."
+    },
+    {
+      "start_s": 202.28,
+      "end_s": 204.43,
+      "text": "So, go ahead and do use those tools."
+    },
+    {
+      "start_s": 204.44,
+      "end_s": 206.31,
+      "text": "Make sure you get those. I hope this was"
+    },
+    {
+      "start_s": 206.32,
+      "end_s": 207.87,
+      "text": "helpful. I'm trying to keep it simple"
+    },
+    {
+      "start_s": 207.88,
+      "end_s": 210.39,
+      "text": "for you. Um thanks for watching and take"
+    },
+    {
+      "start_s": 210.4,
+      "end_s": 212.72,
+      "text": "care."
+    }
+  ]
+}

@@ -1,0 +1,413 @@
+{
+  "lexicon_version": "1",
+  "total_cues": 547,
+  "segments": [
+    {
+      "id": "seg_011",
+      "start_s": 369.08,
+      "end_s": 387.87,
+      "score": 7.0,
+      "categories": [
+        "centering",
+        "corners",
+        "edges"
+      ],
+      "matched_terms": [
+        "centering",
+        "corners",
+        "edges",
+        "zoom in"
+      ],
+      "text": "edges look good corners look sharp there's no blemishes we're focusing just on centering what i'll do i'll activate the light on this and then i will zoom in on the",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_001",
+      "start_s": 39.48,
+      "end_s": 52.59,
+      "score": 6.0,
+      "categories": [
+        "outcomes",
+        "surface"
+      ],
+      "matched_terms": [
+        "came back",
+        "print lines"
+      ],
+      "text": "other ones were just some print lines that i missed all the others came back",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_007",
+      "start_s": 309.96,
+      "end_s": 322.11,
+      "score": 6.0,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "print lines",
+        "scratches"
+      ],
+      "text": "and scratches and print lines because",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_022",
+      "start_s": 818.519,
+      "end_s": 833.389,
+      "score": 5.0,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "dimple",
+        "scratch"
+      ],
+      "text": "and that's it i see if there's a dimple or scratch or a lime like that",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_005",
+      "start_s": 228.68,
+      "end_s": 244.67,
+      "score": 4.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "the centering of it and then on here depending on how the numbers line up it tells you if you're 50 50 centering",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_018",
+      "start_s": 728.2,
+      "end_s": 741.55,
+      "score": 4.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering",
+        "you can see"
+      ],
+      "text": "so you can see 3 3 is 50 50 centering",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_024",
+      "start_s": 875.32,
+      "end_s": 894.189,
+      "score": 4.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "time for centering so i'll give it a quick wipe down there bust out the centering tool",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_002",
+      "start_s": 151.56,
+      "end_s": 163.309,
+      "score": 3.5,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "borders",
+        "centering"
+      ],
+      "text": "centering looks and how the borders look",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_013",
+      "start_s": 397.72,
+      "end_s": 409.87,
+      "score": 2.5,
+      "categories": [
+        "centering",
+        "corners"
+      ],
+      "matched_terms": [
+        "border",
+        "corners"
+      ],
+      "text": "so it has four corners for each border",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_023",
+      "start_s": 867.0,
+      "end_s": 879.87,
+      "score": 2.5,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "scratches"
+      ],
+      "text": "any pimples dents scratches fingerprints",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_003",
+      "start_s": 185.72,
+      "end_s": 198.43,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "centering uh almost every time it's so",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_004",
+      "start_s": 218.68,
+      "end_s": 230.19,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "zoom in"
+      ],
+      "text": "zoom in on the card to walk you through",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_006",
+      "start_s": 286.6,
+      "end_s": 298.11,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "is spotless i know the centering is",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_008",
+      "start_s": 337.32,
+      "end_s": 349.31,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "centering so i look at the back i make",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_009",
+      "start_s": 342.199,
+      "end_s": 353.79,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "the centering process for mosaic and",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_010",
+      "start_s": 359.16,
+      "end_s": 371.469,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "you can see"
+      ],
+      "text": "on top itself but if you can see there's",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_012",
+      "start_s": 389.08,
+      "end_s": 402.189,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "you can see"
+      ],
+      "text": "on this grid so if you can see and again",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_014",
+      "start_s": 483.56,
+      "end_s": 496.43,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "notice how"
+      ],
+      "text": "that hit the mosaic emblem notice how it",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_015",
+      "start_s": 562.92,
+      "end_s": 574.509,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "that centering kind of gives it away too",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_016",
+      "start_s": 573.72,
+      "end_s": 585.71,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "means perfect centering for a mosaic",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_017",
+      "start_s": 663.16,
+      "end_s": 676.03,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "centering up to down you're with me guys",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_019",
+      "start_s": 736.04,
+      "end_s": 748.509,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "perfect centering of 1920 prism",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_020",
+      "start_s": 763.399,
+      "end_s": 774.59,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "centering and let's say it was",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_021",
+      "start_s": 770.68,
+      "end_s": 782.269,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "60 40 centering",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_025",
+      "start_s": 896.68,
+      "end_s": 908.59,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "it passes the centering test that i just",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_026",
+      "start_s": 903.48,
+      "end_s": 916.59,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "flip it over"
+      ],
+      "text": "or that i had it in to flip it over okay",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_027",
+      "start_s": 975.0,
+      "end_s": 986.829,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "this centering tool i would suggest it",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_028",
+      "start_s": 990.519,
+      "end_s": 1002.509,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "down get yourself an eye for centering",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_029",
+      "start_s": 1008.44,
+      "end_s": 1019.55,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "you can see"
+      ],
+      "text": "lighting you can see if there's any",
+      "visual_cue": true
+    }
+  ]
+}

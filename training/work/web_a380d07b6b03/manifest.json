@@ -1,0 +1,69 @@
+{
+  "video_id": "web_a380d07b6b03",
+  "source": {
+    "type": "youtube",
+    "url": "https://vimeo.com/1189890502",
+    "title": "Corners",
+    "uploader": "Eric Michael",
+    "duration_s": 159.0
+  },
+  "file": {
+    "path": "source/video.mp4",
+    "sha256": "ead5d7b9eda3193d0ea28172a45b63cafa8e3c5ddf9d9b2a289e070aed472142",
+    "bytes": 15995929
+  },
+  "stages": {
+    "acquire": {
+      "status": "done",
+      "at": "2026-08-30T00:04:47.328609Z",
+      "error": null,
+      "detail": {
+        "tool": "yt-dlp",
+        "browser": "chrome"
+      }
+    },
+    "transcribe": {
+      "status": "done",
+      "at": "2026-08-30T00:05:01.166998Z",
+      "error": null,
+      "detail": {
+        "method": "mlx-whisper",
+        "model": "mlx-community/whisper-medium-mlx",
+        "cues": 64
+      }
+    },
+    "segment": {
+      "status": "done",
+      "at": "2026-08-30T00:05:01.173212Z",
+      "error": null,
+      "detail": {
+        "n_segments": 6,
+        "lexicon_version": "1"
+      }
+    },
+    "extract_frames": {
+      "status": "done",
+      "at": "2026-08-30T00:05:03.324514Z",
+      "error": null,
+      "detail": {
+        "n_frames": 13,
+        "uniform": false,
+        "fps": 1.0
+      }
+    },
+    "analyze": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    },
+    "validate": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    }
+  },
+  "lesson_id": null,
+  "rubric_version_at_ingest": "0.1.0"
+}

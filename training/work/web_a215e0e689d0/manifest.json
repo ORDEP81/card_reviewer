@@ -1,0 +1,69 @@
+{
+  "video_id": "web_a215e0e689d0",
+  "source": {
+    "type": "youtube",
+    "url": "https://vimeo.com/1189890493",
+    "title": "Surface",
+    "uploader": "Eric Michael",
+    "duration_s": 149.0
+  },
+  "file": {
+    "path": "source/video.mp4",
+    "sha256": "82a9b3f5b16d952992da03a9dfd39a0069f345c5ee95ca61f64cb52e5b4453fd",
+    "bytes": 15444013
+  },
+  "stages": {
+    "acquire": {
+      "status": "done",
+      "at": "2026-08-30T00:05:17.183239Z",
+      "error": null,
+      "detail": {
+        "tool": "yt-dlp",
+        "browser": "chrome"
+      }
+    },
+    "transcribe": {
+      "status": "done",
+      "at": "2026-08-30T00:05:30.833100Z",
+      "error": null,
+      "detail": {
+        "method": "mlx-whisper",
+        "model": "mlx-community/whisper-medium-mlx",
+        "cues": 49
+      }
+    },
+    "segment": {
+      "status": "done",
+      "at": "2026-08-30T00:05:30.841062Z",
+      "error": null,
+      "detail": {
+        "n_segments": 6,
+        "lexicon_version": "1"
+      }
+    },
+    "extract_frames": {
+      "status": "done",
+      "at": "2026-08-30T00:05:32.703358Z",
+      "error": null,
+      "detail": {
+        "n_frames": 13,
+        "uniform": false,
+        "fps": 1.0
+      }
+    },
+    "analyze": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    },
+    "validate": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    }
+  },
+  "lesson_id": null,
+  "rubric_version_at_ingest": "0.1.0"
+}

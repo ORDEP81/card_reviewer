@@ -1,0 +1,4332 @@
+{
+  "method": "captions",
+  "model": null,
+  "language": "en",
+  "cues": [
+    {
+      "start_s": 0.0,
+      "end_s": 2.31,
+      "text": "So what I do instead is I actually start"
+    },
+    {
+      "start_s": 2.32,
+      "end_s": 3.91,
+      "text": "from the assumption that I'm not going"
+    },
+    {
+      "start_s": 3.92,
+      "end_s": 6.79,
+      "text": "to buy the card."
+    },
+    {
+      "start_s": 6.8,
+      "end_s": 8.47,
+      "text": "One of the questions I get all the time"
+    },
+    {
+      "start_s": 8.48,
+      "end_s": 11.27,
+      "text": "is where and how to find clean raw cards"
+    },
+    {
+      "start_s": 11.28,
+      "end_s": 13.11,
+      "text": "to grade. Now I've graded thousands of"
+    },
+    {
+      "start_s": 13.12,
+      "end_s": 15.15,
+      "text": "cards over the past 20 years and I'd say"
+    },
+    {
+      "start_s": 15.16,
+      "end_s": 18.59,
+      "text": "98% of them were bought from eBay. So in"
+    },
+    {
+      "start_s": 18.6,
+      "end_s": 19.95,
+      "text": "this video I'm going to break down the"
+    },
+    {
+      "start_s": 19.96,
+      "end_s": 22.23,
+      "text": "strategy behind how I look for gradable"
+    },
+    {
+      "start_s": 22.24,
+      "end_s": 24.03,
+      "text": "cards online and then I'm going to show"
+    },
+    {
+      "start_s": 24.04,
+      "end_s": 26.15,
+      "text": "you a live demo of how to actually do"
+    },
+    {
+      "start_s": 26.16,
+      "end_s": 28.47,
+      "text": "this on eBay. Let's get right into it."
+    },
+    {
+      "start_s": 28.48,
+      "end_s": 30.19,
+      "text": "So before we ever even get to eBay, the"
+    },
+    {
+      "start_s": 30.2,
+      "end_s": 31.71,
+      "text": "most important part of the grading"
+    },
+    {
+      "start_s": 31.72,
+      "end_s": 34.15,
+      "text": "process is card selection. We want to"
+    },
+    {
+      "start_s": 34.16,
+      "end_s": 35.51,
+      "text": "make sure that we're winning in the"
+    },
+    {
+      "start_s": 35.52,
+      "end_s": 37.39,
+      "text": "draft because ultimately it doesn't"
+    },
+    {
+      "start_s": 37.4,
+      "end_s": 39.59,
+      "text": "matter how clean your card is if the PSA"
+    },
+    {
+      "start_s": 39.6,
+      "end_s": 41.67,
+      "text": "10 doesn't actually add any value. So"
+    },
+    {
+      "start_s": 41.68,
+      "end_s": 43.35,
+      "text": "the first part of card selection is to"
+    },
+    {
+      "start_s": 43.36,
+      "end_s": 45.95,
+      "text": "focus on cards that have high PSA 10"
+    },
+    {
+      "start_s": 45.96,
+      "end_s": 48.15,
+      "text": "upside. So I want to win big when I get"
+    },
+    {
+      "start_s": 48.16,
+      "end_s": 50.07,
+      "text": "the grade that I'm looking for and this"
+    },
+    {
+      "start_s": 50.08,
+      "end_s": 51.63,
+      "text": "is even more important when the"
+    },
+    {
+      "start_s": 51.64,
+      "end_s": 53.55,
+      "text": "turnaround times are longer because who"
+    },
+    {
+      "start_s": 53.56,
+      "end_s": 55.35,
+      "text": "wants to wait for 8 months to get their"
+    },
+    {
+      "start_s": 55.36,
+      "end_s": 57.55,
+      "text": "card back, get a PSA 10 and make like"
+    },
+    {
+      "start_s": 57.56,
+      "end_s": 59.55,
+      "text": "$11 on it. That sucks, right? So I want"
+    },
+    {
+      "start_s": 59.56,
+      "end_s": 61.59,
+      "text": "to focus on cards where I win big when I"
+    },
+    {
+      "start_s": 61.6,
+      "end_s": 63.27,
+      "text": "get the grade I'm looking for. And just"
+    },
+    {
+      "start_s": 63.28,
+      "end_s": 64.91,
+      "text": "to give you an example of this let's"
+    },
+    {
+      "start_s": 64.92,
+      "end_s": 67.51,
+      "text": "consider two cards that are both $50"
+    },
+    {
+      "start_s": 67.52,
+      "end_s": 70.55,
+      "text": "ungraded. We add about a $35 grading fee"
+    },
+    {
+      "start_s": 70.56,
+      "end_s": 73.31,
+      "text": "so we're into each card for $85. You get"
+    },
+    {
+      "start_s": 73.32,
+      "end_s": 75.51,
+      "text": "a PSA 10 on both of them and the first"
+    },
+    {
+      "start_s": 75.52,
+      "end_s": 78.11,
+      "text": "one sells for $150. Not bad, right? You"
+    },
+    {
+      "start_s": 78.12,
+      "end_s": 79.71000000000001,
+      "text": "can make a little bit of money there but"
+    },
+    {
+      "start_s": 79.72,
+      "end_s": 82.39,
+      "text": "the second card sells for $350."
+    },
+    {
+      "start_s": 82.4,
+      "end_s": 83.78999999999999,
+      "text": "They cost the same amount of money, the"
+    },
+    {
+      "start_s": 83.8,
+      "end_s": 85.55,
+      "text": "same grading fee, it takes the same time"
+    },
+    {
+      "start_s": 85.56,
+      "end_s": 87.03,
+      "text": "to get these cards graded but one of"
+    },
+    {
+      "start_s": 87.03999999999999,
+      "end_s": 88.99,
+      "text": "them makes you way more money. So you"
+    },
+    {
+      "start_s": 89.0,
+      "end_s": 90.43,
+      "text": "decide which of those two you want in"
+    },
+    {
+      "start_s": 90.44,
+      "end_s": 91.87,
+      "text": "your order but I know which one I'm"
+    },
+    {
+      "start_s": 91.88,
+      "end_s": 93.59,
+      "text": "after. And the second thing I like to do"
+    },
+    {
+      "start_s": 93.6,
+      "end_s": 95.50999999999999,
+      "text": "when it comes to card selection is use"
+    },
+    {
+      "start_s": 95.52000000000001,
+      "end_s": 97.67,
+      "text": "the historical data that's available and"
+    },
+    {
+      "start_s": 97.68,
+      "end_s": 99.63,
+      "text": "look at the cards gem rates. A really"
+    },
+    {
+      "start_s": 99.64,
+      "end_s": 102.27000000000001,
+      "text": "good site to use for this is gemrate.com"
+    },
+    {
+      "start_s": 102.28,
+      "end_s": 103.83,
+      "text": "but you can see all kinds of grading"
+    },
+    {
+      "start_s": 103.84,
+      "end_s": 106.22999999999999,
+      "text": "data and what I like to do is figure out"
+    },
+    {
+      "start_s": 106.24000000000001,
+      "end_s": 108.11,
+      "text": "which of the sets have a higher gem"
+    },
+    {
+      "start_s": 108.12,
+      "end_s": 109.87,
+      "text": "rate. Now the gem rate is just like the"
+    },
+    {
+      "start_s": 109.88,
+      "end_s": 111.78999999999999,
+      "text": "cards historical success rate with"
+    },
+    {
+      "start_s": 111.8,
+      "end_s": 114.19,
+      "text": "grading so if I send 10 cards and I get"
+    },
+    {
+      "start_s": 114.2,
+      "end_s": 116.55,
+      "text": "seven PSA 10s or gem mint grades, that"
+    },
+    {
+      "start_s": 116.56,
+      "end_s": 118.91,
+      "text": "means my gem rate is 7 divided by 10 or"
+    },
+    {
+      "start_s": 118.92,
+      "end_s": 120.87,
+      "text": "70%. So, pretty straightforward. Now,"
+    },
+    {
+      "start_s": 120.88,
+      "end_s": 122.55,
+      "text": "it's important to note that gem rate is"
+    },
+    {
+      "start_s": 122.56,
+      "end_s": 124.23,
+      "text": "not a perfect metric and it's only"
+    },
+    {
+      "start_s": 124.24,
+      "end_s": 126.03,
+      "text": "helpful until we can see the card in"
+    },
+    {
+      "start_s": 126.04,
+      "end_s": 127.79,
+      "text": "person. We've always got to trust our"
+    },
+    {
+      "start_s": 127.8,
+      "end_s": 129.79,
+      "text": "eyes more than historical data cuz every"
+    },
+    {
+      "start_s": 129.8,
+      "end_s": 131.63,
+      "text": "card is unique, right? So, even if you"
+    },
+    {
+      "start_s": 131.64,
+      "end_s": 134.15,
+      "text": "have a card that has a 100% gem rate, if"
+    },
+    {
+      "start_s": 134.16,
+      "end_s": 135.83,
+      "text": "your copy is ripped in half, it's"
+    },
+    {
+      "start_s": 135.84,
+      "end_s": 137.43,
+      "text": "definitely not going to get a PSA 10, I"
+    },
+    {
+      "start_s": 137.44,
+      "end_s": 138.949,
+      "text": "can promise you that. But, where gem"
+    },
+    {
+      "start_s": 138.959,
+      "end_s": 140.99,
+      "text": "rate is really helpful is when we can't"
+    },
+    {
+      "start_s": 141.0,
+      "end_s": 142.91,
+      "text": "actually tell the condition perfectly"
+    },
+    {
+      "start_s": 142.92000000000002,
+      "end_s": 145.11,
+      "text": "online. This is going to help us focus"
+    },
+    {
+      "start_s": 145.12,
+      "end_s": 147.03,
+      "text": "on the sets that we're more likely to be"
+    },
+    {
+      "start_s": 147.04,
+      "end_s": 148.79,
+      "text": "able to find in clean gradable"
+    },
+    {
+      "start_s": 148.8,
+      "end_s": 150.35,
+      "text": "condition. So, the simple version of"
+    },
+    {
+      "start_s": 150.36,
+      "end_s": 152.31,
+      "text": "this is I want cards with high PSA 10"
+    },
+    {
+      "start_s": 152.32,
+      "end_s": 154.39,
+      "text": "upside and a high gem rate. And that's"
+    },
+    {
+      "start_s": 154.4,
+      "end_s": 155.71,
+      "text": "what I want to spend the majority of my"
+    },
+    {
+      "start_s": 155.72,
+      "end_s": 158.23,
+      "text": "time looking for. Now, we're never going"
+    },
+    {
+      "start_s": 158.24,
+      "end_s": 160.31,
+      "text": "to be perfect on this, right? Not every"
+    },
+    {
+      "start_s": 160.32,
+      "end_s": 161.87,
+      "text": "card's going to gem. What we're trying"
+    },
+    {
+      "start_s": 161.88,
+      "end_s": 163.75,
+      "text": "to do is just skew the odds in our"
+    },
+    {
+      "start_s": 163.76,
+      "end_s": 165.82999999999998,
+      "text": "favor. But, that doesn't mean that every"
+    },
+    {
+      "start_s": 165.84,
+      "end_s": 167.91,
+      "text": "card we buy is going to be gradable. So,"
+    },
+    {
+      "start_s": 167.92000000000002,
+      "end_s": 169.27,
+      "text": "some cards are going to have to be"
+    },
+    {
+      "start_s": 169.28,
+      "end_s": 171.82999999999998,
+      "text": "resold raw either at cost or for a small"
+    },
+    {
+      "start_s": 171.84,
+      "end_s": 173.31,
+      "text": "loss. Some cards we're going to submit"
+    },
+    {
+      "start_s": 173.32,
+      "end_s": 174.43,
+      "text": "for grading and they're still going to"
+    },
+    {
+      "start_s": 174.44,
+      "end_s": 176.71,
+      "text": "come back a 9. That's okay. That's"
+    },
+    {
+      "start_s": 176.72,
+      "end_s": 178.55,
+      "text": "normal. That's part of the process. I"
+    },
+    {
+      "start_s": 178.56,
+      "end_s": 180.949,
+      "text": "only submit around 50% of the cards that"
+    },
+    {
+      "start_s": 180.959,
+      "end_s": 182.71,
+      "text": "I buy with the intent to grade and that"
+    },
+    {
+      "start_s": 182.72,
+      "end_s": 184.19,
+      "text": "means that I'm actually reselling a lot"
+    },
+    {
+      "start_s": 184.2,
+      "end_s": 185.71,
+      "text": "of them raw because I just couldn't"
+    },
+    {
+      "start_s": 185.72,
+      "end_s": 188.15,
+      "text": "quite see the full condition of the card"
+    },
+    {
+      "start_s": 188.16,
+      "end_s": 189.79,
+      "text": "online. And so, I encourage you if"
+    },
+    {
+      "start_s": 189.8,
+      "end_s": 190.949,
+      "text": "you're grading cards, you got to think"
+    },
+    {
+      "start_s": 190.959,
+      "end_s": 192.99,
+      "text": "big here and look at the entire grading"
+    },
+    {
+      "start_s": 193.0,
+      "end_s": 195.27,
+      "text": "order as a play rather than thinking on"
+    },
+    {
+      "start_s": 195.28,
+      "end_s": 197.27,
+      "text": "an individual card-by-card basis and"
+    },
+    {
+      "start_s": 197.28,
+      "end_s": 198.71,
+      "text": "getting caught up on well, hold on, I"
+    },
+    {
+      "start_s": 198.72,
+      "end_s": 200.15,
+      "text": "don't want to lose on that card. Yeah,"
+    },
+    {
+      "start_s": 200.16,
+      "end_s": 201.59,
+      "text": "who cares if you make enough money on"
+    },
+    {
+      "start_s": 201.6,
+      "end_s": 203.31,
+      "text": "the 10s that it pays for everything and"
+    },
+    {
+      "start_s": 203.32,
+      "end_s": 204.71,
+      "text": "still leaves you with a really healthy"
+    },
+    {
+      "start_s": 204.72,
+      "end_s": 206.43,
+      "text": "profit. So, once we've locked in on a"
+    },
+    {
+      "start_s": 206.44,
+      "end_s": 208.07,
+      "text": "card that has high upside and a strong"
+    },
+    {
+      "start_s": 208.07999999999998,
+      "end_s": 209.79,
+      "text": "gem rate, the next step is to go and"
+    },
+    {
+      "start_s": 209.8,
+      "end_s": 211.75,
+      "text": "find the clean-looking raw copies from"
+    },
+    {
+      "start_s": 211.76,
+      "end_s": 213.47,
+      "text": "eBay. So, just because it has a strong"
+    },
+    {
+      "start_s": 213.48,
+      "end_s": 215.22899999999998,
+      "text": "gem rate does not mean that every single"
+    },
+    {
+      "start_s": 215.239,
+      "end_s": 217.79,
+      "text": "copy is buyable. We've got to only focus"
+    },
+    {
+      "start_s": 217.8,
+      "end_s": 219.39,
+      "text": "in on the ones that actually look like"
+    },
+    {
+      "start_s": 219.4,
+      "end_s": 220.63,
+      "text": "they're well-centered, like they don't"
+    },
+    {
+      "start_s": 220.64,
+      "end_s": 222.43,
+      "text": "have clear and obvious flaws. And so, I"
+    },
+    {
+      "start_s": 222.44,
+      "end_s": 223.91,
+      "text": "actually put together a checklist of"
+    },
+    {
+      "start_s": 223.92000000000002,
+      "end_s": 225.35,
+      "text": "some of the tips and tricks I've picked"
+    },
+    {
+      "start_s": 225.36,
+      "end_s": 226.91,
+      "text": "up over the years that have helped me"
+    },
+    {
+      "start_s": 226.92000000000002,
+      "end_s": 228.91,
+      "text": "find clean raw copies of these types of"
+    },
+    {
+      "start_s": 228.92000000000002,
+      "end_s": 230.50900000000001,
+      "text": "cards on eBay and then we'll walk"
+    },
+    {
+      "start_s": 230.519,
+      "end_s": 232.19,
+      "text": "through a demo together. So, the first"
+    },
+    {
+      "start_s": 232.2,
+      "end_s": 233.43,
+      "text": "thing probably sounds pretty obvious,"
+    },
+    {
+      "start_s": 233.44,
+      "end_s": 235.27,
+      "text": "but use the images, right? You just zoom"
+    },
+    {
+      "start_s": 235.28,
+      "end_s": 237.23,
+      "text": "in on them. And I find this easier to do"
+    },
+    {
+      "start_s": 237.24,
+      "end_s": 239.47,
+      "text": "on a phone or if you have like an iPad"
+    },
+    {
+      "start_s": 239.48,
+      "end_s": 240.71,
+      "text": "or some kind of tablet where it's an"
+    },
+    {
+      "start_s": 240.72,
+      "end_s": 242.31,
+      "text": "even bigger screen, then you can kind of"
+    },
+    {
+      "start_s": 242.32,
+      "end_s": 244.35,
+      "text": "do the pinch thing and zoom in to see"
+    },
+    {
+      "start_s": 244.36,
+      "end_s": 245.87,
+      "text": "the pictures up close and make sure that"
+    },
+    {
+      "start_s": 245.88,
+      "end_s": 247.47,
+      "text": "we're not targeting a card that has a"
+    },
+    {
+      "start_s": 247.48,
+      "end_s": 249.43,
+      "text": "clear and obvious flaw. Now, the big"
+    },
+    {
+      "start_s": 249.44,
+      "end_s": 250.79,
+      "text": "thing we want to be focused on is"
+    },
+    {
+      "start_s": 250.8,
+      "end_s": 252.35,
+      "text": "centering because this is the thing that"
+    },
+    {
+      "start_s": 252.36,
+      "end_s": 254.75,
+      "text": "we can just about always tell from the"
+    },
+    {
+      "start_s": 254.76,
+      "end_s": 256.67,
+      "text": "internet pictures if it's actually good"
+    },
+    {
+      "start_s": 256.68,
+      "end_s": 258.789,
+      "text": "enough to give us a chance. Now, PSA's"
+    },
+    {
+      "start_s": 258.799,
+      "end_s": 260.59,
+      "text": "standard is that the front of the card"
+    },
+    {
+      "start_s": 260.6,
+      "end_s": 263.27,
+      "text": "has to be 55/45 or better. And so, when"
+    },
+    {
+      "start_s": 263.28,
+      "end_s": 264.59,
+      "text": "I'm talking about centering, I'm talking"
+    },
+    {
+      "start_s": 264.6,
+      "end_s": 266.39,
+      "text": "about like is the card centered on the"
+    },
+    {
+      "start_s": 266.4,
+      "end_s": 268.03,
+      "text": "border? And if there is no border, then"
+    },
+    {
+      "start_s": 268.04,
+      "end_s": 269.27,
+      "text": "we're usually looking at some of the"
+    },
+    {
+      "start_s": 269.28,
+      "end_s": 271.03,
+      "text": "landmarks on the card, like the team"
+    },
+    {
+      "start_s": 271.04,
+      "end_s": 273.27,
+      "text": "logo or the Topps logo or the player's"
+    },
+    {
+      "start_s": 273.28,
+      "end_s": 275.15,
+      "text": "name and kind of looking at the margins"
+    },
+    {
+      "start_s": 275.15999999999997,
+      "end_s": 276.75,
+      "text": "to the left and the right. And that's"
+    },
+    {
+      "start_s": 276.76,
+      "end_s": 278.23,
+      "text": "how we determine whether or not the card"
+    },
+    {
+      "start_s": 278.24,
+      "end_s": 280.07,
+      "text": "is centered. If I'm ever not sure what"
+    },
+    {
+      "start_s": 280.08,
+      "end_s": 281.79,
+      "text": "ideal centering looks like, I usually"
+    },
+    {
+      "start_s": 281.8,
+      "end_s": 283.75,
+      "text": "like to just go and find a PSA 10 copy"
+    },
+    {
+      "start_s": 283.76,
+      "end_s": 285.11,
+      "text": "online and then just compare the raw"
+    },
+    {
+      "start_s": 285.12,
+      "end_s": 286.909,
+      "text": "copies to that one. But, based on"
+    },
+    {
+      "start_s": 286.919,
+      "end_s": 288.75,
+      "text": "centering alone, we should be able to"
+    },
+    {
+      "start_s": 288.76,
+      "end_s": 290.75,
+      "text": "rip through tons of listings. And this"
+    },
+    {
+      "start_s": 290.76,
+      "end_s": 292.47,
+      "text": "is what speeds up the process quite a"
+    },
+    {
+      "start_s": 292.48,
+      "end_s": 294.59000000000003,
+      "text": "bit because usually we can see centering"
+    },
+    {
+      "start_s": 294.6,
+      "end_s": 296.39,
+      "text": "clearly enough from the gallery or from"
+    },
+    {
+      "start_s": 296.4,
+      "end_s": 298.27,
+      "text": "the list view on eBay where we're just"
+    },
+    {
+      "start_s": 298.28,
+      "end_s": 299.47,
+      "text": "holding our phone and just swiping"
+    },
+    {
+      "start_s": 299.48,
+      "end_s": 300.67,
+      "text": "through off-center, off-center,"
+    },
+    {
+      "start_s": 300.68,
+      "end_s": 301.95,
+      "text": "off-center. Oh, this one looks good."
+    },
+    {
+      "start_s": 301.96,
+      "end_s": 303.63,
+      "text": "Click into it, check the other stuff."
+    },
+    {
+      "start_s": 303.64,
+      "end_s": 304.87,
+      "text": "Nope, off-center, off-center, you know."
+    },
+    {
+      "start_s": 304.88,
+      "end_s": 306.31,
+      "text": "And that's kind of how fast you're going"
+    },
+    {
+      "start_s": 306.32,
+      "end_s": 307.87,
+      "text": "through. So, you should be able to get"
+    },
+    {
+      "start_s": 307.88,
+      "end_s": 309.909,
+      "text": "through hundreds of cards in an hour."
+    },
+    {
+      "start_s": 309.919,
+      "end_s": 311.63,
+      "text": "The next part is to look closely at the"
+    },
+    {
+      "start_s": 311.64,
+      "end_s": 312.99,
+      "text": "corners and the edges. And what we're"
+    },
+    {
+      "start_s": 313.0,
+      "end_s": 314.99,
+      "text": "looking for here are any obvious flaws,"
+    },
+    {
+      "start_s": 315.0,
+      "end_s": 316.87,
+      "text": "any corner touches where it's it's"
+    },
+    {
+      "start_s": 316.88,
+      "end_s": 318.71,
+      "text": "rounded or it looks like it's raised or"
+    },
+    {
+      "start_s": 318.72,
+      "end_s": 320.31,
+      "text": "touched. That's the type of stuff that"
+    },
+    {
+      "start_s": 320.32,
+      "end_s": 322.51,
+      "text": "holds a card back from getting a PSA 10."
+    },
+    {
+      "start_s": 322.52,
+      "end_s": 324.11,
+      "text": "Same goes for the edges. Are they"
+    },
+    {
+      "start_s": 324.12,
+      "end_s": 325.51,
+      "text": "chipped? Are they nicked? Or are we"
+    },
+    {
+      "start_s": 325.52,
+      "end_s": 327.19,
+      "text": "seeing edges that really do go straight"
+    },
+    {
+      "start_s": 327.2,
+      "end_s": 328.909,
+      "text": "across that look clean all the way"
+    },
+    {
+      "start_s": 328.919,
+      "end_s": 330.59,
+      "text": "around the card? Now, surface is the"
+    },
+    {
+      "start_s": 330.6,
+      "end_s": 332.39,
+      "text": "tricky one cuz this is where there's all"
+    },
+    {
+      "start_s": 332.4,
+      "end_s": 334.03,
+      "text": "kinds of things that can go wrong, and"
+    },
+    {
+      "start_s": 334.04,
+      "end_s": 336.11,
+      "text": "we can't always see them from internet"
+    },
+    {
+      "start_s": 336.12,
+      "end_s": 337.67,
+      "text": "pictures. So, sometimes we're going to"
+    },
+    {
+      "start_s": 337.68,
+      "end_s": 338.87,
+      "text": "buy a card and there's going to be a"
+    },
+    {
+      "start_s": 338.88,
+      "end_s": 340.55,
+      "text": "surface thing on the back that we just"
+    },
+    {
+      "start_s": 340.56,
+      "end_s": 342.51,
+      "text": "couldn't see. But, the more reps you"
+    },
+    {
+      "start_s": 342.52,
+      "end_s": 343.909,
+      "text": "get, the better you'll get at"
+    },
+    {
+      "start_s": 343.919,
+      "end_s": 346.15,
+      "text": "understanding what certain flaws look"
+    },
+    {
+      "start_s": 346.15999999999997,
+      "end_s": 348.43,
+      "text": "like in internet pictures. For example,"
+    },
+    {
+      "start_s": 348.44,
+      "end_s": 350.87,
+      "text": "a dimple might look one way in person,"
+    },
+    {
+      "start_s": 350.88,
+      "end_s": 352.79,
+      "text": "but it looks a different way in a scan,"
+    },
+    {
+      "start_s": 352.8,
+      "end_s": 354.47,
+      "text": "so you have to understand what that"
+    },
+    {
+      "start_s": 354.48,
+      "end_s": 356.43,
+      "text": "actually looks like to be able to spot"
+    },
+    {
+      "start_s": 356.44,
+      "end_s": 358.19,
+      "text": "that online, and that just comes with"
+    },
+    {
+      "start_s": 358.2,
+      "end_s": 360.27,
+      "text": "repetition. And once again, even with a"
+    },
+    {
+      "start_s": 360.28,
+      "end_s": 361.95,
+      "text": "lot of reps, it's still tricky to see"
+    },
+    {
+      "start_s": 361.96,
+      "end_s": 363.75,
+      "text": "everything perfectly, so you're still"
+    },
+    {
+      "start_s": 363.76,
+      "end_s": 365.47,
+      "text": "going to occasionally buy a card that"
+    },
+    {
+      "start_s": 365.48,
+      "end_s": 367.27,
+      "text": "doesn't end up being gradable. All"
+    },
+    {
+      "start_s": 367.28,
+      "end_s": 368.51,
+      "text": "right, so those are the basics. Now, the"
+    },
+    {
+      "start_s": 368.52,
+      "end_s": 370.03,
+      "text": "fun stuff is where we get a little more"
+    },
+    {
+      "start_s": 370.04,
+      "end_s": 371.83,
+      "text": "strategic here. So, if I find a card"
+    },
+    {
+      "start_s": 371.84,
+      "end_s": 373.67,
+      "text": "that looks clean, the next thing I want"
+    },
+    {
+      "start_s": 373.68,
+      "end_s": 375.83,
+      "text": "to do is click into the seller's other"
+    },
+    {
+      "start_s": 375.84,
+      "end_s": 377.43,
+      "text": "listings and just see what kinds of"
+    },
+    {
+      "start_s": 377.44,
+      "end_s": 379.39,
+      "text": "inventory they have. Now, sometimes"
+    },
+    {
+      "start_s": 379.4,
+      "end_s": 381.27,
+      "text": "people are going to have 100 cards and"
+    },
+    {
+      "start_s": 381.28,
+      "end_s": 382.99,
+      "text": "99 of them are going to be graded, and"
+    },
+    {
+      "start_s": 383.0,
+      "end_s": 384.55,
+      "text": "this is going to be the only raw card"
+    },
+    {
+      "start_s": 384.56,
+      "end_s": 386.19,
+      "text": "that they have in their store. I don't"
+    },
+    {
+      "start_s": 386.2,
+      "end_s": 387.67,
+      "text": "know about you, but to me that seems"
+    },
+    {
+      "start_s": 387.68,
+      "end_s": 389.27,
+      "text": "like a pretty good indication that this"
+    },
+    {
+      "start_s": 389.28,
+      "end_s": 391.19,
+      "text": "person knows what grading is all about,"
+    },
+    {
+      "start_s": 391.2,
+      "end_s": 392.51,
+      "text": "and there's probably a reason why"
+    },
+    {
+      "start_s": 392.52,
+      "end_s": 394.07,
+      "text": "they're selling that card raw. So,"
+    },
+    {
+      "start_s": 394.08,
+      "end_s": 395.51,
+      "text": "that's the type of card that even if it"
+    },
+    {
+      "start_s": 395.52,
+      "end_s": 397.79,
+      "text": "looks clean, I may still skip. But, on"
+    },
+    {
+      "start_s": 397.8,
+      "end_s": 399.51,
+      "text": "the flip side, if the seller only has"
+    },
+    {
+      "start_s": 399.52,
+      "end_s": 401.43,
+      "text": "raw inventory, or they might have just a"
+    },
+    {
+      "start_s": 401.44,
+      "end_s": 403.19,
+      "text": "few graded cards mixed in, but it's"
+    },
+    {
+      "start_s": 403.2,
+      "end_s": 404.83,
+      "text": "mostly raw stuff, that's where I'd be"
+    },
+    {
+      "start_s": 404.84000000000003,
+      "end_s": 405.95,
+      "text": "able to buy that card with more"
+    },
+    {
+      "start_s": 405.96,
+      "end_s": 407.27,
+      "text": "confidence that it's not been"
+    },
+    {
+      "start_s": 407.28,
+      "end_s": 408.909,
+      "text": "cherry-picked for grading already. The"
+    },
+    {
+      "start_s": 408.919,
+      "end_s": 410.67,
+      "text": "next thing seems obvious as well, but"
+    },
+    {
+      "start_s": 410.68,
+      "end_s": 412.39,
+      "text": "it's also something that gets overlooked"
+    },
+    {
+      "start_s": 412.4,
+      "end_s": 413.83,
+      "text": "all the time, but just check the"
+    },
+    {
+      "start_s": 413.84000000000003,
+      "end_s": 415.75,
+      "text": "description. Sometimes there's going to"
+    },
+    {
+      "start_s": 415.76,
+      "end_s": 417.83,
+      "text": "be a flaw that's clearly explained in"
+    },
+    {
+      "start_s": 417.84000000000003,
+      "end_s": 419.63,
+      "text": "the description, but we're always just"
+    },
+    {
+      "start_s": 419.64,
+      "end_s": 421.15,
+      "text": "looking at the title, and we're always"
+    },
+    {
+      "start_s": 421.16,
+      "end_s": 422.43,
+      "text": "just looking at the pictures, and we"
+    },
+    {
+      "start_s": 422.44,
+      "end_s": 423.87,
+      "text": "sometimes just forget about the"
+    },
+    {
+      "start_s": 423.88,
+      "end_s": 425.95,
+      "text": "description altogether. Another thing to"
+    },
+    {
+      "start_s": 425.96,
+      "end_s": 427.51,
+      "text": "look out for is cards that are being"
+    },
+    {
+      "start_s": 427.52,
+      "end_s": 429.47,
+      "text": "sold by consigners, and usually if"
+    },
+    {
+      "start_s": 429.48,
+      "end_s": 430.63,
+      "text": "you're not sure, you can look in the"
+    },
+    {
+      "start_s": 430.64,
+      "end_s": 432.35,
+      "text": "description of the item, and it'll be"
+    },
+    {
+      "start_s": 432.36,
+      "end_s": 433.67,
+      "text": "pretty clear pretty quickly if it's a"
+    },
+    {
+      "start_s": 433.68,
+      "end_s": 435.75,
+      "text": "consignment operation. But, consigners"
+    },
+    {
+      "start_s": 435.76,
+      "end_s": 437.35,
+      "text": "sell cards for other people, and a lot"
+    },
+    {
+      "start_s": 437.36,
+      "end_s": 438.71,
+      "text": "of times the people sending them cards"
+    },
+    {
+      "start_s": 438.72,
+      "end_s": 440.79,
+      "text": "to sell are the more savvy people in the"
+    },
+    {
+      "start_s": 440.8,
+      "end_s": 442.67,
+      "text": "card market who know about grading, who"
+    },
+    {
+      "start_s": 442.68,
+      "end_s": 444.03,
+      "text": "have already cherry-picked those cards,"
+    },
+    {
+      "start_s": 444.04,
+      "end_s": 444.99,
+      "text": "and they just don't want to deal with"
+    },
+    {
+      "start_s": 445.0,
+      "end_s": 447.31,
+      "text": "the ungradable raw copies. Now, I've"
+    },
+    {
+      "start_s": 447.32,
+      "end_s": 449.23,
+      "text": "definitely bought cards from consigners"
+    },
+    {
+      "start_s": 449.24,
+      "end_s": 450.59,
+      "text": "that have come in, and I've been able to"
+    },
+    {
+      "start_s": 450.6,
+      "end_s": 452.27,
+      "text": "grade them and get 10s, so it's not"
+    },
+    {
+      "start_s": 452.28,
+      "end_s": 454.79,
+      "text": "impossible, but usually I approach those"
+    },
+    {
+      "start_s": 454.8,
+      "end_s": 457.23,
+      "text": "cards with a little bit more skepticism."
+    },
+    {
+      "start_s": 457.24,
+      "end_s": 458.43,
+      "text": "All right, another thing I like to do,"
+    },
+    {
+      "start_s": 458.44,
+      "end_s": 459.99,
+      "text": "when I'm in the search results, eBay"
+    },
+    {
+      "start_s": 460.0,
+      "end_s": 462.11,
+      "text": "they default to the best match view, and"
+    },
+    {
+      "start_s": 462.12,
+      "end_s": 463.90999999999997,
+      "text": "that's not always the best match for"
+    },
+    {
+      "start_s": 463.92,
+      "end_s": 466.03,
+      "text": "you. So, what I like to do is swap to"
+    },
+    {
+      "start_s": 466.04,
+      "end_s": 468.11,
+      "text": "the newly listed view, which shows me"
+    },
+    {
+      "start_s": 468.12,
+      "end_s": 470.31,
+      "text": "the newest listed items first. And that"
+    },
+    {
+      "start_s": 470.32,
+      "end_s": 471.63,
+      "text": "way I'm looking at cards that haven't"
+    },
+    {
+      "start_s": 471.64,
+      "end_s": 473.27,
+      "text": "been on eBay as long that are less"
+    },
+    {
+      "start_s": 473.28,
+      "end_s": 474.90999999999997,
+      "text": "likely to have already been looked at"
+    },
+    {
+      "start_s": 474.92,
+      "end_s": 476.95,
+      "text": "for grading by other potential graders."
+    },
+    {
+      "start_s": 476.96,
+      "end_s": 478.39,
+      "text": "One more thing with the search results,"
+    },
+    {
+      "start_s": 478.4,
+      "end_s": 480.15,
+      "text": "when I'm looking at for a card, I like"
+    },
+    {
+      "start_s": 480.16,
+      "end_s": 482.51,
+      "text": "to focus on one design at a time. So,"
+    },
+    {
+      "start_s": 482.52,
+      "end_s": 483.79,
+      "text": "for example, if I'm looking at a"
+    },
+    {
+      "start_s": 483.8,
+      "end_s": 485.55,
+      "text": "football player and I've got Topps"
+    },
+    {
+      "start_s": 485.56,
+      "end_s": 487.43,
+      "text": "Chrome, I've got Prizm, and I'm putting"
+    },
+    {
+      "start_s": 487.44,
+      "end_s": 489.31,
+      "text": "those both in the same search, and I'm"
+    },
+    {
+      "start_s": 489.32,
+      "end_s": 490.91,
+      "text": "constantly having to bounce back and"
+    },
+    {
+      "start_s": 490.92,
+      "end_s": 492.47,
+      "text": "forth Topps Chrome to Prizm to Topps"
+    },
+    {
+      "start_s": 492.48,
+      "end_s": 494.31,
+      "text": "Chrome again, that makes my brain have"
+    },
+    {
+      "start_s": 494.32,
+      "end_s": 496.35,
+      "text": "to switch back and forth over and over"
+    },
+    {
+      "start_s": 496.36,
+      "end_s": 497.909,
+      "text": "and over again. And every time it"
+    },
+    {
+      "start_s": 497.919,
+      "end_s": 500.19,
+      "text": "switches to remind itself, okay, what"
+    },
+    {
+      "start_s": 500.2,
+      "end_s": 501.43,
+      "text": "this is the design, this is the"
+    },
+    {
+      "start_s": 501.44,
+      "end_s": 502.75,
+      "text": "centering for this card, this is what I"
+    },
+    {
+      "start_s": 502.76,
+      "end_s": 504.43,
+      "text": "need to be looking out for, there is"
+    },
+    {
+      "start_s": 504.44,
+      "end_s": 506.87,
+      "text": "time that is wasted there. We're far"
+    },
+    {
+      "start_s": 506.88,
+      "end_s": 508.59,
+      "text": "more efficient if we can just get into"
+    },
+    {
+      "start_s": 508.6,
+      "end_s": 510.59,
+      "text": "the flow, and so I like to just look at"
+    },
+    {
+      "start_s": 510.6,
+      "end_s": 512.63,
+      "text": "one design at a time and just pull up"
+    },
+    {
+      "start_s": 512.64,
+      "end_s": 513.99,
+      "text": "the Topps Chrome and go through the"
+    },
+    {
+      "start_s": 514.0,
+      "end_s": 516.029,
+      "text": "entire search results for Topps Chrome"
+    },
+    {
+      "start_s": 516.039,
+      "end_s": 517.87,
+      "text": "and then switch to Prizm. And that way"
+    },
+    {
+      "start_s": 517.88,
+      "end_s": 519.469,
+      "text": "you just know exactly what you're"
+    },
+    {
+      "start_s": 519.479,
+      "end_s": 521.31,
+      "text": "looking for, rather than having to"
+    },
+    {
+      "start_s": 521.32,
+      "end_s": 523.31,
+      "text": "constantly bounce back and forth. Now,"
+    },
+    {
+      "start_s": 523.32,
+      "end_s": 525.19,
+      "text": "I've got two last things mindset wise"
+    },
+    {
+      "start_s": 525.2,
+      "end_s": 526.35,
+      "text": "and then we'll get into the demo. So,"
+    },
+    {
+      "start_s": 526.36,
+      "end_s": 527.55,
+      "text": "the first one is we just don't want to"
+    },
+    {
+      "start_s": 527.56,
+      "end_s": 529.59,
+      "text": "spend hours and hours and hours looking"
+    },
+    {
+      "start_s": 529.6,
+      "end_s": 531.11,
+      "text": "at each individual card. This should be"
+    },
+    {
+      "start_s": 531.12,
+      "end_s": 533.19,
+      "text": "a very quick process. We want to"
+    },
+    {
+      "start_s": 533.2,
+      "end_s": 534.95,
+      "text": "eliminate cards as quickly as we can,"
+    },
+    {
+      "start_s": 534.96,
+      "end_s": 536.63,
+      "text": "find the ones that are clean, buy them"
+    },
+    {
+      "start_s": 536.64,
+      "end_s": 538.39,
+      "text": "or add them to your watch list, but then"
+    },
+    {
+      "start_s": 538.4,
+      "end_s": 540.27,
+      "text": "move on. So, we shouldn't be sitting"
+    },
+    {
+      "start_s": 540.28,
+      "end_s": 542.23,
+      "text": "there inspecting and measuring every"
+    },
+    {
+      "start_s": 542.24,
+      "end_s": 543.75,
+      "text": "single card. You're never going to make"
+    },
+    {
+      "start_s": 543.76,
+      "end_s": 545.87,
+      "text": "any progress if you're taking 25 minutes"
+    },
+    {
+      "start_s": 545.88,
+      "end_s": 547.67,
+      "text": "to evaluate whether or not to even bid"
+    },
+    {
+      "start_s": 547.68,
+      "end_s": 549.27,
+      "text": "on a card. Now, you'll definitely be"
+    },
+    {
+      "start_s": 549.28,
+      "end_s": 551.15,
+      "text": "slower up front if it's your first time"
+    },
+    {
+      "start_s": 551.16,
+      "end_s": 552.67,
+      "text": "doing this compared to after you've got"
+    },
+    {
+      "start_s": 552.68,
+      "end_s": 554.67,
+      "text": "a thousand reps, but it still shouldn't"
+    },
+    {
+      "start_s": 554.68,
+      "end_s": 557.23,
+      "text": "be a painfully slow process here. Okay,"
+    },
+    {
+      "start_s": 557.24,
+      "end_s": 559.15,
+      "text": "and finally, this is a shift that I made"
+    },
+    {
+      "start_s": 559.16,
+      "end_s": 561.03,
+      "text": "a few years ago that's really helped me"
+    },
+    {
+      "start_s": 561.04,
+      "end_s": 563.31,
+      "text": "be more efficient, but a lot of times"
+    },
+    {
+      "start_s": 563.32,
+      "end_s": 565.15,
+      "text": "newer graders want the card to be"
+    },
+    {
+      "start_s": 565.16,
+      "end_s": 566.99,
+      "text": "gradable. So, we go into a card, we"
+    },
+    {
+      "start_s": 567.0,
+      "end_s": 568.43,
+      "text": "click into it, and we're like looking"
+    },
+    {
+      "start_s": 568.44,
+      "end_s": 570.11,
+      "text": "for all the reasons why we should buy"
+    },
+    {
+      "start_s": 570.12,
+      "end_s": 572.35,
+      "text": "it. And when we're doing that, we end up"
+    },
+    {
+      "start_s": 572.36,
+      "end_s": 574.55,
+      "text": "starting to justify the flaws, and we"
+    },
+    {
+      "start_s": 574.56,
+      "end_s": 576.35,
+      "text": "say, \"Well, ah, that's not that bad, and"
+    },
+    {
+      "start_s": 576.36,
+      "end_s": 577.99,
+      "text": "the centering's just only a little bit"
+    },
+    {
+      "start_s": 578.0,
+      "end_s": 579.83,
+      "text": "off and so you end up buying cards that"
+    },
+    {
+      "start_s": 579.84,
+      "end_s": 581.83,
+      "text": "actually don't look that clean if you're"
+    },
+    {
+      "start_s": 581.84,
+      "end_s": 583.95,
+      "text": "being objective about it. So what I do"
+    },
+    {
+      "start_s": 583.96,
+      "end_s": 585.95,
+      "text": "instead is I actually start from the"
+    },
+    {
+      "start_s": 585.96,
+      "end_s": 587.67,
+      "text": "assumption that I'm not going to buy the"
+    },
+    {
+      "start_s": 587.68,
+      "end_s": 590.79,
+      "text": "card unless the card proves itself truly"
+    },
+    {
+      "start_s": 590.8,
+      "end_s": 592.35,
+      "text": "worthy. And so it's the difference"
+    },
+    {
+      "start_s": 592.36,
+      "end_s": 594.59,
+      "text": "between justifying flaws versus going"
+    },
+    {
+      "start_s": 594.6,
+      "end_s": 596.67,
+      "text": "into a card expecting not to buy it and"
+    },
+    {
+      "start_s": 596.68,
+      "end_s": 597.79,
+      "text": "saying, \"Well, hold on, the centering"
+    },
+    {
+      "start_s": 597.8,
+      "end_s": 599.11,
+      "text": "actually does look pretty good and"
+    },
+    {
+      "start_s": 599.12,
+      "end_s": 601.07,
+      "text": "actually I can't find any issues with"
+    },
+    {
+      "start_s": 601.08,
+      "end_s": 603.11,
+      "text": "the corners and the seller doesn't look"
+    },
+    {
+      "start_s": 603.12,
+      "end_s": 604.67,
+      "text": "like they grade cards.\" So you run out"
+    },
+    {
+      "start_s": 604.68,
+      "end_s": 606.59,
+      "text": "of reasons not to buy the card rather"
+    },
+    {
+      "start_s": 606.6,
+      "end_s": 608.39,
+      "text": "than looking for reasons to buy the"
+    },
+    {
+      "start_s": 608.4,
+      "end_s": 610.35,
+      "text": "card. And what this has done is help me"
+    },
+    {
+      "start_s": 610.36,
+      "end_s": 612.87,
+      "text": "improve my success rate so I'm able to"
+    },
+    {
+      "start_s": 612.88,
+      "end_s": 614.83,
+      "text": "grade more of the cards that I buy"
+    },
+    {
+      "start_s": 614.84,
+      "end_s": 616.59,
+      "text": "rather than buying stuff that I end up"
+    },
+    {
+      "start_s": 616.6,
+      "end_s": 618.47,
+      "text": "just liquidating raw. All right, so now"
+    },
+    {
+      "start_s": 618.48,
+      "end_s": 620.43,
+      "text": "you understand some of the why behind"
+    },
+    {
+      "start_s": 620.44,
+      "end_s": 622.11,
+      "text": "what I'm about to show you and let's"
+    },
+    {
+      "start_s": 622.12,
+      "end_s": 623.79,
+      "text": "dive into the demo and we can walk"
+    },
+    {
+      "start_s": 623.8,
+      "end_s": 625.23,
+      "text": "through this together. Now remember the"
+    },
+    {
+      "start_s": 625.24,
+      "end_s": 627.35,
+      "text": "first step is card selection. We want to"
+    },
+    {
+      "start_s": 627.36,
+      "end_s": 629.43,
+      "text": "win in the draft. So there are lots of"
+    },
+    {
+      "start_s": 629.44,
+      "end_s": 631.39,
+      "text": "ways to do this, but my favorite way is"
+    },
+    {
+      "start_s": 631.4,
+      "end_s": 633.35,
+      "text": "to use Coin. This is my software that I"
+    },
+    {
+      "start_s": 633.36,
+      "end_s": 635.59,
+      "text": "built specifically for this purpose. And"
+    },
+    {
+      "start_s": 635.6,
+      "end_s": 636.87,
+      "text": "by the way, if you want to follow along,"
+    },
+    {
+      "start_s": 636.88,
+      "end_s": 638.39,
+      "text": "I will leave a link in the description"
+    },
+    {
+      "start_s": 638.4,
+      "end_s": 640.03,
+      "text": "where you can take a free trial and try"
+    },
+    {
+      "start_s": 640.04,
+      "end_s": 641.63,
+      "text": "Coin for free. But this is where we're"
+    },
+    {
+      "start_s": 641.64,
+      "end_s": 643.31,
+      "text": "going to start honing in on which cards"
+    },
+    {
+      "start_s": 643.32,
+      "end_s": 644.63,
+      "text": "to go after. So I'm going to start off"
+    },
+    {
+      "start_s": 644.64,
+      "end_s": 646.27,
+      "text": "by adding a couple of filters here. So"
+    },
+    {
+      "start_s": 646.28,
+      "end_s": 648.87,
+      "text": "the first one is gem rate. I like gem"
+    },
+    {
+      "start_s": 648.88,
+      "end_s": 651.07,
+      "text": "rates that are greater than 50%. This"
+    },
+    {
+      "start_s": 651.08,
+      "end_s": 652.23,
+      "text": "helps us target cards that are just a"
+    },
+    {
+      "start_s": 652.24,
+      "end_s": 654.03,
+      "text": "little bit easier to grade. And then I'm"
+    },
+    {
+      "start_s": 654.04,
+      "end_s": 656.35,
+      "text": "going to add a second filter for PSA 10"
+    },
+    {
+      "start_s": 656.36,
+      "end_s": 657.99,
+      "text": "margin. So that's like the amount of"
+    },
+    {
+      "start_s": 658.0,
+      "end_s": 660.39,
+      "text": "margin that's created by the PSA 10"
+    },
+    {
+      "start_s": 660.4,
+      "end_s": 662.59,
+      "text": "grade. And let's say I want this greater"
+    },
+    {
+      "start_s": 662.6,
+      "end_s": 666.11,
+      "text": "than $300. So this is going to give us"
+    },
+    {
+      "start_s": 666.12,
+      "end_s": 667.43,
+      "text": "cards where we're going to actually make"
+    },
+    {
+      "start_s": 667.44,
+      "end_s": 669.55,
+      "text": "some pretty decent money if we get a 10"
+    },
+    {
+      "start_s": 669.56,
+      "end_s": 670.99,
+      "text": "grade. So once we narrow down the list,"
+    },
+    {
+      "start_s": 671.0,
+      "end_s": 672.71,
+      "text": "it's time to pick a card. So let's say"
+    },
+    {
+      "start_s": 672.72,
+      "end_s": 674.47,
+      "text": "we go after this Shohei Ohtani card,"
+    },
+    {
+      "start_s": 674.48,
+      "end_s": 676.47,
+      "text": "this Bowman's Best Pixel Portraits card."
+    },
+    {
+      "start_s": 676.48,
+      "end_s": 679.07,
+      "text": "So you can see the PSA 10 multiplier,"
+    },
+    {
+      "start_s": 679.08,
+      "end_s": 681.07,
+      "text": "the raw price, the graded price here,"
+    },
+    {
+      "start_s": 681.08,
+      "end_s": 683.03,
+      "text": "the gem rate. So it's got all the data"
+    },
+    {
+      "start_s": 683.04,
+      "end_s": 685.39,
+      "text": "points that you would want in one place."
+    },
+    {
+      "start_s": 685.4,
+      "end_s": 686.95,
+      "text": "But the reason why I like Ohtani"
+    },
+    {
+      "start_s": 686.96,
+      "end_s": 688.79,
+      "text": "especially right now is because with"
+    },
+    {
+      "start_s": 688.8,
+      "end_s": 691.07,
+      "text": "longer turnaround times, that leaves a"
+    },
+    {
+      "start_s": 691.08,
+      "end_s": 692.99,
+      "text": "lot of space and a lot of time for"
+    },
+    {
+      "start_s": 693.0,
+      "end_s": 695.23,
+      "text": "things to happen in the market. And the"
+    },
+    {
+      "start_s": 695.24,
+      "end_s": 697.35,
+      "text": "last thing that we want is to send off a"
+    },
+    {
+      "start_s": 697.36,
+      "end_s": 699.87,
+      "text": "card to be graded just to have the value"
+    },
+    {
+      "start_s": 699.88,
+      "end_s": 701.75,
+      "text": "of that card fall while it's sitting"
+    },
+    {
+      "start_s": 701.76,
+      "end_s": 703.91,
+      "text": "there waiting for PSA to grade it. So,"
+    },
+    {
+      "start_s": 703.92,
+      "end_s": 705.31,
+      "text": "for example, if we're looking at this"
+    },
+    {
+      "start_s": 705.32,
+      "end_s": 707.83,
+      "text": "Jackson Dart card down here, we buy this"
+    },
+    {
+      "start_s": 707.84,
+      "end_s": 709.43,
+      "text": "and we send it off to PSA and then he's"
+    },
+    {
+      "start_s": 709.44,
+      "end_s": 710.83,
+      "text": "just terrible during the football"
+    },
+    {
+      "start_s": 710.84,
+      "end_s": 713.27,
+      "text": "season. He's a less proven name. His"
+    },
+    {
+      "start_s": 713.28,
+      "end_s": 715.75,
+      "text": "floor is far lower than a guy like Otani"
+    },
+    {
+      "start_s": 715.76,
+      "end_s": 716.99,
+      "text": "who's already going to be a Hall of"
+    },
+    {
+      "start_s": 717.0,
+      "end_s": 719.55,
+      "text": "Famer if he retired today. So, Otani's"
+    },
+    {
+      "start_s": 719.56,
+      "end_s": 720.87,
+      "text": "cards aren't going to be nearly as"
+    },
+    {
+      "start_s": 720.88,
+      "end_s": 723.19,
+      "text": "volatile as a guy like Dart who is just"
+    },
+    {
+      "start_s": 723.2,
+      "end_s": 724.87,
+      "text": "a less proven player. So, that's why I"
+    },
+    {
+      "start_s": 724.88,
+      "end_s": 726.39,
+      "text": "like going after these more established"
+    },
+    {
+      "start_s": 726.4,
+      "end_s": 727.83,
+      "text": "names when we have longer turnaround"
+    },
+    {
+      "start_s": 727.84,
+      "end_s": 729.63,
+      "text": "times. So, from here all I do is click"
+    },
+    {
+      "start_s": 729.64,
+      "end_s": 731.39,
+      "text": "the eBay link and I'm off to eBay to"
+    },
+    {
+      "start_s": 731.4,
+      "end_s": 733.23,
+      "text": "search for the clean copies of this"
+    },
+    {
+      "start_s": 733.24,
+      "end_s": 734.83,
+      "text": "card. Now, if we go back we can see our"
+    },
+    {
+      "start_s": 734.84,
+      "end_s": 737.39,
+      "text": "raw price is around 130 bucks. Now, a"
+    },
+    {
+      "start_s": 737.4,
+      "end_s": 738.51,
+      "text": "lot of times people are going to be"
+    },
+    {
+      "start_s": 738.52,
+      "end_s": 739.91,
+      "text": "priced higher than that and we're going"
+    },
+    {
+      "start_s": 739.92,
+      "end_s": 741.67,
+      "text": "to have to make some offers here or"
+    },
+    {
+      "start_s": 741.68,
+      "end_s": 742.67,
+      "text": "we're going to have to wait for an"
+    },
+    {
+      "start_s": 742.68,
+      "end_s": 744.07,
+      "text": "auction to end to actually get that"
+    },
+    {
+      "start_s": 744.08,
+      "end_s": 745.79,
+      "text": "price. Looks like this one's actually a"
+    },
+    {
+      "start_s": 745.8,
+      "end_s": 748.07,
+      "text": "hair above that price already. The thing"
+    },
+    {
+      "start_s": 748.08,
+      "end_s": 750.11,
+      "text": "about this is when we're targeting the"
+    },
+    {
+      "start_s": 750.12,
+      "end_s": 752.51,
+      "text": "clean copies of cards, those ones tend"
+    },
+    {
+      "start_s": 752.52,
+      "end_s": 754.43,
+      "text": "to go for a little bit more money than"
+    },
+    {
+      "start_s": 754.44,
+      "end_s": 755.91,
+      "text": "the ones that look off-centered or have"
+    },
+    {
+      "start_s": 755.92,
+      "end_s": 757.79,
+      "text": "a beat-up corner. And so, that's the"
+    },
+    {
+      "start_s": 757.8,
+      "end_s": 758.99,
+      "text": "thing that we've got to keep in mind is"
+    },
+    {
+      "start_s": 759.0,
+      "end_s": 760.51,
+      "text": "we might actually have to pay a hair"
+    },
+    {
+      "start_s": 760.52,
+      "end_s": 762.23,
+      "text": "higher if we want to lock in one of"
+    },
+    {
+      "start_s": 762.24,
+      "end_s": 764.15,
+      "text": "these clean copies. The good news is"
+    },
+    {
+      "start_s": 764.16,
+      "end_s": 766.03,
+      "text": "that's okay because there's 300 plus"
+    },
+    {
+      "start_s": 766.04,
+      "end_s": 768.07,
+      "text": "dollars of PSA 10 margin here. So, the"
+    },
+    {
+      "start_s": 768.08,
+      "end_s": 769.829,
+      "text": "first thing I'm doing here is I'm going"
+    },
+    {
+      "start_s": 769.8389999999999,
+      "end_s": 772.63,
+      "text": "to go to the ones that are newly listed"
+    },
+    {
+      "start_s": 772.64,
+      "end_s": 774.51,
+      "text": "like we like to do. And so, now we're"
+    },
+    {
+      "start_s": 774.52,
+      "end_s": 775.79,
+      "text": "looking at the ones that have been most"
+    },
+    {
+      "start_s": 775.8,
+      "end_s": 777.31,
+      "text": "recently listed that are less likely to"
+    },
+    {
+      "start_s": 777.32,
+      "end_s": 778.829,
+      "text": "have already been picked over. The thing"
+    },
+    {
+      "start_s": 778.8389999999999,
+      "end_s": 780.51,
+      "text": "that's tricky about this card is it"
+    },
+    {
+      "start_s": 780.52,
+      "end_s": 782.27,
+      "text": "doesn't have a clean border that goes"
+    },
+    {
+      "start_s": 782.28,
+      "end_s": 783.87,
+      "text": "all the way around the card. And so, if"
+    },
+    {
+      "start_s": 783.88,
+      "end_s": 785.75,
+      "text": "I click into this one, I'm going to have"
+    },
+    {
+      "start_s": 785.76,
+      "end_s": 787.19,
+      "text": "to figure out what's the actual"
+    },
+    {
+      "start_s": 787.2,
+      "end_s": 789.11,
+      "text": "centering like. And for this, the clear"
+    },
+    {
+      "start_s": 789.12,
+      "end_s": 791.67,
+      "text": "thing to look at to me is going to be"
+    },
+    {
+      "start_s": 791.68,
+      "end_s": 793.59,
+      "text": "the name here, Otani. So, I want the"
+    },
+    {
+      "start_s": 793.6,
+      "end_s": 795.95,
+      "text": "space from the left of the O to the edge"
+    },
+    {
+      "start_s": 795.96,
+      "end_s": 798.71,
+      "text": "of the card to be about the same as the"
+    },
+    {
+      "start_s": 798.72,
+      "end_s": 800.51,
+      "text": "bottom of his name to the bottom of the"
+    },
+    {
+      "start_s": 800.52,
+      "end_s": 802.23,
+      "text": "card. And to me, this actually looks"
+    },
+    {
+      "start_s": 802.24,
+      "end_s": 804.11,
+      "text": "pretty clean. It looks pretty centered."
+    },
+    {
+      "start_s": 804.12,
+      "end_s": 805.19,
+      "text": "Um you can't really tell on the other"
+    },
+    {
+      "start_s": 805.2,
+      "end_s": 806.63,
+      "text": "side cuz there's nothing to go off of."
+    },
+    {
+      "start_s": 806.64,
+      "end_s": 808.55,
+      "text": "There's no logo or anything to go off of"
+    },
+    {
+      "start_s": 808.56,
+      "end_s": 809.75,
+      "text": "on this side. And when you get to the"
+    },
+    {
+      "start_s": 809.76,
+      "end_s": 811.23,
+      "text": "back of the card, you look at the text"
+    },
+    {
+      "start_s": 811.24,
+      "end_s": 812.67,
+      "text": "like this and you say, \"Okay, is the"
+    },
+    {
+      "start_s": 812.68,
+      "end_s": 814.39,
+      "text": "margin between the end of the font to"
+    },
+    {
+      "start_s": 814.4,
+      "end_s": 816.03,
+      "text": "the side of the card the same on that"
+    },
+    {
+      "start_s": 816.04,
+      "end_s": 817.67,
+      "text": "side as it is on this side?\" Looks"
+    },
+    {
+      "start_s": 817.68,
+      "end_s": 819.47,
+      "text": "relatively close. But hold on, there's a"
+    },
+    {
+      "start_s": 819.48,
+      "end_s": 821.51,
+      "text": "third picture here and we've got a clear"
+    },
+    {
+      "start_s": 821.52,
+      "end_s": 823.31,
+      "text": "and obvious ding that this seller has"
+    },
+    {
+      "start_s": 823.32,
+      "end_s": 825.39,
+      "text": "been kind enough to be honest about. So,"
+    },
+    {
+      "start_s": 825.4,
+      "end_s": 826.95,
+      "text": "this is a card that I'm immediately not"
+    },
+    {
+      "start_s": 826.96,
+      "end_s": 829.27,
+      "text": "going to buy. So, I'm on to the next"
+    },
+    {
+      "start_s": 829.28,
+      "end_s": 831.03,
+      "text": "one. Now, remember the other thing I can"
+    },
+    {
+      "start_s": 831.04,
+      "end_s": 832.59,
+      "text": "do here if I'm not sure about the"
+    },
+    {
+      "start_s": 832.6,
+      "end_s": 835.39,
+      "text": "centering of a card, I can go into uh"
+    },
+    {
+      "start_s": 835.4,
+      "end_s": 837.99,
+      "text": "site like 130point and see if I can find"
+    },
+    {
+      "start_s": 838.0,
+      "end_s": 841.19,
+      "text": "an Otani Best Pixel PSA 10. So, we find"
+    },
+    {
+      "start_s": 841.2,
+      "end_s": 843.07,
+      "text": "a PSA 10 copy. All right, so I like this"
+    },
+    {
+      "start_s": 843.08,
+      "end_s": 844.59,
+      "text": "one cuz it's a nice clean scan. So, we"
+    },
+    {
+      "start_s": 844.6,
+      "end_s": 846.51,
+      "text": "click into this. All we have to do is"
+    },
+    {
+      "start_s": 846.52,
+      "end_s": 848.55,
+      "text": "click see original listing and then we"
+    },
+    {
+      "start_s": 848.56,
+      "end_s": 850.23,
+      "text": "can see, okay, here is the actual"
+    },
+    {
+      "start_s": 850.24,
+      "end_s": 851.71,
+      "text": "centering and you can see it's kind of"
+    },
+    {
+      "start_s": 851.72,
+      "end_s": 853.43,
+      "text": "that what we were talking about where"
+    },
+    {
+      "start_s": 853.44,
+      "end_s": 855.35,
+      "text": "the Otani to the left and the Otani to"
+    },
+    {
+      "start_s": 855.36,
+      "end_s": 857.03,
+      "text": "the bottom of the card are roughly the"
+    },
+    {
+      "start_s": 857.04,
+      "end_s": 859.95,
+      "text": "same. On the back side, you can see kind"
+    },
+    {
+      "start_s": 859.96,
+      "end_s": 861.63,
+      "text": "of the centering here, too. And that"
+    },
+    {
+      "start_s": 861.64,
+      "end_s": 863.03,
+      "text": "looks very similar to that copy that we"
+    },
+    {
+      "start_s": 863.04,
+      "end_s": 865.19,
+      "text": "just looked at, but um so, I think we're"
+    },
+    {
+      "start_s": 865.2,
+      "end_s": 866.67,
+      "text": "we're judging the centering the right"
+    },
+    {
+      "start_s": 866.68,
+      "end_s": 867.95,
+      "text": "way and we just need to look at more"
+    },
+    {
+      "start_s": 867.96,
+      "end_s": 870.27,
+      "text": "copies of this card. So, let's open this"
+    },
+    {
+      "start_s": 870.28,
+      "end_s": 872.55,
+      "text": "one. Let's open this one. Let's open"
+    },
+    {
+      "start_s": 872.56,
+      "end_s": 874.43,
+      "text": "this one and we'll see what we can find."
+    },
+    {
+      "start_s": 874.44,
+      "end_s": 876.03,
+      "text": "This one, right off the bat, quick"
+    },
+    {
+      "start_s": 876.04,
+      "end_s": 877.51,
+      "text": "consigned, pretty good clue that this is"
+    },
+    {
+      "start_s": 877.52,
+      "end_s": 879.27,
+      "text": "consignment operation, right? And it"
+    },
+    {
+      "start_s": 879.28,
+      "end_s": 880.99,
+      "text": "doesn't mean that this card isn't going"
+    },
+    {
+      "start_s": 881.0,
+      "end_s": 882.39,
+      "text": "to be gradable. It just means that I'm"
+    },
+    {
+      "start_s": 882.4,
+      "end_s": 883.59,
+      "text": "going to approach it with a little bit"
+    },
+    {
+      "start_s": 883.6,
+      "end_s": 885.19,
+      "text": "more skepticism from a condition"
+    },
+    {
+      "start_s": 885.2,
+      "end_s": 886.79,
+      "text": "standpoint. Now, I actually don't"
+    },
+    {
+      "start_s": 886.8,
+      "end_s": 888.55,
+      "text": "immediately see anything that makes me"
+    },
+    {
+      "start_s": 888.56,
+      "end_s": 890.47,
+      "text": "think that this isn't clean. So, I might"
+    },
+    {
+      "start_s": 890.48,
+      "end_s": 892.95,
+      "text": "go and check the listing. Usually for a"
+    },
+    {
+      "start_s": 892.96,
+      "end_s": 894.47,
+      "text": "consignment company, you're going to get"
+    },
+    {
+      "start_s": 894.48,
+      "end_s": 896.43,
+      "text": "pretty much just canned terms down here,"
+    },
+    {
+      "start_s": 896.44,
+      "end_s": 898.19,
+      "text": "which is exactly what this looks like."
+    },
+    {
+      "start_s": 898.2,
+      "end_s": 900.07,
+      "text": "And so, I don't get a whole lot of help"
+    },
+    {
+      "start_s": 900.08,
+      "end_s": 901.829,
+      "text": "on this one. But this does look pretty"
+    },
+    {
+      "start_s": 901.839,
+      "end_s": 903.71,
+      "text": "clean to me. So, I may look at this and"
+    },
+    {
+      "start_s": 903.72,
+      "end_s": 905.35,
+      "text": "and at least just add it to my watch"
+    },
+    {
+      "start_s": 905.36,
+      "end_s": 907.43,
+      "text": "list here. Next one, another consignment"
+    },
+    {
+      "start_s": 907.44,
+      "end_s": 909.31,
+      "text": "operation, DC Sports. They do a great"
+    },
+    {
+      "start_s": 909.32,
+      "end_s": 911.11,
+      "text": "job. However, they are also a"
+    },
+    {
+      "start_s": 911.12,
+      "end_s": 912.59,
+      "text": "consignment shop. So, same thing, we're"
+    },
+    {
+      "start_s": 912.6,
+      "end_s": 915.23,
+      "text": "still being a little bit more skeptical."
+    },
+    {
+      "start_s": 915.24,
+      "end_s": 916.91,
+      "text": "Now, what I see on this one is this back"
+    },
+    {
+      "start_s": 916.92,
+      "end_s": 918.87,
+      "text": "left edge. See how that's kind of frayed"
+    },
+    {
+      "start_s": 918.88,
+      "end_s": 920.55,
+      "text": "and there's a lot more white showing on"
+    },
+    {
+      "start_s": 920.56,
+      "end_s": 922.15,
+      "text": "this one compared to those other copies."
+    },
+    {
+      "start_s": 922.16,
+      "end_s": 923.79,
+      "text": "This looks like it's not as clean of a"
+    },
+    {
+      "start_s": 923.8,
+      "end_s": 925.67,
+      "text": "cut. So, for that reason, I'm probably"
+    },
+    {
+      "start_s": 925.68,
+      "end_s": 927.87,
+      "text": "going to skip this copy. And so, let me"
+    },
+    {
+      "start_s": 927.88,
+      "end_s": 929.47,
+      "text": "get back to where I was. Oh, I think I"
+    },
+    {
+      "start_s": 929.48,
+      "end_s": 932.11,
+      "text": "skipped this one. This one. Here we go."
+    },
+    {
+      "start_s": 932.12,
+      "end_s": 933.87,
+      "text": "So, here's another example. Now, this"
+    },
+    {
+      "start_s": 933.88,
+      "end_s": 935.63,
+      "text": "looks like a seller who let's check"
+    },
+    {
+      "start_s": 935.64,
+      "end_s": 937.19,
+      "text": "their other listings and see what"
+    },
+    {
+      "start_s": 937.2,
+      "end_s": 939.07,
+      "text": "they've got. They are priced a little"
+    },
+    {
+      "start_s": 939.08,
+      "end_s": 940.95,
+      "text": "bit above eBay, so I would have to feel"
+    },
+    {
+      "start_s": 940.96,
+      "end_s": 942.71,
+      "text": "really confident about this card before"
+    },
+    {
+      "start_s": 942.72,
+      "end_s": 944.71,
+      "text": "I bought this. But, look at this. They"
+    },
+    {
+      "start_s": 944.72,
+      "end_s": 946.15,
+      "text": "don't have any graded cards in their"
+    },
+    {
+      "start_s": 946.16,
+      "end_s": 947.99,
+      "text": "store whatsoever. So, this is what I'm"
+    },
+    {
+      "start_s": 948.0,
+      "end_s": 949.83,
+      "text": "talking about when I'm saying there's"
+    },
+    {
+      "start_s": 949.84,
+      "end_s": 951.75,
+      "text": "people out there that just don't grade."
+    },
+    {
+      "start_s": 951.76,
+      "end_s": 953.39,
+      "text": "You can sometimes find folks like this"
+    },
+    {
+      "start_s": 953.4,
+      "end_s": 954.75,
+      "text": "that are happy to just take the money"
+    },
+    {
+      "start_s": 954.76,
+      "end_s": 957.51,
+      "text": "for the cards raw and move on. So, looks"
+    },
+    {
+      "start_s": 957.52,
+      "end_s": 959.11,
+      "text": "like that person might have done some"
+    },
+    {
+      "start_s": 959.12,
+      "end_s": 960.63,
+      "text": "breaking and so this might just have"
+    },
+    {
+      "start_s": 960.64,
+      "end_s": 962.59,
+      "text": "come directly from a pack."
+    },
+    {
+      "start_s": 962.6,
+      "end_s": 964.39,
+      "text": "And so, looking here, I see a little"
+    },
+    {
+      "start_s": 964.4,
+      "end_s": 965.83,
+      "text": "spot up there that looks like the type"
+    },
+    {
+      "start_s": 965.84,
+      "end_s": 967.31,
+      "text": "of thing that could just be dust that"
+    },
+    {
+      "start_s": 967.32,
+      "end_s": 969.35,
+      "text": "you can easily wipe off, but it's hard"
+    },
+    {
+      "start_s": 969.36,
+      "end_s": 971.15,
+      "text": "to tell for sure. Down here, there's a"
+    },
+    {
+      "start_s": 971.16,
+      "end_s": 972.75,
+      "text": "little bit of a fray in the bottom right"
+    },
+    {
+      "start_s": 972.76,
+      "end_s": 973.99,
+      "text": "corner though. So, I actually don't like"
+    },
+    {
+      "start_s": 974.0,
+      "end_s": 975.67,
+      "text": "this card for that reason, too. And so,"
+    },
+    {
+      "start_s": 975.68,
+      "end_s": 976.99,
+      "text": "when you're thinking through this, if"
+    },
+    {
+      "start_s": 977.0,
+      "end_s": 978.79,
+      "text": "you're looking online and you can't see"
+    },
+    {
+      "start_s": 978.8,
+      "end_s": 980.79,
+      "text": "everything perfectly and you're already"
+    },
+    {
+      "start_s": 980.8,
+      "end_s": 982.67,
+      "text": "seeing a couple of different areas, this"
+    },
+    {
+      "start_s": 982.68,
+      "end_s": 984.07,
+      "text": "spot on the back here, there's another"
+    },
+    {
+      "start_s": 984.08,
+      "end_s": 985.71,
+      "text": "one up here. If I zoom, you can see this"
+    },
+    {
+      "start_s": 985.72,
+      "end_s": 987.11,
+      "text": "kind of little spot that looks like it"
+    },
+    {
+      "start_s": 987.12,
+      "end_s": 988.51,
+      "text": "could be a nick in the edge. And then"
+    },
+    {
+      "start_s": 988.52,
+      "end_s": 990.59,
+      "text": "this this corner kind of juts out a"
+    },
+    {
+      "start_s": 990.6,
+      "end_s": 992.19,
+      "text": "little bit here. Those are the types of"
+    },
+    {
+      "start_s": 992.2,
+      "end_s": 994.11,
+      "text": "things that if I can already see three"
+    },
+    {
+      "start_s": 994.12,
+      "end_s": 996.23,
+      "text": "different things online, I can't even"
+    },
+    {
+      "start_s": 996.24,
+      "end_s": 998.11,
+      "text": "see the card perfectly, but that gives"
+    },
+    {
+      "start_s": 998.12,
+      "end_s": 999.71,
+      "text": "me a lot less confidence that it's going"
+    },
+    {
+      "start_s": 999.72,
+      "end_s": 1001.27,
+      "text": "to be clean even though this person"
+    },
+    {
+      "start_s": 1001.28,
+      "end_s": 1003.51,
+      "text": "looks like they don't grade cards. So,"
+    },
+    {
+      "start_s": 1003.52,
+      "end_s": 1004.829,
+      "text": "too bad cuz otherwise that might have"
+    },
+    {
+      "start_s": 1004.8389999999999,
+      "end_s": 1006.59,
+      "text": "been a good one to go after. Let's do a"
+    },
+    {
+      "start_s": 1006.6,
+      "end_s": 1008.27,
+      "text": "couple more here and we'll see if we can"
+    },
+    {
+      "start_s": 1008.28,
+      "end_s": 1010.15,
+      "text": "find one that looks halfway decent to"
+    },
+    {
+      "start_s": 1010.16,
+      "end_s": 1011.67,
+      "text": "add to our list. Here's another"
+    },
+    {
+      "start_s": 1011.68,
+      "end_s": 1012.91,
+      "text": "consignment one, so I'm going to skip"
+    },
+    {
+      "start_s": 1012.92,
+      "end_s": 1014.43,
+      "text": "that one right off the bat. So, I'm"
+    },
+    {
+      "start_s": 1014.44,
+      "end_s": 1016.07,
+      "text": "looking at this one and the bottom right"
+    },
+    {
+      "start_s": 1016.08,
+      "end_s": 1017.59,
+      "text": "corner to me looks like there's some"
+    },
+    {
+      "start_s": 1017.6,
+      "end_s": 1019.11,
+      "text": "white showing down here. So, that's a"
+    },
+    {
+      "start_s": 1019.12,
+      "end_s": 1021.31,
+      "text": "clear and obvious spot that I don't want"
+    },
+    {
+      "start_s": 1021.32,
+      "end_s": 1023.47,
+      "text": "to buy. They've also listed the card as"
+    },
+    {
+      "start_s": 1023.48,
+      "end_s": 1025.59,
+      "text": "excellent, which is actually not"
+    },
+    {
+      "start_s": 1025.6,
+      "end_s": 1027.91,
+      "text": "excellent. It's the condition below near"
+    },
+    {
+      "start_s": 1027.92,
+      "end_s": 1029.59,
+      "text": "mint, which is the highest condition on"
+    },
+    {
+      "start_s": 1029.6,
+      "end_s": 1031.59,
+      "text": "eBay. So, if you see things listed as"
+    },
+    {
+      "start_s": 1031.6,
+      "end_s": 1032.99,
+      "text": "near mint, that typically means that"
+    },
+    {
+      "start_s": 1033.0,
+      "end_s": 1034.71,
+      "text": "they're in the cleanest condition. Now,"
+    },
+    {
+      "start_s": 1034.72,
+      "end_s": 1036.429,
+      "text": "some sellers are going to be a little"
+    },
+    {
+      "start_s": 1036.439,
+      "end_s": 1037.79,
+      "text": "bit of conservative here and they're"
+    },
+    {
+      "start_s": 1037.8,
+      "end_s": 1038.79,
+      "text": "going to list all their cards in"
+    },
+    {
+      "start_s": 1038.8,
+      "end_s": 1040.309,
+      "text": "excellent condition. All right, here's"
+    },
+    {
+      "start_s": 1040.319,
+      "end_s": 1042.91,
+      "text": "another one and this looks like a seller"
+    },
+    {
+      "start_s": 1042.92,
+      "end_s": 1044.79,
+      "text": "that is not a consigner, which is cool."
+    },
+    {
+      "start_s": 1044.8,
+      "end_s": 1046.63,
+      "text": "This card looks relatively clean to me."
+    },
+    {
+      "start_s": 1046.64,
+      "end_s": 1048.189,
+      "text": "The centering looks fine based on that"
+    },
+    {
+      "start_s": 1048.199,
+      "end_s": 1049.79,
+      "text": "bottom logo."
+    },
+    {
+      "start_s": 1049.8,
+      "end_s": 1052.43,
+      "text": "I don't see any issues immediately here."
+    },
+    {
+      "start_s": 1052.44,
+      "end_s": 1054.11,
+      "text": "Maybe a tiny little touch down there in"
+    },
+    {
+      "start_s": 1054.12,
+      "end_s": 1055.59,
+      "text": "that corner. That one actually looks a"
+    },
+    {
+      "start_s": 1055.6,
+      "end_s": 1056.79,
+      "text": "little bit rounded to me, too, though."
+    },
+    {
+      "start_s": 1056.8,
+      "end_s": 1058.43,
+      "text": "So, both of those I'm kind of out on"
+    },
+    {
+      "start_s": 1058.44,
+      "end_s": 1059.71,
+      "text": "this card right off the bat. I don't"
+    },
+    {
+      "start_s": 1059.72,
+      "end_s": 1061.59,
+      "text": "need to see his other listings. So far,"
+    },
+    {
+      "start_s": 1061.6,
+      "end_s": 1063.67,
+      "text": "we've only found one, maybe two cards"
+    },
+    {
+      "start_s": 1063.68,
+      "end_s": 1065.43,
+      "text": "that are worth actually considering"
+    },
+    {
+      "start_s": 1065.44,
+      "end_s": 1068.23,
+      "text": "here. Um this is another consignment one"
+    },
+    {
+      "start_s": 1068.24,
+      "end_s": 1069.43,
+      "text": "and these ones are ones where we'll"
+    },
+    {
+      "start_s": 1069.44,
+      "end_s": 1070.79,
+      "text": "probably have to make best offers. You"
+    },
+    {
+      "start_s": 1070.8,
+      "end_s": 1072.35,
+      "text": "see there's a bunch of these with from"
+    },
+    {
+      "start_s": 1072.36,
+      "end_s": 1073.95,
+      "text": "consignment. Let's dig into a couple of"
+    },
+    {
+      "start_s": 1073.96,
+      "end_s": 1075.91,
+      "text": "these and see if we can find one to make"
+    },
+    {
+      "start_s": 1075.92,
+      "end_s": 1077.71,
+      "text": "an offer on. So, this person's name is"
+    },
+    {
+      "start_s": 1077.72,
+      "end_s": 1079.27,
+      "text": "The Slab Lab. So, I don't even feel like"
+    },
+    {
+      "start_s": 1079.28,
+      "end_s": 1080.63,
+      "text": "I necessarily need to look at their"
+    },
+    {
+      "start_s": 1080.64,
+      "end_s": 1081.79,
+      "text": "store to know that they're going to have"
+    },
+    {
+      "start_s": 1081.8,
+      "end_s": 1083.67,
+      "text": "some graded stuff in here."
+    },
+    {
+      "start_s": 1083.68,
+      "end_s": 1085.55,
+      "text": "And sure enough, they do. It doesn't"
+    },
+    {
+      "start_s": 1085.56,
+      "end_s": 1087.47,
+      "text": "necessarily mean that it's picked over,"
+    },
+    {
+      "start_s": 1087.48,
+      "end_s": 1088.43,
+      "text": "but"
+    },
+    {
+      "start_s": 1088.44,
+      "end_s": 1089.51,
+      "text": "there's a pretty good chance. I don't"
+    },
+    {
+      "start_s": 1089.52,
+      "end_s": 1091.87,
+      "text": "know. If that's your name, uh and sure"
+    },
+    {
+      "start_s": 1091.88,
+      "end_s": 1093.47,
+      "text": "enough, in the top right corner, we see"
+    },
+    {
+      "start_s": 1093.48,
+      "end_s": 1095.67,
+      "text": "a pretty obvious ding there. So, this is"
+    },
+    {
+      "start_s": 1095.68,
+      "end_s": 1097.19,
+      "text": "another one that you can pretty quickly"
+    },
+    {
+      "start_s": 1097.2,
+      "end_s": 1099.55,
+      "text": "skip. Sorry, Slab Lab. All right, this"
+    },
+    {
+      "start_s": 1099.56,
+      "end_s": 1101.15,
+      "text": "one. Now, I like this cuz it's on a dark"
+    },
+    {
+      "start_s": 1101.16,
+      "end_s": 1102.63,
+      "text": "background and you can already see"
+    },
+    {
+      "start_s": 1102.64,
+      "end_s": 1104.43,
+      "text": "there's no white on the corners here, at"
+    },
+    {
+      "start_s": 1104.44,
+      "end_s": 1106.31,
+      "text": "least on the front. Same thing actually"
+    },
+    {
+      "start_s": 1106.32,
+      "end_s": 1108.43,
+      "text": "goes on the back here. I don't see any"
+    },
+    {
+      "start_s": 1108.44,
+      "end_s": 1111.15,
+      "text": "issues with this. Maybe a tiny little"
+    },
+    {
+      "start_s": 1111.16,
+      "end_s": 1112.83,
+      "text": "touch there. It's hard to tell if that's"
+    },
+    {
+      "start_s": 1112.84,
+      "end_s": 1114.19,
+      "text": "just the way that the picture came out"
+    },
+    {
+      "start_s": 1114.2,
+      "end_s": 1115.63,
+      "text": "cuz the picture itself is a little bit"
+    },
+    {
+      "start_s": 1115.64,
+      "end_s": 1117.07,
+      "text": "blurry, but this one actually looks"
+    },
+    {
+      "start_s": 1117.08,
+      "end_s": 1118.91,
+      "text": "pretty solid to me."
+    },
+    {
+      "start_s": 1118.92,
+      "end_s": 1119.91,
+      "text": "So, let's check the seller's other"
+    },
+    {
+      "start_s": 1119.92,
+      "end_s": 1121.27,
+      "text": "listings and see what we're working with"
+    },
+    {
+      "start_s": 1121.28,
+      "end_s": 1123.55,
+      "text": "here. Bunch of Ohtani, nothing great."
+    },
+    {
+      "start_s": 1123.56,
+      "end_s": 1125.47,
+      "text": "Well, here's one graded card. It's from"
+    },
+    {
+      "start_s": 1125.48,
+      "end_s": 1127.03,
+      "text": "all the way back in '21, though. So,"
+    },
+    {
+      "start_s": 1127.04,
+      "end_s": 1128.87,
+      "text": "this person looks like they might dabble"
+    },
+    {
+      "start_s": 1128.88,
+      "end_s": 1130.23,
+      "text": "in graded cards, but they don't"
+    },
+    {
+      "start_s": 1130.24,
+      "end_s": 1131.87,
+      "text": "necessarily grade themselves is how I"
+    },
+    {
+      "start_s": 1131.88,
+      "end_s": 1134.03,
+      "text": "would interpret this particular store."
+    },
+    {
+      "start_s": 1134.04,
+      "end_s": 1136.43,
+      "text": "They've got maybe 10% of their store"
+    },
+    {
+      "start_s": 1136.44,
+      "end_s": 1137.83,
+      "text": "looks like it's graded stuff. They've"
+    },
+    {
+      "start_s": 1137.84,
+      "end_s": 1140.51,
+      "text": "got some SGC mixed in here. So, I"
+    },
+    {
+      "start_s": 1140.52,
+      "end_s": 1142.07,
+      "text": "wouldn't have a ton of concern that this"
+    },
+    {
+      "start_s": 1142.08,
+      "end_s": 1143.79,
+      "text": "is super picked over. And so, that's the"
+    },
+    {
+      "start_s": 1143.8,
+      "end_s": 1145.19,
+      "text": "type of card that I'd be throwing in an"
+    },
+    {
+      "start_s": 1145.2,
+      "end_s": 1146.67,
+      "text": "offer and seeing if we can get closer to"
+    },
+    {
+      "start_s": 1146.68,
+      "end_s": 1148.87,
+      "text": "that 130 to 150 range that we're looking"
+    },
+    {
+      "start_s": 1148.88,
+      "end_s": 1150.67,
+      "text": "for. So, I like doing this better on my"
+    },
+    {
+      "start_s": 1150.68,
+      "end_s": 1152.07,
+      "text": "phone cuz once again, you can just kind"
+    },
+    {
+      "start_s": 1152.08,
+      "end_s": 1153.39,
+      "text": "of scroll through them a lot faster"
+    },
+    {
+      "start_s": 1153.4,
+      "end_s": 1155.35,
+      "text": "versus clicking into them on a computer"
+    },
+    {
+      "start_s": 1155.36,
+      "end_s": 1157.07,
+      "text": "like this. But for the sake of this"
+    },
+    {
+      "start_s": 1157.08,
+      "end_s": 1158.83,
+      "text": "demo, hopefully you can at least see"
+    },
+    {
+      "start_s": 1158.84,
+      "end_s": 1160.51,
+      "text": "there's a bunch of different cards that"
+    },
+    {
+      "start_s": 1160.52,
+      "end_s": 1162.11,
+      "text": "are listed, but a lot of them we're"
+    },
+    {
+      "start_s": 1162.12,
+      "end_s": 1163.63,
+      "text": "going to eliminate really quickly once"
+    },
+    {
+      "start_s": 1163.64,
+      "end_s": 1165.43,
+      "text": "we find a flaw with them. And the thing"
+    },
+    {
+      "start_s": 1165.44,
+      "end_s": 1167.39,
+      "text": "to keep in mind here is cards don't have"
+    },
+    {
+      "start_s": 1167.4,
+      "end_s": 1169.91,
+      "text": "to be completely immaculate perfect."
+    },
+    {
+      "start_s": 1169.92,
+      "end_s": 1172.51,
+      "text": "Even a PSA 10 can have a few tiny little"
+    },
+    {
+      "start_s": 1172.52,
+      "end_s": 1174.47,
+      "text": "imperfections. You just don't get that"
+    },
+    {
+      "start_s": 1174.48,
+      "end_s": 1176.15,
+      "text": "much leeway. And so, if I'm already"
+    },
+    {
+      "start_s": 1176.16,
+      "end_s": 1178.27,
+      "text": "seeing multiple issues, that's usually a"
+    },
+    {
+      "start_s": 1178.28,
+      "end_s": 1180.51,
+      "text": "card I'd rather just pass on until I can"
+    },
+    {
+      "start_s": 1180.52,
+      "end_s": 1182.27,
+      "text": "find the next clean card that's going to"
+    },
+    {
+      "start_s": 1182.28,
+      "end_s": 1184.39,
+      "text": "give me a stronger chance at a 10. I'd"
+    },
+    {
+      "start_s": 1184.4,
+      "end_s": 1185.91,
+      "text": "rather live to fight another day and"
+    },
+    {
+      "start_s": 1185.92,
+      "end_s": 1187.95,
+      "text": "save my money compared to forcing it on"
+    },
+    {
+      "start_s": 1187.96,
+      "end_s": 1189.71,
+      "text": "a card that really doesn't look as clean"
+    },
+    {
+      "start_s": 1189.72,
+      "end_s": 1191.03,
+      "text": "as it needs to be. All right, let's do"
+    },
+    {
+      "start_s": 1191.04,
+      "end_s": 1192.67,
+      "text": "one more example real quick. And so, I'm"
+    },
+    {
+      "start_s": 1192.68,
+      "end_s": 1194.43,
+      "text": "actually going to show you the Pokémon"
+    },
+    {
+      "start_s": 1194.44,
+      "end_s": 1197.15,
+      "text": "list inside of Coin. And don't knock it"
+    },
+    {
+      "start_s": 1197.16,
+      "end_s": 1198.55,
+      "text": "till you try it. A lot of the grading"
+    },
+    {
+      "start_s": 1198.56,
+      "end_s": 1200.83,
+      "text": "metrics on Pokémon right now are crazy."
+    },
+    {
+      "start_s": 1200.84,
+      "end_s": 1202.27,
+      "text": "So, I'm going to actually target this"
+    },
+    {
+      "start_s": 1202.28,
+      "end_s": 1205.51,
+      "text": "birthday Pikachu holo from 2021. And the"
+    },
+    {
+      "start_s": 1205.52,
+      "end_s": 1206.63,
+      "text": "thing about grading, by the way, if"
+    },
+    {
+      "start_s": 1206.64,
+      "end_s": 1208.03,
+      "text": "you're looking at this and rolling your"
+    },
+    {
+      "start_s": 1208.04,
+      "end_s": 1209.23,
+      "text": "eyes like, \"Oh my gosh, this guy's going"
+    },
+    {
+      "start_s": 1209.24,
+      "end_s": 1211.47,
+      "text": "to show me some cartoon nonsense here.\""
+    },
+    {
+      "start_s": 1211.48,
+      "end_s": 1213.27,
+      "text": "Guys, it doesn't matter. If the card is"
+    },
+    {
+      "start_s": 1213.28,
+      "end_s": 1215.55,
+      "text": "gradable, it's gradable. And it the same"
+    },
+    {
+      "start_s": 1215.56,
+      "end_s": 1217.51,
+      "text": "skill set that you learn for sports can"
+    },
+    {
+      "start_s": 1217.52,
+      "end_s": 1220.23,
+      "text": "be applied to other categories. And I"
+    },
+    {
+      "start_s": 1220.24,
+      "end_s": 1221.35,
+      "text": "don't know about you, but if the money's"
+    },
+    {
+      "start_s": 1221.36,
+      "end_s": 1223.23,
+      "text": "there and I'm grading to make money,"
+    },
+    {
+      "start_s": 1223.24,
+      "end_s": 1224.91,
+      "text": "doesn't matter if it's baseball,"
+    },
+    {
+      "start_s": 1224.92,
+      "end_s": 1227.51,
+      "text": "basketball, football, WNBA, hockey,"
+    },
+    {
+      "start_s": 1227.52,
+      "end_s": 1230.03,
+      "text": "soccer, Pokémon, whatever it is, if I"
+    },
+    {
+      "start_s": 1230.04,
+      "end_s": 1231.79,
+      "text": "can make good money on that card and I'm"
+    },
+    {
+      "start_s": 1231.8,
+      "end_s": 1233.11,
+      "text": "confident in the numbers and I'm"
+    },
+    {
+      "start_s": 1233.12,
+      "end_s": 1234.71,
+      "text": "confident in the condition, I'm not"
+    },
+    {
+      "start_s": 1234.72,
+      "end_s": 1236.51,
+      "text": "opposed to any category if the numbers"
+    },
+    {
+      "start_s": 1236.52,
+      "end_s": 1238.31,
+      "text": "make sense here. So, I'm going to dig"
+    },
+    {
+      "start_s": 1238.32,
+      "end_s": 1240.03,
+      "text": "into this birthday Pikachu. We'll go to"
+    },
+    {
+      "start_s": 1240.04,
+      "end_s": 1241.67,
+      "text": "eBay and we'll look and see if we can"
+    },
+    {
+      "start_s": 1241.68,
+      "end_s": 1244.47,
+      "text": "find a clean copy or two. So, here we"
+    },
+    {
+      "start_s": 1244.48,
+      "end_s": 1247.43,
+      "text": "are. And once again, my favorite thing"
+    },
+    {
+      "start_s": 1247.44,
+      "end_s": 1249.63,
+      "text": "to do is to start by going for the newly"
+    },
+    {
+      "start_s": 1249.64,
+      "end_s": 1251.39,
+      "text": "listed cards. So, we can see there's a"
+    },
+    {
+      "start_s": 1251.4,
+      "end_s": 1253.39,
+      "text": "bunch of graded copies here. And one of"
+    },
+    {
+      "start_s": 1253.4,
+      "end_s": 1255.15,
+      "text": "my favorite things to do is just throw"
+    },
+    {
+      "start_s": 1255.16,
+      "end_s": 1257.59,
+      "text": "in a minus PSA. And this will actually"
+    },
+    {
+      "start_s": 1257.6,
+      "end_s": 1259.63,
+      "text": "remove all of the graded copies and we"
+    },
+    {
+      "start_s": 1259.64,
+      "end_s": 1261.63,
+      "text": "can see just the raw stuff here. Or I"
+    },
+    {
+      "start_s": 1261.64,
+      "end_s": 1262.99,
+      "text": "guess I need to get rid of this other"
+    },
+    {
+      "start_s": 1263.0,
+      "end_s": 1264.31,
+      "text": "grading company, too. But this should be"
+    },
+    {
+      "start_s": 1264.32,
+      "end_s": 1265.79,
+      "text": "enough for us to start with. So, let's"
+    },
+    {
+      "start_s": 1265.8,
+      "end_s": 1267.59,
+      "text": "open a couple of these. This one looks"
+    },
+    {
+      "start_s": 1267.6,
+      "end_s": 1268.99,
+      "text": "like it's a little bit higher than this"
+    },
+    {
+      "start_s": 1269.0,
+      "end_s": 1270.83,
+      "text": "one. And if we go back to Coin, we can"
+    },
+    {
+      "start_s": 1270.84,
+      "end_s": 1273.35,
+      "text": "see the numbers. So, 40 bucks or so raw"
+    },
+    {
+      "start_s": 1273.36,
+      "end_s": 1275.19,
+      "text": "is pretty standard, and we're looking"
+    },
+    {
+      "start_s": 1275.2,
+      "end_s": 1277.55,
+      "text": "for 300 plus as a PSA 10. So, really"
+    },
+    {
+      "start_s": 1277.56,
+      "end_s": 1279.11,
+      "text": "solid numbers if we can find a clean"
+    },
+    {
+      "start_s": 1279.12,
+      "end_s": 1280.75,
+      "text": "copy or two of this card. Now, the thing"
+    },
+    {
+      "start_s": 1280.76,
+      "end_s": 1282.99,
+      "text": "that's nice about Pokémon stuff is they"
+    },
+    {
+      "start_s": 1283.0,
+      "end_s": 1285.43,
+      "text": "mostly have the same design, and almost"
+    },
+    {
+      "start_s": 1285.44,
+      "end_s": 1286.83,
+      "text": "all of them have clean borders that go"
+    },
+    {
+      "start_s": 1286.84,
+      "end_s": 1288.83,
+      "text": "around the card. So, it's a lot easier"
+    },
+    {
+      "start_s": 1288.84,
+      "end_s": 1290.27,
+      "text": "to tell the centering compared to some"
+    },
+    {
+      "start_s": 1290.28,
+      "end_s": 1291.87,
+      "text": "of the sports stuff that doesn't always"
+    },
+    {
+      "start_s": 1291.88,
+      "end_s": 1293.47,
+      "text": "have a border. So, this one actually"
+    },
+    {
+      "start_s": 1293.48,
+      "end_s": 1294.59,
+      "text": "looks pretty good if you compare the"
+    },
+    {
+      "start_s": 1294.6,
+      "end_s": 1296.47,
+      "text": "right side to the left side. Pretty"
+    },
+    {
+      "start_s": 1296.48,
+      "end_s": 1298.27,
+      "text": "close to even. If you compare the top to"
+    },
+    {
+      "start_s": 1298.28,
+      "end_s": 1300.47,
+      "text": "the bottom, the bottom might be a little"
+    },
+    {
+      "start_s": 1300.48,
+      "end_s": 1302.03,
+      "text": "bit heavy, but it's actually not that"
+    },
+    {
+      "start_s": 1302.04,
+      "end_s": 1304.23,
+      "text": "bad uh from what I can tell. And then"
+    },
+    {
+      "start_s": 1304.24,
+      "end_s": 1305.31,
+      "text": "the back of this card actually looks"
+    },
+    {
+      "start_s": 1305.32,
+      "end_s": 1306.99,
+      "text": "pretty clean, too. And maybe you've got"
+    },
+    {
+      "start_s": 1307.0,
+      "end_s": 1308.19,
+      "text": "a little bit of chipping up here. So,"
+    },
+    {
+      "start_s": 1308.2,
+      "end_s": 1309.79,
+      "text": "that to me is the stopper. You see that"
+    },
+    {
+      "start_s": 1309.8,
+      "end_s": 1312.91,
+      "text": "white spot here? White spot here?"
+    },
+    {
+      "start_s": 1312.92,
+      "end_s": 1313.95,
+      "text": "And then there's another little white"
+    },
+    {
+      "start_s": 1313.96,
+      "end_s": 1316.43,
+      "text": "spot here. Some kind of more minor ones"
+    },
+    {
+      "start_s": 1316.44,
+      "end_s": 1317.47,
+      "text": "there."
+    },
+    {
+      "start_s": 1317.48,
+      "end_s": 1320.03,
+      "text": "Um but this right here, another spot."
+    },
+    {
+      "start_s": 1320.04,
+      "end_s": 1321.47,
+      "text": "So, that's what I'm looking for on the"
+    },
+    {
+      "start_s": 1321.48,
+      "end_s": 1323.31,
+      "text": "backs of these cards is if the if you"
+    },
+    {
+      "start_s": 1323.32,
+      "end_s": 1325.99,
+      "text": "see any kind of white that very clearly"
+    },
+    {
+      "start_s": 1326.0,
+      "end_s": 1327.83,
+      "text": "shows through on the edges or on the"
+    },
+    {
+      "start_s": 1327.84,
+      "end_s": 1330.03,
+      "text": "corners, that's often times going to be"
+    },
+    {
+      "start_s": 1330.04,
+      "end_s": 1332.15,
+      "text": "a stopper for Pokémon stuff. All right,"
+    },
+    {
+      "start_s": 1332.16,
+      "end_s": 1334.87,
+      "text": "next one. This one is probably a little"
+    },
+    {
+      "start_s": 1334.88,
+      "end_s": 1336.79,
+      "text": "bit bottom heavy as well. So, I don't"
+    },
+    {
+      "start_s": 1336.8,
+      "end_s": 1338.27,
+      "text": "think that this one's close enough. The"
+    },
+    {
+      "start_s": 1338.28,
+      "end_s": 1339.67,
+      "text": "other one was, but this one to me"
+    },
+    {
+      "start_s": 1339.68,
+      "end_s": 1340.91,
+      "text": "doesn't look close enough. So, I'm going"
+    },
+    {
+      "start_s": 1340.92,
+      "end_s": 1342.43,
+      "text": "to skip that one. This one's way"
+    },
+    {
+      "start_s": 1342.44,
+      "end_s": 1344.19,
+      "text": "overpriced and looks a little top heavy"
+    },
+    {
+      "start_s": 1344.2,
+      "end_s": 1345.55,
+      "text": "to me, so I'm going to skip that one as"
+    },
+    {
+      "start_s": 1345.56,
+      "end_s": 1347.51,
+      "text": "well. Let's try this one. This one is"
+    },
+    {
+      "start_s": 1347.52,
+      "end_s": 1349.19,
+      "text": "way bottom heavy, so I don't need that"
+    },
+    {
+      "start_s": 1349.2,
+      "end_s": 1351.47,
+      "text": "one either. Try this one. This one's"
+    },
+    {
+      "start_s": 1351.48,
+      "end_s": 1353.19,
+      "text": "heavy left to right. Okay, now this one"
+    },
+    {
+      "start_s": 1353.2,
+      "end_s": 1354.59,
+      "text": "actually looks pretty good to me from a"
+    },
+    {
+      "start_s": 1354.6,
+      "end_s": 1356.43,
+      "text": "centering standpoint. Now, the problem"
+    },
+    {
+      "start_s": 1356.44,
+      "end_s": 1357.59,
+      "text": "here is we only have a picture of the"
+    },
+    {
+      "start_s": 1357.6,
+      "end_s": 1359.07,
+      "text": "front of the card, so we can't actually"
+    },
+    {
+      "start_s": 1359.08,
+      "end_s": 1360.43,
+      "text": "check the back. And so, this is an"
+    },
+    {
+      "start_s": 1360.44,
+      "end_s": 1361.83,
+      "text": "example of a card where I'd just send"
+    },
+    {
+      "start_s": 1361.84,
+      "end_s": 1363.51,
+      "text": "the seller a simple message saying,"
+    },
+    {
+      "start_s": 1363.52,
+      "end_s": 1365.03,
+      "text": "\"Hey, do you mind sending over a picture"
+    },
+    {
+      "start_s": 1365.04,
+      "end_s": 1366.35,
+      "text": "of the back of the card?\" All right, a"
+    },
+    {
+      "start_s": 1366.36,
+      "end_s": 1368.15,
+      "text": "couple of other examples here. This one"
+    },
+    {
+      "start_s": 1368.16,
+      "end_s": 1370.23,
+      "text": "looks off bottom to top, where you see"
+    },
+    {
+      "start_s": 1370.24,
+      "end_s": 1371.63,
+      "text": "how the bottom is a lot thicker than the"
+    },
+    {
+      "start_s": 1371.64,
+      "end_s": 1373.47,
+      "text": "top. This one doesn't look horrible to"
+    },
+    {
+      "start_s": 1373.48,
+      "end_s": 1375.63,
+      "text": "me, although this might be the lighting."
+    },
+    {
+      "start_s": 1375.64,
+      "end_s": 1377.43,
+      "text": "It's hard to tell if this corner is"
+    },
+    {
+      "start_s": 1377.44,
+      "end_s": 1379.07,
+      "text": "touched or if that's just the lighting."
+    },
+    {
+      "start_s": 1379.08,
+      "end_s": 1380.43,
+      "text": "But this one actually looks pretty clean"
+    },
+    {
+      "start_s": 1380.44,
+      "end_s": 1382.07,
+      "text": "otherwise. I don't see any of that"
+    },
+    {
+      "start_s": 1382.08,
+      "end_s": 1383.87,
+      "text": "whitening around the border or on the"
+    },
+    {
+      "start_s": 1383.88,
+      "end_s": 1385.47,
+      "text": "corners. So, this one looks pretty"
+    },
+    {
+      "start_s": 1385.48,
+      "end_s": 1387.15,
+      "text": "clean. Now, I might ask about that"
+    },
+    {
+      "start_s": 1387.16,
+      "end_s": 1388.75,
+      "text": "corner and just see, \"Hey, is this"
+    },
+    {
+      "start_s": 1388.76,
+      "end_s": 1390.63,
+      "text": "glare? Is this just the way that the"
+    },
+    {
+      "start_s": 1390.64,
+      "end_s": 1392.35,
+      "text": "card was angled or is that corner"
+    },
+    {
+      "start_s": 1392.36,
+      "end_s": 1394.19,
+      "text": "actually lifted?\" Cuz if that's lifted,"
+    },
+    {
+      "start_s": 1394.2,
+      "end_s": 1396.59,
+      "text": "that's a clear and obvious stopper. But"
+    },
+    {
+      "start_s": 1396.6,
+      "end_s": 1398.15,
+      "text": "otherwise, I don't really see anything"
+    },
+    {
+      "start_s": 1398.16,
+      "end_s": 1399.43,
+      "text": "on here that would make me think that"
+    },
+    {
+      "start_s": 1399.44,
+      "end_s": 1401.47,
+      "text": "this card can't get a 10. So, good time"
+    },
+    {
+      "start_s": 1401.48,
+      "end_s": 1403.83,
+      "text": "to check down here. Near mint to mint"
+    },
+    {
+      "start_s": 1403.84,
+      "end_s": 1405.67,
+      "text": "unless otherwise noted. So, that sounds"
+    },
+    {
+      "start_s": 1405.68,
+      "end_s": 1407.35,
+      "text": "good. And then let's check his other"
+    },
+    {
+      "start_s": 1407.36,
+      "end_s": 1409.11,
+      "text": "items to see if he has a bunch of graded"
+    },
+    {
+      "start_s": 1409.12,
+      "end_s": 1411.67,
+      "text": "stuff in here. Uh looks like one graded"
+    },
+    {
+      "start_s": 1411.68,
+      "end_s": 1414.19,
+      "text": "card, maybe two graded cards. Tons and"
+    },
+    {
+      "start_s": 1414.2,
+      "end_s": 1416.75,
+      "text": "tons of raw. So, this is the type of"
+    },
+    {
+      "start_s": 1416.76,
+      "end_s": 1418.55,
+      "text": "seller where not only could you"
+    },
+    {
+      "start_s": 1418.56,
+      "end_s": 1420.23,
+      "text": "potentially bid on that one card, but"
+    },
+    {
+      "start_s": 1420.24,
+      "end_s": 1421.31,
+      "text": "you might even look at his other"
+    },
+    {
+      "start_s": 1421.32,
+      "end_s": 1422.87,
+      "text": "listings and say, \"Hey, okay. Some of"
+    },
+    {
+      "start_s": 1422.88,
+      "end_s": 1424.27,
+      "text": "these other cards actually look pretty"
+    },
+    {
+      "start_s": 1424.28,
+      "end_s": 1426.27,
+      "text": "clean, too.\" And end up picking up"
+    },
+    {
+      "start_s": 1426.28,
+      "end_s": 1428.39,
+      "text": "multiple cards from the same seller. So,"
+    },
+    {
+      "start_s": 1428.4,
+      "end_s": 1429.83,
+      "text": "that's an example of one that I would"
+    },
+    {
+      "start_s": 1429.84,
+      "end_s": 1431.35,
+      "text": "add to my watch list. I'd probably send"
+    },
+    {
+      "start_s": 1431.36,
+      "end_s": 1432.75,
+      "text": "them a quick message and just ask about"
+    },
+    {
+      "start_s": 1432.76,
+      "end_s": 1434.43,
+      "text": "that corner saying something like, \"Hey,"
+    },
+    {
+      "start_s": 1434.44,
+      "end_s": 1435.83,
+      "text": "interested in this card, but I couldn't"
+    },
+    {
+      "start_s": 1435.84,
+      "end_s": 1437.39,
+      "text": "tell if this was a flaw or if it was"
+    },
+    {
+      "start_s": 1437.4,
+      "end_s": 1438.83,
+      "text": "just the lighting. Could you either send"
+    },
+    {
+      "start_s": 1438.84,
+      "end_s": 1440.47,
+      "text": "another picture or help me with what's"
+    },
+    {
+      "start_s": 1440.48,
+      "end_s": 1442.07,
+      "text": "going on with the top front left"
+    },
+    {
+      "start_s": 1442.08,
+      "end_s": 1443.95,
+      "text": "corner?\" And so, you see here the the"
+    },
+    {
+      "start_s": 1443.96,
+      "end_s": 1445.83,
+      "text": "theme is that we're going through lots"
+    },
+    {
+      "start_s": 1445.84,
+      "end_s": 1447.71,
+      "text": "of cards. We're going through relatively"
+    },
+    {
+      "start_s": 1447.72,
+      "end_s": 1449.83,
+      "text": "quickly. Again, it's easier on the phone"
+    },
+    {
+      "start_s": 1449.84,
+      "end_s": 1451.47,
+      "text": "cuz you can see the centering up close"
+    },
+    {
+      "start_s": 1451.48,
+      "end_s": 1452.75,
+      "text": "and just kind of swipe and swipe and"
+    },
+    {
+      "start_s": 1452.76,
+      "end_s": 1453.91,
+      "text": "you're getting through cards a lot"
+    },
+    {
+      "start_s": 1453.92,
+      "end_s": 1455.91,
+      "text": "faster than what I was just able to do."
+    },
+    {
+      "start_s": 1455.92,
+      "end_s": 1457.71,
+      "text": "But it's that simple though. We're going"
+    },
+    {
+      "start_s": 1457.72,
+      "end_s": 1459.27,
+      "text": "through. We're checking to see what does"
+    },
+    {
+      "start_s": 1459.28,
+      "end_s": 1460.47,
+      "text": "condition look like? What does the"
+    },
+    {
+      "start_s": 1460.48,
+      "end_s": 1462.39,
+      "text": "centering look like? As soon as I find"
+    },
+    {
+      "start_s": 1462.4,
+      "end_s": 1464.07,
+      "text": "something that's going to eliminate it,"
+    },
+    {
+      "start_s": 1464.08,
+      "end_s": 1465.67,
+      "text": "I want to get on to the next card and"
+    },
+    {
+      "start_s": 1465.68,
+      "end_s": 1467.39,
+      "text": "not waste any more time there. And so,"
+    },
+    {
+      "start_s": 1467.4,
+      "end_s": 1468.99,
+      "text": "we were able to find a couple of copies"
+    },
+    {
+      "start_s": 1469.0,
+      "end_s": 1470.23,
+      "text": "of these cards that looked like they"
+    },
+    {
+      "start_s": 1470.24,
+      "end_s": 1471.95,
+      "text": "were clean enough to bid on. But you'll"
+    },
+    {
+      "start_s": 1471.96,
+      "end_s": 1473.63,
+      "text": "notice that we went through multiple"
+    },
+    {
+      "start_s": 1473.64,
+      "end_s": 1475.83,
+      "text": "copies before we found those. So, I want"
+    },
+    {
+      "start_s": 1475.84,
+      "end_s": 1477.79,
+      "text": "to encourage you, they are out there,"
+    },
+    {
+      "start_s": 1477.8,
+      "end_s": 1479.79,
+      "text": "but it does take work to find the clean"
+    },
+    {
+      "start_s": 1479.8,
+      "end_s": 1481.87,
+      "text": "raw cards. And so, not every single card"
+    },
+    {
+      "start_s": 1481.88,
+      "end_s": 1484.07,
+      "text": "is going to be a PSA 10, but the way I"
+    },
+    {
+      "start_s": 1484.08,
+      "end_s": 1485.95,
+      "text": "think about this, every time we buy a"
+    },
+    {
+      "start_s": 1485.96,
+      "end_s": 1488.11,
+      "text": "card, it's basically like taking a shot"
+    },
+    {
+      "start_s": 1488.12,
+      "end_s": 1489.71,
+      "text": "on goal. And so, some of the time we're"
+    },
+    {
+      "start_s": 1489.72,
+      "end_s": 1491.35,
+      "text": "going to miss. We're going to buy cards"
+    },
+    {
+      "start_s": 1491.36,
+      "end_s": 1492.91,
+      "text": "that end up needing to be liquidated"
+    },
+    {
+      "start_s": 1492.92,
+      "end_s": 1494.59,
+      "text": "raw. That's just part of the process."
+    },
+    {
+      "start_s": 1494.6,
+      "end_s": 1496.27,
+      "text": "But some Some times we are going to hit"
+    },
+    {
+      "start_s": 1496.28,
+      "end_s": 1497.71,
+      "text": "and we're going to find a really clean"
+    },
+    {
+      "start_s": 1497.72,
+      "end_s": 1499.31,
+      "text": "copy of a card that we can submit for"
+    },
+    {
+      "start_s": 1499.32,
+      "end_s": 1501.19,
+      "text": "grading and get a PSA 10. Now, the thing"
+    },
+    {
+      "start_s": 1501.2,
+      "end_s": 1502.91,
+      "text": "to remember is we can't score if we"
+    },
+    {
+      "start_s": 1502.92,
+      "end_s": 1504.43,
+      "text": "never shoot. So, if we're always looking"
+    },
+    {
+      "start_s": 1504.44,
+      "end_s": 1506.59,
+      "text": "for just the absolute most perfect card"
+    },
+    {
+      "start_s": 1506.6,
+      "end_s": 1507.95,
+      "text": "of all time,"
+    },
+    {
+      "start_s": 1507.96,
+      "end_s": 1509.03,
+      "text": "they're out there, but those are going"
+    },
+    {
+      "start_s": 1509.04,
+      "end_s": 1510.95,
+      "text": "to be extremely difficult to find. We"
+    },
+    {
+      "start_s": 1510.96,
+      "end_s": 1512.59,
+      "text": "have to just find cards that look like"
+    },
+    {
+      "start_s": 1512.6,
+      "end_s": 1513.83,
+      "text": "they're clean enough to at least have a"
+    },
+    {
+      "start_s": 1513.84,
+      "end_s": 1515.51,
+      "text": "chance at a 10, and that's usually my"
+    },
+    {
+      "start_s": 1515.52,
+      "end_s": 1517.51,
+      "text": "starting point here. The other thing"
+    },
+    {
+      "start_s": 1517.52,
+      "end_s": 1519.35,
+      "text": "that's important is, once again, we want"
+    },
+    {
+      "start_s": 1519.36,
+      "end_s": 1521.11,
+      "text": "to target big upside because the bigger"
+    },
+    {
+      "start_s": 1521.12,
+      "end_s": 1523.11,
+      "text": "the upside, the more risk I'm willing to"
+    },
+    {
+      "start_s": 1523.12,
+      "end_s": 1524.87,
+      "text": "take cuz we don't need to hit on very"
+    },
+    {
+      "start_s": 1524.88,
+      "end_s": 1527.35,
+      "text": "many of those cards to be able to more"
+    },
+    {
+      "start_s": 1527.36,
+      "end_s": 1529.23,
+      "text": "than make up for any of the misses. So,"
+    },
+    {
+      "start_s": 1529.24,
+      "end_s": 1531.35,
+      "text": "remember, we can't guarantee PSA 10s,"
+    },
+    {
+      "start_s": 1531.36,
+      "end_s": 1532.63,
+      "text": "especially when we're buying cards"
+    },
+    {
+      "start_s": 1532.64,
+      "end_s": 1534.39,
+      "text": "online, but we can do some of these"
+    },
+    {
+      "start_s": 1534.4,
+      "end_s": 1536.35,
+      "text": "simple things to improve our odds. And"
+    },
+    {
+      "start_s": 1536.36,
+      "end_s": 1537.83,
+      "text": "the other thing is the more work we do"
+    },
+    {
+      "start_s": 1537.84,
+      "end_s": 1539.63,
+      "text": "on the front end of evaluating cards and"
+    },
+    {
+      "start_s": 1539.64,
+      "end_s": 1541.43,
+      "text": "being careful to eliminate the ones that"
+    },
+    {
+      "start_s": 1541.44,
+      "end_s": 1543.43,
+      "text": "are clearly not going to be gradable,"
+    },
+    {
+      "start_s": 1543.44,
+      "end_s": 1545.39,
+      "text": "the easier we make things on ourselves"
+    },
+    {
+      "start_s": 1545.4,
+      "end_s": 1547.87,
+      "text": "later. The clean raw cards are still out"
+    },
+    {
+      "start_s": 1547.88,
+      "end_s": 1549.79,
+      "text": "there. It just takes work to find them."
+    },
+    {
+      "start_s": 1549.8,
+      "end_s": 1551.19,
+      "text": "Now, if you're someone who's trying to"
+    },
+    {
+      "start_s": 1551.2,
+      "end_s": 1552.95,
+      "text": "learn the grading game, we talk all"
+    },
+    {
+      "start_s": 1552.96,
+      "end_s": 1554.47,
+      "text": "about this in my card investing"
+    },
+    {
+      "start_s": 1554.48,
+      "end_s": 1556.43,
+      "text": "community, Ignite. We'd love to see you"
+    },
+    {
+      "start_s": 1556.44,
+      "end_s": 1557.83,
+      "text": "inside. I'll leave a link in the"
+    },
+    {
+      "start_s": 1557.84,
+      "end_s": 1559.67,
+      "text": "description with full details to Ignite,"
+    },
+    {
+      "start_s": 1559.68,
+      "end_s": 1561.71,
+      "text": "as well as a link to a free 7-day trial"
+    },
+    {
+      "start_s": 1561.72,
+      "end_s": 1563.63,
+      "text": "if you want to try Coin. But otherwise,"
+    },
+    {
+      "start_s": 1563.64,
+      "end_s": 1567.0,
+      "text": "we'll see you on the next video."
+    }
+  ]
+}

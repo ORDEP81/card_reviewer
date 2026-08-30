@@ -1,0 +1,472 @@
+{
+  "method": "mlx-whisper",
+  "model": "mlx-community/whisper-medium-mlx",
+  "language": "en",
+  "cues": [
+    {
+      "start_s": 0.0,
+      "end_s": 3.04,
+      "text": "Okay, in this video, I'm going to talk about centering."
+    },
+    {
+      "start_s": 3.24,
+      "end_s": 7.96,
+      "text": "Okay, centering is an important subgrade of how cards are graded."
+    },
+    {
+      "start_s": 8.16,
+      "end_s": 10.44,
+      "text": "Now, a couple of things about this."
+    },
+    {
+      "start_s": 10.44,
+      "end_s": 12.6,
+      "text": "This is the most important grade of a card."
+    },
+    {
+      "start_s": 12.68,
+      "end_s": 14.56,
+      "text": "People care about the centering the most."
+    },
+    {
+      "start_s": 14.76,
+      "end_s": 15.68,
+      "text": "I don't know why."
+    },
+    {
+      "start_s": 15.88,
+      "end_s": 17.56,
+      "text": "It's just how it is."
+    },
+    {
+      "start_s": 17.76,
+      "end_s": 19.48,
+      "text": "Maybe because it's not changeable."
+    },
+    {
+      "start_s": 19.48,
+      "end_s": 21.16,
+      "text": "It's just how it was cut off the factory."
+    },
+    {
+      "start_s": 21.36,
+      "end_s": 22.04,
+      "text": "I don't know."
+    },
+    {
+      "start_s": 22.240000000000002,
+      "end_s": 26.76,
+      "text": "But just to give you an example, like Bowman Chrome, the baseball product."
+    },
+    {
+      "start_s": 26.92,
+      "end_s": 31.880000000000003,
+      "text": "Ones with nine centering are just far less desirable to traditional collectors."
+    },
+    {
+      "start_s": 32.08,
+      "end_s": 33.84,
+      "text": "Once again, it's just how it is."
+    },
+    {
+      "start_s": 33.88,
+      "end_s": 34.72,
+      "text": "I don't know why."
+    },
+    {
+      "start_s": 34.92,
+      "end_s": 35.84,
+      "text": "Just keep that in mind."
+    },
+    {
+      "start_s": 36.0,
+      "end_s": 39.68,
+      "text": "But a lot of the times we're sending cards to PSA, so not going to be an issue."
+    },
+    {
+      "start_s": 39.68,
+      "end_s": 42.08,
+      "text": "I'm just kind of telling you this just to give you some information."
+    },
+    {
+      "start_s": 42.28,
+      "end_s": 46.56,
+      "text": "Now, if the rest of the card is good, you can get away with 60 40 centering."
+    },
+    {
+      "start_s": 46.760000000000005,
+      "end_s": 49.72,
+      "text": "So like 60 percent, 40 percent one side to another."
+    },
+    {
+      "start_s": 49.92,
+      "end_s": 52.8,
+      "text": "Now, some things to note about centering, you can't change it."
+    },
+    {
+      "start_s": 53.0,
+      "end_s": 55.160000000000004,
+      "text": "It's just how it was cut off the factory line."
+    },
+    {
+      "start_s": 55.36,
+      "end_s": 59.48,
+      "text": "And every type of card has different types of borders."
+    },
+    {
+      "start_s": 59.48,
+      "end_s": 61.08,
+      "text": "OK, some don't even have borders."
+    },
+    {
+      "start_s": 61.279999999999994,
+      "end_s": 63.64,
+      "text": "Some have only a top and bottom border."
+    },
+    {
+      "start_s": 63.64,
+      "end_s": 64.96,
+      "text": "And I'll show you some examples."
+    },
+    {
+      "start_s": 64.96,
+      "end_s": 68.08,
+      "text": "There's many as I could, but there's obviously too many to count."
+    },
+    {
+      "start_s": 68.28,
+      "end_s": 73.36,
+      "text": "And if you're unsure how well centered a card is, you could check other high end"
+    },
+    {
+      "start_s": 73.36,
+      "end_s": 75.12,
+      "text": "cards to see other measuring the centering."
+    },
+    {
+      "start_s": 75.32,
+      "end_s": 77.52,
+      "text": "I'll give an example in a second."
+    },
+    {
+      "start_s": 77.72,
+      "end_s": 80.96,
+      "text": "And some products are just cut worse than others."
+    },
+    {
+      "start_s": 81.03999999999999,
+      "end_s": 86.16,
+      "text": "Traditionally, Prism, basketball, Prism in general, is just not that well centered."
+    },
+    {
+      "start_s": 86.19999999999999,
+      "end_s": 88.63999999999999,
+      "text": "I don't know why. It's just how it's cut off the factory."
+    },
+    {
+      "start_s": 88.83999999999999,
+      "end_s": 92.8,
+      "text": "Now, the back centering is not as important."
+    },
+    {
+      "start_s": 93.0,
+      "end_s": 97.63999999999999,
+      "text": "But if it's horrible, if it's horrific, it's not going to grade well for you."
+    },
+    {
+      "start_s": 97.83999999999999,
+      "end_s": 98.83999999999999,
+      "text": "So just keep that in mind."
+    },
+    {
+      "start_s": 99.03999999999999,
+      "end_s": 103.44,
+      "text": "I have a basic example here of the same exact type of card."
+    },
+    {
+      "start_s": 103.63999999999999,
+      "end_s": 105.56,
+      "text": "So this is a silver Prism Anthony Edwards."
+    },
+    {
+      "start_s": 105.75999999999999,
+      "end_s": 107.63999999999999,
+      "text": "And you can see both these cards are in"
+    },
+    {
+      "start_s": 107.64,
+      "end_s": 111.16,
+      "text": "immaculate condition, but this nine is not centered well."
+    },
+    {
+      "start_s": 111.36,
+      "end_s": 115.56,
+      "text": "You could see this left border is bigger than the right."
+    },
+    {
+      "start_s": 115.76,
+      "end_s": 118.16,
+      "text": "OK, that's what caused this card to be a nine."
+    },
+    {
+      "start_s": 118.16,
+      "end_s": 121.8,
+      "text": "You can see the top border and bottom border are pretty even,"
+    },
+    {
+      "start_s": 122.0,
+      "end_s": 125.6,
+      "text": "but the left and right, no good as opposed to this one, this ten."
+    },
+    {
+      "start_s": 125.8,
+      "end_s": 127.6,
+      "text": "This is basically perfectly centered."
+    },
+    {
+      "start_s": 127.8,
+      "end_s": 131.4,
+      "text": "You can see this border right here aligns with this border."
+    },
+    {
+      "start_s": 131.6,
+      "end_s": 134.2,
+      "text": "It's the same width and same thing here."
+    },
+    {
+      "start_s": 134.4,
+      "end_s": 136.36,
+      "text": "Same width, same width."
+    },
+    {
+      "start_s": 136.52,
+      "end_s": 140.28,
+      "text": "So I wouldn't be too picky if it looks really good."
+    },
+    {
+      "start_s": 140.48000000000002,
+      "end_s": 140.76000000000002,
+      "text": "You're good."
+    },
+    {
+      "start_s": 140.96,
+      "end_s": 145.36,
+      "text": "Like, you know, I wouldn't measure it to like this is maybe like 51 percent and 49"
+    },
+    {
+      "start_s": 145.56,
+      "end_s": 147.04000000000002,
+      "text": "percent. It's OK."
+    },
+    {
+      "start_s": 147.24,
+      "end_s": 150.68,
+      "text": "So this is a side by side view of what not centered looks like."
+    },
+    {
+      "start_s": 150.88000000000002,
+      "end_s": 152.64000000000001,
+      "text": "And just to give you some more random"
+    },
+    {
+      "start_s": 152.84,
+      "end_s": 155.92000000000002,
+      "text": "examples, like take this card, for example, Bowman Chrome."
+    },
+    {
+      "start_s": 155.92000000000002,
+      "end_s": 158.4,
+      "text": "Bowman Chrome is traditionally a well centered product."
+    },
+    {
+      "start_s": 158.60000000000002,
+      "end_s": 162.0,
+      "text": "So you can see this top border and bottom border."
+    },
+    {
+      "start_s": 162.20000000000002,
+      "end_s": 163.64000000000001,
+      "text": "That's the way I would look at it."
+    },
+    {
+      "start_s": 163.83999999999997,
+      "end_s": 165.72,
+      "text": "And like I can't sit here and show you"
+    },
+    {
+      "start_s": 165.72,
+      "end_s": 168.95999999999998,
+      "text": "like every example of every single card, I'd be here for like 100 hours."
+    },
+    {
+      "start_s": 169.16,
+      "end_s": 172.72,
+      "text": "But that's the type of like borders you want to look for."
+    },
+    {
+      "start_s": 172.72,
+      "end_s": 174.27999999999997,
+      "text": "Hopefully this is like making sense."
+    },
+    {
+      "start_s": 174.27999999999997,
+      "end_s": 175.88,
+      "text": "Once again, every card can be different."
+    },
+    {
+      "start_s": 175.88,
+      "end_s": 178.51999999999998,
+      "text": "And some cards may not have borders, kind of like I said."
+    },
+    {
+      "start_s": 178.72,
+      "end_s": 183.04,
+      "text": "But this is a good example of something I do when it comes to centering."
+    },
+    {
+      "start_s": 183.23999999999998,
+      "end_s": 184.67999999999998,
+      "text": "So let's say you're looking at this card"
+    },
+    {
+      "start_s": 184.88,
+      "end_s": 186.95999999999998,
+      "text": "of Mac Jones and you're like, you know what?"
+    },
+    {
+      "start_s": 187.16,
+      "end_s": 190.39999999999998,
+      "text": "This centering, this left is a little bit smaller than the right."
+    },
+    {
+      "start_s": 190.6,
+      "end_s": 192.6,
+      "text": "I'm not exactly sure how well centered it is."
+    },
+    {
+      "start_s": 192.64,
+      "end_s": 194.51999999999998,
+      "text": "The top is a little bit bigger than the bottom."
+    },
+    {
+      "start_s": 194.72,
+      "end_s": 201.64,
+      "text": "Maybe what I do is I will look at another PSA 10 and compare to see or look at"
+    },
+    {
+      "start_s": 201.84,
+      "end_s": 205.95999999999998,
+      "text": "other PSA 10 to see if I could find any that are slightly off centered and look"
+    },
+    {
+      "start_s": 206.16,
+      "end_s": 209.32,
+      "text": "like mine, because if I can find a PSA 10 that looks like mine,"
+    },
+    {
+      "start_s": 209.51999999999998,
+      "end_s": 211.44,
+      "text": "that means mine could possibly get a 10."
+    },
+    {
+      "start_s": 211.64,
+      "end_s": 215.28,
+      "text": "OK, and this is a good example that I would look at this card."
+    },
+    {
+      "start_s": 215.32,
+      "end_s": 217.68,
+      "text": "All right. It's the same exact card, but a PSA 10."
+    },
+    {
+      "start_s": 217.88,
+      "end_s": 219.51999999999998,
+      "text": "And I'll say to myself, you know what?"
+    },
+    {
+      "start_s": 219.72,
+      "end_s": 221.48,
+      "text": "This right board is a little bit bigger"
+    },
+    {
+      "start_s": 221.56,
+      "end_s": 223.39999999999998,
+      "text": "than the left border, kind of like mine."
+    },
+    {
+      "start_s": 223.6,
+      "end_s": 225.0,
+      "text": "It's not perfect."
+    },
+    {
+      "start_s": 225.2,
+      "end_s": 226.44,
+      "text": "I think it's passable."
+    },
+    {
+      "start_s": 226.64,
+      "end_s": 227.76,
+      "text": "I think it's great."
+    },
+    {
+      "start_s": 227.95999999999998,
+      "end_s": 233.07999999999998,
+      "text": "So use other cards to tell it to be able to tell yourself,"
+    },
+    {
+      "start_s": 233.28,
+      "end_s": 236.28,
+      "text": "you know, hey, this card of contend is proof in the pudding, right?"
+    },
+    {
+      "start_s": 236.48,
+      "end_s": 239.35999999999999,
+      "text": "This card is not perfectly centered and they gave it a 10."
+    },
+    {
+      "start_s": 239.56,
+      "end_s": 244.12,
+      "text": "Something to note is Prism is traditionally off centered, right?"
+    },
+    {
+      "start_s": 244.32,
+      "end_s": 248.12,
+      "text": "So sometimes the rest of the card is good and it's a little off centered."
+    },
+    {
+      "start_s": 248.16,
+      "end_s": 251.72,
+      "text": "PSA will give you some leeway with the grade."
+    },
+    {
+      "start_s": 251.72,
+      "end_s": 253.36,
+      "text": "It's a little off centered. They'll give you a 10."
+    },
+    {
+      "start_s": 253.56,
+      "end_s": 256.44,
+      "text": "But if you send in a card like Bowman Chrome, for example,"
+    },
+    {
+      "start_s": 256.64,
+      "end_s": 261.44,
+      "text": "and they're all perfectly centered, but yours is a little off, but the rest is good."
+    },
+    {
+      "start_s": 261.6,
+      "end_s": 264.28000000000003,
+      "text": "They're not going to give you the benefit of the doubt."
+    },
+    {
+      "start_s": 264.48,
+      "end_s": 266.44,
+      "text": "So hopefully this all makes sense."
+    },
+    {
+      "start_s": 266.64,
+      "end_s": 271.16,
+      "text": "Any questions, ask your coach and I'll see you guys in the next video."
+    }
+  ]
+}

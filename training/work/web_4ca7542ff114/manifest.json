@@ -1,0 +1,69 @@
+{
+  "video_id": "web_4ca7542ff114",
+  "source": {
+    "type": "youtube",
+    "url": "https://vimeo.com/1189890552",
+    "title": "Autograph",
+    "uploader": "Eric Michael",
+    "duration_s": 301.0
+  },
+  "file": {
+    "path": "source/video.mp4",
+    "sha256": "15fbc19edbe35e006faed0e9c22fd9b9c074de76bd4106a91e0066113825e323",
+    "bytes": 29172581
+  },
+  "stages": {
+    "acquire": {
+      "status": "done",
+      "at": "2026-08-30T00:03:21.261316Z",
+      "error": null,
+      "detail": {
+        "tool": "yt-dlp",
+        "browser": "chrome"
+      }
+    },
+    "transcribe": {
+      "status": "done",
+      "at": "2026-08-30T00:03:44.114924Z",
+      "error": null,
+      "detail": {
+        "method": "mlx-whisper",
+        "model": "mlx-community/whisper-medium-mlx",
+        "cues": 59
+      }
+    },
+    "segment": {
+      "status": "done",
+      "at": "2026-08-30T00:03:44.124854Z",
+      "error": null,
+      "detail": {
+        "n_segments": 5,
+        "lexicon_version": "1"
+      }
+    },
+    "extract_frames": {
+      "status": "done",
+      "at": "2026-08-30T00:03:46.021576Z",
+      "error": null,
+      "detail": {
+        "n_frames": 5,
+        "uniform": false,
+        "fps": 1.0
+      }
+    },
+    "analyze": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    },
+    "validate": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    }
+  },
+  "lesson_id": "OUT_OF_SCOPE: autographs, see docs/scope-decisions.md",
+  "rubric_version_at_ingest": "0.1.0"
+}

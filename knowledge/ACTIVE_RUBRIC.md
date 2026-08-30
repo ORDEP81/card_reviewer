@@ -4,11 +4,19 @@
      Source of truth is knowledge/rules/. Regenerate with:
        card-knowledge build-rubric -->
 
-**Version:** 1.0.0  
+**Version:** 2.0.0  
 **Rules:** 28 active rules  
-**Built:** 2026-08-29
+**Built:** 2026-08-30
 
 ## centering
+
+### CENTERING_BACK_TOLERANCE_002
+
+Back-of-card centering is judged more leniently than the front: 75/25 or better on the back versus 55/45 on the front for a Gem Mint 10.
+
+- evidence: `objective`  
+- confidence: `high`  
+- sources: lesson_012 , lesson_008 01:30-01:40
 
 ### CENTERING_BORDERLESS_001
 
@@ -25,14 +33,6 @@ For a borderless card, judge centering by comparing against the same card alread
 - evidence: `experience_based`  
 - confidence: `medium`  
 - sources: lesson_007 09:50-10:20
-
-### CENTERING_FRONT_BACK_TOLERANCE_001
-
-Back-of-card centering is judged more leniently than the front.
-
-- evidence: `unverified`  
-- confidence: `low`  
-- sources: lesson_007 05:41-06:15, lesson_008 01:30-01:40
 
 ### CENTERING_NO_OVERMEASURE_001
 

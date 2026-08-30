@@ -1,0 +1,69 @@
+{
+  "video_id": "yt_38QhtEziAx4",
+  "source": {
+    "type": "youtube",
+    "url": "https://youtu.be/38QhtEziAx4",
+    "title": "Why You NEED These Tools When Grading Cards - How to Get PSA 10 Gem Mint Grades 💎",
+    "uploader": "The Sports Card Teachers",
+    "duration_s": 217.0
+  },
+  "file": {
+    "path": "source/video.mkv",
+    "sha256": "a3d7b3a24b5ae36ab0c53fba15c736ced334de737cede872f168a4f1f0f92c1e",
+    "bytes": 47184236
+  },
+  "stages": {
+    "acquire": {
+      "status": "done",
+      "at": "2026-08-29T19:30:35.437106Z",
+      "error": null,
+      "detail": {
+        "tool": "yt-dlp",
+        "browser": null
+      }
+    },
+    "transcribe": {
+      "status": "done",
+      "at": "2026-08-29T19:30:37.499242Z",
+      "error": null,
+      "detail": {
+        "method": "captions",
+        "model": null,
+        "cues": 99
+      }
+    },
+    "segment": {
+      "status": "done",
+      "at": "2026-08-29T19:30:37.506736Z",
+      "error": null,
+      "detail": {
+        "n_segments": 6,
+        "lexicon_version": "1"
+      }
+    },
+    "extract_frames": {
+      "status": "done",
+      "at": "2026-08-29T19:30:40.192669Z",
+      "error": null,
+      "detail": {
+        "n_frames": 45,
+        "uniform": false,
+        "fps": 1.0
+      }
+    },
+    "analyze": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    },
+    "validate": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    }
+  },
+  "lesson_id": null,
+  "rubric_version_at_ingest": "0.1.0"
+}

@@ -1,0 +1,167 @@
+{
+  "lexicon_version": "1",
+  "total_cues": 241,
+  "segments": [
+    {
+      "id": "seg_006",
+      "start_s": 246.22,
+      "end_s": 279.37,
+      "score": 13.5,
+      "categories": [
+        "centering",
+        "outcomes"
+      ],
+      "matched_terms": [
+        "center",
+        "centering",
+        "gem",
+        "left to right",
+        "off center",
+        "you can see"
+      ],
+      "text": "to centering so this is the Andrea belotti if you can see left to right and you can almost count the the divots over here that you can see four on this side and five on the other so this card would be considered off center and again it wouldn't be a great candidate to send in for a gem grade now we can talk a little",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_001",
+      "start_s": 99.34,
+      "end_s": 118.389,
+      "score": 8.5,
+      "categories": [
+        "centering",
+        "corners",
+        "edges",
+        "outcomes",
+        "surface"
+      ],
+      "matched_terms": [
+        "centering",
+        "corners",
+        "edges",
+        "gem",
+        "surface"
+      ],
+      "text": "want a gem card so those four categories are surface edges corners and centering so those",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_002",
+      "start_s": 192.819,
+      "end_s": 207.91,
+      "score": 8.5,
+      "categories": [
+        "edges"
+      ],
+      "matched_terms": [
+        "edges",
+        "whitening",
+        "you can see"
+      ],
+      "text": "whitening as you can see over here or the jagged edges as you can see from",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_009",
+      "start_s": 463.36,
+      "end_s": 478.99,
+      "score": 6.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10",
+        "psa 9"
+      ],
+      "text": "and submit it and it gets a PSA 10 but if it gets a PSA 9 or an 8 I don't",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_005",
+      "start_s": 230.5,
+      "end_s": 243.009,
+      "score": 5.0,
+      "categories": [
+        "edges",
+        "outcomes"
+      ],
+      "matched_terms": [
+        "gem",
+        "whitening"
+      ],
+      "text": "a bit of whitening does it gem sometimes",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_003",
+      "start_s": 213.4,
+      "end_s": 225.789,
+      "score": 3.5,
+      "categories": [
+        "corners",
+        "outcomes"
+      ],
+      "matched_terms": [
+        "corners",
+        "gem"
+      ],
+      "text": "gem another thing to look at is Corners",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_004",
+      "start_s": 220.18,
+      "end_s": 232.57,
+      "score": 3.0,
+      "categories": [
+        "edges"
+      ],
+      "matched_terms": [
+        "whitening"
+      ],
+      "text": "there's a bit of whitening you also want",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_007",
+      "start_s": 424.3,
+      "end_s": 439.09,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "so this one would have to be a PSA 10 in",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_008",
+      "start_s": 441.94,
+      "end_s": 454.87,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "that it gets a PSA 10 to submit",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_010",
+      "start_s": 527.68,
+      "end_s": 539.65,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "option of profiting off a PSA 10 do I",
+      "visual_cue": false
+    }
+  ]
+}

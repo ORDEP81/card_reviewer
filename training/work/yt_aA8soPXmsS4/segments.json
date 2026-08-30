@@ -1,0 +1,131 @@
+{
+  "lexicon_version": "1",
+  "total_cues": 315,
+  "segments": [
+    {
+      "id": "seg_009",
+      "start_s": 598.04,
+      "end_s": 613.63,
+      "score": 6.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "center",
+        "look at this",
+        "off center"
+      ],
+      "text": "look at this card, you want to see how it looks. Actually looks pretty decent. Is a little off center top or left to",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_004",
+      "start_s": 161.64,
+      "end_s": 173.63,
+      "score": 3.5,
+      "categories": [],
+      "matched_terms": [
+        "look at this",
+        "take a look"
+      ],
+      "text": "gradable. Um, we'll take a look at this",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_006",
+      "start_s": 243.4,
+      "end_s": 255.949,
+      "score": 3.0,
+      "categories": [
+        "edges"
+      ],
+      "matched_terms": [
+        "chipping"
+      ],
+      "text": "chipping or edgeware here. And then this",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_008",
+      "start_s": 283.639,
+      "end_s": 295.39,
+      "score": 3.0,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "crease"
+      ],
+      "text": "Destin rivals crease and it's not there.",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_001",
+      "start_s": 105.96,
+      "end_s": 117.71,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "can get away with centering a lot more",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_002",
+      "start_s": 120.68,
+      "end_s": 132.59,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "zoom in"
+      ],
+      "text": "immaculate. So, I usually zoom in and",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_003",
+      "start_s": 129.319,
+      "end_s": 141.47,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "centering is kind of a no-go here. So, I",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_005",
+      "start_s": 192.44,
+      "end_s": 204.91,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "edgeware here, but centering looks",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_007",
+      "start_s": 262.12,
+      "end_s": 274.59,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "centering looks really, really good.",
+      "visual_cue": false
+    }
+  ]
+}

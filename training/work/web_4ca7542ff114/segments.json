@@ -1,0 +1,71 @@
+{
+  "lexicon_version": "1",
+  "total_cues": 59,
+  "segments": [
+    {
+      "id": "seg_004",
+      "start_s": 215.8,
+      "end_s": 245.24,
+      "score": 7.5,
+      "categories": [],
+      "matched_terms": [
+        "right here",
+        "you can see"
+      ],
+      "text": "running off the sticker. So you can see there's a sticker right here. Hopefully you guys can see that well. And you can see this is an Emmett Smith autograph and it's just running right off the card. I don't know if this is an Emmett Smith, Steve Smith actually, Steve Smith autograph. And you can see it's running right off the sticker and it comes back on. No good, not going to grade",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_001",
+      "start_s": 65.48,
+      "end_s": 79.56,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "grading the autograph. It's not worth the risk. Cause if it gets a PSA 10 with a nine auto,",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_003",
+      "start_s": 171.08,
+      "end_s": 186.52,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "to be less and it'll cause the card itself for a little bit less as a PSA 10. The next one is",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_002",
+      "start_s": 140.84,
+      "end_s": 157.8,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "you can see"
+      ],
+      "text": "and you can see this streak going through the card, how it's white in the middle of that blue pen,",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_005",
+      "start_s": 246.12,
+      "end_s": 260.6,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "you can see"
+      ],
+      "text": "but I see it frequently. There's little white dots throughout the autograph. You can see like here,",
+      "visual_cue": true
+    }
+  ]
+}

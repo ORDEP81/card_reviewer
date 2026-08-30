@@ -1,0 +1,302 @@
+{
+  "method": "mlx-whisper",
+  "model": "mlx-community/whisper-medium-mlx",
+  "language": "en",
+  "cues": [
+    {
+      "start_s": 0.0,
+      "end_s": 4.4,
+      "text": "Okay, in this section we're going to talk about the autograph."
+    },
+    {
+      "start_s": 4.4,
+      "end_s": 7.36,
+      "text": "Okay, now I'm going to throw this out there."
+    },
+    {
+      "start_s": 7.36,
+      "end_s": 12.64,
+      "text": "If you're submitting cards to PSA, PSA does not grade the autograph."
+    },
+    {
+      "start_s": 12.64,
+      "end_s": 19.52,
+      "text": "Okay, but even if they don't grade the autograph, if there's a card, two cards,"
+    },
+    {
+      "start_s": 19.52,
+      "end_s": 25.36,
+      "text": "equal cards, want both PSA 10s, one has a crappy autograph, one has a good autograph,"
+    },
+    {
+      "start_s": 25.36,
+      "end_s": 28.96,
+      "text": "the good autograph is still going to sell for more even though it's not graded."
+    },
+    {
+      "start_s": 28.96,
+      "end_s": 32.64,
+      "text": "Okay, hopefully that makes sense. So autographs, even though if they're not graded,"
+    },
+    {
+      "start_s": 32.64,
+      "end_s": 36.88,
+      "text": "it still matters. Okay, and good autographs are going to go for slightly more, bad autographs"
+    },
+    {
+      "start_s": 36.88,
+      "end_s": 41.68,
+      "text": "are going to go for slightly less. All right, so that's important to note. And if you ever send"
+    },
+    {
+      "start_s": 41.68,
+      "end_s": 46.56,
+      "text": "cards to Beckett, okay, we don't really do that as much anymore while I'm speaking, but if you do,"
+    },
+    {
+      "start_s": 46.56,
+      "end_s": 50.8,
+      "text": "if it gets a nine autograph, it's no good. You're not going to make any money. Okay,"
+    },
+    {
+      "start_s": 50.8,
+      "end_s": 54.400000000000006,
+      "text": "it completely diminishes the value of the card and it's like getting a BGS 9,"
+    },
+    {
+      "start_s": 54.4,
+      "end_s": 59.04,
+      "text": "just throwing it out there. Now, if you're grading the autograph with PSA,"
+    },
+    {
+      "start_s": 59.04,
+      "end_s": 64.0,
+      "text": "because that's an option, you could grade the autograph, they're very picky. Like the little"
+    },
+    {
+      "start_s": 65.44,
+      "end_s": 70.48,
+      "text": "smidgen, smidgen thing will cause it to be a nine autograph. Okay, I would probably recommend not"
+    },
+    {
+      "start_s": 70.48,
+      "end_s": 74.56,
+      "text": "grading the autograph. It's not worth the risk. Cause if it gets a PSA 10 with a nine auto,"
+    },
+    {
+      "start_s": 75.12,
+      "end_s": 81.6,
+      "text": "you're going to lose like 30, 40%. Then you will then 30 is going to be worth 30 to 40% less than"
+    },
+    {
+      "start_s": 81.6,
+      "end_s": 86.39999999999999,
+      "text": "it would be if it was a 10 with no auto. So keep that in mind. No one likes to see a nine on a card."
+    },
+    {
+      "start_s": 87.36,
+      "end_s": 92.0,
+      "text": "BGS though, in grading an autograph is not picky. They're like, you could send in an"
+    },
+    {
+      "start_s": 92.0,
+      "end_s": 97.75999999999999,
+      "text": "autograph that looks okay and it could still get a 10. And another thing to know about the autograph"
+    },
+    {
+      "start_s": 97.75999999999999,
+      "end_s": 104.47999999999999,
+      "text": "grade is this. So there's certain players like Mack Jones, for example, I'm speaking, he may not even"
+    },
+    {
+      "start_s": 104.47999999999999,
+      "end_s": 110.96,
+      "text": "be in the league when you're watching this, but Mack Jones has consistently bad autograph. He"
+    },
+    {
+      "start_s": 110.96,
+      "end_s": 116.0,
+      "text": "stinks at signing either. Maybe he just has a bad autograph that always streaks or maybe when he was"
+    },
+    {
+      "start_s": 116.0,
+      "end_s": 120.96,
+      "text": "signing his cards, he had pens that were running out of ink, whatever the case may be. And if that's"
+    },
+    {
+      "start_s": 120.96,
+      "end_s": 126.96,
+      "text": "the case, there's a premium for a good autograph of a player with a lot of bad autographs. Cause"
+    },
+    {
+      "start_s": 126.96,
+      "end_s": 132.24,
+      "text": "it's rare, right? Supply and demand. Just keep that in mind about the autograph. Now there's five"
+    },
+    {
+      "start_s": 132.24,
+      "end_s": 139.28,
+      "text": "things to look for when looking at an autograph to see if the autograph is good or bad. So the first"
+    },
+    {
+      "start_s": 139.28,
+      "end_s": 145.84,
+      "text": "one is it's streaky. Okay. Streaky would be like this right here. This is a Derek Carr autograph"
+    },
+    {
+      "start_s": 145.84,
+      "end_s": 152.8,
+      "text": "and you can see this streak going through the card, how it's white in the middle of that blue pen,"
+    },
+    {
+      "start_s": 152.8,
+      "end_s": 160.32,
+      "text": "blue marker. So that'll what a streaky autograph would look like. Okay. And then the next one would"
+    },
+    {
+      "start_s": 160.32,
+      "end_s": 164.88,
+      "text": "be running off the card. So this is what running off the card looks like. This is an autograph"
+    },
+    {
+      "start_s": 164.88,
+      "end_s": 170.0,
+      "text": "of Miguel Andujar used to play for the Yankees. And you could see this line is going, going, going,"
+    },
+    {
+      "start_s": 170.0,
+      "end_s": 176.07999999999998,
+      "text": "going boom right off the card. And it keeps going off the card. That will cause the autograph grade"
+    },
+    {
+      "start_s": 176.07999999999998,
+      "end_s": 181.51999999999998,
+      "text": "to be less and it'll cause the card itself for a little bit less as a PSA 10. The next one is"
+    },
+    {
+      "start_s": 181.51999999999998,
+      "end_s": 186.96,
+      "text": "running off the sticker. So same concept as this running off the card, but sometimes players will"
+    },
+    {
+      "start_s": 186.96,
+      "end_s": 192.88,
+      "text": "sign stickers. Just as an FYI, the difference between this and this and why sticker autographs"
+    },
+    {
+      "start_s": 192.88,
+      "end_s": 197.84,
+      "text": "are less desirable is because of this card of this player where he actually signed it on the card"
+    },
+    {
+      "start_s": 197.84,
+      "end_s": 202.16,
+      "text": "means he had the card in his physical possession and he signed the card, which makes the card"
+    },
+    {
+      "start_s": 202.16,
+      "end_s": 207.2,
+      "text": "worth more and it's more desirable. A sticker autograph, what happens is these companies just"
+    },
+    {
+      "start_s": 207.2,
+      "end_s": 211.28,
+      "text": "take a bunch of stickers, send it to the player and they just sign stickers and they send it back"
+    },
+    {
+      "start_s": 211.28,
+      "end_s": 216.16,
+      "text": "and the stickers get plastered on the card. So people want the player actually touching the card."
+    },
+    {
+      "start_s": 216.16,
+      "end_s": 220.8,
+      "text": "It's weird. I know, but that's just how it goes. And this is what it would, what it would look like"
+    },
+    {
+      "start_s": 220.8,
+      "end_s": 225.20000000000002,
+      "text": "running off the sticker. So you can see there's a sticker right here. Hopefully you guys can see"
+    },
+    {
+      "start_s": 225.20000000000002,
+      "end_s": 230.48000000000002,
+      "text": "that well. And you can see this is an Emmett Smith autograph and it's just running right off"
+    },
+    {
+      "start_s": 231.28,
+      "end_s": 235.36,
+      "text": "the card. I don't know if this is an Emmett Smith, Steve Smith actually, Steve Smith autograph."
+    },
+    {
+      "start_s": 235.36,
+      "end_s": 240.24,
+      "text": "And you can see it's running right off the sticker and it comes back on. No good, not going to grade"
+    },
+    {
+      "start_s": 240.24,
+      "end_s": 246.24,
+      "text": "well. And the other one is white dots. So you could see in this autograph of Scotty Barnes,"
+    },
+    {
+      "start_s": 246.24,
+      "end_s": 251.12,
+      "text": "the Toronto Raptors player, there's little white dots. I don't know how this happens, honestly,"
+    },
+    {
+      "start_s": 251.12,
+      "end_s": 255.60000000000002,
+      "text": "but I see it frequently. There's little white dots throughout the autograph. You can see like here,"
+    },
+    {
+      "start_s": 255.60000000000002,
+      "end_s": 260.96000000000004,
+      "text": "like here, and it causes the grade to not be good every time. So watch out for that. And the last"
+    },
+    {
+      "start_s": 260.96000000000004,
+      "end_s": 264.64,
+      "text": "one you're not really going to deal with, I couldn't even find a good example, was fading."
+    },
+    {
+      "start_s": 264.64,
+      "end_s": 268.72,
+      "text": "If the autograph starts to fade and it's like, usually it's going to happen with older cards,"
+    },
+    {
+      "start_s": 268.72,
+      "end_s": 274.40000000000003,
+      "text": "but we're not buying older cards. So it's not that big of a deal. That will cause the grade to"
+    },
+    {
+      "start_s": 274.4,
+      "end_s": 278.23999999999995,
+      "text": "not be good. If it's fading, if it's faint, sometimes people will keep cards in the sun"
+    },
+    {
+      "start_s": 279.03999999999996,
+      "end_s": 282.64,
+      "text": "and the autograph will faint because of it. So this is what to look for"
+    },
+    {
+      "start_s": 283.67999999999995,
+      "end_s": 287.52,
+      "text": "when looking at the autograph. But even if a card's, the autograph's not that good"
+    },
+    {
+      "start_s": 287.52,
+      "end_s": 291.52,
+      "text": "and you're sending it to PSA, I wouldn't let that stop you. Just keep in mind,"
+    },
+    {
+      "start_s": 291.52,
+      "end_s": 295.52,
+      "text": "it might sell for slightly less than the other PSA 10s with good autographs. But this is what"
+    },
+    {
+      "start_s": 295.52,
+      "end_s": 300.88,
+      "text": "to look for. This doc will be below the video and yeah, cool. I'll see you guys in the next video."
+    }
+  ]
+}

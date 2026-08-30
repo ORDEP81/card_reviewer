@@ -1,0 +1,183 @@
+{
+  "lexicon_version": "1",
+  "total_cues": 343,
+  "segments": [
+    {
+      "id": "seg_001",
+      "start_s": 106.36,
+      "end_s": 121.069,
+      "score": 4.0,
+      "categories": [
+        "centering",
+        "outcomes"
+      ],
+      "matched_terms": [
+        "centering",
+        "gem"
+      ],
+      "text": "and then uh this is a gem meant tool for centering just to help centering so",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_005",
+      "start_s": 361.56,
+      "end_s": 376.189,
+      "score": 4.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "so centering is the first part you should do centering last because",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_011",
+      "start_s": 600.04,
+      "end_s": 613.389,
+      "score": 4.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering",
+        "you can see"
+      ],
+      "text": "so this card you can see it says nine centering",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_007",
+      "start_s": 425.24,
+      "end_s": 437.469,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "psa 10 and",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_012",
+      "start_s": 608.839,
+      "end_s": 621.15,
+      "score": 3.0,
+      "categories": [
+        "outcomes"
+      ],
+      "matched_terms": [
+        "psa 10"
+      ],
+      "text": "that pulled a psa 10",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_002",
+      "start_s": 181.56,
+      "end_s": 193.79,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "flip it over"
+      ],
+      "text": "wipe it down flip it over do the same on",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_003",
+      "start_s": 192.68,
+      "end_s": 206.19,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "centering",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_004",
+      "start_s": 211.239,
+      "end_s": 222.589,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "anytime you do the centering you want to",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_006",
+      "start_s": 381.0,
+      "end_s": 392.59,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "you can see"
+      ],
+      "text": "card you can see there's like a light in",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_008",
+      "start_s": 499.8,
+      "end_s": 513.629,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "you can see"
+      ],
+      "text": "the light you can see any dings lines",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_009",
+      "start_s": 572.68,
+      "end_s": 584.11,
+      "score": 2.0,
+      "categories": [],
+      "matched_terms": [
+        "you can see"
+      ],
+      "text": "you can see how this card looks like",
+      "visual_cue": true
+    },
+    {
+      "id": "seg_010",
+      "start_s": 583.32,
+      "end_s": 595.23,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "get centering on because there's there's",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_013",
+      "start_s": 623.88,
+      "end_s": 635.47,
+      "score": 2.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "centering"
+      ],
+      "text": "this one says centering and you can kind",
+      "visual_cue": false
+    }
+  ]
+}

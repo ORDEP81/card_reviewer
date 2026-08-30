@@ -1,0 +1,69 @@
+{
+  "video_id": "web_f4e13adb5cc1",
+  "source": {
+    "type": "youtube",
+    "url": "https://vimeo.com/1189890549",
+    "title": "Centering",
+    "uploader": "Eric Michael",
+    "duration_s": 271.0
+  },
+  "file": {
+    "path": "source/video.mp4",
+    "sha256": "0dbbdcf268246f3c95407e42496bedb6f36a6c581032bbbc4dfbee4a93075549",
+    "bytes": 38474215
+  },
+  "stages": {
+    "acquire": {
+      "status": "done",
+      "at": "2026-08-30T00:04:13.417148Z",
+      "error": null,
+      "detail": {
+        "tool": "yt-dlp",
+        "browser": "chrome"
+      }
+    },
+    "transcribe": {
+      "status": "done",
+      "at": "2026-08-30T00:04:34.844516Z",
+      "error": null,
+      "detail": {
+        "method": "mlx-whisper",
+        "model": "mlx-community/whisper-medium-mlx",
+        "cues": 93
+      }
+    },
+    "segment": {
+      "status": "done",
+      "at": "2026-08-30T00:04:34.852272Z",
+      "error": null,
+      "detail": {
+        "n_segments": 13,
+        "lexicon_version": "1"
+      }
+    },
+    "extract_frames": {
+      "status": "done",
+      "at": "2026-08-30T00:04:39.211218Z",
+      "error": null,
+      "detail": {
+        "n_frames": 18,
+        "uniform": false,
+        "fps": 1.0
+      }
+    },
+    "analyze": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    },
+    "validate": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    }
+  },
+  "lesson_id": null,
+  "rubric_version_at_ingest": "0.1.0"
+}

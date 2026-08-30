@@ -1,0 +1,29 @@
+id: CENTERING_BACK_TOLERANCE_002
+category: centering
+statement: 'Back-of-card centering is judged more leniently than the front: 75/25
+  or better on the back versus 55/45 on the front for a Gem Mint 10.'
+evidence_type: objective
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_012
+  timestamps: []
+  reference: PSA published grading standards
+  locator: Gem Mint 10 centering requirement, front and back
+  quote: 55/45 or better front, 75/25 or better back
+- lesson: lesson_008
+  video_id: web_f4e13adb5cc1
+  timestamps:
+  - 01:30-01:40
+  quote: the back centering is not as important. But if it's horrible, if it's horrific,
+    it's not going to grade well for you.
+status: active
+supersedes: CENTERING_FRONT_BACK_TOLERANCE_001
+created: '2026-08-30'
+rubric_version_added: 2.0.0
+notes: Supersedes CENTERING_FRONT_BACK_TOLERANCE_001, which stated the direction correctly
+  but carried no figure and was filed `unverified` because its only source hedged
+  ('i think psa may be like 70 30' - close, but wrong). This states the documented
+  figures and cites both the standard and the video that got the direction right.

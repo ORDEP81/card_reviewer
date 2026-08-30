@@ -1,0 +1,69 @@
+{
+  "video_id": "yt_t28rOSnMcck",
+  "source": {
+    "type": "youtube",
+    "url": "https://www.youtube.com/watch?v=t28rOSnMcck",
+    "title": "How To Grade & Clean Your Sports Cards Before Submitting to PSA, BGS, or SGC #sportscards #thehobby",
+    "uploader": "Graded Card Investor",
+    "duration_s": 899.0
+  },
+  "file": {
+    "path": "source/video.mkv",
+    "sha256": "3a43c079ffcd463e25c572d533d29b525b41d4081108d6210a61f32f554c6efe",
+    "bytes": 276615714
+  },
+  "stages": {
+    "acquire": {
+      "status": "done",
+      "at": "2026-08-29T19:29:28.287477Z",
+      "error": null,
+      "detail": {
+        "tool": "yt-dlp",
+        "browser": null
+      }
+    },
+    "transcribe": {
+      "status": "done",
+      "at": "2026-08-29T19:29:31.009857Z",
+      "error": null,
+      "detail": {
+        "method": "captions",
+        "model": null,
+        "cues": 376
+      }
+    },
+    "segment": {
+      "status": "done",
+      "at": "2026-08-29T19:29:31.025672Z",
+      "error": null,
+      "detail": {
+        "n_segments": 29,
+        "lexicon_version": "1"
+      }
+    },
+    "extract_frames": {
+      "status": "done",
+      "at": "2026-08-29T19:29:37.339651Z",
+      "error": null,
+      "detail": {
+        "n_frames": 197,
+        "uniform": false,
+        "fps": 1.0
+      }
+    },
+    "analyze": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    },
+    "validate": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    }
+  },
+  "lesson_id": null,
+  "rubric_version_at_ingest": "0.1.0"
+}

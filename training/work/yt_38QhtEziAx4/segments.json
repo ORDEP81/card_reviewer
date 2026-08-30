@@ -1,0 +1,103 @@
+{
+  "lexicon_version": "1",
+  "total_cues": 99,
+  "segments": [
+    {
+      "id": "seg_002",
+      "start_s": 28.92,
+      "end_s": 58.79,
+      "score": 15.0,
+      "categories": [
+        "centering"
+      ],
+      "matched_terms": [
+        "60/40",
+        "centering"
+      ],
+      "text": "little bit. Get yourself a centering tool. I use them 60/40 on the front. You know, you need that at the bare minimum. If I see a card and I use my centering tool and it comes out 60/40, it has to be perfect everywhere else because I think with a 60/40 at the bare minimum, you are really rolling the dice. You really want to see your centering a",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_004",
+      "start_s": 111.64,
+      "end_s": 130.79,
+      "score": 10.5,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "print line",
+        "print lines"
+      ],
+      "text": "print line on the on the front. A single faint print line is a disqualification for me. I do not send that card in. I have sent cards in with print lines on",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_006",
+      "start_s": 182.68,
+      "end_s": 199.27,
+      "score": 8.5,
+      "categories": [
+        "centering",
+        "corners",
+        "edges",
+        "surface"
+      ],
+      "matched_terms": [
+        "centering",
+        "corners",
+        "edges",
+        "surface"
+      ],
+      "text": "through your checklist, centering, corners, edges, surface, repeat on the back, use your centering tool, use your",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_001",
+      "start_s": 17.28,
+      "end_s": 29.11,
+      "score": 5.0,
+      "categories": [
+        "centering",
+        "corners",
+        "edges"
+      ],
+      "matched_terms": [
+        "centering",
+        "corners",
+        "edges"
+      ],
+      "text": "It says centering, corners, edges,",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_003",
+      "start_s": 64.4,
+      "end_s": 76.75,
+      "score": 4.0,
+      "categories": [
+        "corners"
+      ],
+      "matched_terms": [
+        "corners",
+        "frayed"
+      ],
+      "text": "you, all right? Corners, any frayed",
+      "visual_cue": false
+    },
+    {
+      "id": "seg_005",
+      "start_s": 130.48,
+      "end_s": 142.67,
+      "score": 3.5,
+      "categories": [
+        "surface"
+      ],
+      "matched_terms": [
+        "print lines"
+      ],
+      "text": "eye. If you have multiple print lines",
+      "visual_cue": false
+    }
+  ]
+}

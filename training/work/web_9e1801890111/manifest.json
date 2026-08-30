@@ -1,0 +1,69 @@
+{
+  "video_id": "web_9e1801890111",
+  "source": {
+    "type": "youtube",
+    "url": "https://vimeo.com/1189890472",
+    "title": "Edges",
+    "uploader": "Eric Michael",
+    "duration_s": 74.0
+  },
+  "file": {
+    "path": "source/video.mp4",
+    "sha256": "13a067115eff5b191e48f11f3585e4f3583f6a2a65b16d614b174244b94005ee",
+    "bytes": 6632532
+  },
+  "stages": {
+    "acquire": {
+      "status": "done",
+      "at": "2026-08-30T00:00:42.134487Z",
+      "error": null,
+      "detail": {
+        "tool": "yt-dlp",
+        "browser": "chrome"
+      }
+    },
+    "transcribe": {
+      "status": "done",
+      "at": "2026-08-30T00:02:30.964940Z",
+      "error": null,
+      "detail": {
+        "method": "mlx-whisper",
+        "model": "mlx-community/whisper-medium-mlx",
+        "cues": 16
+      }
+    },
+    "segment": {
+      "status": "done",
+      "at": "2026-08-30T00:02:30.974271Z",
+      "error": null,
+      "detail": {
+        "n_segments": 2,
+        "lexicon_version": "1"
+      }
+    },
+    "extract_frames": {
+      "status": "done",
+      "at": "2026-08-30T00:02:31.752921Z",
+      "error": null,
+      "detail": {
+        "n_frames": 2,
+        "uniform": false,
+        "fps": 1.0
+      }
+    },
+    "analyze": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    },
+    "validate": {
+      "status": "pending",
+      "at": null,
+      "error": null,
+      "detail": {}
+    }
+  },
+  "lesson_id": null,
+  "rubric_version_at_ingest": "0.1.0"
+}
