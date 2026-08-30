@@ -12,6 +12,8 @@ sources:
   video_id: yt_38QhtEziAx4
   timestamps:
   - 00:26-00:52
+  reference: null
+  locator: null
   quote: I use them 60/40 on the front. You know, you need that at the bare minimum.
     If I see a card and I use my centering tool and it comes out 60/40, it has to
     be perfect everywhere else
@@ -19,9 +21,11 @@ sources:
   video_id: web_f4e13adb5cc1
   timestamps:
   - 01:00-01:10
+  reference: null
+  locator: null
   quote: if the rest of the card is good, you can get away with 60 40 centering. So
     like 60 percent, 40 percent one side to another.
-status: active
+status: superseded
 supersedes: null
 created: '2026-08-29'
 rubric_version_added: 0.2.0

@@ -4,19 +4,11 @@
      Source of truth is knowledge/rules/. Regenerate with:
        card-knowledge build-rubric -->
 
-**Version:** 0.2.0  
+**Version:** 1.0.0  
 **Rules:** 28 active rules  
 **Built:** 2026-08-29
 
 ## centering
-
-### CENTERING_60_40_FLOOR_001
-
-60/40 front centering is a practical floor; at that ratio the card must be flawless in every other category to have a chance at a 10.
-
-- evidence: `opinion`  
-- confidence: `medium`  
-- sources: lesson_003 00:26-00:52, lesson_008 01:00-01:10
 
 ### CENTERING_BORDERLESS_001
 
@@ -65,6 +57,14 @@ Two PSA-slabbed copies of the same card (2020 Panini Prizm #258 Anthony Edwards 
 - evidence: `objective`  
 - confidence: `high`  
 - sources: lesson_008 01:43-01:55
+
+### CENTERING_PSA10_STANDARD_001
+
+PSA requires 55/45 or better centering on the front and 75/25 or better on the back for a Gem Mint 10.
+
+- evidence: `objective`  
+- confidence: `high`  
+- sources: lesson_012 , lesson_001 04:16-04:28
 
 ## corners
 

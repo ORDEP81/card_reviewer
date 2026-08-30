@@ -1,0 +1,32 @@
+id: CENTERING_PSA10_STANDARD_001
+category: centering
+statement: PSA requires 55/45 or better centering on the front and 75/25 or better
+  on the back for a Gem Mint 10.
+evidence_type: objective
+confidence: high
+applies_to:
+  card_types: []
+  sets: []
+sources:
+- lesson: lesson_012
+  video_id: null
+  timestamps: []
+  reference: PSA published grading standards
+  locator: Gem Mint 10 centering requirement
+  quote: 55/45 or better front, 75/25 or better back
+- lesson: lesson_001
+  video_id: yt_s46CrXjVwCc
+  timestamps:
+  - 04:16-04:28
+  reference: null
+  locator: null
+  quote: PSA's standard is that the front of the card has to be 55/45 or better.
+status: active
+supersedes: CENTERING_60_40_FLOOR_001
+created: '2026-08-29'
+rubric_version_added: 1.0.0
+notes: 'AUTHORITATIVE. Confirmed by the project owner against PSA''s own documentation.
+  Supersedes CENTERING_60_40_FLOOR_001, which asserted 60/40 as a workable floor on
+  the strength of two instructors agreeing - corroboration among practitioners, not
+  verification. Carries two sources: the standard itself, and the one video that stated
+  the front figure correctly.'
