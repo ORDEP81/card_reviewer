@@ -48,6 +48,16 @@ def project(tmp_path):
     return p
 
 
+def reference_source(**over):
+    base = {
+        "lesson": "lesson_001",
+        "reference": "PSA Grading Standards",
+        "locator": "Card Grading Standards, Gem Mint 10",
+        "quote": "55/45 or better front centering and 75/25 or better back.",
+    }
+    return base | over
+
+
 def write_pending(p, data, name=None):
     path = p.pending_rules / f"{name or data['id']}.yaml"
     path.write_text(yaml.safe_dump(data, sort_keys=False))
@@ -226,6 +236,56 @@ def test_load_pending_pairs_paths_with_their_own_rule(project):
     assert loaded == [(path, loaded[0][1])]
     assert loaded[0][0] == path
     assert loaded[0][1].id == "SURFACE_PRINT_LINE_001"
+
+
+def test_reference_mode_source_validates(project):
+    data = rule_dict()
+    data["sources"] = [reference_source()]
+    write_pending(project, data)
+    report = validate.run(project)
+    assert report.ok
+    assert report.errors == {}
+    assert report.checked == 1
+
+
+def test_rule_mixing_video_and_reference_sources_validates(project):
+    data = rule_dict()
+    data["sources"] = [rule_dict()["sources"][0], reference_source()]
+    write_pending(project, data)
+    report = validate.run(project)
+    assert report.ok
+    assert report.errors == {}
+
+
+def test_reference_mode_source_with_missing_lesson_is_reported_not_raised(project):
+    data = rule_dict()
+    data["sources"] = [reference_source(lesson="lesson_999")]
+    write_pending(project, data)
+    report = validate.run(project)
+    assert not report.ok
+    assert any("lesson_999" in e for e in report.errors["SURFACE_PRINT_LINE_001"])
+
+
+def test_reference_mode_source_requires_nonempty_reference_and_locator(project):
+    data = rule_dict()
+    data["sources"] = [reference_source(reference="   ")]
+    write_pending(project, data)
+    report = validate.run(project)
+    assert not report.ok
+    assert any("reference" in e for e in report.errors["SURFACE_PRINT_LINE_001"])
+
+
+def test_video_mode_out_of_bounds_timestamp_still_rejected_with_mixed_sources(project):
+    """Trust boundary: mixing in a reference source must not weaken the
+    video-mode duration check."""
+    data = rule_dict()
+    video_source = rule_dict()["sources"][0]
+    video_source["timestamps"] = ["59:00-59:30"]  # video is 600s
+    data["sources"] = [video_source, reference_source()]
+    write_pending(project, data)
+    report = validate.run(project)
+    assert not report.ok
+    assert any("exceeds" in e for e in report.errors["SURFACE_PRINT_LINE_001"])
 
 
 def test_unparseable_citation_timestamp_is_rejected(project):

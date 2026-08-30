@@ -158,24 +158,34 @@ def check_rule(
         if not paths.lesson(source.lesson).exists():
             errors.append(f"cited lesson {source.lesson} does not exist")
 
-        if source.video_id not in durations:
-            errors.append(f"cited video_id {source.video_id} has no work packet")
-            continue
-
-        duration = durations[source.video_id]
-        for stamp in source.timestamps:
-            try:
-                start, end = parse_timestamp(stamp)
-            except BadTimestamp as exc:
-                errors.append(str(exc))
+        if source.video_id is not None:
+            # Video-mode source: the trust boundary against fabricated
+            # citations. Every check here must run exactly as before.
+            if source.video_id not in durations:
+                errors.append(f"cited video_id {source.video_id} has no work packet")
                 continue
-            if end > duration:
-                errors.append(
-                    f"timestamp {stamp} exceeds the {duration:.0f}s duration of "
-                    f"{source.video_id} — the citation cannot be real"
-                )
-            if start > end:
-                errors.append(f"timestamp {stamp} starts after it ends")
+
+            duration = durations[source.video_id]
+            for stamp in source.timestamps:
+                try:
+                    start, end = parse_timestamp(stamp)
+                except BadTimestamp as exc:
+                    errors.append(str(exc))
+                    continue
+                if end > duration:
+                    errors.append(
+                        f"timestamp {stamp} exceeds the {duration:.0f}s duration of "
+                        f"{source.video_id} — the citation cannot be real"
+                    )
+                if start > end:
+                    errors.append(f"timestamp {stamp} starts after it ends")
+        else:
+            # Reference-mode source: no duration to check against, but the
+            # citation must actually point somewhere.
+            if not (source.reference or "").strip():
+                errors.append("reference-mode source has a blank reference")
+            if not (source.locator or "").strip():
+                errors.append("reference-mode source has a blank locator")
 
     return errors
 

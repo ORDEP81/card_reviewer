@@ -29,6 +29,16 @@ def a_source(**over):
     return RuleSource(**(base | over))
 
 
+def a_reference_source(**over):
+    base = dict(
+        lesson="lesson_014",
+        reference="PSA Grading Standards",
+        locator="Card Grading Standards, Gem Mint 10",
+        quote="55/45 or better front centering and 75/25 or better back.",
+    )
+    return RuleSource(**(base | over))
+
+
 def a_rule(**over):
     base = dict(
         id="SURFACE_PRINT_LINE_001",
@@ -123,6 +133,47 @@ def test_stage_state_rejects_naive_datetime():
     naive_dt = datetime.datetime(2026, 8, 29, 12, 0, 0)
     with pytest.raises(ValidationError):
         StageState(status=StageStatus.DONE, at=naive_dt)
+
+
+def test_video_mode_source_still_validates():
+    source = a_source()
+    assert source.video_id == "yt_abc123"
+    assert source.timestamps == ["12:04-12:38"]
+    assert source.reference is None
+    assert source.locator is None
+
+
+def test_reference_mode_source_validates():
+    source = a_reference_source()
+    assert source.reference == "PSA Grading Standards"
+    assert source.locator == "Card Grading Standards, Gem Mint 10"
+    assert source.video_id is None
+    assert source.timestamps == []
+
+
+def test_rule_may_mix_video_and_reference_sources():
+    rule = a_rule(sources=[a_source(), a_reference_source()])
+    assert len(rule.sources) == 2
+
+
+def test_source_rejects_both_modes_at_once():
+    with pytest.raises(ValidationError):
+        a_source(reference="PSA Grading Standards", locator="p.2")
+
+
+def test_source_rejects_neither_mode():
+    with pytest.raises(ValidationError):
+        RuleSource(lesson="lesson_014", quote="unsupported claim")
+
+
+def test_source_rejects_video_id_without_timestamps():
+    with pytest.raises(ValidationError):
+        RuleSource(lesson="lesson_014", video_id="yt_abc123")
+
+
+def test_source_rejects_reference_without_locator():
+    with pytest.raises(ValidationError):
+        RuleSource(lesson="lesson_014", reference="PSA Grading Standards")
 
 
 def test_stage_state_accepts_utc_aware_datetime():

@@ -11,7 +11,7 @@ import re
 from enum import StrEnum
 from typing import Any, Literal
 
-from pydantic import AwareDatetime, BaseModel, Field, field_validator
+from pydantic import AwareDatetime, BaseModel, Field, field_validator, model_validator
 
 STAGES: tuple[str, ...] = (
     "acquire",
@@ -145,10 +145,54 @@ class AppliesTo(BaseModel):
 
 
 class RuleSource(BaseModel):
+    """A rule's citation: either a video moment, or a document/reference.
+
+    Every source still traces to a `lesson` record — that is the audit
+    trail. Beyond that, a source is EITHER a video citation (`video_id` +
+    `timestamps`, checked against the video's real duration) OR a
+    document/reference citation (`reference` + `locator`, which has no
+    duration to check against). Never both, never neither.
+    """
+
     lesson: str
-    video_id: str
-    timestamps: list[str] = Field(min_length=1)
+    video_id: str | None = None
+    timestamps: list[str] = Field(default_factory=list)
+    reference: str | None = None
+    locator: str | None = None
     quote: str = ""
+
+    @model_validator(mode="after")
+    def _exactly_one_citation_mode(self) -> RuleSource:
+        is_video = self.video_id is not None or bool(self.timestamps)
+        is_reference = self.reference is not None or self.locator is not None
+
+        if is_video and is_reference:
+            raise ValueError(
+                "a source must cite a video OR a reference, not both — got "
+                f"video_id={self.video_id!r}, timestamps={self.timestamps!r}, "
+                f"reference={self.reference!r}, locator={self.locator!r}"
+            )
+
+        if is_video:
+            if self.video_id is None or not self.timestamps:
+                raise ValueError(
+                    "video-mode source requires both video_id and a non-empty "
+                    f"timestamps list — got video_id={self.video_id!r}, "
+                    f"timestamps={self.timestamps!r}"
+                )
+        elif is_reference:
+            if self.reference is None or self.locator is None:
+                raise ValueError(
+                    "reference-mode source requires both reference and locator "
+                    f"— got reference={self.reference!r}, locator={self.locator!r}"
+                )
+        else:
+            raise ValueError(
+                "a source must cite either a video (video_id + timestamps) or "
+                "a reference (reference + locator)"
+            )
+
+        return self
 
 
 class Rule(BaseModel):
