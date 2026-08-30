@@ -298,3 +298,51 @@ def test_unparseable_citation_timestamp_is_rejected(project):
         "sometime near the end" in e
         for e in report.errors["SURFACE_PRINT_LINE_001"]
     )
+
+
+# --- fix round 2, finding 2: a corrupt file already under knowledge/rules/
+# must not be invisible to `validate run`. `load_all` used to catch the
+# exact exceptions `run`'s except clause was written to handle, making that
+# clause dead and the "active rules are unreadable" message a lie -- a
+# broken active rule file was silently skipped and `run` reported clean.
+# Chosen fix: `load_all` now reports what it skips instead of only skipping
+# it, and `run` surfaces each corrupt file keyed by its path.
+
+
+def test_load_all_reports_unparseable_files_instead_of_only_skipping(project):
+    bad_dir = project.rules / "surface"
+    bad_dir.mkdir(parents=True)
+    bad_file = bad_dir / "BROKEN_001.yaml"
+    bad_file.write_text("sources: [not, closed\n")
+
+    rules, errors = validate.load_all(project)
+
+    assert rules == []
+    assert len(errors) == 1
+    (key, message) = next(iter(errors.items()))
+    assert str(bad_file) in key
+    assert "does not parse" in message
+
+
+def test_run_reports_corrupt_active_rule_file_keyed_by_its_path(project):
+    bad_dir = project.rules / "surface"
+    bad_dir.mkdir(parents=True)
+    bad_file = bad_dir / "BROKEN_001.yaml"
+    bad_file.write_text("sources: [not, closed\n")
+
+    report = validate.run(project)
+
+    assert report.ok is False
+    assert any(str(bad_file) in key for key in report.errors)
+
+
+def test_run_still_checks_pending_rules_despite_a_corrupt_active_file(project):
+    bad_dir = project.rules / "surface"
+    bad_dir.mkdir(parents=True)
+    (bad_dir / "BROKEN_001.yaml").write_text("sources: [not, closed\n")
+    write_pending(project, rule_dict())
+
+    report = validate.run(project)
+
+    assert report.ok is False  # corrupt active file alone keeps this false
+    assert report.checked == 1  # pending validation still ran

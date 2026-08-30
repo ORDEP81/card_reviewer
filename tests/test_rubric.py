@@ -175,3 +175,45 @@ def test_for_card_explicit_empty_card_types_is_a_real_constraint(scoped_project)
 def test_for_card_no_arguments_returns_everything(scoped_project):
     r = rubric.load_active_rubric(scoped_project.root)
     assert len(r.for_card()) == 3
+
+
+# --- load_active_rubric's failure mode (fix round 2, finding 1) ---
+#
+# A single corrupt file under knowledge/rules/ used to raise a raw
+# yaml.parser.ParserError (or pydantic ValidationError) straight out of the
+# public contract subsystem A imports. `load_active_rubric` must instead
+# raise one documented exception type, chained from the original, naming
+# the offending file.
+
+
+def test_load_active_rubric_raises_rubric_error_on_corrupt_file(tmp_path):
+    p = ProjectPaths(tmp_path)
+    bad_dir = p.rules / "surface"
+    bad_dir.mkdir(parents=True)
+    bad_file = bad_dir / "BROKEN_001.yaml"
+    bad_file.write_text("sources: [not, closed\n")  # unterminated flow sequence
+    version.write(p, "0.1.0")
+
+    with pytest.raises(rubric.RubricError) as excinfo:
+        rubric.load_active_rubric(tmp_path)
+
+    assert str(bad_file) in str(excinfo.value)
+    assert excinfo.value.__cause__ is not None
+
+
+def test_load_active_rubric_raises_rubric_error_on_schema_violation(tmp_path):
+    """Not just unparseable YAML -- a file that parses but fails Rule's
+    schema (e.g. a missing required field) must also surface as
+    RubricError, not a raw pydantic ValidationError."""
+    p = ProjectPaths(tmp_path)
+    bad_dir = p.rules / "surface"
+    bad_dir.mkdir(parents=True)
+    bad_file = bad_dir / "INVALID_001.yaml"
+    bad_file.write_text(yaml.safe_dump({"id": "INVALID_001"}))
+    version.write(p, "0.1.0")
+
+    with pytest.raises(rubric.RubricError) as excinfo:
+        rubric.load_active_rubric(tmp_path)
+
+    assert str(bad_file) in str(excinfo.value)
+    assert excinfo.value.__cause__ is not None

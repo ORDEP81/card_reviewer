@@ -53,7 +53,17 @@ def write_rule(path: Path, rule: Rule) -> None:
                 f"different claim — choose a new id."
             )
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(yaml.safe_dump(rule.model_dump(mode="json"), sort_keys=False))
+    data = rule.model_dump(mode="json")
+    # `Rule`'s own None fields (supersedes, rubric_version_added, notes) are
+    # meaningful and must keep appearing, so the dump above is not made
+    # exclude_none wholesale. But `RuleSource` is a two-mode citation: a
+    # video-mode source always carries reference=None/locator=None, and a
+    # reference-mode source always carries video_id=None, purely because
+    # the *other* mode's fields exist on the same model. Re-dumping just the
+    # sources with exclude_none drops that mode's unused fields instead of
+    # writing them as noise into an append-only audit trail.
+    data["sources"] = [source.model_dump(mode="json", exclude_none=True) for source in rule.sources]
+    path.write_text(yaml.safe_dump(data, sort_keys=False))
 
 
 def _drop_pending(paths: ProjectPaths, rule: Rule, pending_path: Path | None = None) -> None:

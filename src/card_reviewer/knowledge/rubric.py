@@ -16,6 +16,19 @@ from .models import Rule
 from .paths import ProjectPaths
 
 
+class RubricError(Exception):
+    """`load_active_rubric`'s one documented failure mode.
+
+    Raised when a rule file under `knowledge/rules/` cannot be loaded — it
+    fails to parse as YAML, or parses but fails `Rule`'s schema. The message
+    names the offending file, and the exception is always chained
+    (`__cause__`) from the underlying pyyaml/pydantic error, so a caller who
+    wants the low-level detail still has it. Subsystem A, and anyone else
+    calling `load_active_rubric` as the public contract, should catch this
+    one type rather than whatever pyyaml or pydantic happens to raise.
+    """
+
+
 @dataclass
 class Rubric:
     version: str
@@ -60,9 +73,19 @@ class Rubric:
 
 
 def load_active_rubric(root: Path | str | None = None) -> Rubric:
-    """The contract subsystem A calls. `version` is stamped onto every review."""
+    """The contract subsystem A calls. `version` is stamped onto every review.
+
+    Raises `RubricError` if any rule file under `knowledge/rules/` fails to
+    load — a corrupt or schema-invalid file never reaches the caller as a
+    raw yaml/pydantic exception. The `RubricError` names the offending file
+    and is chained from the original error via `__cause__`.
+    """
     paths = ProjectPaths(root or Path(__file__).resolve().parents[3])
-    return Rubric(version=version.read(paths), rules=validate.load_active(paths))
+    try:
+        rules = validate.load_active(paths)
+    except RuntimeError as exc:
+        raise RubricError(f"failed to load the active rubric: {exc}") from exc
+    return Rubric(version=version.read(paths), rules=rules)
 
 
 def render(r: Rubric) -> str:
