@@ -95,12 +95,26 @@ to, not rewritten.
 
 The review also claimed the `pending_rules/` → `validate` → `review` gate had been
 bypassed, with rules hand-written directly into `knowledge/rules/` as `status: active`.
-That is false. Every rule carries a `rubric_version_added` stamp, which only
-`promote.accept` sets, and the superseding rules carry `supersedes` pointers, which only
-`promote.supersede` sets; `RUBRIC_VERSION` was bumped by `session_bump_level`. The
-reviewer inferred bypass from `pending_rules/` being empty in git history, but it is empty
-because promotion moves files out before any commit. The machine gate held. The human gate
-did not.
+That is false — but the argument first offered for rejecting it was itself circular, and
+is withdrawn here.
+
+**The withdrawn argument.** It claimed the gate held because `rubric_version_added` is
+only set by `promote.accept` and `supersedes` only by `promote.supersede`. That reasons
+from which code path *writes* a field, not from evidence about how a given file came to
+exist. Both are plain optional fields on the `Rule` model, and `validate.check_rule` runs
+only over `pending_rules/` — never over files already in `knowledge/rules/`. Nothing makes
+them tamper-evident; anyone hand-writing YAML could type them. Against the specific
+scenario alleged, the argument assumed its conclusion.
+
+**The evidence that does hold.** `promote.write_rule` emits a narrow canonical
+serialization — `model_dump(mode="json")`, sources re-dumped with `exclude_none`, then
+`yaml.safe_dump(..., sort_keys=False)`. Reproducing that over every rule file on disk
+gives **48 of 49 byte-identical** to what `write_rule` would emit; the one exception
+predates the `exclude_none` behaviour. Hand-edited YAML would not reproduce that
+fingerprint. And `promote._drop_pending` unlinks the pending file, which fully explains
+`pending_rules/` being empty in git history.
+
+The machine gate held. The human gate did not.
 
 ## CORRECTIONS MADE
 
