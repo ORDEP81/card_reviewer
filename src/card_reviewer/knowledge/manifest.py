@@ -21,6 +21,10 @@ class StageNotReady(Exception):
     """A prerequisite stage has not completed."""
 
 
+class UnknownStage(Exception):
+    """`require_ready` was asked about a stage name not in STAGES."""
+
+
 def _now() -> datetime.datetime:
     return datetime.datetime.now(datetime.UTC)
 
@@ -66,6 +70,10 @@ def fail(paths: ProjectPaths, m: Manifest, stage: str, error: str) -> Manifest:
 
 def require_ready(m: Manifest, stage: str) -> None:
     """Raise StageNotReady if any earlier stage has not completed."""
+    if stage not in STAGES:
+        raise UnknownStage(
+            f"unknown stage {stage!r}; valid stages are {', '.join(STAGES)}"
+        )
     for earlier in STAGES[: STAGES.index(stage)]:
         if not is_done(m, earlier):
             raise StageNotReady(

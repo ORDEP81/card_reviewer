@@ -87,3 +87,28 @@ def test_contraction_negation_is_flagged_contradiction():
     assert len(flags) == 1
     assert flags[0].kind == "contradiction"
     assert flags[0].other_id == "SURFACE_001"
+
+
+# --- A12: NEGATIONS had "wont"/"doesnt" but not the other common
+# contractions -- normalize() strips apostrophes, so "don't"/"isn't"/etc.
+# are otherwise invisible to is_negated.
+
+
+def test_is_negated_detects_further_common_contractions():
+    assert dedup.is_negated("This card don't gem.")
+    assert dedup.is_negated("This isn't a defect.")
+    assert dedup.is_negated("This wasn't graded correctly.")
+    assert dedup.is_negated("These aren't gem quality.")
+    assert dedup.is_negated("This can't be a 10.")
+
+
+# --- B5: the self-id skip clause in flags_for is otherwise unguarded --
+# removing `or other.id == rule.id` would let a rule be flagged against
+# itself whenever the exact same Rule object (or an identical statement
+# under the same id) shows up in the active list.
+
+
+def test_flags_for_never_flags_a_rule_against_itself():
+    rule = make("SURFACE_001", "Vertical print lines prevent a PSA 10.")
+    flags = dedup.flags_for(rule, [rule])
+    assert flags == []

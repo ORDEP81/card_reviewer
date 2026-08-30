@@ -173,6 +173,117 @@ def test_from_file_rerun_preserves_downstream_stages(paths, tmp_path):
     assert reloaded.stages["extract_frames"].status is StageStatus.DONE
 
 
+# --- B2: from_url's success path end to end -- every existing test only
+# exercises the failure branches.
+
+
+def test_from_url_success_populates_file_info_and_marks_stage_done(paths):
+    url = "https://youtu.be/abcdefghijk"
+    video_id = acquire.derive_video_id(url=url)
+    dest = paths.source_dir(video_id)
+
+    def runner(cmd, **kwargs):
+        if "--dump-json" in cmd:
+            return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps(METADATA), stderr="")
+        dest.mkdir(parents=True, exist_ok=True)
+        (dest / "video.mp4").write_bytes(b"real video bytes")
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    m = acquire.from_url(paths, url, rubric_version="0.1.0", runner=runner, browser="chrome")
+
+    assert m.source.title == "Grading 101"
+    assert m.source.uploader == "Someone"
+    assert m.source.duration_s == 3120.0
+    assert m.file is not None
+    assert m.file.path.endswith("video.mp4")
+    assert m.file.bytes == len(b"real video bytes")
+    assert m.file.sha256
+    assert m.stages["acquire"].status is StageStatus.DONE
+    assert m.stages["acquire"].detail["tool"] == "yt-dlp"
+    assert m.stages["acquire"].detail["browser"] == "chrome"
+    assert paths.manifest(video_id).exists()
+
+
+# --- A4: acquire's `sorted(dest.glob("video.*"))` could adopt a `.part`/
+# `.ytdl`/`.tmp` leftover from an interrupted download.
+
+
+def test_from_url_ignores_stale_partial_artifact_from_an_earlier_attempt(paths):
+    """`video.mkv.part` sorts *before* `video.mp4` lexically, so a naive
+    `sorted(glob)[0]` would adopt the stale partial instead of the real
+    file this run actually produced."""
+    url = "https://youtu.be/abcdefghijk"
+    video_id = acquire.derive_video_id(url=url)
+    dest = paths.source_dir(video_id)
+    dest.mkdir(parents=True, exist_ok=True)
+    (dest / "video.mkv.part").write_bytes(b"leftover from an earlier interrupted attempt")
+
+    def runner(cmd, **kwargs):
+        if "--dump-json" in cmd:
+            return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps(METADATA), stderr="")
+        (dest / "video.mp4").write_bytes(b"real video bytes")
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    m = acquire.from_url(paths, url, rubric_version="0.1.0", runner=runner)
+
+    assert m.file.path.endswith("video.mp4")
+    assert "part" not in m.file.path
+
+
+def test_from_url_treats_only_a_partial_artifact_as_a_failed_download(paths):
+    url = "https://youtu.be/abcdefghijk"
+    video_id = acquire.derive_video_id(url=url)
+    dest = paths.source_dir(video_id)
+
+    def runner(cmd, **kwargs):
+        if "--dump-json" in cmd:
+            return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps(METADATA), stderr="")
+        dest.mkdir(parents=True, exist_ok=True)
+        (dest / "video.mp4.part").write_bytes(b"interrupted, nothing finished")
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    with pytest.raises(acquire.AcquisitionFailed):
+        acquire.from_url(paths, url, rubric_version="0.1.0", runner=runner)
+
+
+# --- A2: a failed ffprobe used to silently become duration_s=0.0 with no
+# trace of why, which then made `validate`'s duration check reject every
+# citation for the video with a message blaming the citation, not the probe.
+
+
+def test_probe_duration_failure_is_logged_and_recorded(paths, tmp_path, capsys):
+    src = tmp_path / "lesson.mp4"
+    src.write_bytes(b"pretend video bytes")
+    video_id = acquire.derive_video_id(file=src)
+    dest = paths.source_dir(video_id) / "video.mp4"
+
+    def failing_runner(cmd, **kwargs):
+        return subprocess.CompletedProcess(
+            cmd, 1, stdout="", stderr="ffprobe: invalid data found when processing input"
+        )
+
+    m = acquire.from_file(paths, src, rubric_version="0.1.0", runner=failing_runner)
+
+    assert m.source.duration_s == 0.0
+    assert m.stages["acquire"].detail.get("duration_probe_failed") is True
+
+    captured = capsys.readouterr()
+    output = captured.err + captured.out
+    assert str(dest) in output
+    assert "invalid data found" in output
+
+
+def test_probe_duration_success_is_not_flagged(paths, tmp_path):
+    src = tmp_path / "lesson.mp4"
+    src.write_bytes(b"pretend video bytes")
+    runner = recording_runner([], stdout="42.5")
+
+    m = acquire.from_file(paths, src, rubric_version="0.1.0", runner=runner)
+
+    assert m.source.duration_s == 42.5
+    assert "duration_probe_failed" not in m.stages["acquire"].detail
+
+
 def test_from_url_failed_reacquire_does_not_corrupt_a_completed_packet(paths):
     """Regression: a failed re-acquire (e.g. expired Skool cookies) must not
     overwrite a completed packet's real `source` with the failure-path

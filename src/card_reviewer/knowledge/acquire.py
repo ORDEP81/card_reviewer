@@ -12,6 +12,7 @@ import json
 import re
 import shutil
 import subprocess
+import sys
 import urllib.parse
 from collections.abc import Callable
 from pathlib import Path
@@ -40,6 +41,26 @@ class AcquisitionFailed(Exception):
 # path-traversal-shaped `v=` parameter) and must not be used to build a
 # filesystem path — fall back to hashing the whole URL instead.
 _SAFE_YT_ID = re.compile(r"[A-Za-z0-9_-]{1,32}")
+
+# Suffixes yt-dlp (or a crashed prior attempt) leaves on an in-progress or
+# unmerged download. `sorted(dest.glob("video.*"))[0]` must never adopt one
+# of these as if it were the finished media file — acquire.py, transcribe.py,
+# and frames.py all locate media the same way and all share this hazard.
+PARTIAL_SUFFIXES = (".part", ".ytdl", ".tmp")
+
+
+def select_media_file(dest_dir: Path) -> Path | None:
+    """The finished media file in `dest_dir`, or None if there isn't one.
+
+    Ignores partial/temporary download artifacts (see `PARTIAL_SUFFIXES`) so
+    a leftover from an interrupted download is never mistaken for the real
+    file — whether because it sorts before the real file lexically, or
+    because it is the only file present.
+    """
+    candidates = sorted(
+        p for p in dest_dir.glob("video.*") if p.suffix not in PARTIAL_SUFFIXES
+    )
+    return candidates[0] if candidates else None
 
 
 def _sha256_file(path: Path) -> str:
@@ -72,7 +93,15 @@ def derive_video_id(url: str | None = None, file: Path | None = None) -> str:
     return f"{prefix}_{hashlib.sha256(url.encode()).hexdigest()[:12]}"
 
 
-def _probe_duration(path: Path, runner: Runner) -> float:
+def _probe_duration(path: Path, runner: Runner) -> tuple[float, bool]:
+    """Returns (duration_s, probe_failed).
+
+    A failed probe still returns 0.0 (fail-safe: `SourceInfo.duration_s`
+    cannot be negative or missing), but `probe_failed=True` lets the caller
+    surface the real problem instead of a silent, misleading zero -- one
+    that `validate` would otherwise blame on the citation rather than the
+    probe.
+    """
     proc = runner(
         [
             "ffprobe",
@@ -85,10 +114,17 @@ def _probe_duration(path: Path, runner: Runner) -> float:
         text=True,
         check=False,
     )
-    try:
-        return float((proc.stdout or "0").strip())
-    except ValueError:
-        return 0.0
+    if proc.returncode == 0:
+        try:
+            return float((proc.stdout or "0").strip()), False
+        except ValueError:
+            pass
+    stderr = (proc.stderr or "").strip() or "no output from ffprobe"
+    print(
+        f"warning: ffprobe could not determine the duration of {path}: {stderr}",
+        file=sys.stderr,
+    )
+    return 0.0, True
 
 
 def _cookie_args(browser: str | None) -> list[str]:
@@ -187,13 +223,13 @@ def from_url(
         check=False,
     )
 
-    downloaded = sorted(dest.glob("video.*"))
-    if dl.returncode != 0 or not downloaded:
+    downloaded = select_media_file(dest)
+    if dl.returncode != 0 or downloaded is None:
         error = (dl.stderr or "yt-dlp produced no file").strip()
         mf.fail(paths, m, "acquire", error)
         raise AcquisitionFailed(f"download failed for {url}: {error}")
 
-    path = downloaded[0]
+    path = downloaded
     m.file = FileInfo(
         path=str(path.relative_to(paths.packet(video_id))),
         sha256=_sha256_file(path),
@@ -219,12 +255,13 @@ def from_file(
     if not dest.exists():
         shutil.copy2(src, dest)
 
+    duration, probe_failed = _probe_duration(dest, runner)
     source = SourceInfo(
         type="local",
         url=None,
         title=src.stem,
         uploader=None,
-        duration_s=_probe_duration(dest, runner),
+        duration_s=duration,
     )
     m = _open_manifest(paths, video_id, source, rubric_version)
     m.file = FileInfo(
@@ -233,4 +270,7 @@ def from_file(
         bytes=dest.stat().st_size,
     )
     mf.save(paths, m)
-    return mf.finish(paths, m, "acquire", tool="local-copy", original=str(src))
+    detail: dict[str, object] = {"tool": "local-copy", "original": str(src)}
+    if probe_failed:
+        detail["duration_probe_failed"] = True
+    return mf.finish(paths, m, "acquire", **detail)

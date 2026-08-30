@@ -45,3 +45,28 @@ def test_bump_rejects_unknown_level():
 def test_bump_rejects_malformed_version():
     with pytest.raises(ValueError):
         version.bump("nope", "patch")
+
+
+# --- A8: write() didn't strip before validating. Python's `$` in SEMVER_RE
+# matches just before a trailing "\n", so "1.2.3\n" passed the regex and was
+# then written with a doubled newline.
+
+
+def test_write_strips_trailing_whitespace_before_validating_and_writing(paths):
+    version.write(paths, "1.2.3\n")
+    assert paths.version_file.read_text() == "1.2.3\n"
+    assert version.read(paths) == "1.2.3"
+
+
+def test_write_rejects_value_that_is_only_whitespace(paths):
+    with pytest.raises(ValueError):
+        version.write(paths, "   ")
+
+
+# --- B7: a zero-byte version file, distinct from a whitespace-only one,
+# must also fall back to INITIAL.
+
+
+def test_read_on_zero_byte_file_returns_initial(paths):
+    paths.version_file.write_bytes(b"")
+    assert version.read(paths) == "0.1.0"

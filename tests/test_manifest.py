@@ -66,3 +66,40 @@ def test_failed_prerequisite_also_blocks(paths, packet):
     m = mf.fail(paths, packet, "acquire", "boom")
     with pytest.raises(mf.StageNotReady):
         mf.require_ready(m, "transcribe")
+
+
+# --- A7: an unknown stage name used to fall straight into
+# `STAGES.index(stage)` and raise a bare ValueError with no context.
+
+
+def test_require_ready_raises_clear_error_for_unknown_stage(packet):
+    with pytest.raises(mf.UnknownStage) as excinfo:
+        mf.require_ready(packet, "bogus_stage")
+    assert "bogus_stage" in str(excinfo.value)
+
+
+def test_require_ready_unknown_stage_error_lists_valid_stages(packet):
+    with pytest.raises(mf.UnknownStage) as excinfo:
+        mf.require_ready(packet, "bogus_stage")
+    for stage in ("acquire", "transcribe", "segment", "extract_frames", "analyze", "validate"):
+        assert stage in str(excinfo.value)
+
+
+# --- B6: `_default_stages` is a `default_factory`, so this should already
+# hold -- guard it explicitly so a future refactor that swaps in a shared
+# mutable default can't silently reintroduce cross-instance sharing.
+
+
+def test_manifest_stages_dict_is_not_shared_between_instances():
+    m1 = Manifest(
+        video_id="yt_a",
+        source=SourceInfo(type="youtube", url="u", title="t", duration_s=1.0),
+        rubric_version_at_ingest="0.1.0",
+    )
+    m2 = Manifest(
+        video_id="yt_b",
+        source=SourceInfo(type="youtube", url="u", title="t", duration_s=1.0),
+        rubric_version_at_ingest="0.1.0",
+    )
+    m1.stages["acquire"].status = StageStatus.DONE
+    assert m2.stages["acquire"].status is StageStatus.PENDING

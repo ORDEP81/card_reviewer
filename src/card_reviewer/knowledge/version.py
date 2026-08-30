@@ -23,6 +23,7 @@ def read(paths: ProjectPaths) -> str:
 
 
 def write(paths: ProjectPaths, value: str) -> None:
+    value = value.strip()
     if not SEMVER_RE.match(value):
         raise ValueError(f"not a semver string: {value!r}")
     paths.version_file.parent.mkdir(parents=True, exist_ok=True)

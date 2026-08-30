@@ -134,8 +134,14 @@ def render(r: Rubric) -> str:
     return "\n".join(lines) + "\n"
 
 
-def build(paths: ProjectPaths) -> Path:
+def build(paths: ProjectPaths) -> Rubric:
+    """Render ACTIVE_RUBRIC.md and return the `Rubric` that was rendered.
+
+    Returning the `Rubric` (rather than just the path written) lets a caller
+    like `build_rubric_cmd` report version/rule-count without a second,
+    independent parse of every rule file via `load_active_rubric`.
+    """
     r = Rubric(version=version.read(paths), rules=validate.load_active(paths))
     paths.rubric_file.parent.mkdir(parents=True, exist_ok=True)
     paths.rubric_file.write_text(render(r))
-    return paths.rubric_file
+    return r
