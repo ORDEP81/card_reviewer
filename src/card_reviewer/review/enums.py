@@ -8,10 +8,25 @@ constantly, and string comparison would silently do the wrong thing.
 from __future__ import annotations
 
 from enum import IntEnum, StrEnum
+from typing import Any
+
+from pydantic import GetCoreSchemaHandler
+from pydantic_core import core_schema
 
 
 class _OrderedScale(IntEnum):
-    """An ordered scale that also parses from, and renders as, its label."""
+    """An ordered scale with ONE persisted representation: its label.
+
+    IntEnum gives us `>=` against a declared threshold, which the policies
+    rely on constantly. But Pydantic would then dump the member as an int,
+    so a cached stage output would carry `2` while every hand-written
+    fixture and reason code carries `"moderate"` — two representations of
+    one value, which is how a producer and its consumer drift apart.
+
+    The core schema below fixes the representation at the label in both
+    directions, so `model_dump(mode="json")` — exactly what StageRunner
+    persists — round-trips through SQLite unchanged.
+    """
 
     @classmethod
     def _missing_(cls, value: object) -> _OrderedScale | None:
@@ -27,6 +42,20 @@ class _OrderedScale(IntEnum):
 
     def __str__(self) -> str:
         return self.label
+
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source: Any, handler: GetCoreSchemaHandler
+    ) -> core_schema.CoreSchema:
+        def _validate(value: Any) -> _OrderedScale:
+            return value if isinstance(value, cls) else cls(value)
+
+        return core_schema.no_info_plain_validator_function(
+            _validate,
+            serialization=core_schema.plain_serializer_function_ser_schema(
+                lambda member: member.label, return_schema=core_schema.str_schema()
+            ),
+        )
 
 
 class Scale(_OrderedScale):

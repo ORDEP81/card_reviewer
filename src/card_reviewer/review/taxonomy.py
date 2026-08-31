@@ -73,6 +73,14 @@ DEFECT_TYPES: dict[str, DefectTypeSpec] = dict(
         _spec("surface", "dimples", _I),
         _spec("surface", "stains", _I),
         _spec("surface", "gloss_break", _I),
+        # SURFACE_TECHNICAL_DEFECT_001 (active, objective) names a minor
+        # crease and paper loss as grade-limiting, and the spec cites it to
+        # justify requiring the back. Interpretive in v1: no validated
+        # deterministic measurement separates a crease from a scan line or a
+        # fold shadow, so CV may raise the candidate and only the vision
+        # layer may confirm it.
+        _spec("surface", "crease", _I),
+        _spec("surface", "paper_loss", _I),
     ]
 )
 

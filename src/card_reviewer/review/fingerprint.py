@@ -34,7 +34,11 @@ STAGE_SIGNATURE_INPUTS: dict[str, tuple[str, ...]] = {
     "role_features": ("role_features_version", "config"),
     "role_context": ("resolver_version", "vocabulary_version"),
     "evidence_assembly": ("assembly_version",),
-    "heuristic": ("scorer_version", "authority_policy_version", "weights"),
+    # Taxonomy, not authority: the heuristic asks `promotion_of` whether a
+    # defect type may reach OBSERVED. Authority is read by relevance and
+    # scoring, which run later — declaring it here would invalidate stored
+    # heuristic results on a policy bump this stage never reads.
+    "heuristic": ("scorer_version", "taxonomy_version", "weights"),
     "coverage_provisional": ("coverage_policy_version", "taxonomy_version"),
     # Mode is deliberately absent here: it is data the stage consumes, not
     # part of its implementation identity, so it belongs in the FINGERPRINT.
@@ -42,7 +46,18 @@ STAGE_SIGNATURE_INPUTS: dict[str, tuple[str, ...]] = {
     "manifest": ("manifest_builder_version",),
     "vision": ("provider", "model", "prompt_version", "inference_params"),
     "coverage": ("coverage_policy_version", "taxonomy_version"),
-    "combine": ("combination_policy_version", "scoring_policy_version"),
+    # Combine runs relevance, fusion and scoring inside itself, so every one
+    # of those policies can change its output for identical inputs. Taxonomy
+    # is included because relevance decides psa10_relevant from CATEGORIES
+    # and fusion correlates on declared defect types.
+    "combine": (
+        "combination_policy_version",
+        "scoring_policy_version",
+        "relevance_policy_version",
+        "authority_policy_version",
+        "fusion_version",
+        "taxonomy_version",
+    ),
 }
 
 # Which data each stage consumes. Distinct from the signature: this is the
@@ -87,7 +102,24 @@ STAGE_FINGERPRINT_INPUTS: dict[str, tuple[str, ...]] = {
         "vision_category_assessability",
         "applicable_rubric_rules",
     ),
-    "combine": ("heuristic_output", "vision_output", "coverage_output"),
+    # Everything `combine` reads. The three stage outputs are the obvious
+    # part; the rest arrive as separate arguments and are just as capable of
+    # changing the verdict, so they belong in the cache key too:
+    #   - rule content drives relevance and therefore authority
+    #   - detectability drives I1's adequacy prong
+    #   - card_context_known and required_face_missing drive review_confidence
+    #   - manifest_index resolves provider citations back to provenance, so a
+    #     different index can change whether a finding satisfies I3
+    "combine": (
+        "heuristic_output",
+        "vision_output",
+        "coverage_output",
+        "applicable_rubric_rule_content",
+        "detectability",
+        "card_context_known",
+        "required_face_missing",
+        "manifest_index",
+    ),
 }
 
 

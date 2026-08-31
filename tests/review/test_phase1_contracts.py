@@ -9,6 +9,8 @@ a persisted one.
 
 import json
 
+from pydantic import BaseModel
+
 from card_reviewer.review.canonical import canonicalize
 from card_reviewer.review.enums import FindingState, Scale
 from card_reviewer.review.findings import Finding, FindingProducer, enforce_i3
@@ -45,13 +47,43 @@ def test_a_demoted_finding_keeps_its_reason_through_serialization():
     assert "I3" in revived.demotion_reason
 
 
-def test_scale_survives_json_as_a_label_the_consumer_can_parse():
-    """Scale is an IntEnum, so naive JSON gives an int. Cached outputs store
-    labels, so the round trip a consumer actually performs must be exact."""
-    stored = {"detectability": Scale.MODERATE.label}
-    revived = Scale(json.loads(json.dumps(stored))["detectability"])
-    assert revived is Scale.MODERATE
-    assert revived >= Scale.MODERATE
+class _StageOutput(BaseModel):
+    """Stands in for any cached stage output carrying a Scale."""
+
+    detectability: Scale
+    suitability: dict[str, Scale] = {}
+
+
+def _as_stage_runner_would(model: BaseModel) -> dict:
+    """Exactly the serialization path StageRunner uses: model_dump(mode=json)
+    then json.dumps into the stage_result row."""
+    return json.loads(json.dumps(model.model_dump(mode="json")))
+
+
+def test_a_scale_field_persists_as_its_label_not_an_integer():
+    """Scale is an IntEnum, so the default dump would be an int. Cached
+    outputs must carry one readable representation, not two."""
+    stored = _as_stage_runner_would(
+        _StageOutput(detectability=Scale.MODERATE,
+                     suitability={"surface": Scale.LOW})
+    )
+    assert stored["detectability"] == "moderate"
+    assert stored["suitability"]["surface"] == "low"
+
+
+def test_a_scale_field_revives_from_its_persisted_label_with_order_intact():
+    original = _StageOutput(detectability=Scale.MODERATE,
+                            suitability={"surface": Scale.LOW})
+    revived = _StageOutput.model_validate(_as_stage_runner_would(original))
+    assert revived == original
+    assert revived.detectability is Scale.MODERATE
+    assert revived.detectability >= Scale.MODERATE
+    assert revived.suitability["surface"] < revived.detectability
+
+
+def test_a_persisted_scale_canonicalizes_without_an_unregistered_float():
+    """The cache boundary and the fingerprint boundary must agree."""
+    assert canonicalize(_as_stage_runner_would(_StageOutput(detectability=Scale.HIGH)))
 
 
 def test_a_finding_fingerprints_identically_before_and_after_a_round_trip():

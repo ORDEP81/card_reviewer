@@ -9489,6 +9489,24 @@ class ReviewPipeline:
 
 An image whose `preflight` reports unusable contributes nothing to assembly and the candidate continues on its remaining images; `to_image_evidence` skips any `ImageStageOutputs` without geometry.
 
+**`_persist` stamps `effective_versions(...)`, never `VERSIONS`.** `VERSIONS` is
+a static declaration whose `vision` entry is the placeholder
+`"provider-supplied"`, which names nothing that ran. A review carries the
+versions that actually executed: either the real provider identity, or an
+explicit `"not_run"`.
+
+```python
+        review = CardReview(
+            ...,
+            versions=effective_versions(
+                vision_signature=provider.signature() if vision_id else None),
+        )
+```
+
+`effective_versions` and its unit tests were built in Task 1; this half of the
+contract cannot exist until the provider does (Task 33), so it is verified in
+Task 39.
+
 **Provider provisioning (item 9).** `service.review_card(candidate_input, mode, provider=None)` builds the provider when one is not supplied: `AnthropicVisionProvider(model=settings.model, store=store, api_key=settings.api_key)` when `ANTHROPIC_API_KEY` is present, else `None`. The CLI passes the same. When routing wants a call and no provider exists, the run records the `VISION_UNAVAILABLE` limitation above rather than behaving as `OFF` — the card is reported as not fully assessed and cannot reach `PASS`, which is the recall-correct outcome. `--require-provider` turns that into a hard `MissingProviderError` for batch runs where a silent degradation would be worse.
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -9850,6 +9868,26 @@ def test_two_manual_copies_with_one_title_do_not_share_a_candidate(tmp_path):
     kw = dict(source="manual", title="same title", image_paths=[img])
     assert (adapter.resolve(CandidateInput(**kw)).candidate_id
             != adapter.resolve(CandidateInput(**kw)).candidate_id)
+
+
+def test_every_review_is_stamped_with_the_versions_that_actually_ran(
+        rig_factory, monkeypatch):
+    """A DEEP review must carry the provider identity that produced the
+    judgment, an OFF review must say vision did not run, and the static
+    placeholder must never reach a stored review — it names nothing."""
+    from card_reviewer.review.versions import VISION_PLACEHOLDER
+
+    pipeline, resolved, provider = rig_factory(provider=_fake_provider(
+        model="m1", prompt="2.0.0"))
+    deep = pipeline.review(resolved, Mode.DEEP, provider)
+    assert "m1" in deep.versions["vision"]
+    assert "2.0.0" in deep.versions["vision"]
+
+    off = pipeline.review(resolved, Mode.OFF)
+    assert off.versions["vision"] == "not_run"
+
+    for review in (deep, off):
+        assert VISION_PLACEHOLDER not in review.versions.values()
 
 
 def test_dod18_no_test_in_the_suite_calls_the_anthropic_api():

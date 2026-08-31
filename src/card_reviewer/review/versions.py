@@ -56,3 +56,54 @@ SUPPORTING_VERSIONS: dict[str, str] = {
     "fusion": FUSION_VERSION,
     "canonicalization": CANON_SCHEME_VERSION,
 }
+
+
+#: What `VERSIONS["vision"]` holds statically. It is not a version — the
+#: vision stage's identity is supplied by the provider at run time — so it
+#: must never reach a stamped review.
+VISION_PLACEHOLDER = "provider-supplied"
+
+#: Recorded when routing decided not to call, or no provider was available.
+#: Explicit, because "vision did not run" and "vision ran with some unknown
+#: model" are different facts and calibration has to tell them apart.
+VISION_NOT_RUN = "not_run"
+
+#: The four values that identify a vision run (spec §4).
+VISION_SIGNATURE_KEYS = ("provider", "model", "prompt_version", "inference_params")
+
+
+def format_vision_version(signature: dict[str, object]) -> str:
+    """Render a provider signature as the version string stamped on a review."""
+    missing = [k for k in VISION_SIGNATURE_KEYS if k not in signature]
+    if missing:
+        raise KeyError(
+            f"vision signature is missing {missing} — a run stamped without its "
+            "provider, model, prompt version and inference parameters cannot be "
+            "compared against the PSA outcome it predicted"
+        )
+    params = signature["inference_params"] or {}
+    rendered = ",".join(f"{k}={v}" for k, v in sorted(dict(params).items()))
+    return (
+        f"{signature['provider']}/{signature['model']}"
+        f"@{signature['prompt_version']}[{rendered}]"
+    )
+
+
+def effective_versions(
+    *, vision_signature: dict[str, object] | None = None
+) -> dict[str, str]:
+    """The versions that ACTUALLY ran, for stamping onto a CardReview.
+
+    `VERSIONS` is a static declaration and cannot describe the vision stage,
+    whose identity comes from the provider at run time. Writing it verbatim
+    would stamp every review with a placeholder that names nothing — so the
+    review carries this map instead, with vision resolved to either the real
+    provider identity or an explicit "did not run".
+    """
+    stamped = dict(VERSIONS)
+    stamped["vision"] = (
+        VISION_NOT_RUN
+        if vision_signature is None
+        else format_vision_version(vision_signature)
+    )
+    return stamped
