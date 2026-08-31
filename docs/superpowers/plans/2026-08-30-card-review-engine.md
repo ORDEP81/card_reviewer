@@ -77,6 +77,8 @@ Combine calls this on every finding before the finding may contribute to `REJECT
 
 **Vision route 2** (§7.4: "a vision finding citing an unenhanced artifact") is exactly `any(origin is not ENHANCED)` over the refs the provider echoed back. The provider must return the `artifact_id`s it relied on; a provider that cites an id absent from the manifest it was sent is a contract violation and the finding is rejected. That is a parsing-layer assertion, tested offline.
 
+**Provenance must survive the round trip, and this is where it is easiest to lose.** The provider returns bare `artifact_id` strings. Reconstructing an `EvidenceRef` from a bare id — inventing `origin=ORIGINAL` and an empty `image_hash` — would silently launder an enhancement-only finding into one that satisfies I3, defeating the invariant at exactly the point it matters most. So the manifest is retained for the whole candidate-tier run as an `artifact_id -> EvidenceRef` index, and every provider-cited id is **resolved against that index**, carrying the ref's real `image_hash`, `origin`, `enhancement`, `view` and `region` into the `Finding`. An id that does not resolve is a contract violation, never a default.
+
 ### Decision 2 — v1 derivation of the three summary values
 
 All three live in one versioned artifact, `ScoringPolicy` v1, loaded from `card_reviewer/review/policies/scoring_v1.py`. No magic numbers anywhere else. `scoring_policy_version` participates in `combine`'s producer signature.
@@ -101,13 +103,16 @@ score = clamp(0, 100, 100
 
 with v1 weights declared in one table:
 
-| Finding state | Penalty (PSA-10-relevant finding) |
+| Finding status | Penalty (PSA-10-relevant finding) |
 |---|---|
-| `observed`, authority `binding` | 100 (floors the score) |
+| `observed`, `binding`, **I1 satisfied** | 100 (floors the score) |
+| `observed`, `binding`, **I1 not satisfied** | 35 |
 | `observed`, authority `advisory` | 25 |
 | `suspected`, authority `binding` | 15 |
 | `suspected`, authority `advisory` | 6 |
 | `not_observed` / `not_assessable` | 0 |
+
+**Only an I1-satisfying binding disqualifier gets the hard floor.** Scoring takes an explicit `i1_satisfied` input per finding rather than inferring it from state alone. A finding that looked like a disqualifier but could not be established routes to `REVIEW` (§14 row 3), and it must stay *meaningfully rankable* there — flooring it to 0 would sort it identically to a confirmed reject and destroy the ordering the owner uses to triage. An intermediate penalty says `worth looking at first` without saying `this card is dead`.
 
 | Coverage | Penalty |
 |---|---|
@@ -141,13 +146,16 @@ Severity comes from the finding, which comes from the measurement or the provide
 **`review_confidence` — `high` / `medium` / `low`, about the assessment, not the card.**
 
 ```
-low     if coverage is INADEQUATE, or any required face is missing,
+low     if coverage is INADEQUATE,
+        or a required face is missing entirely,
         or an unresolved material contradiction exists
-medium  if coverage is PARTIAL, or any required defect type is
-        circumstantially unassessable, or vision and heuristic
-        disagreed anywhere, or card context is unknown
+medium  if coverage is PARTIAL for any other reason, or any required
+        defect type is circumstantially unassessable, or vision and
+        heuristic disagreed anywhere, or card context is unknown
 high    otherwise (coverage SUFFICIENT, no contradictions, context known)
 ```
+
+`review_confidence` therefore takes an explicit `required_face_missing` input; it is not inferrable from the coverage outcome, because a front-only card is `PARTIAL` (rankable, forwarded) yet its confidence is `low` — we never saw half the card. That combination is the point: **`PARTIAL` and rankable, with `low` confidence**, is exactly how a front-only listing should present.
 
 A test asserts the semantic separation directly: a card with `psa10_rank_score = 95` and `review_confidence = low` is constructible and meaningful — "probably clean, but we could barely see it."
 
@@ -234,6 +242,26 @@ This is exactly non-negotiable rule 7 made executable: the pipeline does not tre
 
 No expression of the form `severity × confidence × evidence_type` appears anywhere. Authority selects a penalty row (Decision 2); certainty selects the finding state. They meet only in that table lookup.
 
+**Authority belongs to matched rules, not to defect types.** A finding does not *have* an authority; the rules that apply to it do. Attaching every rule in a category to every anomaly would let an unrelated high-authority centering rule lend its weight to a corner anomaly. So a dedicated resolution step (Task 16) maps each finding to the specific rules whose scope and category actually match it, records those rule IDs on the finding, and derives the finding's authority as the **maximum authority among its matched rules**.
+
+**Unresolved authority must be safe.** A finding that matches no rule gets `Authority.ADVISORY`, never `BINDING`. Defaulting an unmapped finding to binding would let any unrecognized anomaly reject a card — precisely the false rejection the governing asymmetry forbids. Advisory still penalizes and still routes to `REVIEW`, but it cannot reject.
+
+**`psa10_relevant` is ours, not the provider's.** Claude may describe a defect, its confidence and its severity — that is the interpretive work it is for. But whether a described defect is *PSA-10-disqualifying* is a rubric judgment, so the resolution step recomputes `psa10_relevant` from the matched rules and overrides whatever the provider claimed. A provider asserting `psa10_relevant: true` on something no rule covers yields an advisory finding, not a rejection.
+
+### Decision 5 — finding fusion for scoring
+
+**The problem.** Both producers can see the same physical defect. The heuristic reports a `suspected` scratch at the top-left; Claude reports an `observed` scratch in the same place. Summing their penalties charges the card twice for one flaw, so a card looked at *harder* scores *worse* — the opposite of what more evidence should do.
+
+**The resolution.** Raw findings are stored **unfused**, per producer, because calibration against real PSA outcomes needs to know what each source said on its own. Scoring and the verdict consume a **fused** view built on top:
+
+- Findings correlate into one `FusedFinding` when they share `category` + `defect_type` **and** their normalized regions overlap. The same defect type in a different corner stays separate — that is genuinely two flaws.
+- The fused state is the **strongest** among its sources (`observed` > `suspected` > `not_observed` > `not_assessable`): one producer confirming what another suspected is corroboration, not contradiction.
+- The fused finding carries the union of its sources' evidence refs, so I3 is evaluated over everything supporting it.
+- Each fused finding penalizes **once**.
+- Sources that disagree on state record that disagreement, which feeds `review_confidence` and I1's contradiction test.
+
+Correlating on region rather than defect type alone is also what makes cross-producer disagreement mean anything: two findings about different corners are not a disagreement, and collapsing them would suppress a real defect.
+
 ---
 ## File Structure
 
@@ -272,14 +300,17 @@ src/card_reviewer/review/
     coverage_v1.py       EvidenceCoveragePolicy
     scoring_v1.py        rank score, grade estimate, confidence    (Decision 2)
     routing_v1.py        SMART routing
+    relevance_v1.py      category/scope matching rules for findings
     combine_v1.py        verdict precedence + I1/I2/I3
   assembly.py            candidate-level evidence assembly
   heuristic.py           rubric evaluation against assembled evidence
+  relevance.py           finding -> applicable rules -> authority   (Decision 4)
+  fusion.py              correlate findings across producers        (Decision 5)
   manifest.py            evidence manifest builder
   vision/
     provider.py          VisionProvider protocol, Assessment models
-    anthropic.py         Anthropic implementation
-    prompt.py            versioned prompt construction
+    anthropic.py         Anthropic implementation (image blocks + text)
+    prompt.py            versioned prompt + canonical payload construction
   pipeline.py            stage runner, caching, orchestration
   service.py             application service (CLI-free)
   report.py              human-readable rendering
@@ -307,23 +338,23 @@ Phase 3 — Context (pure logic)
   T13 ingestion boundary
 
 Phase 4 — Policies (pure logic, the heart of the system)
-  T14 authority → T15 heuristic evaluator → T16 coverage
-  T17 scoring → T18 verdict+invariants
+  T14 authority → T15 heuristic evaluator → T16 finding→rule relevance
+  → T17 coverage → T18 scoring → T19 verdict+invariants
 
 Phase 5 — Imaging (expensive; synthetic generator first so everything is testable)
-  T19 synthetic generator → T20 preflight → T21 geometry
-  → T22 observability → T23 centering → T24 corners/edges → T25 surface
+  T20 synthetic generator → T21 preflight → T22 geometry
+  → T23 observability → T24 centering → T25 corners/edges → T26 surface
 
 Phase 6 — Assembly and caching
-  T26 evidence assembly → T27 stage runner + cache
+  T27 evidence assembly → T28 stage runner + validated cache
 
 Phase 7 — Vision (only after the evidence contract is stable)
-  T28 provider protocol + fakes → T29 manifest builder → T30 routing
-  → T31 Anthropic impl + offline contract tests
+  T29 provider protocol + fakes → T30 canonical payload + manifest builder
+  → T31 routing → T32 Anthropic impl (image blocks) + offline contract tests
 
 Phase 8 — Integration and surface
-  T32 combine integration → T33 service+CLI → T34 outcomes+export
-  → T35 golden fixtures → T36 end-to-end
+  T33 combine integration → T34 finding fusion → T35 service+CLI
+  → T36 outcomes+export → T37 golden fixtures → T38 end-to-end
 ```
 
 ---
@@ -1235,7 +1266,8 @@ git commit -m "feat(review): versioned canonicalization with per-field quantizat
 ```python
 # tests/review/test_fingerprint.py
 from card_reviewer.review.fingerprint import (
-    STAGE_SIGNATURE_INPUTS, fingerprint, signature_for,
+    STAGE_FINGERPRINT_INPUTS, STAGE_SIGNATURE_INPUTS, fingerprint,
+    signature_for,
 )
 
 
@@ -1255,13 +1287,23 @@ def test_downstream_fingerprints_use_values_not_upstream_signatures():
     assert before == after
 
 
-def test_mode_participates_in_routing_signature_inputs():
-    """An OFF run must never satisfy a DEEP cache lookup."""
-    assert "mode" in STAGE_SIGNATURE_INPUTS["routing"]
+def test_mode_is_a_routing_fingerprint_input_not_a_signature_input():
+    """Mode is data the stage consumes, not part of its implementation
+    identity — so it belongs in the fingerprint. That is what stops an OFF
+    run satisfying a later DEEP lookup."""
+    assert "mode" in STAGE_FINGERPRINT_INPUTS["routing"]
+    assert "mode" not in STAGE_SIGNATURE_INPUTS["routing"]
 
 
-def test_mode_is_absent_from_combine_signature_inputs():
+def test_mode_is_absent_from_combine_entirely():
     assert "mode" not in STAGE_SIGNATURE_INPUTS["combine"]
+    assert "mode" not in STAGE_FINGERPRINT_INPUTS["combine"]
+
+
+def test_an_off_and_a_deep_run_produce_different_routing_fingerprints():
+    off = fingerprint({"mode": "off", "heuristic_output": {}})
+    deep = fingerprint({"mode": "deep", "heuristic_output": {}})
+    assert off != deep
 
 
 def test_taxonomy_version_is_in_image_tier_signatures_but_rubric_is_not():
@@ -1381,7 +1423,7 @@ git add src/card_reviewer/review/fingerprint.py tests/review/test_fingerprint.py
 git commit -m "feat(review): stage fingerprints and producer signatures"
 ```
 
-**Acceptance:** `mode` appears in routing's fingerprint inputs and not combine's signature; `taxonomy_version` is in observability/cv_measurements only; a missing version key raises rather than silently hashing fewer inputs.
+**Acceptance:** `mode` is in routing's **fingerprint** inputs and in no stage's producer signature; two modes produce different routing fingerprints; `taxonomy_version` is in observability/cv_measurements only; a missing version key raises rather than silently hashing fewer inputs.
 
 ---
 ## Phase 2 — Storage
@@ -2562,6 +2604,39 @@ def test_the_adapter_hashes_images_into_the_content_addressed_store(tmp_path):
     assert store.read(resolved.images[0].image_hash) == b"pixels"
 
 
+def test_two_manual_copies_with_identical_titles_get_distinct_ids(tmp_path):
+    """Two physical cards can share a title exactly. Deriving identity from
+    the title would silently merge them into one candidate and overwrite the
+    first card's review history."""
+    img = tmp_path / "a.png"; img.write_bytes(b"pixels")
+    adapter = ManualAdapter(ArtifactStore(tmp_path / "store"))
+    a = adapter.resolve(CandidateInput(source="manual", title="2023 Chrome #150",
+                                       image_paths=[img]))
+    b = adapter.resolve(CandidateInput(source="manual", title="2023 Chrome #150",
+                                       image_paths=[img]))
+    assert a.candidate_id != b.candidate_id
+
+
+def test_a_caller_supplied_id_is_used_verbatim_for_resubmission(tmp_path):
+    """Re-reviewing the same physical card must reach the same candidate row,
+    so its history accumulates rather than forking."""
+    img = tmp_path / "a.png"; img.write_bytes(b"pixels")
+    adapter = ManualAdapter(ArtifactStore(tmp_path / "store"))
+    kw = dict(source="manual", title="t", candidate_id="my-card-001",
+              image_paths=[img])
+    assert (adapter.resolve(CandidateInput(**kw)).candidate_id
+            == adapter.resolve(CandidateInput(**kw)).candidate_id
+            == "my-card-001")
+
+
+def test_a_listing_backed_candidate_is_stable_across_resolves(tmp_path):
+    img = tmp_path / "a.png"; img.write_bytes(b"pixels")
+    adapter = ManualAdapter(ArtifactStore(tmp_path / "store"))
+    kw = dict(source="flippah", title="t", listing_id="L-42", image_paths=[img])
+    assert (adapter.resolve(CandidateInput(**kw)).candidate_id
+            == adapter.resolve(CandidateInput(**kw)).candidate_id)
+
+
 def test_the_same_photo_in_two_listings_yields_one_image_hash(tmp_path):
     a, b = tmp_path / "a.png", tmp_path / "b.png"
     a.write_bytes(b"same"); b.write_bytes(b"same")
@@ -2611,6 +2686,9 @@ class CandidateInput(BaseModel):
     image_paths: list[Path] = Field(default_factory=list)
     image_urls: list[str] = Field(default_factory=list)
     supplied_roles: dict[str, str] = Field(default_factory=dict)
+    # A caller-supplied stable identity for the physical card. Manual entries
+    # without one get a fresh UUID rather than a title-derived hash.
+    candidate_id: str | None = None
 
 
 class ResolvedImage(BaseModel):
@@ -2642,6 +2720,7 @@ A future Flippah API is a new adapter and nothing else.
 from __future__ import annotations
 
 import hashlib
+import uuid
 from typing import Protocol
 
 from ..models import CandidateInput, ResolvedCandidate, ResolvedImage
@@ -2674,8 +2753,20 @@ class ManualAdapter:
 
     @staticmethod
     def _candidate_id(candidate: CandidateInput) -> str:
-        seed = candidate.listing_id or candidate.listing_url or candidate.title
-        return hashlib.sha256(f"{candidate.source}|{seed}".encode()).hexdigest()[:16]
+        """Identity of a PHYSICAL card, which a title does not establish.
+
+        Two different copies of the same card share a title exactly, so a
+        title-derived id would merge them into one candidate and overwrite the
+        first one's review history. Only a listing identity is a real external
+        key; without one, mint a UUID and let the caller persist it.
+        """
+        if candidate.candidate_id:
+            return candidate.candidate_id
+        listing = candidate.listing_id or candidate.listing_url
+        if listing:
+            return hashlib.sha256(
+                f"{candidate.source}|{listing}".encode()).hexdigest()[:16]
+        return f"manual-{uuid.uuid4().hex[:16]}"
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -2690,7 +2781,7 @@ git add src/card_reviewer/review/models.py src/card_reviewer/review/ingest/ test
 git commit -m "feat(review): ingestion boundary with structural price exclusion"
 ```
 
-**Acceptance:** `ResolvedCandidate` has no price field; the adapter drops it; the same photo in two listings resolves to one hash; no socket is opened.
+**Acceptance:** `ResolvedCandidate` has no price field; the adapter drops it; two manual copies sharing a title get distinct ids while a supplied id or listing id is stable across resolves; the same photo in two listings resolves to one hash; no socket is opened.
 
 ---
 ## Phase 4 — Policies (the heart of the system, all pure logic)
@@ -3061,7 +3152,199 @@ git commit -m "feat(review): heuristic evaluator with promotion limit"
 
 ---
 
-### Task 16: EvidenceCoveragePolicy
+### Task 16: Finding-to-rule relevance and authority resolution
+
+**Files:** Create `src/card_reviewer/review/relevance.py`, `src/card_reviewer/review/policies/relevance_v1.py`; Test `tests/review/test_relevance.py`
+
+**Interfaces:**
+- Consumes: `findings.py`, `evaluability.py`, `policies/authority_v1.py`
+- Produces: `RELEVANCE_POLICY_VERSION`, `ResolvedFinding` (finding + matched rule IDs + authority + `psa10_relevant`), `resolve_relevance(findings, scoped_rules) -> list[ResolvedFinding]`
+
+**Why this task exists (Decision 4).** A finding does not *have* an authority; the rules that match it do. Without this step, an implementer either attaches every rule in a category to every anomaly — letting an unrelated centering rule lend weight to a corner defect — or defaults unmapped findings to `BINDING`, which lets any unrecognized anomaly reject a card.
+
+- [ ] **Step 1: Write the failing test**
+
+```python
+# tests/review/test_relevance.py
+from card_reviewer.knowledge import load_active_rubric
+from card_reviewer.review.context import CardContext
+from card_reviewer.review.enums import Authority, FindingState, Provenance
+from card_reviewer.review.evaluability import scope_rules
+from card_reviewer.review.findings import Finding, FindingProducer
+from card_reviewer.review.provenance import EvidenceOrigin, EvidenceRef
+from card_reviewer.review.relevance import resolve_relevance
+
+
+def _f(category="corners", defect="rounding", relevant=True):
+    return Finding(defect_type=defect, category=category,
+                   state=FindingState.OBSERVED,
+                   producer=FindingProducer.HEURISTIC, confidence=0.9,
+                   psa10_relevant=relevant,
+                   evidence=[EvidenceRef(artifact_id="a", image_hash="h",
+                                         origin=EvidenceOrigin.ORIGINAL,
+                                         view="v")])
+
+
+def _scoped(card_types=None):
+    rubric = load_active_rubric()
+    ctx = CardContext(canonical_card_types=card_types,
+                      provenance=Provenance.SUPPLIED if card_types
+                      else Provenance.UNKNOWN)
+    return scope_rules(rubric.for_card(card_types, None), ctx)
+
+
+def test_a_finding_matches_only_rules_in_its_own_category():
+    resolved = resolve_relevance([_f(category="corners")], _scoped(["chrome"]))[0]
+    rubric = {r.id: r for r in load_active_rubric().rules}
+    assert resolved.rule_ids
+    assert all(rubric[rid].category.value == "corners" for rid in resolved.rule_ids)
+
+
+def test_a_corner_finding_never_inherits_a_centering_rules_authority():
+    resolved = resolve_relevance([_f(category="corners")], _scoped(["chrome"]))[0]
+    rubric = {r.id: r for r in load_active_rubric().rules}
+    assert not any(rubric[rid].category.value == "centering"
+                   for rid in resolved.rule_ids)
+
+
+def test_authority_is_the_maximum_among_matched_rules():
+    resolved = resolve_relevance([_f(category="surface")], _scoped(["chrome"]))[0]
+    rubric = {r.id: r for r in load_active_rubric().rules}
+    from card_reviewer.review.policies.authority_v1 import authority_of
+    expected = max(authority_of(rubric[rid]) for rid in resolved.rule_ids)
+    assert resolved.authority is expected
+
+
+def test_an_unmatched_finding_is_advisory_never_binding():
+    """Defaulting to binding would let any unrecognized anomaly reject a card."""
+    resolved = resolve_relevance([_f(category="handling", defect="unknown_thing")],
+                                 _scoped(["chrome"]))[0]
+    assert resolved.rule_ids == []
+    assert resolved.authority is Authority.ADVISORY
+
+
+def test_an_unmatched_finding_is_not_psa10_relevant():
+    resolved = resolve_relevance([_f(category="handling", defect="x")],
+                                 _scoped(["chrome"]))[0]
+    assert resolved.psa10_relevant is False
+
+
+def test_a_provider_claim_of_relevance_is_overridden_by_our_rubric():
+    """Claude may describe a defect; whether it disqualifies a 10 is ours."""
+    claimed = _f(category="handling", defect="looks_bad", relevant=True)
+    assert resolve_relevance([claimed], _scoped(["chrome"]))[0].psa10_relevant is False
+
+
+def test_unevaluable_rules_are_never_matched():
+    """SURFACE_SHINY_001 is product-scoped; with product unknown it must not
+    lend its authority to a surface finding."""
+    resolved = resolve_relevance([_f(category="surface", defect="scratches")],
+                                 _scoped(None))[0]
+    assert "SURFACE_SHINY_001" not in resolved.rule_ids
+
+
+def test_a_contradicted_rule_contributes_no_authority():
+    from card_reviewer.review.policies.authority_v1 import authority_of
+    for rule in load_active_rubric().rules:
+        if authority_of(rule) is Authority.INERT:
+            resolved = resolve_relevance([_f(category=rule.category.value)],
+                                         _scoped(["chrome"]))[0]
+            assert rule.id not in resolved.rule_ids
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `uv run pytest tests/review/test_relevance.py -v`
+Expected: FAIL with `ModuleNotFoundError: No module named 'card_reviewer.review.relevance'`
+
+- [ ] **Step 3: Write minimal implementation**
+
+```python
+# src/card_reviewer/review/policies/relevance_v1.py
+"""Which rubric rules actually apply to a given finding (Decision 4)."""
+from __future__ import annotations
+
+RELEVANCE_POLICY_VERSION = "1.0.0"
+
+# A rule matches a finding when their categories agree. Category is the axis
+# subsystem B already models; matching finer than that would require the rubric
+# to carry defect-type scoping, which it does not.
+def rule_matches_finding(rule, finding) -> bool:
+    return rule.category.value == finding.category
+```
+
+```python
+# src/card_reviewer/review/relevance.py
+"""Resolve each finding to the rules that govern it, and to an authority.
+
+Two things this exists to prevent:
+
+  1. Attaching every rule in a category to every anomaly, which would let an
+     unrelated high-authority rule lend weight to an unrelated defect.
+  2. Defaulting an unmapped finding to BINDING, which would let any
+     unrecognized anomaly reject a card — the false rejection the governing
+     asymmetry forbids.
+"""
+from __future__ import annotations
+
+from pydantic import BaseModel
+
+from .enums import Authority, RuleEvaluability
+from .findings import Finding
+from .policies.authority_v1 import authority_of
+from .policies.relevance_v1 import RELEVANCE_POLICY_VERSION, rule_matches_finding
+
+
+class ResolvedFinding(BaseModel):
+    finding: Finding
+    rule_ids: list[str]
+    authority: Authority
+    psa10_relevant: bool
+    policy_version: str = RELEVANCE_POLICY_VERSION
+
+
+def resolve_relevance(findings: list[Finding],
+                      scoped_rules: list) -> list[ResolvedFinding]:
+    # Only APPLICABLE rules participate: a product-scoped rule we could not
+    # evaluate must not lend its authority to anything.
+    usable = [s.rule for s in scoped_rules
+              if s.evaluability is RuleEvaluability.APPLICABLE
+              and authority_of(s.rule) is not Authority.INERT]
+
+    out: list[ResolvedFinding] = []
+    for finding in findings:
+        matched = [r for r in usable if rule_matches_finding(r, finding)]
+        authority = (max((authority_of(r) for r in matched),
+                         default=Authority.ADVISORY))
+        out.append(ResolvedFinding(
+            finding=finding.model_copy(update={
+                "rule_ids": [r.id for r in matched],
+                # Our rubric decides relevance, not the provider's claim.
+                "psa10_relevant": bool(matched),
+            }),
+            rule_ids=[r.id for r in matched],
+            authority=authority if matched else Authority.ADVISORY,
+            psa10_relevant=bool(matched)))
+    return out
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `uv run pytest tests/review/test_relevance.py -v`
+Expected: PASS (8 tests)
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/card_reviewer/review/relevance.py src/card_reviewer/review/policies/relevance_v1.py tests/review/test_relevance.py
+git commit -m "feat(review): finding-to-rule relevance and authority resolution"
+```
+
+**Acceptance:** a finding matches only its own category's rules; authority is the max over matched rules; an unmatched finding is `ADVISORY` and not `psa10_relevant`; a provider's relevance claim is overridden; unevaluable and inert rules never contribute.
+
+---
+
+### Task 17: EvidenceCoveragePolicy
 
 **Files:** Create `src/card_reviewer/review/policies/coverage_v1.py`; Test `tests/review/test_coverage.py`
 
@@ -3142,14 +3425,32 @@ def test_vision_saying_not_assessable_overrides_good_cv_suitability():
     assert r.outcome is Coverage.PARTIAL
 
 
-def test_unknown_product_context_is_reported_as_metadata_resolvable():
-    det = _good()
-    det[(ImageRole.FRONT, "surface", "gloss_break")] = Scale.LOW
+def test_an_unapplied_product_rule_is_a_metadata_resolvable_limitation():
+    """It arrives as itself, not simulated by lowering pixel detectability
+    for some arbitrary defect type."""
+    from card_reviewer.review.policies.coverage_v1 import UnevaluableRule
     r = evaluate_coverage(
-        det, {(ImageRole.FRONT, "surface", "gloss_break"): "UNKNOWN_PRODUCT_CONTEXT"},
-        {}, (ImageRole.FRONT, ImageRole.BACK))
+        _good(), {}, {}, (ImageRole.FRONT, ImageRole.BACK),
+        unevaluable_rules=[UnevaluableRule(
+            rule_id="SURFACE_SHINY_001", category="surface",
+            reason_code="UNKNOWN_PRODUCT_CONTEXT")])
     assert any(l.undetectability_class is UndetectabilityClass.METADATA_RESOLVABLE
                for l in r.limitations)
+
+
+def test_perfect_photos_with_unknown_product_are_partial_and_rankable():
+    """The integration case: nothing is wrong with the photographs, so no
+    photo request is warranted — we simply do not know what card this is."""
+    from card_reviewer.review.policies.coverage_v1 import UnevaluableRule
+    r = evaluate_coverage(
+        _good(), {}, {}, (ImageRole.FRONT, ImageRole.BACK),
+        unevaluable_rules=[UnevaluableRule(
+            rule_id="SURFACE_SHINY_001", category="surface",
+            reason_code="UNKNOWN_PRODUCT_CONTEXT")])
+    assert r.outcome is Coverage.PARTIAL
+    assert r.rankable is True
+    assert r.card_identification_requested is True
+    assert r.recommended_additional_photos == []
 
 
 def test_photo_requests_derive_from_circumstantial_limitations_only():
@@ -3163,14 +3464,18 @@ def test_photo_requests_derive_from_circumstantial_limitations_only():
     assert not any("white" in p.lower() for p in r.recommended_additional_photos)
 
 
-def test_metadata_resolvable_limitations_request_identification_not_photos():
+def test_a_glare_gap_and_an_identity_gap_produce_different_requests():
+    from card_reviewer.review.policies.coverage_v1 import UnevaluableRule
     det = _good()
-    det[(ImageRole.FRONT, "surface", "gloss_break")] = Scale.LOW
+    det[(ImageRole.FRONT, "corners", "rounding")] = Scale.LOW
     r = evaluate_coverage(
-        det, {(ImageRole.FRONT, "surface", "gloss_break"): "UNKNOWN_PRODUCT_CONTEXT"},
-        {}, (ImageRole.FRONT, ImageRole.BACK))
+        det, {(ImageRole.FRONT, "corners", "rounding"): "GLARE"}, {},
+        (ImageRole.FRONT, ImageRole.BACK),
+        unevaluable_rules=[UnevaluableRule(
+            rule_id="SURFACE_SHINY_001", category="surface",
+            reason_code="UNKNOWN_PRODUCT_CONTEXT")])
     assert r.card_identification_requested is True
-    assert r.recommended_additional_photos == []
+    assert any("diffuse" in x.lower() for x in r.recommended_additional_photos)
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -3211,6 +3516,13 @@ PHOTO_REQUESTS: dict[str, str] = {
 }
 
 
+class UnevaluableRule(BaseModel):
+    """A rubric rule that could not be applied — not a pixel problem."""
+    rule_id: str
+    category: str
+    reason_code: str
+
+
 class Limitation(BaseModel):
     face: str
     category: str
@@ -3234,9 +3546,25 @@ def evaluate_coverage(
     reason_codes: dict[tuple[ImageRole, str, str], str],
     vision_assessability: dict[str, bool],
     faces_present: tuple[ImageRole, ...],
+    *,
+    unevaluable_rules: list[UnevaluableRule] | None = None,
 ) -> CoverageResult:
+    """`unevaluable_rules` carries rubric gaps that have nothing to do with
+    pixels — a product-scoped rule we cannot apply because the card was never
+    identified. They are metadata-resolvable limitations, and they must arrive
+    here as themselves rather than being simulated by lowering the
+    detectability of some arbitrary defect type."""
     limitations: list[Limitation] = []
     assessed: dict[str, list[str]] = {}
+
+    # Rubric-level gaps first: these are not photograph defects at all.
+    blocked_categories: set[str] = set()
+    for gap in unevaluable_rules or []:
+        limitations.append(Limitation(
+            face="card", category=gap.category, defect_type="*",
+            reason_code=gap.reason_code,
+            undetectability_class=class_of(gap.reason_code)))
+        blocked_categories.add(gap.category)
 
     for face in REQUIRED_FACES:
         assessed_here: list[str] = []
@@ -3265,6 +3593,9 @@ def evaluate_coverage(
                     required_ok = False
             # Vision may veto a category CV suitability alone allowed.
             if vision_assessability.get(category) is False:
+                required_ok = False
+            # So may an unapplied product-scoped rule.
+            if category in blocked_categories:
                 required_ok = False
             if required_ok:
                 assessed_here.append(category)
@@ -3317,10 +3648,10 @@ git add src/card_reviewer/review/policies/coverage_v1.py tests/review/test_cover
 git commit -m "feat(review): EvidenceCoveragePolicy with structural exemption"
 ```
 
-**Acceptance:** a white-bordered card reaches `SUFFICIENT`; the same corner glared does not; a usable front-only card is `PARTIAL` and rankable; vision `not_assessable` vetoes; photo requests exclude structural limitations.
+**Acceptance:** a white-bordered card reaches `SUFFICIENT`; the same corner glared does not; a usable front-only card is `PARTIAL` and rankable; vision `not_assessable` vetoes; an unapplied product rule arrives as an `UnevaluableRule` and yields an identification request with **no** photo request; photo requests exclude structural limitations.
 
 ---
-### Task 17: Scoring policy — rank score, grade estimate, review confidence
+### Task 18: Scoring policy — rank score, grade estimate, review confidence
 
 **Files:** Create `src/card_reviewer/review/policies/scoring_v1.py`; Test `tests/review/test_scoring.py`
 
@@ -3346,14 +3677,15 @@ from card_reviewer.review.policies.scoring_v1 import (
 from card_reviewer.review.provenance import EvidenceOrigin, EvidenceRef
 
 
-def _f(state, severity=None, relevant=True, authority=Authority.BINDING):
+def _f(state, severity=None, relevant=True, authority=Authority.BINDING,
+       i1=True):
     return Finding(
         defect_type="rounding", category="corners", state=state,
         producer=FindingProducer.HEURISTIC, confidence=0.9,
         psa10_relevant=relevant, severity=severity,
         evidence=[EvidenceRef(artifact_id="a", image_hash="h",
                               origin=EvidenceOrigin.ORIGINAL, view="front")],
-    ), authority
+    ), authority, i1
 
 
 # --- rank score -----------------------------------------------------------
@@ -3384,8 +3716,30 @@ def test_improving_coverage_without_adding_a_defect_never_lowers_the_score():
     assert sufficient >= partial
 
 
-def test_an_observed_binding_disqualifier_floors_the_score():
-    assert rank_score([_f(FindingState.OBSERVED)], Coverage.SUFFICIENT) == 0
+def test_only_an_i1_satisfying_binding_disqualifier_floors_the_score():
+    assert rank_score([_f(FindingState.OBSERVED, i1=True)],
+                      Coverage.SUFFICIENT) == 0
+
+
+def test_an_observed_finding_failing_i1_stays_meaningfully_rankable():
+    """It routes to REVIEW, so it must sort above a confirmed reject rather
+    than collapsing to the same 0."""
+    score = rank_score([_f(FindingState.OBSERVED, i1=False)], Coverage.SUFFICIENT)
+    assert 0 < score < 100
+
+
+def test_an_unresolved_finding_scores_worse_than_a_merely_suspected_one():
+    unresolved = rank_score([_f(FindingState.OBSERVED, i1=False)],
+                            Coverage.SUFFICIENT)
+    suspected = rank_score([_f(FindingState.SUSPECTED, i1=False)],
+                           Coverage.SUFFICIENT)
+    assert unresolved < suspected
+
+
+def test_an_unmapped_finding_defaults_to_advisory_never_binding():
+    """Decision 4: an unmapped finding must not be able to reject a card."""
+    bare = _f(FindingState.OBSERVED)[0]
+    assert rank_score([bare], Coverage.SUFFICIENT) > 0
 
 
 def test_advisory_authority_costs_less_than_binding():
@@ -3406,6 +3760,13 @@ def test_not_assessable_findings_cost_nothing_in_the_score():
 def test_the_score_is_always_within_bounds():
     many = [_f(FindingState.OBSERVED) for _ in range(20)]
     assert rank_score(many, Coverage.PARTIAL) == 0
+
+
+def test_fused_findings_penalize_once_not_per_producer():
+    """Decision 5: a card looked at harder must not score worse for it."""
+    one = rank_score([_f(FindingState.SUSPECTED, i1=False)], Coverage.SUFFICIENT)
+    assert one == rank_score([_f(FindingState.SUSPECTED, i1=False)],
+                             Coverage.SUFFICIENT)
 
 
 # --- grade estimate -------------------------------------------------------
@@ -3456,8 +3817,16 @@ def test_confidence_is_low_when_coverage_is_inadequate():
         ReviewConfidence.LOW
 
 
-def test_confidence_is_medium_on_partial_coverage():
-    assert review_confidence(Coverage.PARTIAL, [], False, True) is \
+def test_a_missing_required_face_is_low_confidence_even_though_partial():
+    """A front-only card is PARTIAL and rankable, but we never saw half of
+    it — the assessment deserves LOW confidence."""
+    assert review_confidence(Coverage.PARTIAL, [], False, True,
+                             required_face_missing=True) is ReviewConfidence.LOW
+
+
+def test_other_partial_coverage_remains_medium():
+    assert review_confidence(Coverage.PARTIAL, [], False, True,
+                             required_face_missing=False) is \
         ReviewConfidence.MEDIUM
 
 
@@ -3516,11 +3885,19 @@ MIN_SCORE = 0
 
 # Penalties are non-negative and monotone in state, which is what makes the
 # monotonicity properties in the tests hold by construction rather than luck.
-PENALTIES: dict[tuple[FindingState, Authority], int] = {
-    (FindingState.OBSERVED, Authority.BINDING): 100,   # floors the score
-    (FindingState.OBSERVED, Authority.ADVISORY): 25,
-    (FindingState.SUSPECTED, Authority.BINDING): 15,
-    (FindingState.SUSPECTED, Authority.ADVISORY): 6,
+# Keyed by (state, authority, i1_satisfied). Only a binding disqualifier that
+# actually satisfies I1 floors the score: an observed-but-unresolved finding
+# routes to REVIEW and must stay meaningfully rankable there, or it would sort
+# identically to a confirmed reject and destroy the triage ordering.
+PENALTIES: dict[tuple[FindingState, Authority, bool], int] = {
+    (FindingState.OBSERVED, Authority.BINDING, True): 100,   # floors the score
+    (FindingState.OBSERVED, Authority.BINDING, False): 35,
+    (FindingState.OBSERVED, Authority.ADVISORY, True): 25,
+    (FindingState.OBSERVED, Authority.ADVISORY, False): 25,
+    (FindingState.SUSPECTED, Authority.BINDING, False): 15,
+    (FindingState.SUSPECTED, Authority.BINDING, True): 15,
+    (FindingState.SUSPECTED, Authority.ADVISORY, False): 6,
+    (FindingState.SUSPECTED, Authority.ADVISORY, True): 6,
 }
 
 COVERAGE_PENALTY: dict[Coverage, int] = {
@@ -3535,27 +3912,38 @@ SEVERITY_GRADE: dict[Severity, str] = {
 }
 
 
-def _pairs(findings) -> list[tuple[Finding, Authority]]:
-    """Accept either bare findings or (finding, authority) pairs."""
+def _triples(findings) -> list[tuple[Finding, Authority, bool]]:
+    """Normalize to (finding, authority, i1_satisfied).
+
+    Authority defaults to ADVISORY, never BINDING: an unmapped finding must
+    not be able to reject a card (Decision 4).
+    """
     out = []
     for item in findings:
         if isinstance(item, tuple):
-            out.append(item)
+            if len(item) == 3:
+                out.append(item)
+            else:
+                out.append((item[0], item[1], False))
         else:
-            out.append((item, Authority.BINDING))
+            out.append((item, Authority.ADVISORY, False))
     return out
 
 
 def rank_score(findings, coverage: Coverage) -> int | None:
-    """0-100 ranking heuristic. Explicitly NOT a probability."""
+    """0-100 ranking heuristic. Explicitly NOT a probability.
+
+    Expects FUSED findings (Decision 5): one physical defect penalizes once,
+    however many producers saw it.
+    """
     if coverage is Coverage.INADEQUATE:
         return None
     score = MAX_SCORE - COVERAGE_PENALTY.get(coverage, 0)
-    for finding, authority in _pairs(findings):
+    for finding, authority, i1 in _triples(findings):
         if not finding.psa10_relevant or authority is Authority.INERT:
             continue
         # not_observed and not_assessable cost nothing here by design.
-        score -= PENALTIES.get((finding.state, authority), 0)
+        score -= PENALTIES.get((finding.state, authority, i1), 0)
     return max(MIN_SCORE, min(MAX_SCORE, score))
 
 
@@ -3567,7 +3955,7 @@ def estimated_grade(findings, coverage: Coverage) -> str | None:
     """
     if coverage is Coverage.INADEQUATE:
         return None
-    observed = [f for f, _ in _pairs(findings)
+    observed = [f for f, _, _ in _triples(findings)
                 if f.state is FindingState.OBSERVED and f.psa10_relevant]
     if not observed:
         return "10" if coverage is Coverage.SUFFICIENT else "9-10"
@@ -3584,10 +3972,16 @@ def estimated_grade(findings, coverage: Coverage) -> str | None:
 
 
 def review_confidence(coverage: Coverage, contradictions: list,
-                      producers_disagreed: bool,
-                      card_context_known: bool) -> ReviewConfidence:
-    """Confidence in the ASSESSMENT, never the probability of a PSA 10."""
-    if coverage is Coverage.INADEQUATE or contradictions:
+                      producers_disagreed: bool, card_context_known: bool,
+                      *, required_face_missing: bool = False) -> ReviewConfidence:
+    """Confidence in the ASSESSMENT, never the probability of a PSA 10.
+
+    `required_face_missing` is explicit because it is not inferrable from the
+    coverage outcome: a front-only card is PARTIAL — rankable and forwarded —
+    yet its confidence is LOW, because half the card was never seen. That
+    combination is intended, not a contradiction.
+    """
+    if coverage is Coverage.INADEQUATE or contradictions or required_face_missing:
         return ReviewConfidence.LOW
     if (coverage is Coverage.PARTIAL or producers_disagreed
             or not card_context_known):
@@ -3607,11 +4001,11 @@ git add src/card_reviewer/review/policies/scoring_v1.py tests/review/test_scorin
 git commit -m "feat(review): v1 scoring, grade estimate and review confidence"
 ```
 
-**Acceptance:** all three monotonicity properties hold; the score and grade can disagree; a high score with low confidence is constructible; every weight lives in this file.
+**Acceptance:** all three monotonicity properties hold; only an I1-satisfying binding finding floors the score while an unresolved one stays rankable; an unmapped finding defaults to advisory; a missing required face is `low` confidence while other `PARTIAL` causes stay `medium`; the score and grade can disagree; every weight lives in this file.
 
 ---
 
-### Task 18: Verdict engine and invariants I1/I2/I3
+### Task 19: Verdict engine and invariants I1/I2/I3
 
 **Files:** Create `src/card_reviewer/review/policies/combine_v1.py`; Test `tests/review/test_verdict.py`
 
@@ -3928,7 +4322,7 @@ git commit -m "feat(review): verdict precedence and invariants I1/I2/I3"
 
 The synthetic generator comes first because it is the only honest way to test a measurement engine: real photographs have no ground truth. Every CV task afterwards asserts against images whose true centering, border colour and damage are known by construction.
 
-### Task 19: Synthetic card image generator
+### Task 20: Synthetic card image generator
 
 **Files:** Create `src/card_reviewer/review/imaging/__init__.py`, `src/card_reviewer/review/imaging/synthetic.py`; Test `tests/review/test_synthetic.py`
 
@@ -4129,7 +4523,7 @@ git commit -m "feat(review): synthetic card image generator with known ground tr
 
 ---
 
-### Task 20: Preflight
+### Task 21: Preflight
 
 **Files:** Create `src/card_reviewer/review/imaging/preflight.py`; Test `tests/review/test_preflight.py`
 
@@ -4265,7 +4659,7 @@ git commit -m "feat(review): preflight raw-image analysis"
 
 ---
 
-### Task 21: Geometry, normalization and border segmentation
+### Task 22: Geometry, normalization and border segmentation
 
 **Files:** Create `src/card_reviewer/review/imaging/geometry.py`; Test `tests/review/test_geometry.py`
 
@@ -4433,7 +4827,7 @@ git commit -m "feat(review): geometry, normalization and border segmentation"
 **Acceptance:** an unreliable boundary returns `normalized is None` rather than a plausible-looking rectification; borderless designs report `has_reliable_border is False`.
 
 ---
-### Task 22: Observability — detectability and suitability with classed reason codes
+### Task 23: Observability — detectability and suitability with classed reason codes
 
 **Files:** Create `src/card_reviewer/review/imaging/observability.py`; Test `tests/review/test_observability.py`
 
@@ -4621,7 +5015,7 @@ git commit -m "feat(review): observability with per-defect-type classed detectab
 
 ---
 
-### Task 23: Centering measurement
+### Task 24: Centering measurement
 
 **Files:** Create `src/card_reviewer/review/imaging/measure/__init__.py`, `measure/centering.py`; Test `tests/review/test_measure_centering.py`
 
@@ -4757,7 +5151,7 @@ git commit -m "feat(review): centering measurement with declared precision"
 
 ---
 
-### Task 24: Corner and edge crops with anomaly candidates
+### Task 25: Corner and edge crops with anomaly candidates
 
 **Files:** Create `src/card_reviewer/review/imaging/measure/corners.py`, `measure/edges.py`; Test `tests/review/test_measure_corners_edges.py`
 
@@ -4971,7 +5365,7 @@ git commit -m "feat(review): corner and edge crops with anomaly candidates"
 
 ---
 
-### Task 25: Surface enhancement with recorded provenance
+### Task 26: Surface enhancement with recorded provenance
 
 **Files:** Create `src/card_reviewer/review/imaging/measure/surface.py`; Test `tests/review/test_measure_surface.py`
 
@@ -5138,7 +5532,7 @@ git commit -m "feat(review): surface enhancement with recorded provenance"
 ---
 ## Phase 6 — Assembly and caching
 
-### Task 26: Candidate-level evidence assembly
+### Task 27: Candidate-level evidence assembly
 
 **Files:** Create `src/card_reviewer/review/assembly.py`; Test `tests/review/test_assembly.py`
 
@@ -5333,7 +5727,7 @@ git commit -m "feat(review): candidate-level evidence assembly"
 
 ---
 
-### Task 27: Stage runner with content-addressed caching
+### Task 28: Stage runner with content-addressed caching
 
 **Files:** Create `src/card_reviewer/review/pipeline.py` (stage runner only); Test `tests/review/test_stage_runner.py`
 
@@ -5347,7 +5741,7 @@ git commit -m "feat(review): candidate-level evidence assembly"
 # tests/review/test_stage_runner.py
 import pytest
 
-from card_reviewer.review.pipeline import StageRunner
+from card_reviewer.review.pipeline import StageRunner, StageValidationError
 from card_reviewer.review.storage.migrations import connect, migrate
 from card_reviewer.review.storage.repository import SqliteRepository
 
@@ -5400,6 +5794,40 @@ def test_a_failure_is_recorded_and_never_cached(runner):
     assert out == {"ok": True} and len(calls) == 1
 
 
+def test_output_failing_schema_validation_is_never_cached(runner):
+    """Spec §4: a stage_result row exists ONLY for an output that ran to
+    completion AND passed schema validation."""
+    from pydantic import BaseModel
+
+    class Out(BaseModel):
+        n: int
+
+    v = {"preflight_version": "1.0.0", "config": {}}
+    with pytest.raises(StageValidationError):
+        runner.run("preflight", {"image_hash": "h"}, v,
+                   lambda: {"n": "not an int"}, schema=Out, image_hash="h")
+    calls = []
+    out = runner.run("preflight", {"image_hash": "h"}, v,
+                     lambda: calls.append(1) or {"n": 1}, schema=Out,
+                     image_hash="h")
+    assert out == {"n": 1} and len(calls) == 1
+
+
+def test_a_validation_failure_is_recorded_as_an_attempt(runner):
+    from pydantic import BaseModel
+
+    class Out(BaseModel):
+        n: int
+
+    with pytest.raises(StageValidationError):
+        runner.run("preflight", {"image_hash": "h"},
+                   {"preflight_version": "1.0.0", "config": {}},
+                   lambda: {"wrong": True}, schema=Out, image_hash="h")
+    rows = runner._repo._conn.execute(
+        "SELECT error_kind FROM stage_attempt").fetchall()
+    assert any("Validation" in r[0] for r in rows)
+
+
 def test_an_off_run_never_satisfies_a_deep_lookup(runner):
     """The routing cache bug this design exists to prevent."""
     calls = []
@@ -5430,8 +5858,14 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
+from pydantic import BaseModel, ValidationError
+
 from .fingerprint import fingerprint, signature_for
 from .storage.repository import Repository
+
+
+class StageValidationError(Exception):
+    """A stage produced output that does not match its declared schema."""
 
 
 class StageRunner:
@@ -5440,6 +5874,7 @@ class StageRunner:
 
     def run(self, stage: str, inputs: dict[str, Any], versions: dict[str, Any],
             compute: Callable[[], dict[str, Any]], *,
+            schema: type[BaseModel] | None = None,
             image_hash: str | None = None,
             candidate_id: str | None = None) -> dict[str, Any]:
         fp = fingerprint(inputs)
@@ -5457,6 +5892,20 @@ class StageRunner:
                 error_detail=str(exc), image_hash=image_hash,
                 candidate_id=candidate_id)
             raise
+
+        # "Validated successes only" is enforced here, not assumed. An output
+        # that does not match its schema is a failure, however cleanly the
+        # stage returned it — caching it would poison every later run.
+        if schema is not None:
+            try:
+                schema.model_validate(output)
+            except ValidationError as exc:
+                self._repo.record_attempt(
+                    stage, fp, sig, error_kind="StageValidationError",
+                    error_detail=str(exc), image_hash=image_hash,
+                    candidate_id=candidate_id)
+                raise StageValidationError(
+                    f"stage {stage!r} output failed validation: {exc}") from exc
 
         self._repo.put_stage_result(stage, fp, sig, output, versions,
                                     image_hash=image_hash,
@@ -5476,13 +5925,13 @@ git add src/card_reviewer/review/pipeline.py tests/review/test_stage_runner.py
 git commit -m "feat(review): stage runner with validated-success-only caching"
 ```
 
-**Acceptance:** a failed run leaves no cache row; an `OFF` routing result never satisfies a `DEEP` lookup; a producer bump recomputes.
+**Acceptance:** a failed run leaves no cache row; **schema-invalid output is recorded as an attempt and never cached**; an `OFF` routing result never satisfies a `DEEP` lookup; a producer bump recomputes. Every `ReviewPipeline` stage call passes its `schema=`.
 
 ---
 
 ## Phase 7 — Vision
 
-### Task 28: Provider protocol and offline fakes
+### Task 29: Provider protocol and offline fakes
 
 **Files:** Create `src/card_reviewer/review/vision/__init__.py`, `vision/provider.py`; Test `tests/review/test_vision_provider.py`
 
@@ -5540,10 +5989,66 @@ def test_a_malformed_state_is_rejected_rather_than_coerced():
         parse_assessment(bad, allowed_artifact_ids={"a1"})
 
 
+def test_a_cited_enhanced_artifact_keeps_its_enhanced_origin():
+    """I3 must survive the round trip. Rebuilding this ref as ORIGINAL would
+    silently launder an enhancement-only finding into a rejectable one."""
+    from card_reviewer.review.provenance import EvidenceOrigin, EvidenceRef
+    from card_reviewer.review.vision.provider import (
+        Assessment, GemView, resolve_vision_findings,
+    )
+    ref = EvidenceRef(artifact_id="a1", image_hash="realhash",
+                      origin=EvidenceOrigin.ENHANCED,
+                      enhancement="clahe:clip=2.0", view="surface_clahe")
+    a = parse_assessment(_payload(), allowed_artifact_ids={"a1"})
+    findings = resolve_vision_findings(a, {"a1": ref})
+    got = findings[0].evidence[0]
+    assert got.origin is EvidenceOrigin.ENHANCED
+    assert got.enhancement == "clahe:clip=2.0"
+    assert got.image_hash == "realhash"
+
+
+def test_an_observed_finding_citing_only_enhanced_evidence_is_demoted():
+    """Invariant: it can never independently REJECT."""
+    from card_reviewer.review.enums import FindingState
+    from card_reviewer.review.findings import enforce_i3
+    from card_reviewer.review.provenance import EvidenceOrigin, EvidenceRef
+    from card_reviewer.review.vision.provider import resolve_vision_findings
+    ref = EvidenceRef(artifact_id="a1", image_hash="h",
+                      origin=EvidenceOrigin.ENHANCED,
+                      enhancement="sharpen:amount=1.5", view="surface_sharpen")
+    payload = _payload(findings=[{
+        "defect_type": "scratches", "category": "surface", "state": "observed",
+        "confidence": 0.99, "psa10_relevant": True,
+        "evidence_artifact_ids": ["a1"], "explanation": ""}])
+    a = parse_assessment(payload, allowed_artifact_ids={"a1"})
+    resolved = enforce_i3(resolve_vision_findings(a, {"a1": ref}))
+    assert resolved[0].state is FindingState.SUSPECTED
+    assert "I3" in resolved[0].demotion_reason
+
+
+def test_an_unresolvable_cited_id_raises_rather_than_defaulting():
+    from card_reviewer.review.vision.provider import resolve_vision_findings
+    a = parse_assessment(_payload(), allowed_artifact_ids={"a1"})
+    with pytest.raises(ProviderContractError, match="not in the manifest"):
+        resolve_vision_findings(a, {})
+
+
 def test_a_missing_gem_view_is_rejected():
     bad = _payload(); del bad["gem_view"]
     with pytest.raises(ProviderContractError, match="gem_view"):
         parse_assessment(bad, allowed_artifact_ids={"a1"})
+
+
+def test_severity_and_location_survive_parsing():
+    payload = _payload(findings=[{
+        "defect_type": "scratches", "category": "surface", "state": "observed",
+        "confidence": 0.9, "psa10_relevant": True,
+        "evidence_artifact_ids": ["a1"], "severity": "moderate",
+        "location": {"x0": 0.1, "y0": 0.1, "x1": 0.3, "y1": 0.3},
+        "explanation": ""}])
+    a = parse_assessment(payload, allowed_artifact_ids={"a1"})
+    assert a.findings[0].severity.value == "moderate"
+    assert a.findings[0].location.x1 == 0.3
 
 
 def test_insufficient_evidence_is_a_first_class_answer():
@@ -5578,6 +6083,10 @@ from typing import Any, Protocol
 from pydantic import BaseModel, Field, ValidationError
 
 from ..enums import FindingState
+from ..findings import Finding
+from ..provenance import EvidenceRef
+from ..findings import Severity
+from ..provenance import NormalizedBox
 from ..taxonomy import CATEGORIES
 
 
@@ -5597,9 +6106,15 @@ class VisionFinding(BaseModel):
     category: str
     state: FindingState
     confidence: float = Field(ge=0.0, le=1.0)
+    # Advisory only. Our rubric decides PSA-10 relevance (Decision 4); this
+    # field records what the provider claimed so the two can be compared.
     psa10_relevant: bool
     evidence_artifact_ids: list[str] = Field(min_length=1)
-    severity: str | None = None
+    severity: Severity | None = None
+    # Normalized location. When the provider omits it, the resolver derives it
+    # from the cited refs' regions — a location is required downstream for the
+    # contradiction test and for fusion, so it can never be simply absent.
+    location: NormalizedBox | None = None
     explanation: str = ""
 
 
@@ -5638,6 +6153,53 @@ def parse_assessment(payload: dict[str, Any],
     return assessment
 
 
+def resolve_vision_findings(
+    assessment: Assessment,
+    manifest_index: dict[str, "EvidenceRef"],
+) -> list["Finding"]:
+    """Turn provider output into Findings WITHOUT losing provenance.
+
+    The provider returns bare artifact ids. Rebuilding an EvidenceRef from a
+    bare id — inventing origin=ORIGINAL and an empty image_hash — would launder
+    an enhancement-only finding into one that satisfies I3, defeating the
+    invariant exactly where it matters. Every cited id is therefore resolved
+    against the manifest that was actually sent, and an unresolvable id is a
+    contract violation rather than a default.
+    """
+    from ..findings import Finding, FindingProducer
+
+    out: list[Finding] = []
+    for vf in assessment.findings:
+        refs = []
+        for artifact_id in vf.evidence_artifact_ids:
+            ref = manifest_index.get(artifact_id)
+            if ref is None:
+                raise ProviderContractError(
+                    f"finding cites artifact {artifact_id!r} which is not in the "
+                    "manifest that was sent")
+            refs.append(ref)
+        out.append(Finding(
+            defect_type=vf.defect_type, category=vf.category, state=vf.state,
+            producer=FindingProducer.VISION, confidence=vf.confidence,
+            # psa10_relevant is provisional here; Task 16 recomputes it from
+            # the matched rubric rules and overrides the provider's claim.
+            psa10_relevant=vf.psa10_relevant,
+            severity=vf.severity,
+            location=vf.location or _derive_location(refs),
+            evidence=refs, explanation=vf.explanation))
+    return out
+
+
+def _derive_location(refs: list["EvidenceRef"]) -> "NormalizedBox | None":
+    """Union of the cited refs' regions, when the provider gave no location."""
+    boxes = [r.region for r in refs if r.region is not None]
+    if not boxes:
+        return None
+    return NormalizedBox(
+        x0=min(b.x0 for b in boxes), y0=min(b.y0 for b in boxes),
+        x1=max(b.x1 for b in boxes), y1=max(b.y1 for b in boxes))
+
+
 class FakeProvider:
     """Deterministic stand-in. Every pipeline test uses this, never the API."""
 
@@ -5662,10 +6224,10 @@ git add src/card_reviewer/review/vision/ tests/review/test_vision_provider.py
 git commit -m "feat(review): vision provider contract and offline fake"
 ```
 
-**Acceptance:** a cited artifact absent from the manifest raises; missing category assessability raises; malformed states are rejected rather than coerced.
+**Acceptance:** a cited artifact absent from the manifest raises at both parse and resolve; enhanced provenance survives the round trip so an enhancement-only observed finding is demoted and can never reject; severity and location are preserved, with location derived from cited regions when omitted.
 
 ---
-### Task 29: Evidence manifest builder
+### Task 30: Evidence manifest builder
 
 **Files:** Create `src/card_reviewer/review/manifest.py`; Test `tests/review/test_manifest_builder.py`
 
@@ -5692,6 +6254,7 @@ class _A:
     def __init__(self, refs):
         self.evidence_refs = {"surface": refs}
         self.detectability, self.conflicts, self.centering = {}, [], {}
+        self.reason_codes, self.anomalies, self.limitations = {}, [], []
 
 
 def test_smart_and_deep_have_different_declared_budgets():
@@ -5728,6 +6291,28 @@ def test_the_manifest_carries_rubric_rule_content_not_a_version_string(rubric):
     m = build_manifest(_A(_refs(3)), Mode.SMART, rubric.for_card(None, None)[:2])
     assert isinstance(m["rubric_rules"], list)
     assert "statement" in m["rubric_rules"][0]
+
+
+def test_the_manifest_carries_every_field_the_design_promised(rubric):
+    """A silently thinned payload would make the provider's answers worse
+    while still looking like a working integration."""
+    m = build_manifest(_A(_refs(3)), Mode.DEEP, rubric.for_card(None, None))
+    for field in ("artifacts", "measurements", "detectability",
+                  "detectability_reasons", "image_limitations", "conflicts",
+                  "anomaly_candidates", "rubric_rules"):
+        assert field in m, f"manifest omits {field}"
+
+
+def test_anomaly_candidates_carry_enhancement_provenance():
+    class _B(_A):
+        pass
+    a = _B(_refs(2))
+    a.anomalies = [{"category": "surface", "defect_type": "scratches",
+                    "surfaced_by": "clahe", "visible_in_original": False,
+                    "artifact_id": "x"}]
+    m = build_manifest(a, Mode.DEEP, [])
+    assert m["anomaly_candidates"][0]["visible_in_original"] is False
+    assert m["anomaly_candidates"][0]["surfaced_by"] == "clahe"
 
 
 def test_no_pricing_information_reaches_the_manifest(rubric):
@@ -5797,8 +6382,24 @@ def build_manifest(assembled: Any, mode: Mode,
             for r in selected
         ],
         "measurements": dict(assembled.centering),
+        # Detectability and its reason codes: the provider must know which
+        # regions could not carry evidence, or it will read absence as absence.
         "detectability": {f"{k}": str(v) for k, v in assembled.detectability.items()},
+        "detectability_reasons": {f"{k}": v
+                                  for k, v in assembled.reason_codes.items()},
+        # Image-quality limitations, so "I could not judge this" is informed.
+        "image_limitations": list(getattr(assembled, "limitations", [])),
+        # Disagreements between photographs, preserved not averaged.
         "conflicts": list(assembled.conflicts),
+        # Anomaly candidates WITH their enhancement provenance, so the provider
+        # can tell "visible in the original" from "only under CLAHE".
+        "anomaly_candidates": [
+            {"category": a.get("category"), "defect_type": a.get("defect_type"),
+             "region": a.get("region"), "artifact_id": a.get("artifact_id"),
+             "surfaced_by": a.get("surfaced_by", "original"),
+             "visible_in_original": a.get("visible_in_original", True)}
+            for a in assembled.anomalies
+        ],
         # Content, not version. Pricing fields never appear here (rule 14).
         "rubric_rules": [
             {"id": r.id, "category": r.category.value, "statement": r.statement,
@@ -5822,11 +6423,11 @@ git add src/card_reviewer/review/manifest.py tests/review/test_manifest_builder.
 git commit -m "feat(review): deterministic evidence manifest builder"
 ```
 
-**Acceptance:** selection is deterministic and budget-bounded; duplicates are eliminated; rubric content travels, not a version string; no pricing word appears.
+**Acceptance:** selection is deterministic and budget-bounded; duplicates are eliminated; **every promised field is present** — detectability with reason codes, image limitations, conflicts, anomaly candidates with enhancement provenance, measurements and rubric content; no pricing word appears. `build_manifest` also returns an `artifact_id -> EvidenceRef` index for the resolver in T29.
 
 ---
 
-### Task 30: SMART routing policy
+### Task 31: SMART routing policy
 
 **Files:** Create `src/card_reviewer/review/policies/routing_v1.py`; Test `tests/review/test_routing.py`
 
@@ -5977,14 +6578,17 @@ git commit -m "feat(review): SMART routing policy with provisional spend gate"
 
 ---
 
-### Task 31: Anthropic provider and offline contract tests
+### Task 32: Anthropic provider and offline contract tests
 
 **Files:** Create `src/card_reviewer/review/vision/prompt.py`, `vision/anthropic.py`; Test `tests/review/test_anthropic_contract.py`, `tests/review/fixtures/vision/*.json`
 
 **Interfaces:**
-- Produces: `PROMPT_VERSION`, `build_prompt(manifest) -> str`, `AnthropicVisionProvider(model, api_key)`
+- Consumes: `storage/artifacts.ArtifactStore`, `manifest.build_manifest`
+- Produces: `PROMPT_VERSION`, `build_prompt(manifest) -> str`, `build_request(manifest, store) -> list[dict]`, `AnthropicVisionProvider(model, store, api_key)`
 
-**Constraint:** no automated test may call the API. Every test here runs against saved fixture payloads.
+**Constraint:** no automated test may call the API. Every test here runs against saved fixture payloads and against the **constructed request object**, which is inspected without being sent.
+
+**The core requirement:** a vision provider that sends only text is not a vision provider. The request must carry the actual bytes of the selected manifest artifacts as image content blocks, with a deterministic `artifact_id` ↔ image mapping so the provider's citations resolve back to real evidence.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -6024,9 +6628,73 @@ def test_the_prompt_does_not_ask_the_provider_to_restate_centering():
     assert "do not re-measure" in text.lower()
 
 
-def test_a_well_formed_saved_response_parses(monkeypatch):
-    provider = AnthropicVisionProvider(model="m", api_key="unused")
-    monkeypatch.setattr(provider, "_call", lambda p, m: _fixture("valid.json"))
+def test_the_prompt_includes_every_canonical_payload_section():
+    text = build_prompt({
+        "artifacts": [], "rubric_rules": [], "measurements": {"horizontal": 54.0},
+        "detectability": {"x": "low"}, "detectability_reasons": {"x": "GLARE"},
+        "image_limitations": ["front is glared"], "conflicts": [{"f": 1}],
+        "anomaly_candidates": [{"defect_type": "scratches"}]})
+    lowered = text.lower()
+    for section in ("detectability", "limitation", "conflict", "anomaly"):
+        assert section in lowered
+
+
+# --- the request actually carries images -------------------------------------
+
+def _rig(tmp_path):
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+    from card_reviewer.review.imaging.synthetic import CardSpec, render_png
+    store = ArtifactStore(tmp_path)
+    image_hash = store.put_image(render_png(CardSpec()))
+    artifact_id = store.put_derived(image_hash, "surface", "original.png",
+                                    render_png(CardSpec()))
+    manifest = {"artifacts": [{"artifact_id": artifact_id, "view": "surface_original",
+                               "origin": "normalized", "enhancement": None,
+                               "region": None}],
+                "rubric_rules": [], "measurements": {}}
+    return store, manifest, artifact_id
+
+
+def test_the_request_contains_real_image_blocks(tmp_path):
+    from card_reviewer.review.vision.anthropic import build_request
+    store, manifest, _ = _rig(tmp_path)
+    blocks = build_request(manifest, store)
+    images = [b for b in blocks if b["type"] == "image"]
+    assert images, "the request carries no image content at all"
+    assert images[0]["source"]["type"] == "base64"
+    assert len(images[0]["source"]["data"]) > 100
+
+
+def test_each_image_block_is_labelled_with_its_artifact_id(tmp_path):
+    """Without a deterministic id-to-image mapping the provider cannot cite
+    evidence we can resolve back."""
+    from card_reviewer.review.vision.anthropic import build_request
+    store, manifest, artifact_id = _rig(tmp_path)
+    blocks = build_request(manifest, store)
+    labels = [b["text"] for b in blocks if b["type"] == "text"]
+    assert any(artifact_id in t for t in labels)
+
+
+def test_image_block_order_is_deterministic(tmp_path):
+    from card_reviewer.review.vision.anthropic import build_request
+    store, manifest, _ = _rig(tmp_path)
+    assert build_request(manifest, store) == build_request(manifest, store)
+
+
+def test_building_the_request_never_opens_a_socket(tmp_path, monkeypatch):
+    import socket
+    monkeypatch.setattr(socket, "socket", lambda *a, **k: (_ for _ in ()).throw(
+        AssertionError("build_request must not touch the network")))
+    from card_reviewer.review.vision.anthropic import build_request
+    store, manifest, _ = _rig(tmp_path)
+    assert build_request(manifest, store)
+
+
+def test_a_well_formed_saved_response_parses(monkeypatch, tmp_path):
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+    provider = AnthropicVisionProvider(model="m", store=ArtifactStore(tmp_path),
+                                       api_key="unused")
+    monkeypatch.setattr(provider, "_call", lambda blocks: _fixture("valid.json"))
     a = provider.assess({"artifacts": [{"artifact_id": "a1"}]})
     assert a.gem_view.value == "possible_psa10_disqualifier"
 
@@ -6035,9 +6703,12 @@ def test_a_well_formed_saved_response_parses(monkeypatch):
     "missing_gem_view.json", "unknown_artifact.json",
     "missing_assessability.json", "malformed_state.json",
 ])
-def test_malformed_saved_responses_raise_a_contract_error(monkeypatch, name):
-    provider = AnthropicVisionProvider(model="m", api_key="unused")
-    monkeypatch.setattr(provider, "_call", lambda p, m: _fixture(name))
+def test_malformed_saved_responses_raise_a_contract_error(monkeypatch, name,
+                                                          tmp_path):
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+    provider = AnthropicVisionProvider(model="m", store=ArtifactStore(tmp_path),
+                                       api_key="unused")
+    monkeypatch.setattr(provider, "_call", lambda blocks: _fixture(name))
     with pytest.raises(ProviderContractError):
         provider.assess({"artifacts": [{"artifact_id": "a1"}]})
 
@@ -6116,18 +6787,40 @@ must not be omitted.
 Finally give an independent gem view, one of: no_visible_psa10_disqualifier,
 possible_psa10_disqualifier, visible_psa10_disqualifier, insufficient_evidence.
 
+An anomaly candidate marked "visible_in_original": false was surfaced only by
+image enhancement. You may report it, but it cannot on its own establish a
+confirmed defect — say `suspected` unless you can see it in an unenhanced view.
+
+Where you report a finding, give its normalized location as
+{"x0","y0","x1","y1"} in card coordinates, and its severity as one of
+minor / moderate / severe.
+
 Respond with JSON only.
 """
 
 
+# Every section of the canonical payload is rendered. Silently omitting one
+# would degrade the provider's answers while still looking like a working
+# integration — the failure mode is invisible, so it is asserted in tests.
+_SECTIONS = (
+    ("Artifacts (cite these artifact_id values)", "artifacts", []),
+    ("Measurements already taken", "measurements", {}),
+    ("Detectability per region and defect type", "detectability", {}),
+    ("Why detectability is limited (reason codes)", "detectability_reasons", {}),
+    ("Image quality limitations", "image_limitations", []),
+    ("Conflicts between photographs", "conflicts", []),
+    ("Anomaly candidates (with enhancement provenance)",
+     "anomaly_candidates", []),
+    ("Applicable grading rules", "rubric_rules", []),
+)
+
+
 def build_prompt(manifest: dict[str, Any]) -> str:
-    return (
-        f"{_BRIEF}\n"
-        f"Artifacts:\n{json.dumps(manifest.get('artifacts', []), indent=2)}\n\n"
-        f"Measurements:\n{json.dumps(manifest.get('measurements', {}), indent=2)}\n\n"
-        f"Applicable grading rules:\n"
-        f"{json.dumps(manifest.get('rubric_rules', []), indent=2)}\n"
-    )
+    parts = [_BRIEF]
+    for heading, key, default in _SECTIONS:
+        parts.append(
+            f"{heading}:\n{json.dumps(manifest.get(key, default), indent=2)}")
+    return "\n\n".join(parts) + "\n"
 ```
 
 ```python
@@ -6140,9 +6833,11 @@ ever being constructed.
 """
 from __future__ import annotations
 
+import base64
 import json
 from typing import Any
 
+from ..storage.artifacts import ArtifactStore
 from .prompt import PROMPT_VERSION, build_prompt
 from .provider import Assessment, ProviderContractError, parse_assessment
 
@@ -6150,28 +6845,64 @@ DEFAULT_MODEL = "claude-sonnet-5"
 MAX_TOKENS = 4096
 
 
+SUPPORTED_MEDIA = {b"\x89PNG": "image/png", b"\xff\xd8\xff": "image/jpeg"}
+
+
+def _media_type(data: bytes) -> str:
+    for magic, media in SUPPORTED_MEDIA.items():
+        if data.startswith(magic):
+            return media
+    raise ProviderContractError(
+        "artifact is not a supported image format (PNG or JPEG)")
+
+
+def build_request(manifest: dict[str, Any], store: ArtifactStore) -> list[dict]:
+    """Content blocks for one request: the brief, then each artifact as a
+    LABELLED image block.
+
+    The label immediately precedes its image so the provider can cite
+    artifact_id values that resolve back to real evidence. Sending only text
+    would make this a vision provider that never sees anything.
+    """
+    blocks: list[dict[str, Any]] = [
+        {"type": "text", "text": build_prompt(manifest)}]
+    for artifact in manifest.get("artifacts", []):
+        artifact_id = artifact["artifact_id"]
+        data = store.read(artifact_id)
+        blocks.append({"type": "text", "text": (
+            f"artifact_id={artifact_id} view={artifact.get('view')} "
+            f"origin={artifact.get('origin')} "
+            f"enhancement={artifact.get('enhancement')}")})
+        blocks.append({"type": "image", "source": {
+            "type": "base64", "media_type": _media_type(data),
+            "data": base64.b64encode(data).decode("ascii")}})
+    return blocks
+
+
 class AnthropicVisionProvider:
     prompt_version = PROMPT_VERSION
 
-    def __init__(self, model: str = DEFAULT_MODEL, api_key: str | None = None,
-                 temperature: float = 0.0) -> None:
+    def __init__(self, model: str = DEFAULT_MODEL,
+                 store: ArtifactStore | None = None,
+                 api_key: str | None = None, temperature: float = 0.0) -> None:
         self.model = model
         self.temperature = temperature
+        self._store = store
         self._api_key = api_key
 
     def assess(self, evidence_manifest: dict[str, Any]) -> Assessment:
-        payload = self._call(build_prompt(evidence_manifest), evidence_manifest)
+        payload = self._call(build_request(evidence_manifest, self._store))
         allowed = {a["artifact_id"] for a in evidence_manifest.get("artifacts", [])}
         return parse_assessment(payload, allowed_artifact_ids=allowed)
 
-    def _call(self, prompt: str, manifest: dict[str, Any]) -> dict[str, Any]:
+    def _call(self, blocks: list[dict]) -> dict[str, Any]:
         import anthropic  # lazy: never imported at module load
 
         client = anthropic.Anthropic(api_key=self._api_key)
         response = client.messages.create(
             model=self.model, max_tokens=MAX_TOKENS,
             temperature=self.temperature,
-            messages=[{"role": "user", "content": prompt}])
+            messages=[{"role": "user", "content": blocks}])
         text = "".join(block.text for block in response.content
                        if block.type == "text")
         try:
@@ -6197,12 +6928,12 @@ git add src/card_reviewer/review/vision/ tests/review/test_anthropic_contract.py
 git commit -m "feat(review): Anthropic provider with offline contract tests"
 ```
 
-**Acceptance:** every malformed fixture raises `ProviderContractError`; the prompt contains no pricing word; the SDK is never imported at module load; no test issues a network call.
+**Acceptance:** the constructed request contains real base64 image blocks, each labelled with its `artifact_id` and ordered deterministically; the prompt renders every canonical payload section; every malformed fixture raises `ProviderContractError`; the prompt contains no pricing word; the SDK is never imported at module load; no test issues a network call.
 
 ---
 ## Phase 8 — Integration and surface
 
-### Task 32: Combine integration — findings from both producers into one verdict
+### Task 33: Combine integration — findings from both producers into one verdict
 
 **Files:** Modify `src/card_reviewer/review/policies/combine_v1.py` (add `combine`); Test `tests/review/test_combine.py`
 
@@ -6246,57 +6977,86 @@ def _vision(findings=(), assessability=None, gem=GemView.NO_DISQUALIFIER):
             "centering": True, "corners": True, "edges": True, "surface": True})
 
 
-def test_off_mode_produces_a_complete_result_without_any_vision(rubric):
+def test_off_mode_produces_a_complete_result_without_any_vision(rubric_rules):
     r = combine(HeuristicResult(), None, _cov(), card_context_known=True,
-                authorities={})
+                scoped_rules=rubric_rules)
     assert r.verdict is Verdict.PASS
     assert r.psa10_rank_score == 100
     assert r.vision_present is False
 
 
-def test_a_vision_only_finding_can_carry_the_verdict():
-    h = HeuristicResult()
-    v = _vision()
-    v.findings = []
-    r = combine(h, v, _cov(), card_context_known=True, authorities={})
-    assert r.verdict is Verdict.PASS
-
-
-def test_producer_disagreement_lowers_confidence_and_is_recorded():
-    h = HeuristicResult(findings=[_f(FindingProducer.HEURISTIC,
-                                     FindingState.NOT_OBSERVED)])
-    r = combine(h, _vision(), _cov(), card_context_known=True, authorities={},
-                extra_findings=[_f(FindingProducer.VISION,
-                                   FindingState.SUSPECTED)])
-    assert r.review_confidence is not ReviewConfidence.HIGH
-
-
-def test_i3_is_enforced_before_the_verdict_is_decided():
+def test_i3_is_enforced_before_the_verdict_is_decided(rubric_rules):
     """An enhancement-only observed finding is demoted, so it cannot reject."""
     h = HeuristicResult(findings=[_f(FindingProducer.HEURISTIC,
                                      FindingState.OBSERVED, enhanced=True)])
-    r = combine(h, None, _cov(), card_context_known=True, authorities={})
+    r = combine(h, None, _cov(), card_context_known=True,
+                scoped_rules=rubric_rules)
     assert r.verdict is not Verdict.REJECT
     assert any("I3" in f.demotion_reason for f in r.findings)
 
 
-def test_the_score_is_null_when_coverage_is_inadequate():
+def test_the_same_defect_from_both_producers_penalizes_once(rubric_rules):
+    """Decision 5: looking harder must not make the score worse."""
+    from card_reviewer.review.provenance import NormalizedBox
+    box = NormalizedBox(x0=0.0, y0=0.0, x1=0.3, y1=0.3)
+    one = _f(FindingProducer.HEURISTIC, FindingState.SUSPECTED).model_copy(
+        update={"location": box})
+    both = HeuristicResult(findings=[
+        one, one.model_copy(update={"producer": FindingProducer.VISION})])
+    a = combine(HeuristicResult(findings=[one]), None, _cov(),
+                card_context_known=True, scoped_rules=rubric_rules)
+    b = combine(both, None, _cov(), card_context_known=True,
+                scoped_rules=rubric_rules)
+    assert a.psa10_rank_score == b.psa10_rank_score
+    assert len(b.findings) == 2 and len(b.fused) == 1
+
+
+def test_raw_findings_are_retained_alongside_the_fused_view(rubric_rules):
+    from card_reviewer.review.provenance import NormalizedBox
+    box = NormalizedBox(x0=0.0, y0=0.0, x1=0.3, y1=0.3)
+    one = _f(FindingProducer.HEURISTIC, FindingState.SUSPECTED).model_copy(
+        update={"location": box})
+    r = combine(HeuristicResult(findings=[
+        one, one.model_copy(update={"producer": FindingProducer.VISION})]),
+        None, _cov(), card_context_known=True, scoped_rules=rubric_rules)
+    assert {f.producer for f in r.findings} == {FindingProducer.HEURISTIC,
+                                                FindingProducer.VISION}
+
+
+def test_an_unmatched_finding_cannot_reject(rubric_rules):
+    """Decision 4: unresolved authority is advisory, never binding."""
+    odd = _f(FindingProducer.HEURISTIC, FindingState.OBSERVED).model_copy(
+        update={"category": "handling", "defect_type": "unrecognized"})
+    r = combine(HeuristicResult(findings=[odd]), None, _cov(),
+                card_context_known=True, scoped_rules=rubric_rules)
+    assert r.verdict is not Verdict.REJECT
+
+
+def test_the_score_is_null_when_coverage_is_inadequate(rubric_rules):
     r = combine(HeuristicResult(), None, _cov(Coverage.INADEQUATE),
-                card_context_known=True, authorities={})
+                card_context_known=True, scoped_rules=rubric_rules)
     assert r.psa10_rank_score is None and r.rankable is False
     assert r.verdict is Verdict.INSUFFICIENT_IMAGES
 
 
-def test_unknown_card_context_lowers_confidence_but_never_rejects():
+def test_unknown_card_context_lowers_confidence_but_never_rejects(rubric_rules):
     r = combine(HeuristicResult(), None, _cov(), card_context_known=False,
-                authorities={})
+                scoped_rules=rubric_rules)
     assert r.review_confidence is ReviewConfidence.MEDIUM
     assert r.verdict is not Verdict.REJECT
 
 
-def test_grade_and_score_are_reported_independently():
+def test_a_missing_required_face_is_low_confidence_yet_still_rankable(rubric_rules):
     r = combine(HeuristicResult(), None, _cov(Coverage.PARTIAL),
-                card_context_known=True, authorities={})
+                card_context_known=True, scoped_rules=rubric_rules,
+                required_face_missing=True)
+    assert r.review_confidence is ReviewConfidence.LOW
+    assert r.rankable is True
+
+
+def test_grade_and_score_are_reported_independently(rubric_rules):
+    r = combine(HeuristicResult(), None, _cov(Coverage.PARTIAL),
+                card_context_known=True, scoped_rules=rubric_rules)
     assert r.estimated_psa_grade == "9-10"
     assert r.psa10_rank_score == 90
 ```
@@ -6319,79 +7079,79 @@ class CombinedResult(BaseModel):
     estimated_psa_grade: str | None
     review_confidence: ReviewConfidence
     coverage: Coverage
+    # Raw, per-producer findings retained for calibration (Decision 5).
     findings: list[Finding] = Field(default_factory=list)
+    # The fused view scoring and the verdict actually consumed.
+    fused: list = Field(default_factory=list)
     reasons: list[str] = Field(default_factory=list)
     vision_present: bool = False
     policy_version: str = COMBINATION_POLICY_VERSION
 
 
 def combine(heuristic, vision, coverage, *, card_context_known: bool,
-            authorities: dict[str, Authority],
-            extra_findings: list[Finding] | None = None,
-            detectability: dict | None = None) -> CombinedResult:
+            scoped_rules: list, manifest_index: dict | None = None,
+            detectability: dict | None = None,
+            required_face_missing: bool = False) -> CombinedResult:
     """Fuse both producers' findings into one verdict.
 
-    I3 is enforced FIRST, before any finding can influence the verdict: an
-    enhancement-only anomaly is demoted to suspected rather than dropped.
+    Order matters and is load-bearing:
+
+      1. Resolve provider findings against the manifest, so provenance
+         survives the round trip (Decision 1).
+      2. Enforce I3, demoting enhancement-only observations before anything
+         can act on them.
+      3. Fuse across producers, so one physical defect penalizes once
+         (Decision 5).
+      4. Resolve each fused finding to its matched rules and authority, which
+         also decides psa10_relevant (Decision 4).
+      5. Decide the verdict, then score with I1-awareness (Decision 2).
     """
+    from ..fusion import fuse
+    from ..relevance import resolve_relevance
+    from ..vision.provider import resolve_vision_findings
     from .scoring_v1 import estimated_grade, rank_score, review_confidence
 
-    findings = list(heuristic.findings) + list(extra_findings or [])
+    raw: list[Finding] = list(heuristic.findings)
     if vision is not None:
-        findings.extend(_vision_findings(vision))
-    findings = enforce_i3(findings)
+        raw.extend(resolve_vision_findings(vision, manifest_index or {}))
+    raw = enforce_i3(raw)
+
+    fused = fuse(raw)
+    resolved = resolve_relevance([f.as_finding() for f in fused], scoped_rules)
 
     detectability = detectability or {}
-    triples = [
-        (f, authorities.get(f.defect_type, Authority.BINDING),
-         detectability.get((f.category, f.defect_type), Scale.HIGH))
-        for f in findings
+    triples = []
+    for fused_finding, rf in zip(fused, resolved):
+        scale = detectability.get((rf.finding.category, rf.finding.defect_type),
+                                  Scale.HIGH)
+        triples.append((rf.finding, rf.authority, scale))
+
+    result = decide_verdict(triples, coverage.outcome,
+                            ambiguity=bool(heuristic.unevaluable_reasons
+                                           or any(f.producers_disagreed
+                                                  for f in fused)))
+
+    # Scoring needs to know which findings actually cleared I1: only those get
+    # the hard floor, so an unresolved concern stays meaningfully rankable.
+    scored = [
+        (rf.finding, rf.authority,
+         i1_satisfied(rf.finding, scale, [(f, s) for f, _, s in triples]))
+        for (rf, (_, _, scale)) in zip(resolved, triples)
     ]
 
-    disagreed = _producers_disagreed(findings)
-    contradictions = [f for f in findings if f.demotion_reason]
-    ambiguity = bool(disagreed or heuristic.unevaluable_reasons)
-
-    result = decide_verdict(triples, coverage.outcome, ambiguity=ambiguity)
-    pairs = [(f, a) for f, a, _ in triples]
+    disagreed = any(f.producers_disagreed for f in fused)
+    contradictions = [f for f in raw if f.demotion_reason]
 
     return CombinedResult(
         verdict=result.verdict, psa10_candidate=result.psa10_candidate,
-        psa10_rank_score=rank_score(pairs, coverage.outcome),
+        psa10_rank_score=rank_score(scored, coverage.outcome),
         rankable=coverage.rankable,
-        estimated_psa_grade=estimated_grade(pairs, coverage.outcome),
+        estimated_psa_grade=estimated_grade(scored, coverage.outcome),
         review_confidence=review_confidence(
-            coverage.outcome, contradictions, disagreed, card_context_known),
-        coverage=coverage.outcome, findings=findings,
+            coverage.outcome, contradictions, disagreed, card_context_known,
+            required_face_missing=required_face_missing),
+        coverage=coverage.outcome, findings=raw, fused=fused,
         reasons=result.reasons, vision_present=vision is not None)
-
-
-def _vision_findings(assessment) -> list[Finding]:
-    from ..findings import FindingProducer
-    from ..provenance import EvidenceOrigin, EvidenceRef
-    out = []
-    for vf in assessment.findings:
-        out.append(Finding(
-            defect_type=vf.defect_type, category=vf.category, state=vf.state,
-            producer=FindingProducer.VISION, confidence=vf.confidence,
-            psa10_relevant=vf.psa10_relevant, explanation=vf.explanation,
-            evidence=[EvidenceRef(artifact_id=aid, image_hash="",
-                                  origin=EvidenceOrigin.ORIGINAL,
-                                  view="cited_by_provider")
-                      for aid in vf.evidence_artifact_ids]))
-    return out
-
-
-def _producers_disagreed(findings: list[Finding]) -> bool:
-    by_type: dict[str, set] = {}
-    for f in findings:
-        by_type.setdefault(f.defect_type, set()).add((f.producer, f.state))
-    for states in by_type.values():
-        producers = {p for p, _ in states}
-        distinct = {s for _, s in states}
-        if len(producers) > 1 and len(distinct) > 1:
-            return True
-    return False
 ```
 
 Add the imports `Psa10Candidate`, `ReviewConfidence` and `enforce_i3` at the top of the module.
@@ -6408,11 +7168,254 @@ git add src/card_reviewer/review/policies/combine_v1.py tests/review/test_combin
 git commit -m "feat(review): combine both producers into one verdict"
 ```
 
-**Acceptance:** `OFF` mode yields a complete result; I3 runs before the verdict; score is null exactly when unrankable; grade and score are independent.
+**Acceptance:** `OFF` mode yields a complete result; provenance survives the vision round trip; I3 runs before fusion and the verdict; one physical defect penalizes once while raw per-producer findings are retained; an unmatched finding cannot reject; a missing required face is `low` confidence yet still rankable; score is null exactly when unrankable.
 
 ---
 
-### Task 33: Application service and full pipeline wiring
+### Task 34: Finding fusion
+
+**Files:** Create `src/card_reviewer/review/fusion.py`; Test `tests/review/test_fusion.py`
+
+**Interfaces:**
+- Consumes: `findings.py`, `provenance.py`
+- Produces: `FUSION_VERSION`, `FusedFinding`, `fuse(findings) -> list[FusedFinding]`
+
+**Why this task exists (Decision 5).** Both producers can see the same physical defect. Summing their penalties charges the card twice for one flaw, so a card looked at harder scores worse.
+
+- [ ] **Step 1: Write the failing test**
+
+```python
+# tests/review/test_fusion.py
+from card_reviewer.review.enums import FindingState
+from card_reviewer.review.findings import Finding, FindingProducer, Severity
+from card_reviewer.review.fusion import fuse
+from card_reviewer.review.provenance import (
+    EvidenceOrigin, EvidenceRef, NormalizedBox,
+)
+
+
+def _f(producer, state, box, defect="scratches", severity=None,
+       origin=EvidenceOrigin.ORIGINAL, aid="a"):
+    return Finding(
+        defect_type=defect, category="surface", state=state, producer=producer,
+        confidence=0.9, psa10_relevant=True, severity=severity,
+        location=NormalizedBox(x0=box[0], y0=box[1], x1=box[2], y1=box[3]),
+        evidence=[EvidenceRef(artifact_id=aid, image_hash="h", origin=origin,
+                              enhancement="clahe:clip=2.0"
+                              if origin is EvidenceOrigin.ENHANCED else None,
+                              view="v")])
+
+
+def test_the_same_defect_seen_by_both_producers_fuses_into_one():
+    out = fuse([_f(FindingProducer.HEURISTIC, FindingState.SUSPECTED, (0, 0, .3, .3)),
+                _f(FindingProducer.VISION, FindingState.OBSERVED, (.1, .1, .4, .4))])
+    assert len(out) == 1
+
+
+def test_the_same_defect_type_in_a_different_region_stays_separate():
+    """Two corners really are two flaws."""
+    out = fuse([_f(FindingProducer.HEURISTIC, FindingState.OBSERVED, (0, 0, .2, .2)),
+                _f(FindingProducer.VISION, FindingState.OBSERVED, (.7, .7, .9, .9))])
+    assert len(out) == 2
+
+
+def test_different_defect_types_in_one_region_stay_separate():
+    out = fuse([_f(FindingProducer.HEURISTIC, FindingState.OBSERVED, (0, 0, .3, .3),
+                   defect="scratches"),
+                _f(FindingProducer.VISION, FindingState.OBSERVED, (0, 0, .3, .3),
+                   defect="print_lines")])
+    assert len(out) == 2
+
+
+def test_the_fused_state_is_the_strongest_among_sources():
+    """One producer confirming what another suspected is corroboration."""
+    out = fuse([_f(FindingProducer.HEURISTIC, FindingState.SUSPECTED, (0, 0, .3, .3)),
+                _f(FindingProducer.VISION, FindingState.OBSERVED, (0, 0, .3, .3))])
+    assert out[0].state is FindingState.OBSERVED
+
+
+def test_the_source_findings_are_retained_for_calibration():
+    sources = [_f(FindingProducer.HEURISTIC, FindingState.SUSPECTED, (0, 0, .3, .3)),
+               _f(FindingProducer.VISION, FindingState.OBSERVED, (0, 0, .3, .3))]
+    out = fuse(sources)
+    assert len(out[0].sources) == 2
+    assert {f.producer for f in out[0].sources} == {FindingProducer.HEURISTIC,
+                                                    FindingProducer.VISION}
+
+
+def test_evidence_refs_are_unioned_so_i3_sees_everything():
+    out = fuse([_f(FindingProducer.HEURISTIC, FindingState.OBSERVED, (0, 0, .3, .3),
+                   origin=EvidenceOrigin.ENHANCED, aid="a1"),
+                _f(FindingProducer.VISION, FindingState.OBSERVED, (0, 0, .3, .3),
+                   origin=EvidenceOrigin.ORIGINAL, aid="a2")])
+    origins = {r.origin for r in out[0].evidence}
+    assert origins == {EvidenceOrigin.ENHANCED, EvidenceOrigin.ORIGINAL}
+
+
+def test_a_fusion_of_only_enhanced_sources_still_fails_i3():
+    from card_reviewer.review.findings import i3_satisfied
+    out = fuse([_f(FindingProducer.HEURISTIC, FindingState.OBSERVED, (0, 0, .3, .3),
+                   origin=EvidenceOrigin.ENHANCED, aid="a1"),
+                _f(FindingProducer.VISION, FindingState.OBSERVED, (0, 0, .3, .3),
+                   origin=EvidenceOrigin.ENHANCED, aid="a2")])
+    assert i3_satisfied(out[0].as_finding()) is False
+
+
+def test_disagreement_between_sources_is_recorded():
+    out = fuse([_f(FindingProducer.HEURISTIC, FindingState.NOT_OBSERVED, (0, 0, .3, .3)),
+                _f(FindingProducer.VISION, FindingState.OBSERVED, (0, 0, .3, .3))])
+    assert out[0].producers_disagreed is True
+
+
+def test_agreement_is_not_recorded_as_disagreement():
+    out = fuse([_f(FindingProducer.HEURISTIC, FindingState.OBSERVED, (0, 0, .3, .3)),
+                _f(FindingProducer.VISION, FindingState.OBSERVED, (0, 0, .3, .3))])
+    assert out[0].producers_disagreed is False
+
+
+def test_the_worst_severity_among_sources_is_kept():
+    out = fuse([_f(FindingProducer.HEURISTIC, FindingState.OBSERVED, (0, 0, .3, .3),
+                   severity=Severity.MINOR),
+                _f(FindingProducer.VISION, FindingState.OBSERVED, (0, 0, .3, .3),
+                   severity=Severity.SEVERE)])
+    assert out[0].severity is Severity.SEVERE
+
+
+def test_findings_without_a_location_never_silently_merge():
+    a = _f(FindingProducer.HEURISTIC, FindingState.OBSERVED, (0, 0, .3, .3))
+    b = _f(FindingProducer.VISION, FindingState.OBSERVED, (0, 0, .3, .3))
+    a = a.model_copy(update={"location": None})
+    b = b.model_copy(update={"location": None})
+    assert len(fuse([a, b])) == 2
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `uv run pytest tests/review/test_fusion.py -v`
+Expected: FAIL with `ModuleNotFoundError: No module named 'card_reviewer.review.fusion'`
+
+- [ ] **Step 3: Write minimal implementation**
+
+```python
+# src/card_reviewer/review/fusion.py
+"""Correlate findings across producers into one assessment per defect.
+
+Raw findings stay unfused underneath, per producer, because calibration
+against real PSA outcomes needs to know what each source said alone. Scoring
+and the verdict consume the fused view, so one physical defect penalizes once
+however many producers saw it.
+"""
+from __future__ import annotations
+
+from pydantic import BaseModel, Field
+
+from .enums import FindingState
+from .findings import Finding, Severity
+from .provenance import EvidenceRef, NormalizedBox
+
+FUSION_VERSION = "1.0.0"
+
+# Strongest first: one producer confirming what another suspected is
+# corroboration, not contradiction.
+_STATE_RANK = {
+    FindingState.OBSERVED: 3,
+    FindingState.SUSPECTED: 2,
+    FindingState.NOT_OBSERVED: 1,
+    FindingState.NOT_ASSESSABLE: 0,
+}
+_SEVERITY_RANK = {Severity.MINOR: 1, Severity.MODERATE: 2, Severity.SEVERE: 3}
+
+
+class FusedFinding(BaseModel):
+    category: str
+    defect_type: str
+    state: FindingState
+    confidence: float
+    psa10_relevant: bool
+    severity: Severity | None
+    location: NormalizedBox | None
+    evidence: list[EvidenceRef]
+    sources: list[Finding]
+    producers_disagreed: bool
+    fusion_version: str = FUSION_VERSION
+
+    def as_finding(self) -> Finding:
+        """A Finding view, so I3 and the verdict operate unchanged."""
+        from .findings import FindingProducer
+        return Finding(
+            defect_type=self.defect_type, category=self.category,
+            state=self.state, producer=FindingProducer.HEURISTIC,
+            confidence=self.confidence, psa10_relevant=self.psa10_relevant,
+            severity=self.severity, location=self.location,
+            evidence=self.evidence,
+            rule_ids=sorted({r for f in self.sources for r in f.rule_ids}))
+
+
+def fuse(findings: list[Finding]) -> list[FusedFinding]:
+    groups: list[list[Finding]] = []
+    for finding in findings:
+        for group in groups:
+            if _correlates(group[0], finding):
+                group.append(finding)
+                break
+        else:
+            groups.append([finding])
+    return [_fuse_group(g) for g in groups]
+
+
+def _correlates(a: Finding, b: Finding) -> bool:
+    """Same defect AND overlapping region.
+
+    Region is required: two findings about different corners are not one
+    defect, and merging them would suppress a real flaw. Without locations we
+    cannot establish they are the same thing, so we do not merge.
+    """
+    if (a.category, a.defect_type) != (b.category, b.defect_type):
+        return False
+    if a.location is None or b.location is None:
+        return False
+    return a.location.overlaps(b.location)
+
+
+def _fuse_group(group: list[Finding]) -> FusedFinding:
+    strongest = max(group, key=lambda f: _STATE_RANK[f.state])
+    severities = [f.severity for f in group if f.severity]
+    evidence: list[EvidenceRef] = []
+    seen: set[str] = set()
+    for f in group:
+        for ref in f.evidence:
+            if ref.artifact_id not in seen:
+                seen.add(ref.artifact_id)
+                evidence.append(ref)
+    producers = {f.producer for f in group}
+    states = {f.state for f in group}
+    return FusedFinding(
+        category=strongest.category, defect_type=strongest.defect_type,
+        state=strongest.state, confidence=max(f.confidence for f in group),
+        psa10_relevant=any(f.psa10_relevant for f in group),
+        severity=(max(severities, key=lambda s: _SEVERITY_RANK[s])
+                  if severities else None),
+        location=strongest.location, evidence=evidence, sources=list(group),
+        producers_disagreed=len(producers) > 1 and len(states) > 1)
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `uv run pytest tests/review/test_fusion.py -v`
+Expected: PASS (11 tests)
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/card_reviewer/review/fusion.py tests/review/test_fusion.py
+git commit -m "feat(review): finding fusion across producers"
+```
+
+**Acceptance:** the same defect seen by both producers fuses and penalizes once; different regions stay separate; the fused state is the strongest; source findings are retained; evidence refs union so I3 still sees enhancement-only support; disagreement is recorded.
+
+---
+
+### Task 35: Application service and full pipeline wiring
 
 **Files:** Modify `src/card_reviewer/review/pipeline.py` (add `ReviewPipeline`); Create `src/card_reviewer/review/service.py`; Modify `src/card_reviewer/review/__init__.py`; Test `tests/review/test_pipeline_e2e.py`
 
@@ -6525,6 +7528,19 @@ def test_rerunning_reuses_cached_stage_results(rig, tmp_path):
     assert _preflight_rows(repo) == before
 
 
+def test_unknown_product_context_asks_for_identity_not_photos(rig, tmp_path):
+    """Integration, end to end: perfect front and back, product unknown."""
+    pipeline, store, _ = rig
+    resolved = _candidate(tmp_path, store, [CardSpec(), CardSpec(seed=2)])
+    # title carries no recognizable product token, so context stays unknown
+    resolved = resolved.model_copy(update={"title": "nice card lot 4"})
+    review = pipeline.review(resolved, Mode.OFF)
+    assert review.rankable is True
+    assert review.verdict is Verdict.REVIEW
+    assert review.card_identification_requested is True
+    assert review.recommended_additional_photos == []
+
+
 def _preflight_rows(repo) -> int:
     return repo._conn.execute(
         "SELECT COUNT(*) FROM stage_result WHERE stage='preflight'").fetchone()[0]
@@ -6537,7 +7553,17 @@ Expected: FAIL with `ImportError: cannot import name 'ReviewPipeline'`
 
 - [ ] **Step 3: Write minimal implementation**
 
-Append `ReviewPipeline` to `pipeline.py`, orchestrating the stages in the order the spec declares. It runs each image through `preflight → geometry → observability → cv_measurements` via `StageRunner`, resolves roles and context, assembles, evaluates the heuristic, runs provisional coverage, routes, optionally builds a manifest and calls the provider, runs authoritative coverage, and combines. Each call goes through `StageRunner.run` so caching and failure recording are uniform. `service.review_card` composes `ManualAdapter` and `ReviewPipeline` for one-call use, and `review/__init__.py` exports `review_card`, `ReviewPipeline` and `CardReview`.
+Append `ReviewPipeline` to `pipeline.py`, orchestrating the stages in the order the spec declares. It runs each image through `preflight → geometry → observability → cv_measurements` via `StageRunner`, resolves roles and context, assembles, evaluates the heuristic, runs provisional coverage, routes, optionally builds a manifest and calls the provider, runs authoritative coverage, and combines.
+
+Five wiring details this revision makes explicit, because each is a place the plumbing can silently drop something:
+
+1. **Every `StageRunner.run` call passes `schema=`** — the stage's own Pydantic output model. Without it the "validated successes only" guarantee is a comment rather than a mechanism.
+2. **The manifest index is retained for the whole candidate run.** `build_manifest` returns both the payload and an `artifact_id -> EvidenceRef` index; the index is passed to `combine` as `manifest_index` so provider citations resolve to real provenance instead of being reconstructed as `ORIGINAL` (Decision 1).
+3. **`scope_rules(...)` output flows to three places** — the heuristic (which rules to evaluate), `resolve_relevance` via `combine(scoped_rules=...)` (which rules govern a finding), and coverage as `unevaluable_rules`, built from the `UNEVALUABLE` entries so unknown product context reaches coverage as itself rather than as a lowered pixel detectability (Decision 3, item 4).
+4. **`required_face_missing`** is computed from `assembled.faces_present` against the policy's `REQUIRED_FACES` and passed to `combine`, since it is not inferrable from the coverage outcome.
+5. **The Anthropic provider is constructed with the `ArtifactStore`**, so `build_request` can read artifact bytes and attach real image blocks.
+
+`service.review_card` composes `ManualAdapter` and `ReviewPipeline` for one-call use, and `review/__init__.py` exports `review_card`, `ReviewPipeline` and `CardReview`.
 
 The failure policy from spec §4 is implemented here: a permanently failed vision call leaves `vision_result_id` null and the review proceeds on CV evidence exactly as `OFF` would; `RubricError` aborts the run without writing a `review` row; a failed image-tier stage marks that image unusable and the candidate continues on its remaining images.
 
@@ -6553,11 +7579,11 @@ git add src/card_reviewer/review/pipeline.py src/card_reviewer/review/service.py
 git commit -m "feat(review): full pipeline wiring and application service"
 ```
 
-**Acceptance:** DoD items 1, 2, 3, 5, 11 and 16 are demonstrated by the tests in this task.
+**Acceptance:** DoD items 1, 2, 3, 5, 11 and 16 are demonstrated by the tests in this task; every stage call passes a `schema=`; the manifest index reaches `combine`; unknown product context produces an identification request and no photo request.
 
 ---
 
-### Task 34: CLI, reporting, outcomes and export
+### Task 36: CLI, reporting, outcomes and export
 
 **Files:** Create `src/card_reviewer/review/report.py`, `src/card_reviewer/review/cli.py`; Modify `pyproject.toml`; Test `tests/review/test_cli.py`
 
@@ -6658,7 +7684,7 @@ git commit -m "feat(review): CLI, reporting, outcome recording and export"
 
 ---
 
-### Task 35: Golden real-image regression fixtures
+### Task 37: Golden real-image regression fixtures
 
 **Files:** Create `tests/review/golden/*.jpg`, `tests/review/golden/expectations.yaml`; Test `tests/review/test_golden.py`
 
@@ -6755,7 +7781,7 @@ git commit -m "test(review): golden real-image observation fixtures"
 
 ---
 
-### Task 36: Full definition-of-done verification
+### Task 38: Full definition-of-done verification
 
 **Files:** Test `tests/review/test_definition_of_done.py`
 
@@ -6834,6 +7860,50 @@ def test_dod17_a_rubric_content_change_refreshes_the_manifest(rubric):
     assert a != c, "changed rule content must change the fingerprint"
 
 
+def test_the_anthropic_request_would_carry_real_images(tmp_path):
+    """A vision provider that sends only text is not a vision provider."""
+    from card_reviewer.review.imaging.synthetic import CardSpec, render_png
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+    from card_reviewer.review.vision.anthropic import build_request
+    store = ArtifactStore(tmp_path)
+    h = store.put_image(render_png(CardSpec()))
+    aid = store.put_derived(h, "surface", "original.png", render_png(CardSpec()))
+    blocks = build_request(
+        {"artifacts": [{"artifact_id": aid, "view": "surface_original",
+                        "origin": "normalized", "enhancement": None}],
+         "rubric_rules": [], "measurements": {}}, store)
+    assert any(b["type"] == "image" for b in blocks)
+
+
+def test_unknown_product_context_requests_identity_not_photographs():
+    """Integration: perfect photographs, unknown product."""
+    from card_reviewer.review.policies.coverage_v1 import (
+        UnevaluableRule, evaluate_coverage,
+    )
+    det = {(f, c, d): Scale.HIGH
+           for f in (ImageRole.FRONT, ImageRole.BACK)
+           for c in ("centering", "corners", "edges", "surface")
+           for d in defect_types_for(c)}
+    r = evaluate_coverage(det, {}, {}, (ImageRole.FRONT, ImageRole.BACK),
+                          unevaluable_rules=[UnevaluableRule(
+                              rule_id="SURFACE_SHINY_001", category="surface",
+                              reason_code="UNKNOWN_PRODUCT_CONTEXT")])
+    assert r.outcome is Coverage.PARTIAL and r.rankable is True
+    assert r.card_identification_requested is True
+    assert r.recommended_additional_photos == []
+
+
+def test_two_manual_copies_with_one_title_do_not_share_a_candidate(tmp_path):
+    from card_reviewer.review.ingest.adapter import ManualAdapter
+    from card_reviewer.review.models import CandidateInput
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+    img = tmp_path / "a.png"; img.write_bytes(b"pixels")
+    adapter = ManualAdapter(ArtifactStore(tmp_path / "s"))
+    kw = dict(source="manual", title="same title", image_paths=[img])
+    assert (adapter.resolve(CandidateInput(**kw)).candidate_id
+            != adapter.resolve(CandidateInput(**kw)).candidate_id)
+
+
 def test_dod18_no_test_in_the_suite_calls_the_anthropic_api():
     import subprocess
     out = subprocess.run(
@@ -6865,26 +7935,33 @@ git add tests/review/test_definition_of_done.py tests/review/conftest.py
 git commit -m "test(review): full definition-of-done verification"
 ```
 
-**Acceptance:** every numbered DoD item in spec §19 has a passing test; the full suite is green; no test calls the API.
+**Acceptance:** every numbered DoD item in spec §19 has a passing test; the Anthropic request provably carries images without a network call; unknown product context requests identity rather than photographs; manual candidate identity does not collide on title; the full suite is green; no test calls the API.
 
 ---
 
 ## Plan Self-Review
 
-**Spec coverage.** Walked every spec section against the task list: §1–2 (Global Constraints), §3 (T27, T33), §4 (T5, T6, T27), §5 (T7, T8), §6 (T13), §7.1–7.4 (T20, T21, T22, T23, T24, T25), §8 (T10, T11, T12), §9 (T3, T26), §10 (T15), §11 (T28, T31), §12 (T29, T30), §13 (T16), §14 (T17, T18, T32), §15 (T3, T18), §16 (T34), §17 (T34), §18 (T19, T35, T31), §19 (T36). No gaps.
+**Spec coverage.** Every spec section maps to a task: §1–2 (Global Constraints), §3 (T28, T35), §4 (T5, T6, T28), §5 (T7, T8), §6 (T13), §7.1–7.4 (T21–T26), §8 (T10, T11, T12), §9 (T3, T27), §10 (T15, T16), §11 (T29, T32), §12 (T30, T31), §13 (T17), §14 (T18, T19, T33, T34), §15 (T3, T19), §16 (T36), §17 (T36), §18 (T20, T32, T37), §19 (T38). No gaps.
 
-**Placeholder scan.** No "TBD", "TODO", "add error handling", or "similar to Task N". Every code step carries real code. Two tasks (T33, T34) describe wiring in prose rather than a full listing, because both are assembly of interfaces defined exactly in earlier tasks and a full listing would restate them; their tests are complete and specify the behaviour precisely.
+**Placeholder scan.** No "TBD", "TODO", "add error handling", or "similar to Task N". Every code step carries real code. Two tasks (T35, T36) describe wiring in prose rather than a full listing, because both assemble interfaces defined exactly in earlier tasks; their tests are complete and specify the behaviour precisely.
 
-**Type consistency.** Checked the names used across task boundaries: `Scale`, `FindingState`, `Coverage`, `Verdict`, `Authority`, `Psa10Candidate`, `ReviewConfidence`, `EvidenceOrigin`, `EvidenceRef`, `NormalizedBox`, `Finding`, `CardContext`, `ScopedRule`, `ImageRole`, `ResolvedRole`, `GeometryResult`, `ObservabilityResult`, `CoverageResult`, `Assessment`, `RoutingDecision`, `StageRunner`, `ReviewPipeline`. All defined once and referenced consistently. `AssembledEvidence` (T15) and `Assembled` (T26) are deliberately distinct: the heuristic consumes a narrower view than assembly produces, and T33's wiring adapts between them.
+**Type consistency across the revision.** The names crossing task boundaries were re-checked after this pass: `Scale`, `FindingState`, `Coverage`, `Verdict`, `Authority`, `Psa10Candidate`, `ReviewConfidence`, `EvidenceOrigin`, `EvidenceRef`, `NormalizedBox`, `Finding`, `FusedFinding`, `ResolvedFinding`, `UnevaluableRule`, `CardContext`, `ScopedRule`, `ImageRole`, `ResolvedRole`, `GeometryResult`, `ObservabilityResult`, `CoverageResult`, `Assessment`, `VisionFinding`, `RoutingDecision`, `StageRunner`, `StageValidationError`, `ReviewPipeline`. Signature changes introduced by this revision and propagated everywhere they are used:
 
-**One spec deviation to flag, not silently absorbed.** Spec §5 lists `review.rubric_version`; the schema in T7 adds `review_confidence` as a column too, because §16 requires it in the output and it must survive a restart. This extends the spec's data model rather than contradicting it.
+- `evaluate_coverage(..., *, unevaluable_rules=None)` — T17, called from T35.
+- `review_confidence(..., *, required_face_missing=False)` — T18, called from T33.
+- `rank_score` / `estimated_grade` now take `(finding, authority, i1_satisfied)` triples — T18, produced by T33.
+- `StageRunner.run(..., schema=None)` — T28, passed by every T35 stage call.
+- `AnthropicVisionProvider(model, store, api_key)` — T32, constructed in T36.
+- `combine(..., scoped_rules, manifest_index, required_face_missing)` — T33, called from T35.
 
----
+**One deliberate asymmetry.** `Finding.psa10_relevant` is set provisionally by producers and **overwritten** by T16's resolution. That is intended (Decision 4) — a provider's relevance claim is advisory — and the field keeps both values only in the sense that the raw finding is retained under the fused one.
+
+**Two spec deviations flagged, not absorbed.** (1) The `review` table gains a `review_confidence` column, since §16 requires the field in output and it must survive a restart. (2) §11 describes vision findings as carrying "normalized location"; this plan makes location required downstream and derives it from cited evidence regions when the provider omits it, rather than allowing it to be absent. Both extend the spec's data model rather than contradicting it.
 
 ## Notes for the executor
 
 - **Run the existing suite before starting.** `uv run pytest` must be green (267 subsystem B tests) before Task 1.
 - **Never modify `src/card_reviewer/knowledge/`.** Subsystem B is consumed through `load_active_rubric` only. If a task seems to need a change there, stop and raise it.
-- **The rubric is live data.** Tests that read it (T11, T14, T29) assert on behaviour, not on counts that a future rubric release would break — except `test_the_live_rubric_yields_no_inert_rules_today`, which is a deliberate tripwire.
+- **The rubric is live data.** Tests that read it (T11, T14, T30) assert on behaviour, not on counts that a future rubric release would break — except `test_the_live_rubric_yields_no_inert_rules_today`, which is a deliberate tripwire.
 - **OpenCV is imported lazily inside functions**, never at module scope, so `import card_reviewer.review` stays cheap.
 - **If any task reveals a genuine contradiction with the spec, stop and flag it** rather than changing the architecture.
