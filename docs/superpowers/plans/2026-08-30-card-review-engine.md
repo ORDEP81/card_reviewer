@@ -343,18 +343,19 @@ Phase 4 — Policies (pure logic, the heart of the system)
 
 Phase 5 — Imaging (expensive; synthetic generator first so everything is testable)
   T20 synthetic generator → T21 preflight → T22 geometry
-  → T23 observability → T24 centering → T25 corners/edges → T26 surface
+  → T23 observability → T24 role features → T25 centering
+  → T26 corners/edges → T27 surface
 
 Phase 6 — Assembly and caching
-  T27 evidence assembly → T28 stage runner + validated cache
+  T28 evidence assembly → T29 stage runner + validated cache
 
 Phase 7 — Vision (only after the evidence contract is stable)
-  T29 provider protocol + fakes → T30 canonical payload + manifest builder
-  → T31 routing → T32 Anthropic impl (image blocks) + offline contract tests
+  T30 provider protocol + fakes → T31 canonical payload + manifest builder
+  → T32 routing → T33 Anthropic impl (image blocks) + offline contract tests
 
 Phase 8 — Integration and surface
-  T33 finding fusion → T34 combine integration → T35 service
-  → T36 outcomes+export → T37 golden fixtures → T38 end-to-end
+  T34 finding fusion → T35 combine integration → T36 service
+  → T37 outcomes+export → T38 golden fixtures → T39 end-to-end
 ```
 
 ---
@@ -784,7 +785,7 @@ def test_suspected_finding_is_never_an_i3_violation():
     assert i3_satisfied(f) is True
 
 
-def test_enforce_i3_demotes_rather_than_drops():
+def test_enforce_i3_demotes_rather_than_drops(store):
     """An enhancement-only anomaly is still information — it just cannot reject."""
     findings = [_finding(FindingState.OBSERVED,
                          [_ev(EvidenceOrigin.ENHANCED, "clahe:clip=2.0")])]
@@ -1306,6 +1307,19 @@ def test_an_off_and_a_deep_run_produce_different_routing_fingerprints():
     assert off != deep
 
 
+def test_the_vision_fingerprint_is_the_provider_payload_not_the_builder():
+    """A manifest-builder bump producing identical provider-visible content
+    must not re-bill a call."""
+    assert STAGE_FINGERPRINT_INPUTS["vision"] == ("provider_evidence_payload",)
+    assert "manifest_builder_version" not in STAGE_SIGNATURE_INPUTS["vision"]
+
+
+def test_every_stage_declares_both_a_fingerprint_and_a_signature():
+    """A stage in one table but not the other is a stage the pipeline claims
+    to cache but cannot."""
+    assert set(STAGE_FINGERPRINT_INPUTS) == set(STAGE_SIGNATURE_INPUTS)
+
+
 def test_taxonomy_version_is_in_image_tier_signatures_but_rubric_is_not():
     for stage in ("observability", "cv_measurements"):
         assert "taxonomy_version" in STAGE_SIGNATURE_INPUTS[stage]
@@ -1358,7 +1372,11 @@ STAGE_SIGNATURE_INPUTS: dict[str, tuple[str, ...]] = {
     # measured; changing a rubric rule changes what the measurement means.
     "observability": ("observability_version", "taxonomy_version", "config"),
     "cv_measurements": ("cv_version", "taxonomy_version", "config"),
-    "role_context": ("resolver_version",),
+    # Layout signatures used to infer which face a photograph shows. Its own
+    # stage rather than a side effect of cv_measurements: it is about layout,
+    # not defects, and role resolution consumes it before any defect does.
+    "role_features": ("role_features_version", "config"),
+    "role_context": ("resolver_version", "vocabulary_version"),
     "evidence_assembly": ("assembly_version",),
     "heuristic": ("scorer_version", "authority_policy_version", "weights"),
     "coverage_provisional": ("coverage_policy_version", "taxonomy_version"),
@@ -1378,7 +1396,8 @@ STAGE_FINGERPRINT_INPUTS: dict[str, tuple[str, ...]] = {
     "geometry": ("image_hash", "preflight_output"),
     "observability": ("image_hash", "geometry_output"),
     "cv_measurements": ("image_hash", "geometry_output", "observability_output"),
-    "role_context": ("image_hashes", "per_image_cv", "per_image_geometry",
+    "role_features": ("image_hash", "geometry_output"),
+    "role_context": ("image_hashes", "per_image_role_features",
                      "listing_title", "card_identification_text",
                      "supplied_card_type", "supplied_set", "supplied_roles"),
     "evidence_assembly": ("roles", "context", "per_image_outputs"),
@@ -1388,7 +1407,10 @@ STAGE_FINGERPRINT_INPUTS: dict[str, tuple[str, ...]] = {
                 "assembled_observability", "detectability"),
     "manifest": ("mode_budget", "assembled_evidence", "routing_decision",
                  "applicable_rubric_rule_content"),
-    "vision": ("evidence_manifest",),
+    # ONLY what the provider actually consumes. The builder's own version lives
+    # in the MANIFEST stage's signature, never here: a builder bump producing
+    # identical provider-visible content must not re-bill a call.
+    "vision": ("provider_evidence_payload",),
     "coverage": ("assembled_detectability", "vision_category_assessability",
                  "applicable_rubric_rules"),
     "combine": ("heuristic_output", "vision_output", "coverage_output"),
@@ -1414,7 +1436,7 @@ def signature_for(stage: str, versions: dict[str, Any]) -> str:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/review/test_fingerprint.py -v`
-Expected: PASS (9 tests)
+Expected: PASS (11 tests)
 
 - [ ] **Step 5: Commit**
 
@@ -3531,7 +3553,7 @@ git add src/card_reviewer/review/relevance.py src/card_reviewer/review/policies/
 git commit -m "feat(review): finding-to-rule relevance and authority resolution"
 ```
 
-**Acceptance:** a finding matches only its own category's rules; authority is the max over matched rules; an unmatched finding is `ADVISORY` and not `psa10_relevant`; a provider's relevance claim is overridden; unevaluable and inert rules never contribute.
+**Acceptance:** a finding matches only its own category's rules; authority is the max over matched rules; an unmatched finding **inside a grading category is `psa10_relevant` with `ADVISORY` authority** — it cannot `REJECT` but still penalizes and still routes to `REVIEW`; a finding outside the grading taxonomy is not `psa10_relevant`; a provider's relevance claim is overridden by our policy; unevaluable and inert rules never contribute.
 
 ---
 
@@ -4261,6 +4283,13 @@ def test_i1_requires_the_reject_confidence_floor():
     assert i1_satisfied(_f(conf=0.55), Scale.HIGH, []) is False
 
 
+def test_i1_fails_on_a_contradiction_carried_from_fusion():
+    """Fusion selects the strongest state, so the contradicting source is no
+    longer visible in `others`. The flag is what preserves it."""
+    assert i1_satisfied(_f(), Scale.HIGH, [],
+                        material_contradiction=True) is False
+
+
 def test_i1_fails_on_a_material_contradiction_at_an_overlapping_location():
     contradicting = _f(state=FindingState.NOT_OBSERVED, box=(0.2, 0.2, 0.5, 0.5))
     assert i1_satisfied(_f(), Scale.HIGH, [(contradicting, Scale.HIGH)]) is False
@@ -4281,6 +4310,15 @@ def test_suspected_findings_never_satisfy_i1():
 
 
 # --- verdict precedence ---------------------------------------------------
+
+def test_a_contradicted_finding_does_not_reject_even_at_row_one():
+    """REJECT precedence is evaluated first, so the contradiction must be
+    visible there — not only in the ambiguity clause at row 3."""
+    f = _f()
+    r = decide_verdict([(f, Authority.BINDING, Scale.HIGH)], Coverage.SUFFICIENT,
+                       ambiguity=False, contradicted={id(f)})
+    assert r.verdict is Verdict.REVIEW
+
 
 def test_an_i1_satisfying_disqualifier_rejects():
     r = decide_verdict([(_f(), Authority.BINDING, Scale.HIGH)],
@@ -4427,7 +4465,8 @@ _CANDIDATE: dict[Verdict, Psa10Candidate] = {
 
 
 def i1_satisfied(finding: Finding, detectability: Scale,
-                 others: list[tuple[Finding, Scale]]) -> bool:
+                 others: list[tuple[Finding, Scale]],
+                 *, material_contradiction: bool = False) -> bool:
     """I1 — ambiguity never rejects.
 
     The adequacy prong binds the ASSERTING finding rather than hoping for a
@@ -4442,6 +4481,13 @@ def i1_satisfied(finding: Finding, detectability: Scale,
     if detectability < MIN_DETECTABILITY_FOR_REJECT:
         return False
     if finding.confidence < REJECT_CONFIDENCE_FLOOR:
+        return False
+    # Carried from fusion, which saw the raw sources. Fusion selects the
+    # STRONGEST state, so by the time a fused finding reaches here the
+    # contradicting NOT_OBSERVED source is no longer in `others` — without
+    # this flag a contested defect would reject the card as though it were
+    # uncontested.
+    if material_contradiction:
         return False
     return not _material_contradiction(finding, others)
 
@@ -4466,9 +4512,10 @@ def _material_contradiction(finding: Finding,
 def decide_verdict(
     findings: list[tuple[Finding, Authority, Scale]],
     coverage: Coverage,
-    *, ambiguity: bool,
+    *, ambiguity: bool, contradicted: set[int] | None = None,
 ) -> VerdictResult:
     others = [(f, d) for f, _, d in findings]
+    contradicted = contradicted or set()
     reasons: list[str] = []
 
     # Rule 1 — REJECT. A confidently observed disqualifier is knowledge, not
@@ -4476,7 +4523,8 @@ def decide_verdict(
     for finding, authority, detectability in findings:
         if not finding.psa10_relevant or authority is not Authority.BINDING:
             continue
-        if i1_satisfied(finding, detectability, others):
+        if i1_satisfied(finding, detectability, others,
+                        material_contradiction=id(finding) in contradicted):
             reasons.append(
                 f"{finding.category}/{finding.defect_type} observed and I1-satisfying")
             return _result(Verdict.REJECT, reasons)
@@ -4515,7 +4563,7 @@ def _result(verdict: Verdict, reasons: list[str]) -> VerdictResult:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/review/test_verdict.py -v`
-Expected: PASS (17 tests, including the 24-cell cross-product)
+Expected: PASS (19 tests, including the 24-cell cross-product)
 
 - [ ] **Step 5: Commit**
 
@@ -4570,6 +4618,12 @@ def test_white_and_dark_borders_are_both_producible():
     white = render(CardSpec(border_color=(255, 255, 255)))
     dark = render(CardSpec(border_color=(20, 20, 20)))
     assert white[5, 5].mean() > 200 and dark[5, 5].mean() < 60
+
+
+def test_a_text_heavy_layout_differs_from_a_plain_front():
+    """Backs are simulated this way so Task 24's role features have ground
+    truth to measure against."""
+    assert not np.array_equal(render(CardSpec()), render(CardSpec(text_heavy=True)))
 
 
 def test_a_borderless_design_has_no_uniform_border_band():
@@ -4634,6 +4688,9 @@ class CardSpec(BaseModel):
     border_color: tuple[int, int, int] = (255, 255, 255)
     art_color: tuple[int, int, int] = (40, 90, 160)
     borderless: bool = False
+    # Renders a dense grid of small dark blocks instead of one large art panel,
+    # so a card BACK can be simulated with known ground truth for Task 24.
+    text_heavy: bool = False
     corner_damage: dict[str, float] = Field(default_factory=dict)
     rotation_deg: float = 0.0
     perspective: float = 0.0
@@ -4666,6 +4723,12 @@ def render(spec: CardSpec) -> np.ndarray:
         slack_v = spec.card_h - total_v
         top = int(round(slack_v * spec.v_centering / 100.0))
         img[top:top + total_v, left:left + total_h] = spec.art_color
+
+    if spec.text_heavy:
+        step = 24
+        for y in range(step, spec.card_h - step, step):
+            for x in range(step, spec.card_w - step, step):
+                img[y:y + 8, x:x + 16] = (30, 30, 30)
 
     for name, severity in spec.corner_damage.items():
         r, c = _CORNERS[name]
@@ -4719,7 +4782,7 @@ def render_png(spec: CardSpec) -> bytes:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/review/test_synthetic.py -v`
-Expected: PASS (7 tests including parametrized cases)
+Expected: PASS (8 tests including parametrized cases)
 
 - [ ] **Step 5: Commit**
 
@@ -4873,7 +4936,10 @@ git commit -m "feat(review): preflight raw-image analysis"
 **Files:** Create `src/card_reviewer/review/imaging/geometry.py`; Test `tests/review/test_geometry.py`
 
 **Interfaces:**
-- Produces: `GEOMETRY_VERSION`, `GeometryResult` (quad, transform, `boundary_confidence`, `normalized` image, `border_mask`), `analyze(image_bytes) -> GeometryResult`
+- Consumes: `storage/artifacts.ArtifactStore`
+- Produces: `GEOMETRY_VERSION`, `GeometryResult` (quad, transform, `boundary_confidence`, `has_reliable_border`, plus `normalized_artifact_id` / `border_mask_artifact_id`), `GeometryArtifacts`, `analyze(image_bytes, store, image_hash) -> GeometryResult`, `load_geometry(result, store) -> GeometryArtifacts`
+
+**Cache safety is the constraint that shapes this task.** `geometry` is a cached stage whose output is stored as JSON in SQLite, so the output model cannot contain live NumPy arrays. Pixel products go to the artifact store; the stage output carries their ids.
 
 **Why border segmentation lives here:** both `observability` (is this corner white, so unable to show whitening?) and `cv_measurements` (is there a reliable border reference?) need it, and neither should own a result the other depends on.
 
@@ -4884,43 +4950,75 @@ git commit -m "feat(review): preflight raw-image analysis"
 import cv2
 import numpy as np
 
-from card_reviewer.review.imaging.geometry import analyze
+import pytest
+
+from card_reviewer.review.imaging.geometry import (
+    GeometryResult, analyze, load_geometry,
+)
 from card_reviewer.review.imaging.synthetic import CardSpec, render_png
 
 
-def test_a_clean_card_boundary_is_detected_with_high_confidence():
-    r = analyze(render_png(CardSpec(rotation_deg=0, perspective=0)))
+@pytest.fixture
+def store(tmp_path):
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+    return ArtifactStore(tmp_path)
+
+
+def test_a_clean_card_boundary_is_detected_with_high_confidence(store):
+    r = analyze(render_png(CardSpec(rotation_deg=0, perspective=0)), store, "h1")
     assert r.boundary_confidence > 0.8 and r.quad is not None
 
 
-def test_a_rotated_card_is_rectified_to_an_axis_aligned_image():
-    r = analyze(render_png(CardSpec(rotation_deg=8.0, perspective=0.1, seed=3)))
-    assert r.normalized is not None
-    assert abs(r.normalized.shape[1] / r.normalized.shape[0] - 600 / 840) < 0.1
+def test_a_rotated_card_is_rectified_to_an_axis_aligned_image(store):
+    r = analyze(render_png(CardSpec(rotation_deg=8.0, perspective=0.1, seed=3)),
+                store, "h1")
+    normalized = load_geometry(r, store).normalized
+    assert normalized is not None
+    assert abs(normalized.shape[1] / normalized.shape[0] - 600 / 840) < 0.1
 
 
-def test_unreliable_detection_declines_geometry_dependent_work():
+def test_unreliable_detection_declines_geometry_dependent_work(store):
     """Spec §7.2 / build plan §11: never produce plausible numbers from a bad
     quad."""
     noise = np.random.default_rng(0).integers(0, 255, (800, 600, 3), dtype=np.uint8)
-    r = analyze(cv2.imencode(".png", noise)[1].tobytes())
+    r = analyze(cv2.imencode(".png", noise)[1].tobytes(), store, "h1")
     assert r.boundary_confidence < 0.5
-    assert r.normalized is None
+    assert r.usable is False
 
 
-def test_a_white_border_is_segmented_as_border():
-    r = analyze(render_png(CardSpec(border_color=(255, 255, 255))))
-    assert r.border_mask is not None and r.border_mask[:8, :8].mean() > 0.5
+def test_a_white_border_is_segmented_as_border(store):
+    r = analyze(render_png(CardSpec(border_color=(255, 255, 255))), store, "h1")
+    mask = load_geometry(r, store).border_mask
+    assert mask is not None and mask[:8, :8].mean() > 128
 
 
-def test_a_borderless_design_yields_no_reliable_border_band():
-    r = analyze(render_png(CardSpec(borderless=True)))
-    assert r.has_reliable_border is False
+def test_a_borderless_design_yields_no_reliable_border_band(store):
+    assert analyze(render_png(CardSpec(borderless=True)), store,
+                   "h1").has_reliable_border is False
 
 
-def test_the_perspective_transform_is_emitted_as_provenance():
-    r = analyze(render_png(CardSpec(perspective=0.12, seed=5)))
+def test_the_perspective_transform_is_emitted_as_provenance(store):
+    r = analyze(render_png(CardSpec(perspective=0.12, seed=5)), store, "h1")
     assert r.transform is not None and len(r.transform) == 3
+
+
+def test_the_output_serializes_to_json_for_the_cache(store):
+    """This stage is cached as JSON in SQLite. A live NumPy array in the
+    output model would make the whole image tier uncacheable."""
+    import json
+    r = analyze(render_png(CardSpec()), store, "h1")
+    assert json.loads(r.model_dump_json())["normalized_artifact_id"]
+
+
+def test_a_cached_result_round_trips_to_identical_downstream_pixels(store):
+    """A cache hit and a fresh computation must be indistinguishable to the
+    CV stages that consume this."""
+    import json
+    fresh = analyze(render_png(CardSpec(seed=7)), store, "h1")
+    revived = GeometryResult.model_validate(json.loads(fresh.model_dump_json()))
+    a = load_geometry(fresh, store).normalized
+    b = load_geometry(revived, store).normalized
+    assert np.array_equal(a, b)
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -4939,8 +5037,12 @@ defect location and future model output refers to.
 """
 from __future__ import annotations
 
+from typing import NamedTuple
+
 import numpy as np
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
+
+from ..storage.artifacts import ArtifactStore
 
 GEOMETRY_VERSION = "1.0.0"
 
@@ -4950,18 +5052,56 @@ BORDER_BAND_PX = 24
 
 
 class GeometryResult(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    """Cache-safe: scalars and artifact IDs only.
 
+    This stage's output is stored as JSON in SQLite, so it cannot carry live
+    NumPy arrays. Pixel products are written to the content-addressed store and
+    referenced by id; `load_geometry` resolves them back for downstream CV.
+    """
     boundary_confidence: float
     quad: list[list[float]] | None = None
     transform: list[list[float]] | None = None
-    normalized: np.ndarray | None = None
-    border_mask: np.ndarray | None = None
+    normalized_artifact_id: str | None = None
+    border_mask_artifact_id: str | None = None
     has_reliable_border: bool = False
     version: str = GEOMETRY_VERSION
 
+    @property
+    def usable(self) -> bool:
+        return self.normalized_artifact_id is not None
 
-def analyze(image_bytes: bytes) -> GeometryResult:
+
+class GeometryArtifacts(NamedTuple):
+    """The resolved pixel view, never persisted."""
+    result: GeometryResult
+    normalized: "np.ndarray | None"
+    border_mask: "np.ndarray | None"
+
+
+def load_geometry(result: GeometryResult,
+                  store: ArtifactStore) -> GeometryArtifacts:
+    """Resolve a cached geometry result back to pixels.
+
+    Downstream CV stages call this rather than receiving arrays directly, so a
+    cache hit and a fresh computation are indistinguishable to them.
+    """
+    import cv2
+    import numpy as np
+
+    def _read(artifact_id: str | None, flags: int):
+        if artifact_id is None:
+            return None
+        return cv2.imdecode(np.frombuffer(store.read(artifact_id), np.uint8), flags)
+
+    return GeometryArtifacts(
+        result=result,
+        normalized=_read(result.normalized_artifact_id, cv2.IMREAD_COLOR),
+        border_mask=_read(result.border_mask_artifact_id, cv2.IMREAD_GRAYSCALE))
+
+
+def analyze(image_bytes: bytes, store: ArtifactStore,
+            image_hash: str) -> GeometryResult:
+    """Writes pixel products to the store and returns only references."""
     import cv2
 
     img = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
@@ -4978,10 +5118,18 @@ def analyze(image_bytes: bytes) -> GeometryResult:
     normalized = cv2.warpPerspective(img, matrix, (NORM_W, NORM_H))
     mask, reliable = _segment_border(normalized)
 
+    # `face/` is geometry's own directory; measurement crops live under
+    # corners/, edges/ and surface/ and are invalidated by their own stage.
     return GeometryResult(
         boundary_confidence=confidence, quad=quad.tolist(),
-        transform=matrix.tolist(), normalized=normalized,
-        border_mask=mask, has_reliable_border=reliable)
+        transform=matrix.tolist(),
+        normalized_artifact_id=store.put_derived(
+            image_hash, "face", "normalized.png",
+            cv2.imencode(".png", normalized)[1].tobytes()),
+        border_mask_artifact_id=store.put_derived(
+            image_hash, "face", "border_mask.png",
+            cv2.imencode(".png", (mask * 255).astype(np.uint8))[1].tobytes()),
+        has_reliable_border=reliable)
 
 
 def _detect_quad(img, cv2) -> tuple[np.ndarray | None, float]:
@@ -5024,7 +5172,7 @@ def _segment_border(normalized) -> tuple[np.ndarray, bool]:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/review/test_geometry.py -v`
-Expected: PASS (6 tests)
+Expected: PASS (8 tests)
 
 - [ ] **Step 5: Commit**
 
@@ -5033,7 +5181,7 @@ git add src/card_reviewer/review/imaging/geometry.py tests/review/test_geometry.
 git commit -m "feat(review): geometry, normalization and border segmentation"
 ```
 
-**Acceptance:** an unreliable boundary returns `normalized is None` rather than a plausible-looking rectification; borderless designs report `has_reliable_border is False`.
+**Acceptance:** an unreliable boundary returns `usable is False` rather than a plausible-looking rectification; borderless designs report `has_reliable_border is False`; **the output serializes to JSON and a revived result yields byte-identical downstream pixels**, which is what makes the image tier cacheable at all.
 
 ---
 ### Task 23: Observability — detectability and suitability with classed reason codes
@@ -5041,67 +5189,97 @@ git commit -m "feat(review): geometry, normalization and border segmentation"
 **Files:** Create `src/card_reviewer/review/imaging/observability.py`; Test `tests/review/test_observability.py`
 
 **Interfaces:**
-- Consumes: `geometry.py`, `taxonomy.py`
-- Produces: `OBSERVABILITY_VERSION`, `ObservabilityResult` (per-region-per-defect-type detectability, reason codes with class, per-purpose suitability, glare/occlusion masks), `analyze(geometry_result) -> ObservabilityResult`
+- Consumes: `geometry.py`, `taxonomy.py`, `storage/artifacts.ArtifactStore`
+- Produces: `OBSERVABILITY_VERSION`, `ObservabilityResult` (per-region-per-defect-type detectability, reason codes with class, per-purpose suitability, **glare and occlusion mask artifact ids**), `analyze(geometry_result, store, image_hash) -> ObservabilityResult`
+
+**Cache safety, as in Task 22.** Masks are pixel data and go to the artifact store; tuple keys flatten to `"region|category|defect_type"` so the output is JSON-serializable, with tuple-keyed properties for every consumer.
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/review/test_observability.py
+import pytest
+
 from card_reviewer.review.enums import Scale, UndetectabilityClass
 from card_reviewer.review.imaging.geometry import analyze as geom
 from card_reviewer.review.imaging.observability import analyze
 from card_reviewer.review.imaging.synthetic import CardSpec, render_png
 
 
-def _obs(spec):
-    return analyze(geom(render_png(spec)))
+@pytest.fixture
+def store(tmp_path):
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+    return ArtifactStore(tmp_path)
 
 
-def test_detectability_is_reported_per_region_and_per_defect_type():
-    r = _obs(CardSpec())
+def _obs(spec, store):
+    data = render_png(spec)
+    return analyze(geom(data, store, "h1"), store, "h1")
+
+
+def test_detectability_is_reported_per_region_and_per_defect_type(store):
+    r = _obs(CardSpec(), store)
     assert ("bottom_left", "corners", "whitening") in r.detectability
     assert ("bottom_left", "corners", "rounding") in r.detectability
 
 
-def test_a_white_corner_cannot_show_whitening_and_says_so_structurally():
+def test_a_white_corner_cannot_show_whitening_and_says_so_structurally(store):
     """CORNERS_COLORED_001 as physics: the reason code is WHITE_BORDER and
     its class is structural, so coverage waives it rather than demanding a
     photograph that could never help."""
-    r = _obs(CardSpec(border_color=(255, 255, 255)))
+    r = _obs(CardSpec(border_color=(255, 255, 255)), store)
     key = ("bottom_left", "corners", "whitening")
     assert r.detectability[key] < Scale.MODERATE
     assert r.reason_codes[key] == "WHITE_BORDER"
     assert r.reason_class(key) is UndetectabilityClass.STRUCTURAL
 
 
-def test_the_same_white_corner_is_still_assessable_for_rounding():
+def test_the_same_white_corner_is_still_assessable_for_rounding(store):
     """This is what keeps PASS reachable for white-bordered cards."""
-    r = _obs(CardSpec(border_color=(255, 255, 255)))
+    r = _obs(CardSpec(border_color=(255, 255, 255)), store)
     assert r.detectability[("bottom_left", "corners", "rounding")] >= Scale.MODERATE
 
 
-def test_a_dark_border_gives_high_whitening_detectability():
-    r = _obs(CardSpec(border_color=(20, 20, 20)))
+def test_a_dark_border_gives_high_whitening_detectability(store):
+    r = _obs(CardSpec(border_color=(20, 20, 20)), store)
     assert r.detectability[("bottom_left", "corners", "whitening")] >= Scale.MODERATE
 
 
-def test_glare_is_circumstantial_not_structural():
-    r = _obs(CardSpec(border_color=(20, 20, 20), glare_regions=["top_left"], seed=2))
+def test_glare_is_circumstantial_not_structural(store):
+    r = _obs(CardSpec(border_color=(20, 20, 20), glare_regions=["top_left"], seed=2), store)
     key = ("top_left", "surface", "scratches")
     assert r.reason_codes.get(key) == "GLARE"
     assert r.reason_class(key) is UndetectabilityClass.CIRCUMSTANTIAL
 
 
-def test_a_photo_can_be_good_for_centering_and_useless_for_surface():
+def test_a_photo_can_be_good_for_centering_and_useless_for_surface(store):
     """A glare spot must not condemn a whole image."""
-    r = _obs(CardSpec(border_color=(20, 20, 20), glare_regions=["top_left"], seed=2))
+    r = _obs(CardSpec(border_color=(20, 20, 20), glare_regions=["top_left"], seed=2), store)
     assert r.suitability["centering"] >= Scale.MODERATE
     assert r.suitability["surface"] < r.suitability["centering"]
 
 
-def test_every_shortfall_below_moderate_carries_a_declared_reason_code():
-    r = _obs(CardSpec(border_color=(255, 255, 255)))
+def test_the_output_revives_from_json_with_identical_detectability(store):
+    """Cache round trip: tuple keys must survive JSON or the image tier is
+    not cacheable at all."""
+    import json
+    from card_reviewer.review.imaging.observability import ObservabilityResult
+    fresh = _obs(CardSpec(), store)
+    revived = ObservabilityResult.model_validate(json.loads(fresh.model_dump_json()))
+    assert revived.detectability == fresh.detectability
+    assert revived.reason_codes == fresh.reason_codes
+
+
+def test_glare_and_occlusion_masks_are_stored_as_artifacts(store):
+    """This task's interface promises masks; they are pixel data, so they are
+    referenced rather than embedded."""
+    r = _obs(CardSpec(glare_regions=["top_left"], seed=2), store)
+    assert r.glare_mask_artifact_id and store.read(r.glare_mask_artifact_id)
+    assert r.occlusion_mask_artifact_id
+
+
+def test_every_shortfall_below_moderate_carries_a_declared_reason_code(store):
+    r = _obs(CardSpec(border_color=(255, 255, 255)), store)
     for key, value in r.detectability.items():
         if value < Scale.MODERATE:
             assert key in r.reason_codes
@@ -5131,40 +5309,71 @@ import numpy as np
 from pydantic import BaseModel, Field
 
 from ..enums import Scale, UndetectabilityClass
-from ..taxonomy import CATEGORIES, class_of, defect_types_for
-from .geometry import GeometryResult
+from ..storage.artifacts import ArtifactStore
+from ..taxonomy import CATEGORIES, TAXONOMY_VERSION, class_of, defect_types_for
+from .geometry import GeometryResult, load_geometry
 
 OBSERVABILITY_VERSION = "1.0.0"
 
 REGIONS = ("top_left", "top_right", "bottom_left", "bottom_right", "center")
 WHITE_BORDER_LUMA = 200.0
 GLARE_LUMA = 245.0
+OCCLUSION_LUMA = 12.0
 GLARE_FRACTION = 0.15
 
 Key = tuple[str, str, str]
 
 
 class ObservabilityResult(BaseModel):
-    detectability: dict[Key, Scale] = Field(default_factory=dict)
-    reason_codes: dict[Key, str] = Field(default_factory=dict)
-    suitability: dict[str, Scale] = Field(default_factory=dict)
+    """Cache-safe: JSON-serializable scalars plus artifact ids.
+
+    Tuple keys are stored as `"region|category|defect_type"` strings, because
+    JSON object keys must be strings; the tuple view every consumer uses is
+    exposed as a property.
+    """
+    detectability_flat: dict[str, str] = Field(default_factory=dict)
+    reason_codes_flat: dict[str, str] = Field(default_factory=dict)
+    suitability: dict[str, str] = Field(default_factory=dict)
+    glare_mask_artifact_id: str | None = None
+    occlusion_mask_artifact_id: str | None = None
     version: str = OBSERVABILITY_VERSION
+    taxonomy_version: str = TAXONOMY_VERSION
+
+    @staticmethod
+    def _key(k: Key) -> str:
+        return "|".join(k)
+
+    @staticmethod
+    def _unkey(k: str) -> Key:
+        region, category, defect_type = k.split("|")
+        return (region, category, defect_type)
+
+    @property
+    def detectability(self) -> dict[Key, Scale]:
+        return {self._unkey(k): Scale(v)
+                for k, v in self.detectability_flat.items()}
+
+    @property
+    def reason_codes(self) -> dict[Key, str]:
+        return {self._unkey(k): v for k, v in self.reason_codes_flat.items()}
 
     def reason_class(self, key: Key) -> UndetectabilityClass | None:
         code = self.reason_codes.get(key)
         return class_of(code) if code else None
 
 
-def analyze(geometry: GeometryResult) -> ObservabilityResult:
-    if geometry.normalized is None:
+def analyze(geometry: GeometryResult, store: ArtifactStore,
+            image_hash: str) -> ObservabilityResult:
+    import cv2
+    import numpy as np
+
+    if not geometry.usable:
         det = {(r, c, d): Scale.NONE
                for r in REGIONS for c in CATEGORIES for d in defect_types_for(c)}
-        return ObservabilityResult(
-            detectability=det,
-            reason_codes={k: "SEVERE_PERSPECTIVE" for k in det},
-            suitability={c: Scale.NONE for c in CATEGORIES})
+        return _build(det, {k: "SEVERE_PERSPECTIVE" for k in det}, None, None)
 
-    gray = geometry.normalized.mean(axis=2)
+    normalized = load_geometry(geometry, store).normalized
+    gray = normalized.mean(axis=2)
     det: dict[Key, Scale] = {}
     reasons: dict[Key, str] = {}
 
@@ -5185,9 +5394,27 @@ def analyze(geometry: GeometryResult) -> ObservabilityResult:
                     det[key], reasons[key] = Scale.LOW, "BORDERLESS_DESIGN"
                 else:
                     det[key] = Scale.HIGH
+    # Masks are pixel data, so they go to the store and the output carries ids.
+    glare = (gray >= GLARE_LUMA).astype(np.uint8) * 255
+    occlusion = (gray <= OCCLUSION_LUMA).astype(np.uint8) * 255
+    return _build(
+        det, reasons,
+        store.put_derived(image_hash, "masks", "glare.png",
+                          cv2.imencode(".png", glare)[1].tobytes()),
+        store.put_derived(image_hash, "masks", "occlusion.png",
+                          cv2.imencode(".png", occlusion)[1].tobytes()))
+
+
+def _build(det: dict[Key, Scale], reasons: dict[Key, str],
+           glare_id: str | None, occlusion_id: str | None) -> ObservabilityResult:
     return ObservabilityResult(
-        detectability=det, reason_codes=reasons,
-        suitability=_suitability(det))
+        detectability_flat={ObservabilityResult._key(k): v.label
+                            for k, v in det.items()},
+        reason_codes_flat={ObservabilityResult._key(k): v
+                           for k, v in reasons.items()},
+        suitability={c: v.label for c, v in _suitability(det).items()},
+        glare_mask_artifact_id=glare_id,
+        occlusion_mask_artifact_id=occlusion_id)
 
 
 def _patch(gray: np.ndarray, region: str) -> np.ndarray:
@@ -5211,7 +5438,7 @@ def _suitability(det: dict[Key, Scale]) -> dict[str, Scale]:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/review/test_observability.py -v`
-Expected: PASS (7 tests)
+Expected: PASS (9 tests)
 
 - [ ] **Step 5: Commit**
 
@@ -5220,11 +5447,155 @@ git add src/card_reviewer/review/imaging/observability.py tests/review/test_obse
 git commit -m "feat(review): observability with per-defect-type classed detectability"
 ```
 
-**Acceptance:** a white corner is `WHITE_BORDER`/structural for whitening yet still assessable for rounding; glare is circumstantial; every sub-`MODERATE` value carries a declared code.
+**Acceptance:** a white corner is `WHITE_BORDER`/structural for whitening yet still assessable for rounding; glare is circumstantial; every sub-`MODERATE` value carries a declared code; **the output revives from JSON with identical detectability, and glare/occlusion masks exist as artifacts**.
 
 ---
 
-### Task 24: Centering measurement
+### Task 24: Image-role features
+
+**Files:** Create `src/card_reviewer/review/imaging/role_features.py`; Test `tests/review/test_role_features.py`
+
+**Interfaces:**
+- Consumes: `imaging/geometry.py`, `storage/artifacts.ArtifactStore`
+- Produces: `ROLE_FEATURES_VERSION`, `RoleFeatures` (`text_density`, `has_central_image_region`, `layout_confidence`), `extract_role_features(geometry, store) -> RoleFeatures`
+
+**Why this is its own stage.** Task 12 resolves roles from `text_density` and `has_central_image_region`, and nothing produced them — they were magic keys. They are *layout* measurements, not defect measurements, so folding them into `cv_measurements` would make role resolution depend on the defect analyzer's version for no reason. A separate image-tier stage keeps the dependency honest and cached by image hash like its neighbours.
+
+- [ ] **Step 1: Write the failing test**
+
+```python
+# tests/review/test_role_features.py
+import pytest
+
+from card_reviewer.review.imaging.geometry import analyze as geom
+from card_reviewer.review.imaging.role_features import (
+    ROLE_FEATURES_VERSION, RoleFeatures, extract_role_features,
+)
+from card_reviewer.review.imaging.synthetic import CardSpec, render_png
+from card_reviewer.review.storage.artifacts import ArtifactStore
+
+
+@pytest.fixture
+def store(tmp_path):
+    return ArtifactStore(tmp_path)
+
+
+def _features(spec, store):
+    data = render_png(spec)
+    return extract_role_features(geom(data, store, "h1"), store)
+
+
+def test_a_card_front_has_a_large_central_image_region(store):
+    f = _features(CardSpec(), store)
+    assert f.has_central_image_region is True
+
+
+def test_a_text_heavy_layout_reports_high_text_density(store):
+    """A back is dominated by small high-frequency detail — stat lines, the
+    card number, the copyright block — rather than one large image."""
+    f = _features(CardSpec(text_heavy=True, seed=3), store)
+    assert f.text_density > _features(CardSpec(seed=3), store).text_density
+
+
+def test_features_are_bounded_and_serializable(store):
+    import json
+    f = _features(CardSpec(), store)
+    assert 0.0 <= f.text_density <= 1.0
+    revived = RoleFeatures.model_validate(json.loads(f.model_dump_json()))
+    assert revived == f
+
+
+def test_unusable_geometry_yields_zero_confidence_not_a_guess(store):
+    from card_reviewer.review.imaging.geometry import GeometryResult
+    f = extract_role_features(GeometryResult(boundary_confidence=0.1), store)
+    assert f.layout_confidence == 0.0
+    assert f.has_central_image_region is False
+
+
+def test_the_version_is_declared(store):
+    assert _features(CardSpec(), store).version == ROLE_FEATURES_VERSION
+```
+
+The synthetic generator gains a `text_heavy: bool = False` field that renders a dense grid of small dark rectangles instead of one large art panel, so a back can be simulated with known ground truth.
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `uv run pytest tests/review/test_role_features.py -v`
+Expected: FAIL with `ModuleNotFoundError: No module named 'card_reviewer.review.imaging.role_features'`
+
+- [ ] **Step 3: Write minimal implementation**
+
+```python
+# src/card_reviewer/review/imaging/role_features.py
+"""Layout signatures used to infer which face a photograph shows.
+
+Separate from cv_measurements on purpose: this is about layout, not defects,
+and Task 12's role resolution consumes it before any defect analysis runs.
+Keeping it apart means a defect-analyzer bump does not invalidate role
+resolution, and a layout change does not invalidate defect measurements.
+"""
+from __future__ import annotations
+
+from pydantic import BaseModel, Field
+
+from ..storage.artifacts import ArtifactStore
+from .geometry import GeometryResult, load_geometry
+
+ROLE_FEATURES_VERSION = "1.0.0"
+
+# A back's detail is small and high-frequency; a front's is one large region.
+EDGE_DENSITY_SCALE = 0.25
+CENTRAL_REGION_MIN_UNIFORMITY = 0.55
+
+
+class RoleFeatures(BaseModel):
+    text_density: float = Field(default=0.0, ge=0.0, le=1.0)
+    has_central_image_region: bool = False
+    layout_confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+    version: str = ROLE_FEATURES_VERSION
+
+
+def extract_role_features(geometry: GeometryResult,
+                          store: ArtifactStore) -> RoleFeatures:
+    import cv2
+    import numpy as np
+
+    if not geometry.usable:
+        # Unknown is a first-class state (spec §8). Never guess a face.
+        return RoleFeatures()
+
+    normalized = load_geometry(geometry, store).normalized
+    gray = cv2.cvtColor(normalized, cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(gray, 60, 160)
+    text_density = float(min(1.0, (edges > 0).mean() / EDGE_DENSITY_SCALE))
+
+    h, w = gray.shape
+    centre = gray[h // 4:3 * h // 4, w // 4:3 * w // 4]
+    centre_edges = cv2.Canny(centre, 60, 160)
+    uniformity = 1.0 - float((centre_edges > 0).mean() / EDGE_DENSITY_SCALE)
+    return RoleFeatures(
+        text_density=text_density,
+        has_central_image_region=uniformity >= CENTRAL_REGION_MIN_UNIFORMITY,
+        layout_confidence=float(geometry.boundary_confidence))
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `uv run pytest tests/review/test_role_features.py -v`
+Expected: PASS (5 tests)
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/card_reviewer/review/imaging/role_features.py tests/review/test_role_features.py
+git commit -m "feat(review): image-role layout features as their own cached stage"
+```
+
+**Acceptance:** `text_density` and `has_central_image_region` have a declared producer, schema and version; unusable geometry yields zero confidence rather than a guessed face; the output is JSON-serializable for the cache.
+
+---
+
+### Task 25: Centering measurement
 
 **Files:** Create `src/card_reviewer/review/imaging/measure/__init__.py`, `measure/centering.py`; Test `tests/review/test_measure_centering.py`
 
@@ -5240,43 +5611,49 @@ import pytest
 from card_reviewer.review.imaging.geometry import analyze as geom
 from card_reviewer.review.imaging.measure.centering import measure_centering
 from card_reviewer.review.imaging.synthetic import CardSpec, render_png
+from card_reviewer.review.storage.artifacts import ArtifactStore
+
+
+@pytest.fixture
+def store(tmp_path):
+    return ArtifactStore(tmp_path)
 
 
 @pytest.mark.parametrize("truth", [50.0, 55.0, 60.0, 65.0])
-def test_measured_centering_lands_within_the_declared_tolerance(truth):
-    m = measure_centering(geom(render_png(CardSpec(h_centering=truth))))
+def test_measured_centering_lands_within_the_declared_tolerance(truth, store):
+    m = measure_centering(geom(render_png(CardSpec(h_centering=truth)), store, "h"), store)
     assert m.measurable is True
     assert abs(m.horizontal - truth) <= m.precision_pp
 
 
 def test_the_measurement_declares_its_own_precision():
-    m = measure_centering(geom(render_png(CardSpec())))
+    m = measure_centering(geom(render_png(CardSpec()), store, "h"), store)
     assert m.precision_pp == 1.5
 
 
 def test_a_borderless_design_reports_not_measurable_with_a_reason():
-    m = measure_centering(geom(render_png(CardSpec(borderless=True))))
+    m = measure_centering(geom(render_png(CardSpec(borderless=True)), store, "h"), store)
     assert m.measurable is False
     assert m.reason == "BORDERLESS_OR_NO_RELIABLE_REFERENCE"
 
 
 def test_no_ratio_is_forced_onto_a_borderless_card():
     """CENTERING_BORDERLESS_001 binds directly here."""
-    m = measure_centering(geom(render_png(CardSpec(borderless=True))))
+    m = measure_centering(geom(render_png(CardSpec(borderless=True)), store, "h"), store)
     assert m.horizontal is None and m.vertical is None
 
 
-def test_the_measurement_carries_no_acceptability_judgment():
+def test_the_measurement_carries_no_acceptability_judgment(store):
     """Product leniency is the heuristic layer's decision, never the
     measurement layer's — CENTERING_PRODUCT_LENIENCY_001 does not apply here."""
-    m = measure_centering(geom(render_png(CardSpec(h_centering=62.0))))
+    m = measure_centering(geom(render_png(CardSpec(h_centering=62.0)), store, "h"), store)
     assert not hasattr(m, "passes")
     assert not hasattr(m, "acceptable")
 
 
 def test_an_undetected_boundary_yields_not_measurable():
     from card_reviewer.review.imaging.geometry import GeometryResult
-    m = measure_centering(GeometryResult(boundary_confidence=0.1))
+    m = measure_centering(GeometryResult(boundary_confidence=0.1), store)
     assert m.measurable is False
 ```
 
@@ -5300,7 +5677,8 @@ from __future__ import annotations
 import numpy as np
 from pydantic import BaseModel
 
-from ..geometry import GeometryResult
+from ...storage.artifacts import ArtifactStore
+from ..geometry import GeometryResult, load_geometry
 
 PRECISION_PP = 1.5
 INK_VARIANCE_FRACTION = 0.25
@@ -5315,12 +5693,13 @@ class CenteringMeasurement(BaseModel):
     reason: str | None = None
 
 
-def measure_centering(geometry: GeometryResult) -> CenteringMeasurement:
-    if geometry.normalized is None or not geometry.has_reliable_border:
+def measure_centering(geometry: GeometryResult,
+                      store: ArtifactStore) -> CenteringMeasurement:
+    if not geometry.usable or not geometry.has_reliable_border:
         return CenteringMeasurement(
             measurable=False, reason="BORDERLESS_OR_NO_RELIABLE_REFERENCE")
 
-    gray = geometry.normalized.mean(axis=2)
+    gray = load_geometry(geometry, store).normalized.mean(axis=2)
     horizontal = _ratio(gray.std(axis=0))
     vertical = _ratio(gray.std(axis=1))
     if horizontal is None or vertical is None:
@@ -5360,7 +5739,7 @@ git commit -m "feat(review): centering measurement with declared precision"
 
 ---
 
-### Task 25: Corner and edge crops with anomaly candidates
+### Task 26: Corner and edge crops with anomaly candidates
 
 **Files:** Create `src/card_reviewer/review/imaging/measure/corners.py`, `measure/edges.py`; Test `tests/review/test_measure_corners_edges.py`
 
@@ -5388,19 +5767,19 @@ def store(tmp_path):
 
 
 def test_four_corner_crops_are_produced_per_image(store):
-    r = measure_corners(geom(render_png(CardSpec())), store, "h1")
+    r = measure_corners(geom(render_png(CardSpec()), store, "h1"), store, "h1")
     assert len(r.crops) == 4
 
 
 def test_crops_land_in_the_measurement_owned_directory(store):
-    r = measure_corners(geom(render_png(CardSpec())), store, "h1")
+    r = measure_corners(geom(render_png(CardSpec()), store, "h1"), store, "h1")
     assert "/corners/" in str(store.path_of(next(iter(r.crops.values()))))
 
 
 def test_corner_damage_produces_an_anomaly_candidate_not_a_defect(store):
     spec = CardSpec(border_color=(20, 20, 20),
                     corner_damage={"bottom_left": 0.9})
-    r = measure_corners(geom(render_png(spec)), store, "h1")
+    r = measure_corners(geom(render_png(spec), store, "h1"), store, "h1")
     assert any(a["region"] == "bottom_left" for a in r.anomalies)
     for a in r.anomalies:
         assert a["kind"] == "candidate"
@@ -5408,18 +5787,19 @@ def test_corner_damage_produces_an_anomaly_candidate_not_a_defect(store):
 
 
 def test_a_clean_card_yields_no_corner_anomalies(store):
-    r = measure_corners(geom(render_png(CardSpec(border_color=(20, 20, 20)))),
-                        store, "h1")
+    r = measure_corners(
+        geom(render_png(CardSpec(border_color=(20, 20, 20))), store, "h1"),
+        store, "h1")
     assert r.anomalies == []
 
 
 def test_evidence_refs_record_normalized_origin_not_enhanced(store):
-    r = measure_corners(geom(render_png(CardSpec())), store, "h1")
+    r = measure_corners(geom(render_png(CardSpec()), store, "h1"), store, "h1")
     assert all(ref.origin is EvidenceOrigin.NORMALIZED for ref in r.evidence_refs)
 
 
 def test_four_edge_strips_are_produced_per_image(store):
-    r = measure_edges(geom(render_png(CardSpec())), store, "h1")
+    r = measure_edges(geom(render_png(CardSpec()), store, "h1"), store, "h1")
     assert len(r.crops) == 4
 ```
 
@@ -5442,7 +5822,7 @@ from pydantic import BaseModel, Field
 
 from ...provenance import EvidenceOrigin, EvidenceRef, NormalizedBox
 from ...storage.artifacts import ArtifactStore
-from ..geometry import GeometryResult
+from ..geometry import GeometryResult, load_geometry
 
 CORNER_FRACTION = 0.12
 ANOMALY_CONTRAST = 45.0
@@ -5464,9 +5844,9 @@ def measure_corners(geometry: GeometryResult, store: ArtifactStore,
     import cv2
 
     result = CornerResult()
-    if geometry.normalized is None:
+    if not geometry.usable:
         return result
-    img = geometry.normalized
+    img = load_geometry(geometry, store).normalized
     h, w = img.shape[:2]
     size_x, size_y = int(w * CORNER_FRACTION), int(h * CORNER_FRACTION)
 
@@ -5508,7 +5888,7 @@ from pydantic import BaseModel, Field
 
 from ...provenance import EvidenceOrigin, EvidenceRef, NormalizedBox
 from ...storage.artifacts import ArtifactStore
-from ..geometry import GeometryResult
+from ..geometry import GeometryResult, load_geometry
 
 EDGE_FRACTION = 0.06
 ANOMALY_CONTRAST = 45.0
@@ -5527,9 +5907,9 @@ def measure_edges(geometry: GeometryResult, store: ArtifactStore,
     import cv2
 
     result = EdgeResult()
-    if geometry.normalized is None:
+    if not geometry.usable:
         return result
-    img = geometry.normalized
+    img = load_geometry(geometry, store).normalized
     h, w = img.shape[:2]
     band_y, band_x = int(h * EDGE_FRACTION), int(w * EDGE_FRACTION)
 
@@ -5574,7 +5954,7 @@ git commit -m "feat(review): corner and edge crops with anomaly candidates"
 
 ---
 
-### Task 26: Surface enhancement with recorded provenance
+### Task 27: Surface enhancement with recorded provenance
 
 **Files:** Create `src/card_reviewer/review/imaging/measure/surface.py`; Test `tests/review/test_measure_surface.py`
 
@@ -5596,8 +5976,9 @@ from card_reviewer.review.storage.artifacts import ArtifactStore
 
 @pytest.fixture
 def result(tmp_path):
-    return measure_surface(geom(render_png(CardSpec(seed=4))),
-                           ArtifactStore(tmp_path), "h1")
+    store = ArtifactStore(tmp_path)
+    return measure_surface(geom(render_png(CardSpec(seed=4)), store, "h1"),
+                           store, "h1")
 
 
 def test_the_unenhanced_original_is_always_preserved_alongside(result):
@@ -5612,10 +5993,9 @@ def test_every_enhanced_view_records_its_method(result):
 
 
 def test_enhancement_parameters_are_reproducible(tmp_path):
-    a = measure_surface(geom(render_png(CardSpec(seed=4))),
-                        ArtifactStore(tmp_path / "a"), "h1")
-    b = measure_surface(geom(render_png(CardSpec(seed=4))),
-                        ArtifactStore(tmp_path / "b"), "h1")
+    sa, sb = ArtifactStore(tmp_path / "a"), ArtifactStore(tmp_path / "b")
+    a = measure_surface(geom(render_png(CardSpec(seed=4)), sa, "h1"), sa, "h1")
+    b = measure_surface(geom(render_png(CardSpec(seed=4)), sb, "h1"), sb, "h1")
     assert ({r.enhancement for r in a.evidence_refs}
             == {r.enhancement for r in b.evidence_refs})
 
@@ -5655,7 +6035,7 @@ from pydantic import BaseModel, Field
 
 from ...provenance import EvidenceOrigin, EvidenceRef
 from ...storage.artifacts import ArtifactStore
-from ..geometry import GeometryResult
+from ..geometry import GeometryResult, load_geometry
 
 CLAHE_CLIP = 2.0
 CLAHE_GRID = 8
@@ -5681,9 +6061,9 @@ def measure_surface(geometry: GeometryResult, store: ArtifactStore,
     import numpy as np
 
     result = SurfaceResult()
-    if geometry.normalized is None:
+    if not geometry.usable:
         return result
-    img = geometry.normalized
+    img = load_geometry(geometry, store).normalized
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     original_id = store.put_derived(image_hash, "surface", "original.png",
@@ -5741,7 +6121,7 @@ git commit -m "feat(review): surface enhancement with recorded provenance"
 ---
 ## Phase 6 — Assembly and caching
 
-### Task 27: Candidate-level evidence assembly
+### Task 28: Candidate-level evidence assembly
 
 **Files:** Create `src/card_reviewer/review/assembly.py`; Test `tests/review/test_assembly.py`
 
@@ -5980,7 +6360,7 @@ git commit -m "feat(review): candidate-level evidence assembly"
 
 ---
 
-### Task 28: Stage runner with content-addressed caching
+### Task 29: Stage runner with content-addressed caching
 
 **Files:** Create `src/card_reviewer/review/pipeline.py` (stage runner only); Test `tests/review/test_stage_runner.py`
 
@@ -6164,6 +6544,18 @@ class StageRunner:
                                     image_hash=image_hash,
                                     candidate_id=candidate_id)
         return output
+
+    def run_with_id(self, stage: str, inputs: dict[str, Any],
+                    versions: dict[str, Any], compute, **kw) -> tuple[dict, int]:
+        """As `run`, plus the `stage_result` row id.
+
+        `review` carries foreign keys to the exact rows that produced it, so
+        `_persist` needs the id rather than re-deriving the cache key.
+        """
+        output = self.run(stage, inputs, versions, compute, **kw)
+        row = self._repo.get_stage_result(stage, fingerprint(inputs),
+                                          signature_for(stage, versions))
+        return output, row.id
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -6184,7 +6576,7 @@ git commit -m "feat(review): stage runner with validated-success-only caching"
 
 ## Phase 7 — Vision
 
-### Task 29: Provider protocol and offline fakes
+### Task 30: Provider protocol and offline fakes
 
 **Files:** Create `src/card_reviewer/review/vision/__init__.py`, `vision/provider.py`; Test `tests/review/test_vision_provider.py`
 
@@ -6381,6 +6773,15 @@ class Assessment(BaseModel):
 class VisionProvider(Protocol):
     def assess(self, evidence_manifest: dict[str, Any]) -> Assessment: ...
 
+    def signature(self) -> dict[str, Any]:
+        """Provider identity for the vision stage's producer signature.
+
+        Must contain exactly `provider`, `model`, `prompt_version` and
+        `inference_params`. Exposing it here is what lets the pipeline cache a
+        vision result without importing or knowing about Anthropic.
+        """
+        ...
+
 
 def parse_assessment(payload: dict[str, Any],
                      allowed_artifact_ids: set[str]) -> Assessment:
@@ -6456,13 +6857,20 @@ def _derive_location(refs: list["EvidenceRef"]) -> "NormalizedBox | None":
 class FakeProvider:
     """Deterministic stand-in. Every pipeline test uses this, never the API."""
 
-    def __init__(self, assessment: Assessment) -> None:
+    def __init__(self, assessment: Assessment, *, model: str = "fake-model",
+                 prompt_version: str = "1.0.0") -> None:
         self._assessment = assessment
+        self._model = model
+        self._prompt_version = prompt_version
         self.calls = 0
 
     def assess(self, evidence_manifest: dict[str, Any]) -> Assessment:
         self.calls += 1
         return self._assessment
+
+    def signature(self) -> dict[str, Any]:
+        return {"provider": "fake", "model": self._model,
+                "prompt_version": self._prompt_version, "inference_params": {}}
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -6480,7 +6888,7 @@ git commit -m "feat(review): vision provider contract and offline fake"
 **Acceptance:** a cited artifact absent from the manifest raises at both parse and resolve; enhanced provenance survives the round trip so an enhancement-only observed finding is demoted and can never reject; severity and location are preserved, with location derived from cited regions when omitted.
 
 ---
-### Task 30: Evidence manifest builder
+### Task 31: Evidence manifest builder
 
 **Files:** Create `src/card_reviewer/review/manifest.py`; Test `tests/review/test_manifest_builder.py`
 
@@ -6547,6 +6955,21 @@ def test_the_index_resolves_every_sent_artifact_back_to_its_ref():
         ref = built.index[artifact["artifact_id"]]
         assert ref.origin.value == artifact["origin"]
         assert ref.image_hash
+
+
+def test_the_builder_version_is_not_in_the_provider_payload():
+    """It would otherwise enter the vision fingerprint and re-bill every call
+    on a builder bump that changed nothing the provider can see."""
+    built = build_manifest(_A(_refs(3)), Mode.SMART, [])
+    assert "builder_version" not in built.payload
+    assert built.builder_meta["builder_version"]
+
+
+def test_a_builder_bump_leaves_the_provider_payload_untouched(monkeypatch):
+    import card_reviewer.review.manifest as mod
+    before = build_manifest(_A(_refs(3)), Mode.SMART, []).payload
+    monkeypatch.setattr(mod, "MANIFEST_BUILDER_VERSION", "9.9.9")
+    assert build_manifest(_A(_refs(3)), Mode.SMART, []).payload == before
 
 
 def test_the_index_contains_exactly_what_was_sent():
@@ -6638,11 +7061,17 @@ def _rank(view: str) -> int:
 
 
 class BuiltManifest(NamedTuple):
-    """The payload sent to the provider, and the index used to resolve what it
-    cites back to real provenance (Decision 1). Returning them together is what
-    stops `combine` inventing an EvidenceRef from a bare artifact id."""
+    """What the provider sees, what resolves its citations, and our own metadata.
+
+    `payload` is EXACTLY what `VisionProvider.assess()` consumes, and it is what
+    the vision stage fingerprints. `builder_meta` holds our bookkeeping —
+    notably the builder version — deliberately kept out of `payload`, because
+    a builder bump that produces identical provider-visible content must not
+    re-bill an API call.
+    """
     payload: dict[str, Any]
     index: dict[str, EvidenceRef]
+    builder_meta: dict[str, Any]
 
 
 def build_manifest(assembled: Any, mode: Mode,
@@ -6692,16 +7121,18 @@ def build_manifest(assembled: Any, mode: Mode,
              "confidence": r.confidence.value}
             for r in rubric_rules
         ],
-        "builder_version": MANIFEST_BUILDER_VERSION,
     }
-    return BuiltManifest(payload=payload,
-                         index={r.artifact_id: r for r in selected})
+    return BuiltManifest(
+        payload=payload,
+        index={r.artifact_id: r for r in selected},
+        builder_meta={"builder_version": MANIFEST_BUILDER_VERSION,
+                      "mode": mode.value, "selected": len(selected)})
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/review/test_manifest_builder.py -v`
-Expected: PASS (11 tests)
+Expected: PASS (13 tests)
 
 - [ ] **Step 5: Commit**
 
@@ -6714,7 +7145,7 @@ git commit -m "feat(review): deterministic evidence manifest builder"
 
 ---
 
-### Task 31: SMART routing policy
+### Task 32: SMART routing policy
 
 **Files:** Create `src/card_reviewer/review/policies/routing_v1.py`; Test `tests/review/test_routing.py`
 
@@ -6874,7 +7305,7 @@ git commit -m "feat(review): SMART routing policy with provisional spend gate"
 
 ---
 
-### Task 32: Anthropic provider and offline contract tests
+### Task 33: Anthropic provider and offline contract tests
 
 **Files:** Create `src/card_reviewer/review/vision/prompt.py`, `vision/anthropic.py`; Test `tests/review/test_anthropic_contract.py`, `tests/review/fixtures/vision/*.json`
 
@@ -7019,6 +7450,26 @@ def test_a_well_formed_saved_response_parses(monkeypatch, provider_rig):
     monkeypatch.setattr(provider, "_call", lambda blocks: payload)
     a = provider.assess(manifest)
     assert a.gem_view.value == "possible_psa10_disqualifier"
+
+
+def test_the_signature_carries_the_four_declared_signature_inputs():
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        sig = AnthropicVisionProvider(model="m", store=ArtifactStore(d),
+                                      api_key="unused").signature()
+    assert set(sig) == {"provider", "model", "prompt_version", "inference_params"}
+    assert sig["provider"] == "anthropic"
+
+
+def test_changing_the_model_changes_the_signature():
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        store = ArtifactStore(d)
+        a = AnthropicVisionProvider(model="m1", store=store, api_key="x").signature()
+        b = AnthropicVisionProvider(model="m2", store=store, api_key="x").signature()
+    assert a != b
 
 
 def test_a_provider_built_without_a_store_is_rejected_at_construction():
@@ -7249,17 +7700,27 @@ class AnthropicVisionProvider:
 
     @property
     def inference_params(self) -> dict[str, Any]:
-        """Part of the vision stage's producer signature."""
         params: dict[str, Any] = {"max_tokens": MAX_TOKENS}
         if self.temperature is not None:
             params["temperature"] = self.temperature
         return params
+
+    def signature(self) -> dict[str, Any]:
+        """The vision stage's producer signature (spec §4).
+
+        The pipeline reads this rather than knowing anything about Anthropic,
+        so swapping providers changes the cache key without changing the
+        caching code.
+        """
+        return {"provider": "anthropic", "model": self.model,
+                "prompt_version": self.prompt_version,
+                "inference_params": self.inference_params}
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/review/test_anthropic_contract.py -v`
-Expected: PASS (12 tests including parametrized cases)
+Expected: PASS (14 tests including parametrized cases)
 
 - [ ] **Step 5: Commit**
 
@@ -7273,7 +7734,7 @@ git commit -m "feat(review): Anthropic provider with offline contract tests"
 ---
 ## Phase 8 — Integration and surface
 
-### Task 33: Finding fusion
+### Task 34: Finding fusion
 
 **Files:** Create `src/card_reviewer/review/fusion.py`; Test `tests/review/test_fusion.py`
 
@@ -7370,6 +7831,21 @@ def test_disagreement_between_sources_is_recorded():
     assert out[0].producers_disagreed is True
 
 
+def test_an_observed_versus_not_observed_pair_is_a_material_contradiction():
+    """Selecting OBSERVED as the strongest state must not erase the fact that
+    another producer looked and did not see it."""
+    out = fuse([_f(FindingProducer.HEURISTIC, FindingState.OBSERVED, (0, 0, .3, .3)),
+                _f(FindingProducer.VISION, FindingState.NOT_OBSERVED, (.1, .1, .4, .4))])
+    assert out[0].state is FindingState.OBSERVED
+    assert out[0].material_contradiction is True
+
+
+def test_corroboration_is_not_a_material_contradiction():
+    out = fuse([_f(FindingProducer.HEURISTIC, FindingState.SUSPECTED, (0, 0, .3, .3)),
+                _f(FindingProducer.VISION, FindingState.OBSERVED, (0, 0, .3, .3))])
+    assert out[0].material_contradiction is False
+
+
 def test_agreement_is_not_recorded_as_disagreement():
     out = fuse([_f(FindingProducer.HEURISTIC, FindingState.OBSERVED, (0, 0, .3, .3)),
                 _f(FindingProducer.VISION, FindingState.OBSERVED, (0, 0, .3, .3))])
@@ -7448,6 +7924,11 @@ class FusedFinding(BaseModel):
     evidence: list[EvidenceRef]
     sources: list[Finding]
     producers_disagreed: bool
+    # Mechanically defined and computed from the RAW sources, before the
+    # strongest state is selected. Without it, a heuristic OBSERVED fused with
+    # a well-evidenced vision NOT_OBSERVED would present as a clean OBSERVED
+    # and could reject the card on evidence that was actually contested.
+    material_contradiction: bool = False
     fusion_version: str = FUSION_VERSION
 
     def as_finding(self) -> Finding:
@@ -7507,7 +7988,12 @@ def _fuse_group(group: list[Finding]) -> FusedFinding:
                 evidence.append(ref)
     producers = {f.producer for f in group}
     states = {f.state for f in group}
+    # A material contradiction: one source says it is there, another looked
+    # with adequate evidence and says it is not.
+    contradicted = (any(f.state is FindingState.OBSERVED for f in group)
+                    and any(f.state is FindingState.NOT_OBSERVED for f in group))
     return FusedFinding(
+        material_contradiction=contradicted,
         category=strongest.category, defect_type=strongest.defect_type,
         state=strongest.state, confidence=max(f.confidence for f in group),
         psa10_relevant=any(f.psa10_relevant for f in group),
@@ -7520,7 +8006,7 @@ def _fuse_group(group: list[Finding]) -> FusedFinding:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/review/test_fusion.py -v`
-Expected: PASS (12 tests)
+Expected: PASS (14 tests)
 
 - [ ] **Step 5: Commit**
 
@@ -7533,7 +8019,7 @@ git commit -m "feat(review): finding fusion across producers"
 
 ---
 
-### Task 34: Combine integration — findings from both producers into one verdict
+### Task 35: Combine integration — findings from both producers into one verdict
 
 **Files:** Modify `src/card_reviewer/review/policies/combine_v1.py` (add `combine`); Test `tests/review/test_combine.py`
 
@@ -7756,17 +8242,24 @@ def combine(heuristic, vision, coverage, *, card_context_known: bool,
                                    rf.finding.defect_type)
         triples.append((rf.finding, rf.authority, scale))
 
-    result = decide_verdict(triples, coverage.outcome,
-                            ambiguity=bool(heuristic.unevaluable_reasons
-                                           or any(f.producers_disagreed
-                                                  for f in fused)))
+    # Contradictions are carried per finding so REJECT precedence cannot fire
+    # on a contested defect. `ambiguity` alone would be consulted only at row 3,
+    # which is too late — row 1 would already have rejected.
+    contradicted = {id(rf.finding) for rf, fu in zip(resolved, fused)
+                    if fu.material_contradiction}
+    result = decide_verdict(
+        triples, coverage.outcome,
+        contradicted=contradicted,
+        ambiguity=bool(heuristic.unevaluable_reasons
+                       or any(f.producers_disagreed for f in fused)))
 
     # Scoring needs to know which findings actually cleared I1: only those get
     # the hard floor, so an unresolved concern stays meaningfully rankable.
     scored = [
         (rf.finding, rf.authority,
-         i1_satisfied(rf.finding, scale, [(f, s) for f, _, s in triples]))
-        for (rf, (_, _, scale)) in zip(resolved, triples)
+         i1_satisfied(rf.finding, scale, [(f, s) for f, _, s in triples],
+                      material_contradiction=fu.material_contradiction))
+        for (rf, (_, _, scale), fu) in zip(resolved, triples, fused)
     ]
 
     disagreed = any(f.producers_disagreed for f in fused)
@@ -7806,7 +8299,38 @@ git commit -m "feat(review): combine both producers into one verdict"
 
 ---
 
-### Task 35: Application service and full pipeline wiring
+### The stage contract matrix
+
+Every row is a stage the cache model claims exists. A stage in this table must
+execute through `StageRunner.run` in Task 36; a stage that cannot must be struck
+from `STAGE_FINGERPRINT_INPUTS` / `STAGE_SIGNATURE_INPUTS` with a reason, because
+a declared-but-uncached stage is a cache that silently does not work.
+
+| Stage | Tier | Input model | Fingerprint inputs | Producer signature inputs | Output model | Persisted artifact refs | Call site |
+|---|---|---|---|---|---|---|---|
+| `preflight` | image | raw bytes | image hash | preflight version, config | `PreflightResult` | — | `_image_tier` |
+| `geometry` | image | raw bytes | image hash, preflight output | geometry version, config | `GeometryResult` | `normalized_artifact_id`, `border_mask_artifact_id` | `_image_tier` |
+| `observability` | image | `GeometryResult` | image hash, geometry output | observability version, taxonomy version, config | `ObservabilityResult` | `glare_mask_artifact_id`, `occlusion_mask_artifact_id` | `_image_tier` |
+| `cv_measurements` | image | `GeometryResult` | image hash, geometry output, observability output | cv version, taxonomy version, config | `CvMeasurements` | corner / edge / surface crop ids | `_image_tier` |
+| `role_features` | image | `GeometryResult` | image hash, geometry output | role-features version, config | `RoleFeatures` | — | `_image_tier` |
+| `role_context` | candidate | supplied metadata + per-image role features | image hashes, per-image role features, listing title, card-identification text, supplied type / set / roles | resolver version, vocabulary version | `RoleContext` | — | `review` |
+| `evidence_assembly` | candidate | `list[ImageEvidence]`, roles | roles, context, per-image outputs | assembly version | `Assembled` | — | `review` |
+| `heuristic` | candidate | `Assembled`, scoped rules | assembled evidence, applicable rubric rule content | scorer version, authority policy version, weights | `HeuristicResult` | — | `review` |
+| `coverage_provisional` | candidate | detectability, reason codes | assembled detectability, applicable rubric rules | coverage policy version, taxonomy version | `CoverageResult` | — | `review` |
+| `routing` | candidate | mode, heuristic, provisional coverage | **mode**, heuristic output, provisional coverage, observability, detectability | routing policy version | `RoutingDecision` | — | `review` |
+| `manifest` | candidate | `Assembled`, mode, rules | mode budget, assembled evidence, routing decision, applicable rubric rule content | manifest-builder version | `BuiltManifest` | artifact ids in `payload` and `index` | `_vision` |
+| `vision` | candidate | `provider_evidence_payload` | **provider evidence payload only** | provider, model, prompt version, inference params | `Assessment` | — | `_vision` |
+| `coverage` | candidate | detectability, vision assessability | assembled detectability, vision category assessability, applicable rubric rules | coverage policy version, taxonomy version | `CoverageResult` | — | `review` |
+| `combine` | candidate | heuristic, vision, coverage | heuristic output, vision output, coverage output | combination policy version, scoring policy version | `CombinedResult` | — | `review` |
+
+Two boundaries here are load-bearing and easy to get wrong:
+
+- **`vision` fingerprints only `provider_evidence_payload`.** `MANIFEST_BUILDER_VERSION` belongs to the `manifest` row's signature. Leaking it into the vision fingerprint would re-bill every card on a builder bump the provider cannot see.
+- **`manifest` is cached, but its output is not what `vision` keys on.** It exists as a stage so selection stays reproducible whether or not a call was made.
+
+---
+
+### Task 36: Application service and full pipeline wiring
 
 **Files:** Modify `src/card_reviewer/review/pipeline.py` (add `ReviewPipeline`); Create `src/card_reviewer/review/service.py`; Modify `src/card_reviewer/review/__init__.py`; Test `tests/review/test_pipeline_e2e.py`
 
@@ -7899,14 +8423,25 @@ def test_the_same_image_in_two_candidates_is_analyzed_once(rig, tmp_path):
     assert _preflight_rows(repo) == before
 
 
-def test_a_front_only_card_is_partial_and_rankable_never_rejected(rig, tmp_path):
-    """DoD 16."""
+def test_a_clean_front_only_card_is_partial_rankable_and_reviewed(rig, tmp_path):
+    """DoD 16. A missing back bars PASS, not REJECT — and with no confident
+    disqualifier on the front the verdict is REVIEW."""
     pipeline, store, _ = rig
     resolved = _candidate(tmp_path, store, [CardSpec()])
     review = pipeline.review(resolved, Mode.OFF)
-    assert review.verdict in (Verdict.REVIEW, Verdict.REJECT)
-    if review.verdict is Verdict.REVIEW:
-        assert review.rankable is True
+    assert review.verdict is Verdict.REVIEW
+    assert review.rankable is True
+    assert review.review_confidence == "low"   # we never saw half the card
+
+
+def test_a_front_only_card_may_still_reject_on_a_front_defect(rig, tmp_path):
+    """A missing back removes evidence; it does not unsee a defect the front
+    already shows. Where I1 is satisfied on the front, REJECT stands."""
+    pipeline, store, _ = rig
+    resolved = _candidate(tmp_path, store, [CardSpec(h_centering=85.0)])
+    review = pipeline.review(resolved, Mode.OFF)
+    assert review.verdict in (Verdict.REJECT, Verdict.REVIEW)
+    assert review.verdict is not Verdict.PASS
 
 
 def test_rerunning_reuses_cached_stage_results(rig, tmp_path):
@@ -7917,6 +8452,95 @@ def test_rerunning_reuses_cached_stage_results(rig, tmp_path):
     before = _preflight_rows(repo)
     pipeline.review(resolved, Mode.OFF)
     assert _preflight_rows(repo) == before
+
+
+def test_every_declared_stage_produces_a_cached_result(rig, tmp_path):
+    """A stage the tables claim to cache but that runs directly is not cached.
+    Counting preflight rows alone would never catch that."""
+    pipeline, store, repo = rig
+    resolved = _candidate(tmp_path, store, [CardSpec(), CardSpec(seed=2)])
+    pipeline.review(resolved, Mode.OFF)
+    stages = {r[0] for r in repo._conn.execute(
+        "SELECT DISTINCT stage FROM stage_result")}
+    assert {"preflight", "geometry", "observability", "cv_measurements",
+            "role_features", "role_context", "evidence_assembly", "heuristic",
+            "coverage_provisional", "routing", "coverage", "combine"} <= stages
+
+
+def test_rerunning_reuses_every_stage_not_just_preflight(rig, tmp_path):
+    pipeline, store, repo = rig
+    resolved = _candidate(tmp_path, store, [CardSpec(), CardSpec(seed=2)])
+    pipeline.review(resolved, Mode.OFF)
+    before = _rows_by_stage(repo)
+    pipeline.review(resolved, Mode.OFF)
+    assert _rows_by_stage(repo) == before
+
+
+def test_deep_reviewed_twice_calls_the_provider_exactly_once(rig, tmp_path):
+    """The cache lookup must happen BEFORE assess(), or every re-review of an
+    unchanged card bills again."""
+    pipeline, store, _ = rig
+    resolved = _candidate(tmp_path, store, [CardSpec(), CardSpec(seed=2)])
+    provider = _fake_provider()
+    pipeline.review(resolved, Mode.DEEP, provider)
+    pipeline.review(resolved, Mode.DEEP, provider)
+    assert provider.calls == 1
+
+
+def test_a_model_change_forces_a_new_provider_call(rig, tmp_path):
+    pipeline, store, _ = rig
+    resolved = _candidate(tmp_path, store, [CardSpec(), CardSpec(seed=2)])
+    a, b = _fake_provider(model="m1"), _fake_provider(model="m2")
+    pipeline.review(resolved, Mode.DEEP, a)
+    pipeline.review(resolved, Mode.DEEP, b)
+    assert a.calls == 1 and b.calls == 1
+
+
+def test_a_prompt_version_change_forces_a_new_provider_call(rig, tmp_path):
+    pipeline, store, _ = rig
+    resolved = _candidate(tmp_path, store, [CardSpec(), CardSpec(seed=2)])
+    a, b = _fake_provider(prompt="1.0.0"), _fake_provider(prompt="1.1.0")
+    pipeline.review(resolved, Mode.DEEP, a)
+    pipeline.review(resolved, Mode.DEEP, b)
+    assert a.calls == 1 and b.calls == 1
+
+
+def test_changed_provider_visible_evidence_forces_a_new_call(rig, tmp_path):
+    pipeline, store, _ = rig
+    provider = _fake_provider()
+    pipeline.review(_candidate(tmp_path, store, [CardSpec()]), Mode.DEEP, provider)
+    pipeline.review(_candidate(tmp_path, store, [CardSpec(seed=9)]),
+                    Mode.DEEP, provider)
+    assert provider.calls == 2
+
+
+def test_smart_wanting_vision_without_a_provider_does_not_behave_as_off(
+        rig, tmp_path):
+    """Silently degrading to OFF would report a card as fully assessed when
+    the layer that judges surface never ran."""
+    pipeline, store, _ = rig
+    resolved = _candidate(tmp_path, store, [CardSpec(), CardSpec(seed=2)])
+    review = pipeline.review(resolved, Mode.SMART, None)
+    assert review.verdict is not Verdict.PASS
+    assert any(l["reason_code"] == "VISION_UNAVAILABLE"
+               for l in review.limitations)
+
+
+def test_a_heuristic_observed_against_a_vision_not_observed_reviews(rig, tmp_path):
+    """Item 3's exact scenario: fusion picks OBSERVED as the strongest state,
+    but the contradicting NOT_OBSERVED must still block REJECT."""
+    from card_reviewer.review.vision.provider import (
+        Assessment, FakeProvider, GemView,
+    )
+    pipeline, store, _ = rig
+    resolved = _candidate(tmp_path, store, [CardSpec(h_centering=85.0),
+                                            CardSpec(seed=2)])
+    denier = FakeProvider(Assessment(
+        findings=[], gem_view=GemView.NO_DISQUALIFIER,
+        category_assessability={"centering": True, "corners": True,
+                                "edges": True, "surface": True}))
+    review = pipeline.review(resolved, Mode.DEEP, denier)
+    assert review.verdict is not Verdict.REJECT
 
 
 def test_unknown_product_context_asks_for_identity_not_photos(rig, tmp_path):
@@ -7932,9 +8556,24 @@ def test_unknown_product_context_asks_for_identity_not_photos(rig, tmp_path):
     assert review.recommended_additional_photos == []
 
 
+def _rows_by_stage(repo) -> dict[str, int]:
+    return dict(repo._conn.execute(
+        "SELECT stage, COUNT(*) FROM stage_result GROUP BY stage"))
+
+
 def _preflight_rows(repo) -> int:
-    return repo._conn.execute(
-        "SELECT COUNT(*) FROM stage_result WHERE stage='preflight'").fetchone()[0]
+    return _rows_by_stage(repo).get("preflight", 0)
+
+
+def _fake_provider(model="fake-model", prompt="1.0.0"):
+    from card_reviewer.review.vision.provider import (
+        Assessment, FakeProvider, GemView,
+    )
+    return FakeProvider(
+        Assessment(category_assessability={"centering": True, "corners": True,
+                                           "edges": True, "surface": True},
+                   gem_view=GemView.NO_DISQUALIFIER),
+        model=model, prompt_version=prompt)
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -7944,21 +8583,13 @@ Expected: FAIL with `ImportError: cannot import name 'ReviewPipeline'`
 
 - [ ] **Step 3: Write minimal implementation**
 
-Append `ReviewPipeline` to `pipeline.py`. Every stage goes through `StageRunner.run` with its `schema=`, so caching, validation and failure recording are uniform.
+Append `ReviewPipeline` to `pipeline.py`. **Every stage in the matrix above executes through `StageRunner.run` with its declared fingerprint inputs, producer-signature inputs and output schema.** A stage that is invoked directly is not a cached stage, however the tables describe it.
 
 ```python
 # appended to src/card_reviewer/review/pipeline.py
-"""Orchestration. The stage order is the spec's, and the wiring below is where
-the guarantees the policies promise actually get connected."""
 
-IMAGE_TIER_VERSIONS = {
-    "preflight": {"preflight_version": PREFLIGHT_VERSION, "config": {}},
-    "geometry": {"geometry_version": GEOMETRY_VERSION, "config": {}},
-    "observability": {"observability_version": OBSERVABILITY_VERSION,
-                      "taxonomy_version": TAXONOMY_VERSION, "config": {}},
-    "cv_measurements": {"cv_version": CV_VERSION,
-                        "taxonomy_version": TAXONOMY_VERSION, "config": {}},
-}
+class MissingProviderError(Exception):
+    """SMART/DEEP routing wanted a vision call and no provider was configured."""
 
 
 class ReviewPipeline:
@@ -7967,119 +8598,273 @@ class ReviewPipeline:
         self._repo = repo
         self._store = store
         self._runner = StageRunner(repo)
-        # RubricError aborts the run: there is no verdict without a rubric, and
-        # guessing at one is worse than declining (spec §4 failure policy).
+        # RubricError aborts the run: there is no verdict without a rubric,
+        # and guessing at one is worse than declining (spec §4).
         self._rubric = rubric or load_active_rubric()
+
+    # ---- image tier: cached by image hash, shared across candidates --------
+
+    def _image_tier(self, image_hash: str) -> ImageStageOutputs:
+        data = self._store.read(image_hash)
+        run = self._runner.run
+
+        pre = run("preflight", {"image_hash": image_hash},
+                  {"preflight_version": PREFLIGHT_VERSION, "config": {}},
+                  lambda: preflight_analyze(data).model_dump(),
+                  schema=PreflightResult, image_hash=image_hash)
+        if not pre["usable"]:
+            return ImageStageOutputs(image_hash=image_hash, preflight=pre)
+
+        geo = run("geometry", {"image_hash": image_hash, "preflight_output": pre},
+                  {"geometry_version": GEOMETRY_VERSION, "config": {}},
+                  lambda: geometry_analyze(data, self._store,
+                                           image_hash).model_dump(),
+                  schema=GeometryResult, image_hash=image_hash)
+        geometry = GeometryResult.model_validate(geo)
+
+        obs = run("observability",
+                  {"image_hash": image_hash, "geometry_output": geo},
+                  {"observability_version": OBSERVABILITY_VERSION,
+                   "taxonomy_version": TAXONOMY_VERSION, "config": {}},
+                  lambda: observability_analyze(geometry, self._store,
+                                                image_hash).model_dump(),
+                  schema=ObservabilityResult, image_hash=image_hash)
+
+        cv = run("cv_measurements",
+                 {"image_hash": image_hash, "geometry_output": geo,
+                  "observability_output": obs},
+                 {"cv_version": CV_VERSION, "taxonomy_version": TAXONOMY_VERSION,
+                  "config": {}},
+                 lambda: measure_all(geometry, self._store,
+                                     image_hash).model_dump(),
+                 schema=CvMeasurements, image_hash=image_hash)
+
+        roles = run("role_features",
+                    {"image_hash": image_hash, "geometry_output": geo},
+                    {"role_features_version": ROLE_FEATURES_VERSION, "config": {}},
+                    lambda: extract_role_features(geometry,
+                                                  self._store).model_dump(),
+                    schema=RoleFeatures, image_hash=image_hash)
+
+        return ImageStageOutputs(image_hash=image_hash, preflight=pre,
+                                 geometry=geo, observability=obs,
+                                 cv_measurements=cv, role_features=roles)
+
+    # ---- candidate tier ----------------------------------------------------
 
     def review(self, candidate: ResolvedCandidate, mode: Mode,
                provider: VisionProvider | None = None) -> CardReview:
-        images = [self._analyze_image(i.image_hash) for i in candidate.images]
+        run = self._runner.run
+        cid = candidate.candidate_id
+        images = [self._image_tier(i.image_hash) for i in candidate.images]
 
-        roles = resolve_roles([
-            RoleInput(image_hash=i.image_hash,
-                      supplied_role=i.supplied_role,
-                      text_density=ev["text_density"],
-                      has_central_image_region=ev["has_central_image_region"])
-            for i, ev in zip(candidate.images, images)])
-
-        context = CardContextNormalizer().normalize(
-            raw_title=candidate.title, supplied_card_type=candidate.card_type,
-            supplied_set=candidate.set_name)
+        rc = run("role_context",
+                 {"image_hashes": [i.image_hash for i in images],
+                  "per_image_role_features": [i.role_features for i in images],
+                  "listing_title": candidate.title,
+                  "card_identification_text": candidate.title,
+                  "supplied_card_type": candidate.card_type,
+                  "supplied_set": candidate.set_name,
+                  "supplied_roles": {i.image_hash: i.supplied_role
+                                     for i in candidate.images}},
+                 {"resolver_version": RESOLVER_VERSION,
+                  "vocabulary_version": VOCABULARY_VERSION},
+                 lambda: resolve_role_context(candidate, images).model_dump(),
+                 schema=RoleContext, candidate_id=cid)
+        role_context = RoleContext.model_validate(rc)
+        context = role_context.card_context
         scoped = scope_rules(
             self._rubric.for_card(context.canonical_card_types,
                                   context.canonical_sets), context)
 
-        assembled = assemble(
-            [ImageEvidence(**ev["assembly_input"]) for ev in images], roles)
-        heuristic = evaluate(assembled, scoped)
+        asm = run("evidence_assembly",
+                  {"roles": rc["roles"], "context": rc["card_context"],
+                   "per_image_outputs": [i.model_dump() for i in images]},
+                  {"assembly_version": ASSEMBLY_VERSION},
+                  lambda: assemble(to_image_evidence(images),
+                                   role_context.roles).model_dump(),
+                  schema=Assembled, candidate_id=cid)
+        assembled = Assembled.model_validate(asm)
 
-        # scope_rules feeds three consumers: the heuristic (which rules to
-        # evaluate), coverage (which rules could NOT be applied), and relevance
-        # inside combine (which rules govern a finding).
-        unevaluable = [
-            UnevaluableRule(rule_id=sr.rule.id, category=sr.rule.category.value,
-                            reason_code=sr.reason)
-            for sr in scoped if sr.evaluability is RuleEvaluability.UNEVALUABLE]
+        heur = run("heuristic",
+                   {"assembled_evidence": asm,
+                    "applicable_rubric_rules": rule_content(scoped)},
+                   {"scorer_version": SCORER_VERSION,
+                    "authority_policy_version": AUTHORITY_POLICY_VERSION,
+                    "weights": {}},
+                   lambda: evaluate(assembled, scoped).model_dump(),
+                   schema=HeuristicResult, candidate_id=cid)
+        heuristic = HeuristicResult.model_validate(heur)
 
-        provisional = evaluate_coverage(
-            assembled.detectability, assembled.reason_codes, {},
-            assembled.faces_present, unevaluable_rules=unevaluable)
+        unevaluable = [UnevaluableRule(rule_id=sr.rule.id,
+                                       category=sr.rule.category.value,
+                                       reason_code=sr.reason)
+                       for sr in scoped
+                       if sr.evaluability is RuleEvaluability.UNEVALUABLE]
 
-        routing = decide_routing(mode, heuristic.findings, provisional.outcome,
-                                 assembled.detectability)
+        prov = run("coverage_provisional",
+                   {"assembled_detectability": asm["detectability_flat"],
+                    "applicable_rubric_rules": rule_content(scoped)},
+                   {"coverage_policy_version": COVERAGE_POLICY_VERSION,
+                    "taxonomy_version": TAXONOMY_VERSION},
+                   lambda: evaluate_coverage(
+                       assembled.detectability, assembled.reason_codes, {},
+                       assembled.faces_present,
+                       unevaluable_rules=unevaluable).model_dump(),
+                   schema=CoverageResult, candidate_id=cid)
+        provisional = CoverageResult.model_validate(prov)
+
+        rout = run("routing",
+                   {"mode": mode.value, "heuristic_output": heur,
+                    "provisional_coverage": prov,
+                    "assembled_observability": asm["detectability_flat"],
+                    "detectability": asm["detectability_flat"]},
+                   {"routing_policy_version": ROUTING_POLICY_VERSION},
+                   lambda: decide_routing(mode, heuristic.findings,
+                                          provisional.outcome,
+                                          assembled.detectability).model_dump(),
+                   schema=RoutingDecision, candidate_id=cid)
+        routing = RoutingDecision.model_validate(rout)
         routing_id = self._repo.save_routing_decision(
-            candidate_id=candidate.candidate_id,
-            policy_version=ROUTING_POLICY_VERSION, mode=mode.value,
-            call_vision=routing.call_vision,
+            candidate_id=cid, policy_version=ROUTING_POLICY_VERSION,
+            mode=mode.value, call_vision=routing.call_vision,
             trigger_reasons=routing.trigger_reasons,
-            input_fingerprint=fingerprint({"mode": mode.value}))
+            input_fingerprint=fingerprint({"mode": mode.value,
+                                           "heuristic_output": heur}))
 
-        vision, manifest_index, vision_result_id = None, {}, None
-        if routing.call_vision and provider is not None:
-            built = build_manifest(assembled, mode, applicable(scoped))
-            manifest_index = built.index
-            try:
-                vision = provider.assess(built.payload)
-                vision_result_id = self._repo.put_stage_result(
-                    "vision", fingerprint(built.payload), "provider",
-                    vision.model_dump(), {}, candidate_id=candidate.candidate_id)
-            except Exception as exc:
-                # A permanently failed call leaves vision_result_id null and the
-                # review proceeds on CV evidence exactly as OFF would. It never
-                # produces REJECT.
-                self._repo.record_attempt(
-                    "vision", None, None, error_kind=type(exc).__name__,
-                    error_detail=str(exc), candidate_id=candidate.candidate_id)
+        vision, index, vision_id, vision_limit = None, {}, None, None
+        if routing.call_vision:
+            vision, index, vision_id, vision_limit = self._vision(
+                cid, mode, assembled, scoped, provider)
 
-        assessability = (vision.category_assessability if vision else {})
-        coverage = evaluate_coverage(
-            assembled.detectability, assembled.reason_codes, assessability,
-            assembled.faces_present, unevaluable_rules=unevaluable)
+        assessability = vision.category_assessability if vision else {}
+        cov = run("coverage",
+                  {"assembled_detectability": asm["detectability_flat"],
+                   "vision_category_assessability": assessability,
+                   "applicable_rubric_rules": rule_content(scoped)},
+                  {"coverage_policy_version": COVERAGE_POLICY_VERSION,
+                   "taxonomy_version": TAXONOMY_VERSION},
+                  lambda: evaluate_coverage(
+                      assembled.detectability, assembled.reason_codes,
+                      assessability, assembled.faces_present,
+                      unevaluable_rules=unevaluable).model_dump(),
+                  schema=CoverageResult, candidate_id=cid)
+        coverage = CoverageResult.model_validate(cov)
 
-        combined = combine(
-            heuristic, vision, coverage,
-            card_context_known=context.is_known, scoped_rules=scoped,
-            manifest_index=manifest_index,
-            detectability=assembled.detectability,
-            # Not inferrable from the coverage outcome: a front-only card is
-            # PARTIAL and rankable yet its confidence is LOW.
-            required_face_missing=any(f not in assembled.faces_present
-                                      for f in REQUIRED_FACES))
+        missing_face = any(f not in assembled.faces_present
+                           for f in REQUIRED_FACES)
+        comb = run("combine",
+                   {"heuristic_output": heur, "vision_output":
+                        vision.model_dump() if vision else None,
+                    "coverage_output": cov},
+                   {"combination_policy_version": COMBINATION_POLICY_VERSION,
+                    "scoring_policy_version": SCORING_POLICY_VERSION},
+                   lambda: combine(
+                       heuristic, vision, coverage,
+                       card_context_known=context.is_known, scoped_rules=scoped,
+                       manifest_index=index,
+                       detectability=assembled.detectability,
+                       required_face_missing=missing_face).model_dump(),
+                   schema=CombinedResult, candidate_id=cid)
 
-        return self._persist(candidate, mode, routing_id, combined, coverage,
-                             context, roles, vision_result_id)
+        return self._persist(candidate, mode, routing_id,
+                             CombinedResult.model_validate(comb), coverage,
+                             role_context, images,
+                             {"heuristic": heur, "coverage_provisional": prov,
+                              "coverage": cov, "combine": comb},
+                             vision_id, vision_limit)
 
-    def _analyze_image(self, image_hash: str) -> dict[str, Any]:
-        """Image tier: cached by image hash, so a photo shared by two listings
-        is analyzed once, ever."""
-        data = self._store.read(image_hash)
-        pre = self._runner.run(
-            "preflight", {"image_hash": image_hash},
-            IMAGE_TIER_VERSIONS["preflight"],
-            lambda: preflight_analyze(data).model_dump(),
-            schema=PreflightResult, image_hash=image_hash)
-        if not pre["usable"]:
-            return _unusable_image(image_hash, pre)
-
-        geometry = geometry_analyze(data)
-        obs = observability_analyze(geometry)
-        measurements = {
-            "centering": measure_centering(geometry).model_dump(),
-            "corners": measure_corners(geometry, self._store, image_hash),
-            "edges": measure_edges(geometry, self._store, image_hash),
-            "surface": measure_surface(geometry, self._store, image_hash),
-        }
-        return _image_evidence(image_hash, pre, geometry, obs, measurements)
+    def _vision(self, cid: str, mode: Mode, assembled, scoped,
+                provider: VisionProvider | None):
+        """Cache lookup BEFORE any call. A provider invoked before the lookup
+        bills every re-review of an unchanged card."""
+        built = build_manifest(assembled, mode, applicable(scoped))
+        if provider is None:
+            # SMART/DEEP wanted a call and none is configured. This must not
+            # silently behave as OFF: the categories the provider would have
+            # judged are recorded unassessed, which caps the card at REVIEW.
+            return None, built.index, None, "VISION_UNAVAILABLE"
+        try:
+            output = self._runner.run(
+                "vision", {"provider_evidence_payload": built.payload},
+                provider.signature(),
+                lambda: provider.assess(built.payload).model_dump(),
+                schema=Assessment, candidate_id=cid)
+        except Exception as exc:
+            self._repo.record_attempt("vision", None, None,
+                                      error_kind=type(exc).__name__,
+                                      error_detail=str(exc), candidate_id=cid)
+            # A failure REMOVES evidence; it never creates any. The review
+            # proceeds on CV evidence, and an independently established
+            # I1-satisfying defect may still reject.
+            return None, built.index, None, "VISION_FAILED"
+        result = self._repo.get_stage_result(
+            "vision", fingerprint({"provider_evidence_payload": built.payload}),
+            signature_for("vision", provider.signature()))
+        return (Assessment.model_validate(output), built.index,
+                result.id if result else None, None)
 ```
 
-`_unusable_image` and `_image_evidence` build the `ImageEvidence` payload — detectability, **reason codes**, limitations, sharpness, centering, anomalies and evidence refs keyed `"category:defect_type"`. `_persist` writes the `review` row (including both coverage result ids and the nullable `vision_result_id`) and returns the `CardReview`. A failed image-tier stage marks that image unusable and the candidate continues on its remaining images.
+`ImageStageOutputs`, `RoleContext`, `CvMeasurements` and `to_image_evidence` are small declared models introduced with this task; `measure_all` composes the four measurement functions from T25–T27 into one `CvMeasurements`. `resolve_role_context` wraps `resolve_roles` (T12) and `CardContextNormalizer` (T10) into the single cached `role_context` stage.
 
-`service.review_card` composes `ManualAdapter` and `ReviewPipeline`; `review/__init__.py` exports `review_card`, `ReviewPipeline` and `CardReview`.
+`_persist` writes the `review` row, pointing each foreign key at the exact `stage_result` id returned by its `StageRunner` call, and returns the `CardReview`:
+
+```python
+    def _persist(self, candidate, mode, routing_id, combined, coverage,
+                 role_context, images, stage_ids, vision_id, vision_limit):
+        limitations = [l.model_dump() for l in coverage.limitations]
+        if vision_limit:
+            limitations.append({
+                "face": "card", "category": "*", "defect_type": "*",
+                "reason_code": vision_limit,
+                "undetectability_class": "circumstantial"})
+        review = CardReview(
+            candidate_id=candidate.candidate_id, title=candidate.title,
+            mode=mode.value, verdict=combined.verdict.value,
+            psa10_candidate=combined.psa10_candidate.value,
+            psa10_rank_score=combined.psa10_rank_score,
+            rankable=combined.rankable,
+            estimated_psa_grade=combined.estimated_psa_grade,
+            review_confidence=combined.review_confidence.value,
+            coverage=coverage.outcome.value,
+            coverage_detail=coverage.assessed,
+            roles_and_context=role_context.model_dump(),
+            defects_found=[f.model_dump() for f in combined.findings],
+            limitations=limitations,
+            recommended_additional_photos=coverage.recommended_additional_photos,
+            card_identification_request=coverage.card_identification_request,
+            image_quality={i.image_hash: i.preflight for i in images},
+            reasoning="; ".join(combined.reasons),
+            versions=VERSIONS)
+        review.review_id = self._repo.save_review(
+            candidate_id=candidate.candidate_id, mode=mode.value,
+            routing_decision_id=routing_id, verdict=review.verdict,
+            psa10_candidate=review.psa10_candidate,
+            psa10_rank_score=review.psa10_rank_score,
+            rankable=review.rankable,
+            estimated_psa_grade=review.estimated_psa_grade,
+            review_confidence=review.review_confidence,
+            coverage=review.coverage,
+            heuristic_result_id=stage_ids["heuristic"],
+            coverage_provisional_result_id=stage_ids["coverage_provisional"],
+            coverage_result_id=stage_ids["coverage"],
+            combine_result_id=stage_ids["combine"],
+            vision_result_id=vision_id,
+            rubric_version=self._rubric.version,
+            output=review.model_dump())
+        return review
+```
+
+`StageRunner.run` returns the output dict; it also exposes `run_with_id` returning `(output, stage_result_id)` so `_persist` can reference the exact rows — added to T28 as a one-line wrapper over the same code path.
+
+An image whose `preflight` reports unusable contributes nothing to assembly and the candidate continues on its remaining images; `to_image_evidence` skips any `ImageStageOutputs` without geometry.
+
+**Provider provisioning (item 9).** `service.review_card(candidate_input, mode, provider=None)` builds the provider when one is not supplied: `AnthropicVisionProvider(model=settings.model, store=store, api_key=settings.api_key)` when `ANTHROPIC_API_KEY` is present, else `None`. The CLI passes the same. When routing wants a call and no provider exists, the run records the `VISION_UNAVAILABLE` limitation above rather than behaving as `OFF` — the card is reported as not fully assessed and cannot reach `PASS`, which is the recall-correct outcome. `--require-provider` turns that into a hard `MissingProviderError` for batch runs where a silent degradation would be worse.
 
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/review/test_pipeline_e2e.py -v`
-Expected: PASS (7 tests)
+Expected: PASS (16 tests)
 
 - [ ] **Step 5: Commit**
 
@@ -8088,11 +8873,11 @@ git add src/card_reviewer/review/pipeline.py src/card_reviewer/review/service.py
 git commit -m "feat(review): full pipeline wiring and application service"
 ```
 
-**Acceptance:** DoD items 1, 2, 3, 5, 11 and 16 are demonstrated by the tests in this task; every stage call passes a `schema=`; the manifest index reaches `combine`; unknown product context produces an identification request and no photo request.
+**Acceptance:** every stage named in T6's tables appears in `stage_result` after one review, and a re-review adds no rows for any of them; a `DEEP` card reviewed twice calls the provider once; a model or prompt change forces a new call while a builder bump does not; `SMART` without a provider records `VISION_UNAVAILABLE` and cannot reach `PASS`; a heuristic `OBSERVED` against a vision `NOT_OBSERVED` reviews rather than rejects; a front-only card is `PARTIAL`/rankable/`low` confidence yet may still `REJECT` on a front defect; DoD items 1, 2, 3, 5, 11 and 16 are demonstrated here.
 
 ---
 
-### Task 36: CLI, reporting, outcomes and export
+### Task 37: CLI, reporting, outcomes and export
 
 **Files:** Create `src/card_reviewer/review/report.py`, `src/card_reviewer/review/cli.py`; Modify `pyproject.toml`; Test `tests/review/test_cli.py`
 
@@ -8193,7 +8978,7 @@ git commit -m "feat(review): CLI, reporting, outcome recording and export"
 
 ---
 
-### Task 37: Golden real-image regression fixtures
+### Task 38: Golden real-image regression fixtures
 
 **Files:** Create `tests/review/golden/*.jpg`, `tests/review/golden/expectations.yaml`; Test `tests/review/test_golden.py`
 
@@ -8290,7 +9075,7 @@ git commit -m "test(review): golden real-image observation fixtures"
 
 ---
 
-### Task 38: Full definition-of-done verification
+### Task 39: Full definition-of-done verification
 
 **Files:** Test `tests/review/test_definition_of_done.py`
 
@@ -8466,27 +9251,30 @@ git commit -m "test(review): full definition-of-done verification"
 
 ## Plan Self-Review
 
-**Spec coverage.** Every spec section maps to a task: §1–2 (Global Constraints), §3 (T28, T35), §4 (T5, T6, T28), §5 (T7, T8), §6 (T13), §7.1–7.4 (T21–T26), §8 (T10, T11, T12), §9 (T3, T27), §10 (T15, T16), §11 (T29, T32), §12 (T30, T31), §13 (T17), §14 (T18, T19, T33, T34), §15 (T3, T19), §16 (T36), §17 (T36), §18 (T20, T32, T37), §19 (T38). No gaps.
+**Spec coverage.** Every spec section maps to a task: §1–2 (Global Constraints), §3 (T29, T36), §4 (T5, T6, T29, and the stage contract matrix), §5 (T7, T8), §6 (T13), §7.1–7.4 (T21–T27), §8 (T10, T11, T12, T24), §9 (T3, T28), §10 (T15, T16), §11 (T30, T33), §12 (T31, T32), §13 (T17), §14 (T18, T19, T34, T35), §15 (T3, T19, T34), §16 (T13 `CardReview`, T37), §17 (T37), §18 (T20, T33, T38), §19 (T39). No gaps.
 
-**Placeholder scan.** No "TBD", "TODO", "add error handling", or "similar to Task N". T35 now ships the `ReviewPipeline` orchestration code rather than describing it, since the revision loaded five load-bearing wiring guarantees onto it. Three steps remain prose: T35's three small helpers (`_unusable_image`, `_image_evidence`, `_persist`), T36's CLI command bodies, and T37/T38's fixture assembly. Each is mechanical assembly of interfaces defined exactly above it, and each has complete tests specifying its behaviour.
+**Placeholder scan.** No "TBD", "TODO", "add error handling", or "similar to Task N". T36 ships the full `ReviewPipeline` including `_image_tier`, `_vision` and `_persist`. Prose remains only for T37's CLI command bodies and T38/T39's fixture assembly, each mechanical against interfaces defined above it and each with complete tests.
 
-**Type consistency across the revision.** The names crossing task boundaries were re-checked after this pass: `Scale`, `FindingState`, `Coverage`, `Verdict`, `Authority`, `Psa10Candidate`, `ReviewConfidence`, `EvidenceOrigin`, `EvidenceRef`, `NormalizedBox`, `Finding`, `FusedFinding`, `ResolvedFinding`, `UnevaluableRule`, `CardContext`, `ScopedRule`, `ImageRole`, `ResolvedRole`, `GeometryResult`, `ObservabilityResult`, `CoverageResult`, `Assessment`, `VisionFinding`, `RoutingDecision`, `StageRunner`, `StageValidationError`, `ReviewPipeline`. Signature changes introduced by this revision and propagated everywhere they are used:
+**The stage contract matrix is the cross-boundary check.** Every stage in `STAGE_FINGERPRINT_INPUTS` has a row naming its input model, fingerprint inputs, signature inputs, output model, persisted artifacts and call site — and `test_every_declared_stage_produces_a_cached_result` asserts each one actually reaches `stage_result` at runtime. That is what makes "declared but not wired" a test failure rather than a review finding.
 
-- `evaluate_coverage(..., *, unevaluable_rules=None)` — T17, called from T35.
-- `review_confidence(..., *, required_face_missing=False)` — T18, called from T33.
-- `rank_score` / `estimated_grade` now take `(finding, authority, i1_satisfied)` triples — T18, produced by T33.
-- `StageRunner.run(..., schema=None)` — T28, passed by every T35 stage call.
-- `AnthropicVisionProvider(model, store, api_key)` — T32, constructed in T36.
-- `combine(..., scoped_rules, manifest_index, required_face_missing)` — T33, called from T35.
+**Cache safety was the pass's structural change.** `GeometryResult` and `ObservabilityResult` are cached as JSON in SQLite, so neither may hold NumPy arrays. Pixel products — normalized faces, border masks, glare and occlusion masks, every crop — go to the artifact store and the stage outputs carry ids. Both tasks assert a JSON round trip yields identical downstream pixels.
 
-**One deliberate asymmetry.** `Finding.psa10_relevant` is set provisionally by producers and **overwritten** by T16's resolution. That is intended (Decision 4) — a provider's relevance claim is advisory — and the field keeps both values only in the sense that the raw finding is retained under the fused one.
+**Signature changes propagated this pass:**
 
-**Two spec deviations flagged, not absorbed.** (1) The `review` table gains a `review_confidence` column, since §16 requires the field in output and it must survive a restart. (2) §11 describes vision findings as carrying "normalized location"; this plan makes location required downstream and derives it from cited evidence regions when the provider omits it, rather than allowing it to be absent. Both extend the spec's data model rather than contradicting it.
+- `geometry.analyze(image_bytes, store, image_hash)` and new `load_geometry(result, store)` — T22, consumed by T23, T24, T25, T26, T27, T36.
+- `observability.analyze(geometry, store, image_hash)` — T23, consumed by T36.
+- `measure_centering(geometry, store)` — T25, consumed by T36.
+- `VisionProvider.signature()` — T30, implemented by `FakeProvider` and `AnthropicVisionProvider` (T33), consumed by T36's `_vision`.
+- `BuiltManifest(payload, index, builder_meta)` — T32, consumed by T36.
+- `i1_satisfied(..., material_contradiction=)` and `decide_verdict(..., contradicted=)` — T19, consumed by T35.
+- `StageRunner.run_with_id` — T29, consumed by T36's `_persist`.
+
+**Two spec deviations flagged, not absorbed.** (1) `review` gains a `review_confidence` column, required by §16 output and needing to survive a restart. (2) `role_features` is a stage the spec does not name; §8 requires role inference from layout signatures but leaves the producer unstated, and leaving it implicit is what made `text_density` a magic key. Both extend the spec's model rather than contradicting it.
 
 ## Notes for the executor
 
 - **Run the existing suite before starting.** `uv run pytest` must be green (267 subsystem B tests) before Task 1.
 - **Never modify `src/card_reviewer/knowledge/`.** Subsystem B is consumed through `load_active_rubric` only. If a task seems to need a change there, stop and raise it.
-- **The rubric is live data.** Tests that read it (T11, T14, T30) assert on behaviour, not on counts that a future rubric release would break — except `test_the_live_rubric_yields_no_inert_rules_today`, which is a deliberate tripwire.
+- **The rubric is live data.** Tests that read it (T11, T14, T31) assert on behaviour, not on counts that a future rubric release would break — except `test_the_live_rubric_yields_no_inert_rules_today`, which is a deliberate tripwire.
 - **OpenCV is imported lazily inside functions**, never at module scope, so `import card_reviewer.review` stays cheap.
 - **If any task reveals a genuine contradiction with the spec, stop and flag it** rather than changing the architecture.
