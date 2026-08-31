@@ -77,3 +77,29 @@ def test_an_incomplete_vision_signature_is_rejected():
 
     with pytest.raises(KeyError, match="model"):
         effective_versions(vision_signature={"provider": "anthropic"})
+
+
+def test_nested_inference_parameters_render_deterministically():
+    """Equivalent parameter dicts must produce one run-version string, or the
+    same run reads as two different ones in the calibration record."""
+    from card_reviewer.review.versions import format_vision_version
+
+    base = {"provider": "anthropic", "model": "m", "prompt_version": "1.0.0"}
+    a = format_vision_version(
+        base | {"inference_params": {"thinking": {"budget": 2, "type": "on"},
+                                     "max_tokens": 4096}}
+    )
+    b = format_vision_version(
+        base | {"inference_params": {"max_tokens": 4096,
+                                     "thinking": {"type": "on", "budget": 2}}}
+    )
+    assert a == b
+
+
+def test_different_nested_parameters_still_render_differently():
+    from card_reviewer.review.versions import format_vision_version
+
+    base = {"provider": "anthropic", "model": "m", "prompt_version": "1.0.0"}
+    a = format_vision_version(base | {"inference_params": {"thinking": {"budget": 2}}})
+    b = format_vision_version(base | {"inference_params": {"thinking": {"budget": 3}}})
+    assert a != b

@@ -6,6 +6,8 @@ producer signature and this table can never disagree.
 
 from __future__ import annotations
 
+import json
+
 PREFLIGHT_VERSION = "1.0.0"
 GEOMETRY_VERSION = "1.0.0"
 OBSERVABILITY_VERSION = "1.0.0"
@@ -81,8 +83,15 @@ def format_vision_version(signature: dict[str, object]) -> str:
             "provider, model, prompt version and inference parameters cannot be "
             "compared against the PSA outcome it predicted"
         )
+    # Render each value as canonical JSON rather than with str(), so a nested
+    # parameter dict produces one stable string whatever order it was built
+    # in — otherwise the same run reads as two different ones in the
+    # calibration record.
     params = signature["inference_params"] or {}
-    rendered = ",".join(f"{k}={v}" for k, v in sorted(dict(params).items()))
+    rendered = ",".join(
+        f"{k}={json.dumps(v, sort_keys=True, separators=(',', ':'))}"
+        for k, v in sorted(dict(params).items())
+    )
     return (
         f"{signature['provider']}/{signature['model']}"
         f"@{signature['prompt_version']}[{rendered}]"

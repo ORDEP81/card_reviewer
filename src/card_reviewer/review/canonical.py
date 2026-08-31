@@ -1,6 +1,17 @@
 """Canonical serialization for fingerprinting (spec §4).
 
-Two properties this module exists to guarantee:
+There are TWO canonical forms here, and conflating them is a real defect:
+
+- `canonicalize` is for **evidence and stage inputs**. It quantizes by
+  declared measurement precision, because two centering readings inside the
+  same bucket are the same observation and must reuse the same result.
+- `canonicalize_config` is for **producer signatures** — config, weights,
+  inference parameters. These identify behaviour, not measurements, so
+  floats are preserved exactly. Rounding `temperature=0.2` and
+  `temperature=0.204` together would make two different configurations
+  share a cache row.
+
+Two properties both forms guarantee:
 
 1. **Precision is semantic, not positional.** Each value is quantized by the
    precision its *meaning* declares, resolved from the tail of its field
@@ -23,10 +34,17 @@ from .versions import CANON_SCHEME_VERSION
 __all__ = [
     "CANON_SCHEME_VERSION",
     "PRECISION_MAP",
+    "SIGNATURE_SCHEME_VERSION",
     "canonicalize",
+    "canonicalize_config",
     "precision_for",
     "quantize",
 ]
+
+#: Versioned independently of the evidence scheme: changing how producer
+#: configuration is rendered must be a traceable invalidation of signatures
+#: without disturbing evidence fingerprints, and vice versa.
+SIGNATURE_SCHEME_VERSION = "1.0.0"
 
 #: Declared semantic precision, keyed by the SUFFIX of a field path. Real
 #: payloads wrap values under stage names, list indices and model fields, so
@@ -129,4 +147,59 @@ def canonicalize(obj: Any) -> str:
     """
     return json.dumps(
         _walk(obj, ""), sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    )
+
+
+def _walk_config(node: Any, path: str) -> Any:
+    """Exact rendering for producer configuration.
+
+    Same strictness as the evidence walker — string keys, JSON-safe types
+    only — but floats pass through unrounded. A configuration value is an
+    identity, not a measurement, so there is no bucket it belongs to.
+    """
+    if isinstance(node, dict):
+        bad = [k for k in node if not isinstance(k, str)]
+        if bad:
+            raise TypeError(
+                f"canonicalize_config requires string keys — {path or '<root>'} "
+                f"has {bad!r}."
+            )
+        return {
+            k: _walk_config(v, f"{path}.{k}" if path else k)
+            for k, v in sorted(node.items())
+        }
+    if isinstance(node, (list, tuple)):
+        return [_walk_config(v, path) for v in node]
+    if isinstance(node, bool):
+        return node
+    if isinstance(node, float):
+        if not math.isfinite(node):
+            raise ValueError(
+                f"producer configuration must be finite — {path or '<root>'} is "
+                f"{node!r}. NaN is not JSON and never equals itself, so a "
+                "signature containing one could never match its own cache row."
+            )
+        return node
+    if node is None or isinstance(node, (str, int)):
+        return node
+    raise TypeError(
+        f"canonicalize_config cannot represent {type(node).__name__} at "
+        f"{path or '<root>'}. Stringifying it would put an unstable or "
+        "colliding value into a producer signature."
+    )
+
+
+def canonicalize_config(obj: Any) -> str:
+    """Deterministic, EXACT JSON for producer signatures.
+
+    No quantization: `PRECISION_MAP` describes what counts as the same
+    observation, which says nothing about what counts as the same
+    configuration.
+    """
+    return json.dumps(
+        _walk_config(obj, ""),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
     )

@@ -12,7 +12,12 @@ from __future__ import annotations
 import hashlib
 from typing import Any
 
-from .canonical import CANON_SCHEME_VERSION, canonicalize
+from .canonical import (
+    CANON_SCHEME_VERSION,
+    SIGNATURE_SCHEME_VERSION,
+    canonicalize,
+    canonicalize_config,
+)
 
 __all__ = [
     "STAGE_FINGERPRINT_INPUTS",
@@ -124,6 +129,7 @@ STAGE_FINGERPRINT_INPUTS: dict[str, tuple[str, ...]] = {
 
 
 def fingerprint(payload: Any) -> str:
+    """Cache identity of a stage's INPUTS — evidence, quantized semantically."""
     body = f"{CANON_SCHEME_VERSION}|{canonicalize(payload)}"
     return hashlib.sha256(body.encode("utf-8")).hexdigest()
 
@@ -142,4 +148,12 @@ def signature_for(stage: str, versions: dict[str, Any]) -> str:
             f"stage {stage!r} signature requires {missing} — an omitted version "
             "key would silently make two different implementations look identical"
         )
-    return fingerprint({"stage": stage, **{k: versions[k] for k in keys}})
+    # Producer configuration is rendered EXACTLY, never through the
+    # measurement quantizer: `temperature=0.2` and `temperature=0.204` are
+    # different behaviour, and a provider signature carrying a float must not
+    # need a declared measurement precision to be hashable at all.
+    body = (
+        f"{SIGNATURE_SCHEME_VERSION}|"
+        f"{canonicalize_config({'stage': stage, **{k: versions[k] for k in keys}})}"
+    )
+    return hashlib.sha256(body.encode("utf-8")).hexdigest()
