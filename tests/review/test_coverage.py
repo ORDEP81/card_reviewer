@@ -114,3 +114,26 @@ def test_the_result_round_trips_through_json():
 
     r = evaluate_coverage(_good(), {}, {}, REQUIRED_FACES)
     assert CoverageResult.model_validate(json.loads(r.model_dump_json())) == r
+
+
+def test_a_structural_limitation_yields_no_photo_request_even_if_templated(
+        monkeypatch):
+    """Guards the structural check itself, not the absence of a template.
+
+    WHITE_BORDER has no entry in PHOTO_REQUESTS today, so the previous test
+    would still pass if the structural skip were deleted. Giving it one
+    proves the class check is what excludes it — otherwise adding a template
+    later would silently start asking for a better photograph of something
+    no photograph can show.
+    """
+    from card_reviewer.review.policies import coverage_v1
+
+    monkeypatch.setitem(coverage_v1.PHOTO_REQUESTS, "WHITE_BORDER",
+                        "a photograph of the {face} {category} on dark backing")
+    det, reasons = _good(), {}
+    for face in REQUIRED_FACES:
+        det[(face, "corners", "whitening")] = Scale.LOW
+        reasons[(face, "corners", "whitening")] = "WHITE_BORDER"
+    r = evaluate_coverage(det, reasons, {}, REQUIRED_FACES)
+    assert any(l.reason_code == "WHITE_BORDER" for l in r.limitations)
+    assert r.recommended_additional_photos == []
