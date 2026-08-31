@@ -29,5 +29,8 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/card_reviewer"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"src/card_reviewer/review/storage/schema.sql" = "card_reviewer/review/storage/schema.sql"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
