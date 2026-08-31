@@ -293,7 +293,9 @@ src/card_reviewer/review/
     preflight.py         raw-image analysis
     geometry.py          boundary, perspective, normalization, border segmentation
     observability.py     detectability + suitability, classed reason codes
+    role_features.py     layout signatures for image-role inference
     measure/
+      __init__.py   CvMeasurements + measure_all (the stage output)
       centering.py  corners.py  edges.py  surface.py
   policies/
     authority_v1.py      evidence_type/confidence -> authority     (Decision 4)
@@ -304,6 +306,7 @@ src/card_reviewer/review/
     combine_v1.py        verdict precedence + I1/I2/I3
   assembly.py            candidate-level evidence assembly
   heuristic.py           rubric evaluation against assembled evidence
+  versions.py            every declared stage version, in one place
   relevance.py           finding -> applicable rules -> authority   (Decision 4)
   fusion.py              correlate findings across producers        (Decision 5)
   manifest.py            evidence manifest builder
@@ -521,7 +524,59 @@ class Mode(StrEnum):
         return cls.SMART
 ```
 
-`src/card_reviewer/review/__init__.py` starts as a docstring only — the public surface is added in Task 35, so importing `review` stays cheap and never drags in OpenCV.
+Also create `src/card_reviewer/review/versions.py`, the single place every
+stage version lives. Task 36 builds `versions=` dicts for thirteen stages; if
+each module owned its own constant in isolation there would be no one place to
+read the set from, and `CardReview.versions` could drift from what actually ran.
+
+```python
+# src/card_reviewer/review/versions.py
+"""Every declared version, in one place.
+
+Each is re-exported by the module that owns the behaviour, so a stage's
+producer signature and this table can never disagree.
+"""
+from __future__ import annotations
+
+PREFLIGHT_VERSION = "1.0.0"
+GEOMETRY_VERSION = "1.0.0"
+OBSERVABILITY_VERSION = "1.0.0"
+CV_VERSION = "1.0.0"
+ROLE_FEATURES_VERSION = "1.0.0"
+RESOLVER_VERSION = "1.0.0"
+VOCABULARY_VERSION = "1.0.0"
+ASSEMBLY_VERSION = "1.0.0"
+SCORER_VERSION = "1.0.0"
+AUTHORITY_POLICY_VERSION = "1.0.0"
+RELEVANCE_POLICY_VERSION = "1.0.0"
+COVERAGE_POLICY_VERSION = "1.0.0"
+ROUTING_POLICY_VERSION = "1.0.0"
+MANIFEST_BUILDER_VERSION = "1.0.0"
+COMBINATION_POLICY_VERSION = "1.0.0"
+SCORING_POLICY_VERSION = "1.0.0"
+FUSION_VERSION = "1.0.0"
+TAXONOMY_VERSION = "1.0.0"
+CANON_SCHEME_VERSION = "1.0.0"
+
+#: Stamped onto every CardReview (spec §16).
+VERSIONS: dict[str, str] = {
+    "preflight": PREFLIGHT_VERSION, "geometry": GEOMETRY_VERSION,
+    "observability": OBSERVABILITY_VERSION, "cv": CV_VERSION,
+    "role_features": ROLE_FEATURES_VERSION, "resolver": RESOLVER_VERSION,
+    "vocabulary": VOCABULARY_VERSION, "assembly": ASSEMBLY_VERSION,
+    "scorer": SCORER_VERSION, "authority": AUTHORITY_POLICY_VERSION,
+    "relevance": RELEVANCE_POLICY_VERSION, "coverage": COVERAGE_POLICY_VERSION,
+    "routing": ROUTING_POLICY_VERSION, "manifest": MANIFEST_BUILDER_VERSION,
+    "combination": COMBINATION_POLICY_VERSION, "scoring": SCORING_POLICY_VERSION,
+    "fusion": FUSION_VERSION, "taxonomy": TAXONOMY_VERSION,
+    "canonicalization": CANON_SCHEME_VERSION,
+}
+```
+
+Add a test asserting `set(VERSIONS)` covers every stage in
+`STAGE_SIGNATURE_INPUTS` once Task 6 exists.
+
+`src/card_reviewer/review/__init__.py` starts as a docstring only — the public surface is added in Task 36, so importing `review` stays cheap and never drags in OpenCV.
 
 ```python
 # src/card_reviewer/review/__init__.py
@@ -785,7 +840,7 @@ def test_suspected_finding_is_never_an_i3_violation():
     assert i3_satisfied(f) is True
 
 
-def test_enforce_i3_demotes_rather_than_drops(store):
+def test_enforce_i3_demotes_rather_than_drops():
     """An enhancement-only anomaly is still information — it just cannot reject."""
     findings = [_finding(FindingState.OBSERVED,
                          [_ev(EvidenceOrigin.ENHANCED, "clahe:clip=2.0")])]
@@ -1698,7 +1753,7 @@ git commit -m "feat(review): SQLite schema and migration runner"
 
 **Interfaces:**
 - Consumes: `migrations.py`, `fingerprint.py`
-- Produces: `Repository` protocol; `SqliteRepository` with `get_stage_result(stage, fp, sig)`, `put_stage_result(...) -> int`, `record_attempt(...)`, `save_review(...)`, `save_routing_decision(...) -> int`
+- Produces: `Repository` protocol; `SqliteRepository` with `save_candidate(...)`, `save_image(...)`, `link_image(...)`, `get_stage_result(stage, fp, sig)`, `put_stage_result(...) -> int`, `record_attempt(...)`, `save_review(...)`, `save_routing_decision(...) -> int`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1752,6 +1807,18 @@ def test_putting_the_same_identity_twice_returns_the_existing_row(repo):
     assert a == b
 
 
+def test_an_image_can_be_linked_to_two_candidates(repo):
+    """The same photograph across two listings is stored once and linked
+    twice — and the foreign keys the pipeline relies on must resolve."""
+    repo.save_candidate(id="c2", source="manual", title="t2")
+    repo.save_image("h1", "/tmp/a.png")
+    repo.link_image("c1", "h1")
+    repo.link_image("c2", "h1")
+    assert repo._conn.execute(
+        "SELECT COUNT(*) FROM candidate_image WHERE image_hash='h1'"
+    ).fetchone()[0] == 2
+
+
 def test_reviews_are_append_only_so_history_survives(repo):
     rd = repo.save_routing_decision(candidate_id="c1", policy_version="1.0.0",
                                     mode="off", call_vision=False,
@@ -1781,6 +1848,7 @@ import datetime as dt
 import json
 import sqlite3
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Protocol
 
 
@@ -1829,6 +1897,25 @@ class SqliteRepository:
              supplied_card_type, supplied_set, _now()))
         self._conn.commit()
         return id
+
+    def save_image(self, image_hash: str, path: Path | str,
+                   width: int | None = None, height: int | None = None) -> None:
+        self._conn.execute(
+            "INSERT OR IGNORE INTO image(image_hash, path, width, height,"
+            " created_at) VALUES(?,?,?,?,?)",
+            (image_hash, str(path), width, height, _now()))
+        self._conn.commit()
+
+    def link_image(self, candidate_id: str, image_hash: str, *,
+                   supplied_role: str | None = None,
+                   source_url: str | None = None, ordering: int = 0) -> None:
+        """The many-to-many join. The same photograph across two listings is
+        stored and analyzed once, and linked twice."""
+        self._conn.execute(
+            "INSERT OR IGNORE INTO candidate_image(candidate_id, image_hash,"
+            " supplied_role, source_url, ordering) VALUES(?,?,?,?,?)",
+            (candidate_id, image_hash, supplied_role, source_url, ordering))
+        self._conn.commit()
 
     def get_stage_result(self, stage: str, fp: str, sig: str) -> StageResult | None:
         row = self._conn.execute(
@@ -1906,7 +1993,7 @@ class SqliteRepository:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/review/test_repository.py -v`
-Expected: PASS (6 tests)
+Expected: PASS (7 tests)
 
 - [ ] **Step 5: Commit**
 
@@ -2302,7 +2389,7 @@ git commit -m "feat(review): canonical card-context normalization"
 
 **Interfaces:**
 - Consumes: `context.py`, `enums.py`, `card_reviewer.knowledge.load_active_rubric`
-- Produces: `ScopedRule` (rule + evaluability), `UNKNOWN_PRODUCT_CONTEXT`, `scope_rules(rules, context) -> list[ScopedRule]`, `unevaluable_reasons(scoped) -> list[str]`, `applicable(scoped) -> list[Rule]`
+- Produces: `ScopedRule` (rule + evaluability), `UNKNOWN_PRODUCT_CONTEXT`, `scope_rules(rules, context) -> list[ScopedRule]`, `unevaluable_reasons(scoped) -> list[str]`, `applicable(scoped) -> list[Rule]`, `rule_content(scoped) -> list[dict]`
 
 **Why this task exists:** `for_card(None, None)` returns *every* rule, which is correct — unknown context must not narrow the rubric. But a returned rule is not an applicable one. Without this gate, a product-scoped rule would silently apply to a card whose product is unknown.
 
@@ -2420,6 +2507,19 @@ def unevaluable_reasons(scoped: list[ScopedRule]) -> list[str]:
 def applicable(scoped: list[ScopedRule]) -> list[Rule]:
     return [s.rule for s in scoped
             if s.evaluability is RuleEvaluability.APPLICABLE]
+
+
+def rule_content(scoped: list[ScopedRule]) -> list[dict[str, str]]:
+    """The applicable rules as fingerprintable CONTENT, not a version string.
+
+    Stages that consume the rubric fingerprint what the rules actually say, so
+    a rubric release that leaves the applicable rules unchanged for this card
+    does not invalidate their results (spec §4, values not signatures).
+    """
+    return [{"id": r.id, "category": r.category.value, "statement": r.statement,
+             "evidence_type": r.evidence_type.value,
+             "confidence": r.confidence.value}
+            for r in applicable(scoped)]
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -2444,7 +2544,7 @@ git commit -m "feat(review): rule evaluability gate for unknown card context"
 
 **Interfaces:**
 - Consumes: `enums.py`
-- Produces: `ImageRole` (`FRONT`/`BACK`/`UNKNOWN`), `ResolvedRole`, `resolve_roles(images) -> dict[str, ResolvedRole]`
+- Produces: `ImageRole` (`FRONT`/`BACK`/`UNKNOWN`), `ResolvedRole`, `resolve_roles(images) -> dict[str, ResolvedRole]`, `RoleContext`, `resolve_role_context(candidate, image_outputs) -> RoleContext` — the declared output model and entry point of the `role_context` stage, which fuses role resolution (here) with card-context normalization (Task 10) into one cached result
 
 - [ ] **Step 1: Write the failing test**
 
@@ -2563,13 +2663,52 @@ def resolve_roles(images: list[RoleInput]) -> dict[str, ResolvedRole]:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/review/test_roles.py -v`
-Expected: PASS (5 tests)
+Expected: PASS (6 tests)
+
+The `role_context` stage caches roles and card context together, because they
+are resolved from the same inputs and consumed together:
+
+```python
+class RoleContext(BaseModel):
+    roles: dict[str, ResolvedRole] = Field(default_factory=dict)
+    card_context: CardContext = Field(default_factory=CardContext)
+    version: str = RESOLVER_VERSION
+
+
+def resolve_role_context(candidate, image_outputs) -> RoleContext:
+    """The cached `role_context` stage (Task 36 call site).
+
+    `image_outputs` are `ImageStageOutputs`; role features come from the
+    `role_features` stage, never from defect measurements.
+    """
+    from .normalize import CardContextNormalizer
+    features = {i.image_hash: RoleFeatures.model_validate(i.role_features
+                                                          or {})
+                for i in image_outputs}
+    supplied = {i.image_hash: i.supplied_role for i in candidate.images}
+    roles = resolve_roles([
+        RoleInput(image_hash=h, supplied_role=supplied.get(h),
+                  text_density=f.text_density,
+                  has_central_image_region=f.has_central_image_region)
+        for h, f in features.items()])
+    context = CardContextNormalizer().normalize(
+        raw_title=candidate.title, supplied_card_type=candidate.card_type,
+        supplied_set=candidate.set_name)
+    return RoleContext(roles=roles, card_context=context)
+```
+
+```python
+def test_role_context_pairs_roles_with_normalized_card_context():
+    """One cached stage, because both are resolved from the same inputs."""
+    ...  # constructs a ResolvedCandidate and ImageStageOutputs, asserts
+         # roles are resolved and canonical_card_types is ["chrome"]
+```
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add src/card_reviewer/review/roles.py tests/review/test_roles.py
-git commit -m "feat(review): image role resolution with unknown as first-class"
+git commit -m "feat(review): image role resolution and the role_context stage"
 ```
 
 **Acceptance:** supplied beats inferred beats unknown; ambiguous signatures return `UNKNOWN` rather than guessing.
@@ -3018,7 +3157,7 @@ git commit -m "feat(review): rule authority policy from subsystem B evidence typ
 **Files:** Create `src/card_reviewer/review/heuristic.py`; Test `tests/review/test_heuristic.py`
 
 **Interfaces:**
-- Consumes: `findings.py`, `taxonomy.py`, `evaluability.py`, `assembly.Assembled` (Task 27)
+- Consumes: `findings.py`, `taxonomy.py`, `evaluability.py`, `assembly.Assembled` (Task 28)
 - Produces: `HeuristicResult`, `best_detectability(detectability, category, defect_type) -> Scale`, `evaluate(assembled: Assembled, scoped_rules) -> HeuristicResult`
 
 - [ ] **Step 1: Write the failing test**
@@ -3209,7 +3348,7 @@ CENTERING_TOLERANCE_PP = 5.0
 CENTERING_SEVERE_PP = 15.0
 
 
-# NOTE: the heuristic consumes `assembly.Assembled` (Task 27) directly. There is
+# NOTE: the heuristic consumes `assembly.Assembled` (Task 28) directly. There is
 # deliberately no second "assembled evidence" type — two shapes with different
 # detectability key arities would silently miss on every lookup and no finding
 # could ever reach `observed`.
@@ -4433,9 +4572,11 @@ from __future__ import annotations
 from pydantic import BaseModel, Field
 
 from ..enums import (
-    Authority, Coverage, FindingState, Psa10Candidate, Scale, Verdict,
+    Authority, Coverage, FindingState, Psa10Candidate, ReviewConfidence,
+    Scale, Verdict,
 )
-from ..findings import Finding, i3_satisfied
+from ..findings import Finding, enforce_i3, i3_satisfied
+from ..fusion import FusedFinding
 
 COMBINATION_POLICY_VERSION = "1.0.0"
 
@@ -5255,8 +5396,12 @@ def test_glare_is_circumstantial_not_structural(store):
 def test_a_photo_can_be_good_for_centering_and_useless_for_surface(store):
     """A glare spot must not condemn a whole image."""
     r = _obs(CardSpec(border_color=(20, 20, 20), glare_regions=["top_left"], seed=2), store)
-    assert r.suitability["centering"] >= Scale.MODERATE
-    assert r.suitability["surface"] < r.suitability["centering"]
+    # `suitability` is stored as labels so the output is JSON-cacheable;
+    # compare through `Scale` rather than as strings.
+    centering = Scale(r.suitability["centering"])
+    surface = Scale(r.suitability["surface"])
+    assert centering >= Scale.MODERATE
+    assert surface < centering
 
 
 def test_the_output_revives_from_json_with_identical_detectability(store):
@@ -5600,7 +5745,8 @@ git commit -m "feat(review): image-role layout features as their own cached stag
 **Files:** Create `src/card_reviewer/review/imaging/measure/__init__.py`, `measure/centering.py`; Test `tests/review/test_measure_centering.py`
 
 **Interfaces:**
-- Produces: `CenteringMeasurement` (`measurable`, `horizontal`, `vertical`, `method`, `precision_pp`, `reason`), `measure_centering(geometry) -> CenteringMeasurement`
+- Consumes: `imaging/geometry.py`, `storage/artifacts.ArtifactStore`
+- Produces: `CenteringMeasurement` (`measurable`, `horizontal`, `vertical`, `method`, `precision_pp`, `reason`), `measure_centering(geometry, store) -> CenteringMeasurement`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -5626,18 +5772,18 @@ def test_measured_centering_lands_within_the_declared_tolerance(truth, store):
     assert abs(m.horizontal - truth) <= m.precision_pp
 
 
-def test_the_measurement_declares_its_own_precision():
+def test_the_measurement_declares_its_own_precision(store):
     m = measure_centering(geom(render_png(CardSpec()), store, "h"), store)
     assert m.precision_pp == 1.5
 
 
-def test_a_borderless_design_reports_not_measurable_with_a_reason():
+def test_a_borderless_design_reports_not_measurable_with_a_reason(store):
     m = measure_centering(geom(render_png(CardSpec(borderless=True)), store, "h"), store)
     assert m.measurable is False
     assert m.reason == "BORDERLESS_OR_NO_RELIABLE_REFERENCE"
 
 
-def test_no_ratio_is_forced_onto_a_borderless_card():
+def test_no_ratio_is_forced_onto_a_borderless_card(store):
     """CENTERING_BORDERLESS_001 binds directly here."""
     m = measure_centering(geom(render_png(CardSpec(borderless=True)), store, "h"), store)
     assert m.horizontal is None and m.vertical is None
@@ -5651,7 +5797,7 @@ def test_the_measurement_carries_no_acceptability_judgment(store):
     assert not hasattr(m, "acceptable")
 
 
-def test_an_undetected_boundary_yields_not_measurable():
+def test_an_undetected_boundary_yields_not_measurable(store):
     from card_reviewer.review.imaging.geometry import GeometryResult
     m = measure_centering(GeometryResult(boundary_confidence=0.1), store)
     assert m.measurable is False
@@ -5959,7 +6105,7 @@ git commit -m "feat(review): corner and edge crops with anomaly candidates"
 **Files:** Create `src/card_reviewer/review/imaging/measure/surface.py`; Test `tests/review/test_measure_surface.py`
 
 **Interfaces:**
-- Produces: `measure_surface(geometry, store, image_hash) -> SurfaceResult` with the preserved original plus deterministic enhanced views, each `EvidenceRef` carrying `origin=ENHANCED` and its method string
+- Produces: `measure_surface(geometry, store, image_hash) -> SurfaceResult` with the preserved original plus deterministic enhanced views, each `EvidenceRef` carrying `origin=ENHANCED` and its method string; **`CvMeasurements` and `measure_all(geometry, store, image_hash)`**, the declared output model and entry point of the `cv_measurements` stage
 
 - [ ] **Step 1: Write the failing test**
 
@@ -6107,13 +6253,72 @@ def measure_surface(geometry: GeometryResult, store: ArtifactStore,
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/review/test_measure_surface.py -v`
-Expected: PASS (5 tests)
+Expected: PASS (6 tests)
+
+Also create `src/card_reviewer/review/imaging/measure/__init__.py`, which
+defines the **output model of the `cv_measurements` stage**. The stage caches
+one JSON document per image, so the four measurement functions need a single
+declared aggregate rather than four loose return values:
+
+```python
+# src/card_reviewer/review/imaging/measure/__init__.py
+"""The cv_measurements stage output: one cached document per image."""
+from __future__ import annotations
+
+from typing import Any
+
+from pydantic import BaseModel, Field
+
+from ...storage.artifacts import ArtifactStore
+from ...versions import CV_VERSION
+from ..geometry import GeometryResult
+from .centering import CenteringMeasurement, measure_centering
+from .corners import CornerResult, measure_corners
+from .edges import EdgeResult, measure_edges
+from .surface import SurfaceResult, measure_surface
+
+
+class CvMeasurements(BaseModel):
+    centering: dict[str, Any] = Field(default_factory=dict)
+    corners: CornerResult = Field(default_factory=CornerResult)
+    edges: EdgeResult = Field(default_factory=EdgeResult)
+    surface: SurfaceResult = Field(default_factory=SurfaceResult)
+    version: str = CV_VERSION
+
+    @property
+    def anomalies(self) -> list[dict[str, Any]]:
+        """All candidates from every region, in one list for assembly."""
+        return [*self.corners.anomalies, *self.edges.anomalies,
+                *self.surface.anomalies]
+
+
+def measure_all(geometry: GeometryResult, store: ArtifactStore,
+                image_hash: str) -> CvMeasurements:
+    return CvMeasurements(
+        centering=measure_centering(geometry, store).model_dump(),
+        corners=measure_corners(geometry, store, image_hash),
+        edges=measure_edges(geometry, store, image_hash),
+        surface=measure_surface(geometry, store, image_hash))
+```
+
+Add to `tests/review/test_measure_surface.py`:
+
+```python
+def test_measure_all_produces_one_json_serializable_document(tmp_path):
+    """cv_measurements is cached as JSON, so its aggregate must serialize."""
+    import json
+    from card_reviewer.review.imaging.measure import measure_all
+    store = ArtifactStore(tmp_path)
+    m = measure_all(geom(render_png(CardSpec()), store, "h1"), store, "h1")
+    assert json.loads(m.model_dump_json())["corners"]
+    assert isinstance(m.anomalies, list)
+```
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/card_reviewer/review/imaging/measure/surface.py tests/review/test_measure_surface.py
-git commit -m "feat(review): surface enhancement with recorded provenance"
+git add src/card_reviewer/review/imaging/measure/ tests/review/test_measure_surface.py
+git commit -m "feat(review): surface enhancement, provenance and the cv_measurements aggregate"
 ```
 
 **Acceptance:** the original is preserved alongside every enhancement; each enhanced ref carries a reproducible method string; anomalies record what surfaced them.
@@ -6127,7 +6332,9 @@ git commit -m "feat(review): surface enhancement with recorded provenance"
 
 **Interfaces:**
 - Consumes: `roles.py`, `imaging/*`, `provenance.py`
-- Produces: `ASSEMBLY_VERSION`, `ImageEvidence`, `Assembled`, `assemble(images, roles) -> Assembled`
+- Produces: `ASSEMBLY_VERSION`, `ImageEvidence`, `Assembled`, `ImageStageOutputs`, `assemble(images, roles) -> Assembled`, `to_image_evidence(image_stage_outputs) -> list[ImageEvidence]`
+
+**Cache safety, as in Tasks 22 and 23.** `evidence_assembly` is a cached stage, so `Assembled` flattens its tuple keys to strings and exposes tuple-keyed properties. `to_image_evidence` is the declared bridge from the measurement modules' `evidence_refs` lists to the `"category:defect_type"` map the heuristic looks up — without it that mapping would be implicit and a mismatch would silently emit no findings at all.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -6268,16 +6475,99 @@ class ImageEvidence(BaseModel):
 
 
 class Assembled(BaseModel):
-    detectability: dict[tuple[ImageRole, str, str], Scale] = Field(default_factory=dict)
-    reason_codes: dict[tuple[ImageRole, str, str], str] = Field(default_factory=dict)
-    provenance: dict[tuple[ImageRole, str, str], str] = Field(default_factory=dict)
+    """Cache-safe, for the same reason `ObservabilityResult` is.
+
+    `evidence_assembly` is a cached stage stored as JSON in SQLite, so tuple
+    keys are flattened to `"role|category|defect_type"` strings. The tuple view
+    every consumer uses is exposed as a property; the flat form is what the
+    fingerprint and the cache see.
+    """
+    detectability_flat: dict[str, str] = Field(default_factory=dict)
+    reason_codes_flat: dict[str, str] = Field(default_factory=dict)
+    provenance_flat: dict[str, str] = Field(default_factory=dict)
     best_for: dict[str, str] = Field(default_factory=dict)
     limitations: list[str] = Field(default_factory=list)
     conflicts: list[dict[str, Any]] = Field(default_factory=list)
     anomalies: list[dict[str, Any]] = Field(default_factory=list)
     evidence_refs: dict[str, list[EvidenceRef]] = Field(default_factory=dict)
-    faces_present: tuple[ImageRole, ...] = ()
+    faces_present: list[str] = Field(default_factory=list)
     centering: dict[str, Any] = Field(default_factory=dict)
+
+    @staticmethod
+    def key(role: ImageRole, category: str, defect_type: str) -> str:
+        return f"{role.value}|{category}|{defect_type}"
+
+    @staticmethod
+    def _unkey(k: str) -> tuple[ImageRole, str, str]:
+        role, category, defect_type = k.split("|")
+        return (ImageRole(role), category, defect_type)
+
+    @property
+    def detectability(self) -> dict[tuple[ImageRole, str, str], Scale]:
+        return {self._unkey(k): Scale(v)
+                for k, v in self.detectability_flat.items()}
+
+    @property
+    def reason_codes(self) -> dict[tuple[ImageRole, str, str], str]:
+        return {self._unkey(k): v for k, v in self.reason_codes_flat.items()}
+
+    @property
+    def provenance(self) -> dict[tuple[ImageRole, str, str], str]:
+        return {self._unkey(k): v for k, v in self.provenance_flat.items()}
+
+    @property
+    def faces(self) -> tuple[ImageRole, ...]:
+        return tuple(ImageRole(f) for f in self.faces_present)
+
+
+class ImageStageOutputs(BaseModel):
+    """Every image-tier stage's output for one photograph, as cached dicts.
+
+    Task 36 collects these; `to_image_evidence` turns them into the
+    `ImageEvidence` values `assemble` consumes. Keeping the raw stage outputs
+    means the assembly fingerprint is over exactly what the stages produced.
+    """
+    image_hash: str
+    preflight: dict[str, Any] = Field(default_factory=dict)
+    geometry: dict[str, Any] | None = None
+    observability: dict[str, Any] | None = None
+    cv_measurements: dict[str, Any] | None = None
+    role_features: dict[str, Any] | None = None
+
+    @property
+    def usable(self) -> bool:
+        return self.geometry is not None
+
+
+def to_image_evidence(images: list[ImageStageOutputs]) -> list[ImageEvidence]:
+    """Adapt cached image-tier outputs into assembly inputs.
+
+    This is the one place the measurement modules' `evidence_refs` lists become
+    the `"category:defect_type"` keyed map the heuristic looks up — if that
+    mapping were left implicit, no CV finding would ever be emitted and every
+    card would silently pass.
+    """
+    out: list[ImageEvidence] = []
+    for image in images:
+        if not image.usable:
+            continue
+        obs = ObservabilityResult.model_validate(image.observability)
+        cv = CvMeasurements.model_validate(image.cv_measurements)
+        refs: dict[str, list[EvidenceRef]] = {}
+        for category, group in (("corners", cv.corners), ("edges", cv.edges),
+                                ("surface", cv.surface)):
+            for defect_type in defect_types_for(category):
+                key = f"{category}:{defect_type}"
+                refs.setdefault(key, []).extend(group.evidence_refs)
+        if cv.centering.get("measurable"):
+            refs["centering:border_ratio"] = cv.surface.evidence_refs[:1]
+        out.append(ImageEvidence(
+            image_hash=image.image_hash,
+            detectability=obs.detectability,
+            reason_codes=obs.reason_codes,
+            sharpness=float(image.preflight.get("global_sharpness", 0.0)),
+            centering=cv.centering, anomalies=cv.anomalies, evidence_refs=refs))
+    return out
 
 
 def assemble(images: list[ImageEvidence],
@@ -6293,26 +6583,26 @@ def assemble(images: list[ImageEvidence],
             continue
         faces.add(role)
         for (region, category, defect_type), value in image.detectability.items():
-            key = (role, category, defect_type)
+            key = Assembled.key(role, category, defect_type)
             # Best-of across images: a defect visible in ANY photo is observable.
-            if value > out.detectability.get(key, Scale.NONE):
-                out.detectability[key] = value
-                out.provenance[key] = image.image_hash
+            if value > Scale(out.detectability_flat.get(key, Scale.NONE.label)):
+                out.detectability_flat[key] = value.label
+                out.provenance_flat[key] = image.image_hash
                 # The reason travels with the value it explains. If the best
                 # view of this defect type is still limited, coverage needs to
                 # know WHY — structural and circumstantial are handled
                 # completely differently.
                 code = image.reason_codes.get((region, category, defect_type))
                 if code and value < Scale.MODERATE:
-                    out.reason_codes[key] = code
+                    out.reason_codes_flat[key] = code
                 else:
-                    out.reason_codes.pop(key, None)
+                    out.reason_codes_flat.pop(key, None)
         out.limitations.extend(image.limitations)
         out.anomalies.extend(image.anomalies)
         for purpose, refs in image.evidence_refs.items():
             out.evidence_refs.setdefault(purpose, []).extend(refs)
 
-    out.faces_present = tuple(sorted(faces, key=lambda r: r.value))
+    out.faces_present = sorted(f.value for f in faces)
     out.best_for = _best_for(images, roles)
     out.conflicts = _conflicts(images, roles)
     fronts = [i for i in images if roles[i.image_hash].role is ImageRole.FRONT]
@@ -6366,7 +6656,7 @@ git commit -m "feat(review): candidate-level evidence assembly"
 
 **Interfaces:**
 - Consumes: `fingerprint.py`, `storage/repository.py`
-- Produces: `StageValidationError`, `StageRunner.run(stage, inputs, versions, compute, *, schema=None, image_hash=None, candidate_id=None) -> dict`
+- Produces: `StageValidationError`, `StageRunner.run_with_id(stage, inputs, versions, compute, *, schema=None, image_hash=None, candidate_id=None) -> (dict, int)` and `StageRunner.run(...) -> dict`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -6425,6 +6715,18 @@ def test_a_failure_is_recorded_and_never_cached(runner):
     out = runner.run("vision", {"manifest": "x"}, v,
                      lambda: calls.append(1) or {"ok": True}, candidate_id="c1")
     assert out == {"ok": True} and len(calls) == 1
+
+
+def test_run_with_id_returns_the_row_the_output_was_stored_in(runner):
+    """`review`'s foreign keys point at exact rows, so the id must travel with
+    the output rather than being re-derived afterwards."""
+    v = {"preflight_version": "1.0.0", "config": {}}
+    out, row_id = runner.run_with_id("preflight", {"image_hash": "h"}, v,
+                                     lambda: {"n": 1}, image_hash="h")
+    again, again_id = runner.run_with_id("preflight", {"image_hash": "h"}, v,
+                                         lambda: {"n": 2}, image_hash="h")
+    assert out == again and row_id == again_id
+    assert isinstance(row_id, int)
 
 
 def test_output_failing_schema_validation_is_never_cached(runner):
@@ -6505,17 +6807,25 @@ class StageRunner:
     def __init__(self, repo: Repository) -> None:
         self._repo = repo
 
-    def run(self, stage: str, inputs: dict[str, Any], versions: dict[str, Any],
-            compute: Callable[[], dict[str, Any]], *,
-            schema: type[BaseModel] | None = None,
-            image_hash: str | None = None,
-            candidate_id: str | None = None) -> dict[str, Any]:
+    def run_with_id(self, stage: str, inputs: dict[str, Any],
+                    versions: dict[str, Any],
+                    compute: Callable[[], dict[str, Any]], *,
+                    schema: type[BaseModel] | None = None,
+                    image_hash: str | None = None,
+                    candidate_id: str | None = None
+                    ) -> tuple[dict[str, Any], int]:
+        """Run or reuse a stage, returning its output and its row id.
+
+        `review` carries foreign keys to the exact `stage_result` rows that
+        produced it, so the id travels with the output rather than being
+        re-derived from the cache key afterwards.
+        """
         fp = fingerprint(inputs)
         sig = signature_for(stage, versions)
 
         cached = self._repo.get_stage_result(stage, fp, sig)
         if cached is not None:
-            return cached.output
+            return cached.output, cached.id
 
         try:
             output = compute()
@@ -6540,28 +6850,20 @@ class StageRunner:
                 raise StageValidationError(
                     f"stage {stage!r} output failed validation: {exc}") from exc
 
-        self._repo.put_stage_result(stage, fp, sig, output, versions,
-                                    image_hash=image_hash,
-                                    candidate_id=candidate_id)
-        return output
+        row_id = self._repo.put_stage_result(stage, fp, sig, output, versions,
+                                             image_hash=image_hash,
+                                             candidate_id=candidate_id)
+        return output, row_id
 
-    def run_with_id(self, stage: str, inputs: dict[str, Any],
-                    versions: dict[str, Any], compute, **kw) -> tuple[dict, int]:
-        """As `run`, plus the `stage_result` row id.
-
-        `review` carries foreign keys to the exact rows that produced it, so
-        `_persist` needs the id rather than re-deriving the cache key.
-        """
-        output = self.run(stage, inputs, versions, compute, **kw)
-        row = self._repo.get_stage_result(stage, fingerprint(inputs),
-                                          signature_for(stage, versions))
-        return output, row.id
+    def run(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
+        """The output alone, for stages whose row id nothing references."""
+        return self.run_with_id(*args, **kwargs)[0]
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/review/test_stage_runner.py -v`
-Expected: PASS (7 tests)
+Expected: PASS (8 tests)
 
 - [ ] **Step 5: Commit**
 
@@ -6947,6 +7249,17 @@ def test_selection_is_deterministic_for_the_same_inputs():
             == build_manifest(_A(_refs(30)), Mode.SMART, []).payload)
 
 
+def test_the_built_manifest_serializes_for_the_cache():
+    """`manifest` is a cached stage, so its output must round-trip as JSON
+    with the index intact — that index is what resolves provider citations."""
+    import json
+    from card_reviewer.review.manifest import BuiltManifest
+    built = build_manifest(_A(_refs(4)), Mode.SMART, [])
+    revived = BuiltManifest.model_validate(json.loads(built.model_dump_json()))
+    assert revived.payload == built.payload
+    assert set(revived.index) == set(built.index)
+
+
 def test_the_index_resolves_every_sent_artifact_back_to_its_ref():
     """Decision 1: without this the provider's citations cannot be resolved
     and provenance is lost at the round trip."""
@@ -7039,7 +7352,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from typing import NamedTuple
+from pydantic import BaseModel, Field
 
 from .enums import Mode
 from .provenance import EvidenceRef
@@ -7060,18 +7373,22 @@ def _rank(view: str) -> int:
     return len(VIEW_PRIORITY)
 
 
-class BuiltManifest(NamedTuple):
-    """What the provider sees, what resolves its citations, and our own metadata.
+class BuiltManifest(BaseModel):
+    """The `manifest` stage's cached output.
 
-    `payload` is EXACTLY what `VisionProvider.assess()` consumes, and it is what
-    the vision stage fingerprints. `builder_meta` holds our bookkeeping —
-    notably the builder version — deliberately kept out of `payload`, because
-    a builder bump that produces identical provider-visible content must not
+    A Pydantic model, not a NamedTuple, because `StageRunner.run(schema=...)`
+    validates it and SQLite stores it as JSON — `EvidenceRef` is itself a model,
+    so the index serializes cleanly.
+
+    `payload` is EXACTLY what `VisionProvider.assess()` consumes, and it alone
+    is what the vision stage fingerprints. `builder_meta` holds our bookkeeping
+    — notably the builder version — deliberately kept out of `payload`, because
+    a builder bump producing identical provider-visible content must not
     re-bill an API call.
     """
-    payload: dict[str, Any]
-    index: dict[str, EvidenceRef]
-    builder_meta: dict[str, Any]
+    payload: dict[str, Any] = Field(default_factory=dict)
+    index: dict[str, EvidenceRef] = Field(default_factory=dict)
+    builder_meta: dict[str, Any] = Field(default_factory=dict)
 
 
 def build_manifest(assembled: Any, mode: Mode,
@@ -7132,7 +7449,7 @@ def build_manifest(assembled: Any, mode: Mode,
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/review/test_manifest_builder.py -v`
-Expected: PASS (13 tests)
+Expected: PASS (14 tests)
 
 - [ ] **Step 5: Commit**
 
@@ -8078,7 +8395,9 @@ def test_i3_is_enforced_before_the_verdict_is_decided(rubric_rules):
     r = combine(h, None, _cov(), card_context_known=True,
                 scoped_rules=rubric_rules)
     assert r.verdict is not Verdict.REJECT
-    assert any("I3" in f.demotion_reason for f in r.findings)
+    # The demotion is recorded on the FUSED view, which is what the verdict
+    # consumed; `findings` deliberately preserves the raw producer output.
+    assert any("I3" in f.demotion_reason for f in r.fused)
 
 
 def test_the_same_defect_from_both_producers_penalizes_once(rubric_rules):
@@ -8185,8 +8504,10 @@ class CombinedResult(BaseModel):
     coverage: Coverage
     # Raw, per-producer findings retained for calibration (Decision 5).
     findings: list[Finding] = Field(default_factory=list)
-    # The fused view scoring and the verdict actually consumed.
-    fused: list = Field(default_factory=list)
+    # The fused view scoring and the verdict actually consumed. Typed, because
+    # `combine` is a cached stage and an untyped list of models does not
+    # serialize.
+    fused: list[FusedFinding] = Field(default_factory=list)
     reasons: list[str] = Field(default_factory=list)
     vision_present: bool = False
     policy_version: str = COMBINATION_POLICY_VERSION
@@ -8535,12 +8856,22 @@ def test_a_heuristic_observed_against_a_vision_not_observed_reviews(rig, tmp_pat
     pipeline, store, _ = rig
     resolved = _candidate(tmp_path, store, [CardSpec(h_centering=85.0),
                                             CardSpec(seed=2)])
+    from card_reviewer.review.vision.provider import VisionFinding
+    # The provider must actually report NOT_OBSERVED at the same place the
+    # heuristic reported the miscut, or there is no contradiction to test.
     denier = FakeProvider(Assessment(
-        findings=[], gem_view=GemView.NO_DISQUALIFIER,
+        findings=[VisionFinding(
+            defect_type="border_ratio", category="centering",
+            state="not_observed", confidence=0.95, psa10_relevant=True,
+            evidence_artifact_ids=["*"],
+            location={"x0": 0.0, "y0": 0.0, "x1": 1.0, "y1": 1.0},
+            explanation="borders look even to me")],
+        gem_view=GemView.NO_DISQUALIFIER,
         category_assessability={"centering": True, "corners": True,
                                 "edges": True, "surface": True}))
     review = pipeline.review(resolved, Mode.DEEP, denier)
-    assert review.verdict is not Verdict.REJECT
+    assert review.verdict is Verdict.REVIEW
+    assert review.review_confidence == "low"
 
 
 def test_unknown_product_context_asks_for_identity_not_photos(rig, tmp_path):
@@ -8655,7 +8986,23 @@ class ReviewPipeline:
     def review(self, candidate: ResolvedCandidate, mode: Mode,
                provider: VisionProvider | None = None) -> CardReview:
         run = self._runner.run
+        run_id = self._runner.run_with_id
         cid = candidate.candidate_id
+
+        # routing_decision and review both carry NOT NULL foreign keys to
+        # candidate, and candidate_image joins images to it. Nothing else
+        # writes these rows, so the pipeline must.
+        self._repo.save_candidate(
+            id=cid, source=candidate.source, title=candidate.title,
+            supplied_card_type=candidate.card_type,
+            supplied_set=candidate.set_name)
+        for image in candidate.images:
+            self._repo.save_image(image.image_hash,
+                                  self._store.path_of(image.image_hash))
+            self._repo.link_image(cid, image.image_hash,
+                                  supplied_role=image.supplied_role,
+                                  ordering=image.ordering)
+
         images = [self._image_tier(i.image_hash) for i in candidate.images]
 
         rc = run("role_context",
@@ -8686,14 +9033,15 @@ class ReviewPipeline:
                   schema=Assembled, candidate_id=cid)
         assembled = Assembled.model_validate(asm)
 
-        heur = run("heuristic",
-                   {"assembled_evidence": asm,
-                    "applicable_rubric_rules": rule_content(scoped)},
-                   {"scorer_version": SCORER_VERSION,
-                    "authority_policy_version": AUTHORITY_POLICY_VERSION,
-                    "weights": {}},
-                   lambda: evaluate(assembled, scoped).model_dump(),
-                   schema=HeuristicResult, candidate_id=cid)
+        heur, heur_id = run_id(
+            "heuristic",
+            {"assembled_evidence": asm,
+             "applicable_rubric_rules": rule_content(scoped)},
+            {"scorer_version": SCORER_VERSION,
+             "authority_policy_version": AUTHORITY_POLICY_VERSION,
+             "weights": {}},
+            lambda: evaluate(assembled, scoped).model_dump(),
+            schema=HeuristicResult, candidate_id=cid)
         heuristic = HeuristicResult.model_validate(heur)
 
         unevaluable = [UnevaluableRule(rule_id=sr.rule.id,
@@ -8702,7 +9050,8 @@ class ReviewPipeline:
                        for sr in scoped
                        if sr.evaluability is RuleEvaluability.UNEVALUABLE]
 
-        prov = run("coverage_provisional",
+        prov, prov_id = run_id(
+                   "coverage_provisional",
                    {"assembled_detectability": asm["detectability_flat"],
                     "applicable_rubric_rules": rule_content(scoped)},
                    {"coverage_policy_version": COVERAGE_POLICY_VERSION,
@@ -8735,10 +9084,20 @@ class ReviewPipeline:
         vision, index, vision_id, vision_limit = None, {}, None, None
         if routing.call_vision:
             vision, index, vision_id, vision_limit = self._vision(
-                cid, mode, assembled, scoped, provider)
+                cid, mode, assembled, asm, rout, scoped, provider)
 
-        assessability = vision.category_assessability if vision else {}
-        cov = run("coverage",
+        if vision is not None:
+            assessability = vision.category_assessability
+        elif vision_limit is not None:
+            # The vision layer was wanted and did not run. Every category it
+            # would have judged is unassessed — recorded HERE, before coverage,
+            # because appending a limitation after the verdict would let the
+            # card PASS as though it had been fully assessed.
+            assessability = {c: False for c in CATEGORIES}
+        else:
+            assessability = {}   # OFF: nothing was expected, nothing is missing
+        cov, cov_id = run_id(
+                  "coverage",
                   {"assembled_detectability": asm["detectability_flat"],
                    "vision_category_assessability": assessability,
                    "applicable_rubric_rules": rule_content(scoped)},
@@ -8753,7 +9112,8 @@ class ReviewPipeline:
 
         missing_face = any(f not in assembled.faces_present
                            for f in REQUIRED_FACES)
-        comb = run("combine",
+        comb, comb_id = run_id(
+                   "combine",
                    {"heuristic_output": heur, "vision_output":
                         vision.model_dump() if vision else None,
                     "coverage_output": cov},
@@ -8770,22 +9130,32 @@ class ReviewPipeline:
         return self._persist(candidate, mode, routing_id,
                              CombinedResult.model_validate(comb), coverage,
                              role_context, images,
-                             {"heuristic": heur, "coverage_provisional": prov,
-                              "coverage": cov, "combine": comb},
+                             {"heuristic": heur_id,
+                              "coverage_provisional": prov_id,
+                              "coverage": cov_id, "combine": comb_id},
                              vision_id, vision_limit)
 
-    def _vision(self, cid: str, mode: Mode, assembled, scoped,
-                provider: VisionProvider | None):
+    def _vision(self, cid: str, mode: Mode, assembled, assembled_json,
+                routing_json, scoped, provider: VisionProvider | None):
         """Cache lookup BEFORE any call. A provider invoked before the lookup
         bills every re-review of an unchanged card."""
-        built = build_manifest(assembled, mode, applicable(scoped))
+        man = self._runner.run(
+            "manifest",
+            {"mode_budget": BUDGETS[mode], "assembled_evidence": assembled_json,
+             "routing_decision": routing_json,
+             "applicable_rubric_rule_content": rule_content(scoped)},
+            {"manifest_builder_version": MANIFEST_BUILDER_VERSION},
+            lambda: build_manifest(assembled, mode,
+                                   applicable(scoped)).model_dump(),
+            schema=BuiltManifest, candidate_id=cid)
+        built = BuiltManifest.model_validate(man)
         if provider is None:
             # SMART/DEEP wanted a call and none is configured. This must not
             # silently behave as OFF: the categories the provider would have
             # judged are recorded unassessed, which caps the card at REVIEW.
             return None, built.index, None, "VISION_UNAVAILABLE"
         try:
-            output = self._runner.run(
+            output, vision_id = self._runner.run_with_id(
                 "vision", {"provider_evidence_payload": built.payload},
                 provider.signature(),
                 lambda: provider.assess(built.payload).model_dump(),
@@ -8798,11 +9168,7 @@ class ReviewPipeline:
             # proceeds on CV evidence, and an independently established
             # I1-satisfying defect may still reject.
             return None, built.index, None, "VISION_FAILED"
-        result = self._repo.get_stage_result(
-            "vision", fingerprint({"provider_evidence_payload": built.payload}),
-            signature_for("vision", provider.signature()))
-        return (Assessment.model_validate(output), built.index,
-                result.id if result else None, None)
+        return Assessment.model_validate(output), built.index, vision_id, None
 ```
 
 `ImageStageOutputs`, `RoleContext`, `CvMeasurements` and `to_image_evidence` are small declared models introduced with this task; `measure_all` composes the four measurement functions from T25–T27 into one `CvMeasurements`. `resolve_role_context` wraps `resolve_roles` (T12) and `CardContextNormalizer` (T10) into the single cached `role_context` stage.
@@ -8855,7 +9221,7 @@ class ReviewPipeline:
         return review
 ```
 
-`StageRunner.run` returns the output dict; it also exposes `run_with_id` returning `(output, stage_result_id)` so `_persist` can reference the exact rows — added to T28 as a one-line wrapper over the same code path.
+`StageRunner.run` returns the output dict; it also exposes `run_with_id` returning `(output, stage_result_id)` so `_persist` can reference the exact rows — added to T29 as a one-line wrapper over the same code path.
 
 An image whose `preflight` reports unusable contributes nothing to assembly and the candidate continues on its remaining images; `to_image_evidence` skips any `ImageStageOutputs` without geometry.
 
@@ -9265,9 +9631,9 @@ git commit -m "test(review): full definition-of-done verification"
 - `observability.analyze(geometry, store, image_hash)` — T23, consumed by T36.
 - `measure_centering(geometry, store)` — T25, consumed by T36.
 - `VisionProvider.signature()` — T30, implemented by `FakeProvider` and `AnthropicVisionProvider` (T33), consumed by T36's `_vision`.
-- `BuiltManifest(payload, index, builder_meta)` — T32, consumed by T36.
+- `BuiltManifest(payload, index, builder_meta)` — T31, consumed by T36.
 - `i1_satisfied(..., material_contradiction=)` and `decide_verdict(..., contradicted=)` — T19, consumed by T35.
-- `StageRunner.run_with_id` — T29, consumed by T36's `_persist`.
+- `StageRunner.run_with_id` — T29, consumed by T36's `review`, which passes the ids to `_persist`.
 
 **Two spec deviations flagged, not absorbed.** (1) `review` gains a `review_confidence` column, required by §16 output and needing to survive a restart. (2) `role_features` is a stage the spec does not name; §8 requires role inference from layout signatures but leaves the producer unstated, and leaving it implicit is what made `text_density` a magic key. Both extend the spec's model rather than contradicting it.
 
