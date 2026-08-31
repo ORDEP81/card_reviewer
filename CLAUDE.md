@@ -964,22 +964,96 @@ Historical review data must remain intact.
 
 ---
 
-# Phase checkpoints
+# Autonomous phase execution
 
-Follow the approved implementation plan phase-by-phase.
+Implementation phases do not require a user checkpoint merely because a phase
+ended.
 
-At each required checkpoint:
+Claude may continue automatically from one phase to the next when all required
+engineering gates are satisfied.
 
-1. run the full suite;
-2. confirm Subsystem B tests remain green;
-3. mutation-test guards added during the phase;
-4. report tasks completed;
-5. report commits;
-6. report tests added and total passing;
-7. report deviations from plan pseudocode;
-8. report any genuine design ambiguity.
+At the end of each phase:
 
-Do not automatically cross a required phase checkpoint without review.
+1. run the complete test suite;
+2. confirm Subsystem B remains green;
+3. mutation-test every new guard introduced by the phase;
+4. verify the intended test killed each mutation;
+5. run affected producer → consumer contract tests;
+6. run persistence round-trip tests where applicable;
+7. invoke `superpowers:requesting-code-review`;
+8. verify every finding using `superpowers:receiving-code-review`;
+9. fix verified findings;
+10. run the complete relevant verification again;
+11. request independent scoped re-review of the fixes;
+12. proceed to the next phase only when no unresolved findings remain.
+
+These are engineering checkpoints, not user checkpoints.
+
+Do not stop merely to report normal phase completion.
+
+Keep phase reports in commits / PR history so the implementation remains
+auditable.
+
+# When to stop and ask the user
+
+Stop implementation and ask the user only when a genuine decision is required.
+
+Examples:
+
+- the approved design/spec is ambiguous or contradictory;
+- multiple reasonable behaviors exist and choosing among them changes product
+  behavior;
+- a change would weaken or alter an approved invariant;
+- Subsystem A exposes a genuine incompatibility with Subsystem B;
+- implementing a reviewer finding would require changing an approved product
+  decision;
+- an external credential, paid action, destructive action, or authorization
+  decision requires the user;
+- executable evidence shows that a governing assumption itself is wrong.
+
+Do NOT stop for:
+
+- ordinary implementation bugs;
+- failing tests with a clear intended behavior;
+- producer/consumer mismatches;
+- serialization bugs;
+- incorrect implementation-plan pseudocode when the governing design is clear;
+- review findings that can be verified and corrected without changing product
+  policy;
+- routine refactoring required to satisfy the approved design.
+
+Handle those through TDD, contract testing, mutation testing, review, and
+re-review, then continue.
+
+# Final implementation gate
+
+After the final implementation phase:
+
+1. run the entire test suite;
+2. run all required end-to-end tests;
+3. verify Subsystem B remains unchanged unless an approved change required it;
+4. complete mutation verification for final-phase guards;
+5. perform an independent full implementation review using
+   `superpowers:requesting-code-review`;
+6. verify findings with `superpowers:receiving-code-review`;
+7. fix verified findings;
+8. run an independent re-review of the fix diff;
+9. ensure no unresolved review findings remain;
+10. produce a concise final readiness report for the user.
+
+The final report should include:
+
+- phases/tasks completed;
+- final test count;
+- Subsystem B test count;
+- implementation-plan deviations;
+- independent review result;
+- re-review result;
+- unresolved issues, if any;
+- whether the PR is ready to merge.
+
+Do not require the user to manually review implementation code unless a
+governing product/design decision remains unresolved.
 
 ---
 
