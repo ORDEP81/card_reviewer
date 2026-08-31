@@ -138,12 +138,12 @@ unchanged and its stored result — including an expensive vision assessment —
 | image | `geometry` | image hash, preflight output | geometry version + config |
 | image | `observability` | image hash, geometry output | observability version + config + **taxonomy version** |
 | image | `cv_measurements` | image hash, geometry output, observability output | CV version + config + **taxonomy version** |
-| candidate | `role_context` | image hashes, per-image cv/geometry outputs, supplied metadata | resolver version |
+| candidate | `role_context` | image hashes, per-image cv/geometry outputs, supplied metadata (see below) | resolver version |
 | candidate | `evidence_assembly` | resolved roles/context, per-image outputs consumed | assembly version |
 | candidate | `heuristic` | assembled evidence values, applicable rubric rules | scorer version + weights |
 | candidate | `coverage_provisional` | assembled detectability/observability, applicable rubric rules | coverage policy version + taxonomy version |
 | candidate | `routing` | **mode**, heuristic output, provisional coverage, assembled observability, detectability | routing policy version |
-| candidate | `manifest` | mode budget, assembled evidence, routing decision, **applicable rubric rules** | manifest-builder version |
+| candidate | `manifest` | mode budget, assembled evidence, routing decision, **applicable rubric rule content** | manifest-builder version |
 | candidate | `vision` | the canonical evidence manifest actually sent | provider + model + prompt version + material inference params |
 | candidate | `coverage` | assembled detectability/observability, vision per-category assessability, applicable rubric rules | coverage policy version + taxonomy version |
 | candidate | `combine` | heuristic output, optional vision output, coverage output | combination/decision-policy version |
@@ -154,6 +154,10 @@ reproduce the `routing` failure one stage over: a rubric bump that adds a surfac
 would change what *should* be sent, leave the manifest fingerprint unmoved, hit the cached
 manifest, hit the cached `vision` result keyed on it, and never re-ask the provider under
 the new rubric.
+
+It fingerprints the rubric's **content**, not its version string, consistently with the
+values-not-signatures rule above: a rubric release that leaves the applicable rules
+byte-identical for this card must not re-bill a vision call.
 
 **Mode is an input to `routing`, and only to `routing`.** Routing's output *is* the
 decision to call, and that decision is mode-dependent by definition — `OFF` never calls,
@@ -168,6 +172,14 @@ whatever vision assessment exists, and the coverage evaluation. Mode determined 
 vision assessment exists; it is not itself an input. Two runs presenting combine with
 identical inputs must reuse the same result regardless of the mode that produced them.
 Mode is recorded on the `routing_decision` and on the `review`.
+
+**`role_context`'s "supplied metadata" is enumerated, not left to interpretation.** The
+resolver consumes, and therefore fingerprints, every supplied value that can change its
+output: the **listing title and any card-identification text**, supplied `card_type` and
+`set` values, and the **supplied role on each `candidate_image`** together with that image's
+ordering. A corrected title or a hand-assigned front/back role must produce a different
+fingerprint and a fresh resolution — otherwise fixing the metadata would silently reuse the
+resolution made without it, which is the whole reason this stage is cached separately.
 
 ### Coverage is evaluated twice
 
@@ -476,7 +488,10 @@ The resolved role carries a confidence and its provenance (`supplied` / `inferre
 `unknown`). An `unknown` role is a first-class state, not an error: the image still
 contributes to any measurement that does not depend on knowing the face, and is excluded
 from those that do. A candidate with no confidently identified back cannot satisfy coverage
-requirements that name the back — which routes it toward `REVIEW`, never toward `REJECT`.
+requirements that name the back, so it can never reach `PASS`. **That is a bar on passing,
+not a bar on rejecting**: a crease plainly visible on the front still produces `REJECT`
+under §14 rule 1 if it satisfies I1. A missing back means we cannot show the card is clean
+enough to pass; it does not unsee a defect the front already shows.
 
 ### Card context resolution
 
@@ -818,12 +833,26 @@ and `INADEQUATE` is reserved for cards whose *front* cannot be assessed:
 | Outcome | Condition (v1) | Consequence |
 |---|---|---|
 | `SUFFICIENT` | all four categories assessed on **both** faces | `PASS` permissible |
-| `PARTIAL` | the front has at least two categories assessed, but the card is not `SUFFICIENT` | `PASS` forbidden; verdict floor `REVIEW`; **rankable**, score carries its limitations |
+| `PARTIAL` | the front has at least two categories assessed, but the card is not `SUFFICIENT` | `PASS` forbidden; `REVIEW` unless §14 rule 1 fires, which stays reachable; **rankable**, score carries its limitations |
 | `INADEQUATE` | fewer than two categories assessed on the front, or no image resolves to a front that passed `preflight` and reached at least `inferred` role confidence | not rankable; `psa10_rank_score` is null |
 
-A front-only listing is therefore `PARTIAL`: ranked and forwarded with the back recorded as
-unassessed, never passed and never rejected. That is the recall-correct outcome — the owner
-sees the card and knows exactly what is missing.
+A **usable** front-only listing — one meeting the v1 front-assessment threshold above — is
+therefore `PARTIAL`: ranked and forwarded, with the back recorded as unassessed. An
+unassessable front remains `INADEQUATE`.
+
+`PARTIAL` forbids `PASS`; it does **not** forbid `REJECT`. If the front carries a
+confidently `observed` PSA-10 disqualifier that satisfies I1, §14 rule 1 fires and the
+verdict is `REJECT` — coverage governs whether we may call a card *clean*, not whether we
+may believe our own eyes about a defect. The three front-only outcomes are therefore:
+
+| Front-only card | Coverage | Verdict | Rankable |
+|---|---|---|---|
+| usable front, no I1-satisfying disqualifier | `PARTIAL` | `REVIEW` | yes |
+| usable front, I1-satisfying disqualifier on it | `PARTIAL` | `REJECT` | yes |
+| unusable or insufficient front | `INADEQUATE` | `INSUFFICIENT_IMAGES` | no |
+
+That is the recall-correct outcome — the owner sees the card and knows exactly what is
+missing.
 
 **This is the `REVIEW` / `INSUFFICIENT_IMAGES` boundary**, and with the counts above it is a
 declared threshold rather than a judgment call: `PARTIAL` means *we learned something but
@@ -895,14 +924,19 @@ crease and `PARTIAL` coverage matching two rows at once.
 |---|---|---|
 | 1 | `REJECT` | at least one confidently `observed` PSA-10 disqualifier satisfying I1 |
 | 2 | `INSUFFICIENT_IMAGES` | coverage is `INADEQUATE` |
-| 3 | `REVIEW` | coverage is `PARTIAL`, or any unresolved ambiguity, suspicion or recorded contradiction |
+| 3 | `REVIEW` | coverage is `PARTIAL`; **or** a PSA-10-relevant disqualifier was `observed` but fails I1; or any unresolved ambiguity, suspicion or recorded contradiction |
 | 4 | `PASS` | **otherwise** — reached only when coverage is `SUFFICIENT` and rules 1–3 all failed |
 
 Row 4 is `otherwise` rather than a positive condition, which is what makes the function
-**total**. A positively-stated row 4 leaves a hole: an `observed` disqualifier that fails
-I1's adequacy prong, on a card with `SUFFICIENT` coverage and no other ambiguity, would
-match no row at all. Falling through to `PASS` there is also correct on the merits — an
-inadequately evidenced finding is not a reason to reject, and coverage was sufficient.
+**total**: every input combination matches exactly one row.
+
+**An `observed` disqualifier that fails I1 routes to `REVIEW`, never to `PASS`.** Failing
+I1 means the evidence was not strong enough to *reject* on; it does not mean the concern
+evaporated. Something in the photographs looked like a disqualifier and could not be
+resolved — that is the definition of an unresolved concern, and the owner should look at it.
+Row 3 states this explicitly rather than leaving it to the ambiguity clause, because the
+distinction between "no disqualifier was seen" and "one was seen but could not be
+established" is exactly the distinction `PASS` must not blur.
 
 **Why `REJECT` outranks `INADEQUATE` coverage.** A confidently observed disqualifier is
 knowledge, not absence of it. If the photographs are poor overall but one of them plainly
@@ -1110,8 +1144,8 @@ every pipeline test. `card-review provider-smoke` is the only path to a real cal
 12. The verdict function is total and unambiguous: every combination of coverage outcome,
     observed-disqualifier presence, **I1-satisfaction of that disqualifier** and ambiguity
     maps to exactly one verdict, asserted table-driven over the full cross-product. In
-    particular an `observed` finding that fails I1's adequacy prong on an otherwise
-    `SUFFICIENT` card yields `PASS`, not an unmatched state.
+    particular an `observed` PSA-10-relevant finding that fails I1's adequacy prong yields
+    `REVIEW`, never `PASS` and never an unmatched state.
 13. A vision response marking a category `not_assessable` prevents `SUFFICIENT` coverage
     even when CV suitability alone would have allowed it.
 14. The synthetic image generator produces cards with known centering, border colours,
@@ -1121,7 +1155,10 @@ every pipeline test. `card-review provider-smoke` is the only path to a real cal
     vision prompt, or in the review output, asserted by test.
 16. A front-only candidate is `PARTIAL`, rankable, and cannot reach `PASS`; a candidate
     whose front cannot be assessed is `INADEQUATE` and unrankable.
-17. A rubric bump changes the evidence manifest's fingerprint and causes a fresh vision
-    call; a detectability-taxonomy bump invalidates image-tier results, while a rubric bump
-    does not.
+17. A change in the **applicable rubric content carried in the evidence manifest** changes
+    that manifest's fingerprint and causes a fresh vision call. A version-only bump that
+    leaves the applicable rules byte-identical preserves the existing vision cache — the
+    value-based fingerprint principle of §4 applied to the rubric like any other input.
+    Separately, a detectability-taxonomy bump invalidates image-tier results, while a
+    rubric change does not.
 18. Test suite green; no test calls the API.
