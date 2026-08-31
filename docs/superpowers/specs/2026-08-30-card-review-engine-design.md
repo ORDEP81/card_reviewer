@@ -59,7 +59,7 @@ A category that could not be assessed must never be scored as if it passed.
 | Cacheability | Only validated successes; failed attempts recorded separately and never reused |
 | Finding states | One vocabulary (`observed` / `suspected` / `not_observed` / `not_assessable`) shared by the heuristic and vision layers |
 | Verdict resolution | Strict precedence, first match wins; the four states are mutually exclusive |
-| Detectability | Per defect type, and split into structural (no photo could show it) vs circumstantial (a better photo would) |
+| Detectability | Per defect type, and classed structural (no photo could show it), circumstantial (a better photo would), or metadata-resolvable (identifying the card would) |
 | Coverage timing | Provisional before routing to gate spend; authoritative after vision |
 
 ---
@@ -231,7 +231,11 @@ A stage that cannot complete never produces a verdict by default. Specifically:
   serves, and the candidate continues on its remaining images. One bad photograph out of
   six must not fail the card.
 
-No failure path may produce `REJECT`. This follows directly from the governing asymmetry.
+**A failure is never evidence of a defect and never contributes to `REJECT`.** Stated as
+the broader "no failure path may produce `REJECT`" this would be wrong in the same way §8
+and §13 were: a card whose *back* image failed an image-tier stage still rejects on an
+I1-satisfying crease plainly visible on its front. A failure removes evidence; it never
+creates any.
 
 ### History is never overwritten
 
@@ -857,8 +861,10 @@ missing.
 **This is the `REVIEW` / `INSUFFICIENT_IMAGES` boundary**, and with the counts above it is a
 declared threshold rather than a judgment call: `PARTIAL` means *we learned something but
 not enough to pass the card*; `INADEQUATE` means *we could not evaluate*. Unknown card
-context (§8 of this spec) makes product-conditional defect types circumstantially
-unassessable and therefore biases toward `PARTIAL`.
+context (§8 of this spec) makes product-conditional defect types **metadata-resolvably**
+unassessable — not circumstantially — and therefore biases toward `PARTIAL`. The class
+matters: derived as circumstantial it would generate a photo request that no photograph
+could satisfy, which is exactly what the third class exists to prevent.
 
 Detectability is not a proxy for absence. A corner whose whitening detectability is `LOW`
 because of glare is **not assessed for whitening**, regardless of whether whitening was
@@ -929,6 +935,15 @@ crease and `PARTIAL` coverage matching two rows at once.
 
 Row 4 is `otherwise` rather than a positive condition, which is what makes the function
 **total**: every input combination matches exactly one row.
+
+**The third clause is defined, not left to the implementer.** "Unresolved ambiguity,
+suspicion or recorded contradiction" means any of: a `suspected` finding whose PSA-10
+relevance is not negligible; a contradiction recorded under §11 that I1 deems material; or a
+category the vision layer returned `not_assessable` for that coverage did not already
+classify as structurally exempt. **Structurally exempt `not_assessable` findings are
+explicitly excluded** — counting them would make `PASS` unreachable for every white-bordered
+card and silently defeat §13's structural exemption. Where a case is genuinely borderline,
+the governing asymmetry decides it: `REVIEW` costs a minute, `PASS` costs a missed defect.
 
 **An `observed` disqualifier that fails I1 routes to `REVIEW`, never to `PASS`.** Failing
 I1 means the evidence was not strong enough to *reject* on; it does not mean the concern
@@ -1026,7 +1041,7 @@ rankable:             true | false
 estimated_psa_grade:  "10" | "9-10" | "9" | "8-9" | "<=8" | null
 review_confidence:    how far the evidence supports the verdict — separate from grade
 coverage:             SUFFICIENT | PARTIAL | INADEQUATE, per-category and
-                      per-defect-type detail, each marked circumstantial or structural
+                      per-defect-type detail, each marked structural, circumstantial or metadata-resolvable
 centering / corners / edges / surface   — assessment, confidence, detectability
 image_quality         — per-image preflight, per-region observability, masks
 roles_and_context     — resolved values with confidence and provenance
@@ -1035,7 +1050,9 @@ defects_found         — producer, state, category, defect type, normalized loc
 limitations           — what could not be assessed and why, structural vs circumstantial
 recommended_additional_photos
                       — specific shots that would resolve each *circumstantial*
-                        limitation; empty when every limitation is structural
+                        limitation; empty when no limitation is circumstantial
+card_identification_request
+                      — present when a limitation is metadata-resolvable
 cv_assessment         — stored independently
 vision_assessment     — stored independently, incl. independent gem view; null in OFF
 reasoning             — concise, evidence-anchored
@@ -1159,6 +1176,7 @@ every pipeline test. `card-review provider-smoke` is the only path to a real cal
     that manifest's fingerprint and causes a fresh vision call. A version-only bump that
     leaves the applicable rules byte-identical preserves the existing vision cache — the
     value-based fingerprint principle of §4 applied to the rubric like any other input.
-    Separately, a detectability-taxonomy bump invalidates image-tier results, while a
-    rubric change does not.
+    Separately, a detectability-taxonomy bump invalidates `observability` and
+    `cv_measurements` results — not `preflight` or `geometry`, which do not consume it —
+    while a rubric change invalidates no image-tier result at all.
 18. Test suite green; no test calls the API.
