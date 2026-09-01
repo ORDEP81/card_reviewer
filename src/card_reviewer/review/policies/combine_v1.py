@@ -12,7 +12,8 @@ from typing import TYPE_CHECKING
 from pydantic import BaseModel, Field
 
 from ..enums import (
-    Authority, Coverage, FindingState, Psa10Candidate, Scale, Verdict,
+    Authority, Coverage, FindingState, Psa10Candidate, ReviewConfidence,
+    Scale, Verdict,
 )
 from ..findings import Finding, i3_satisfied
 from ..versions import COMBINATION_POLICY_VERSION
@@ -22,6 +23,8 @@ if TYPE_CHECKING:
 
 __all__ = [
     "COMBINATION_POLICY_VERSION",
+    "CombinedResult",
+    "combine",
     "MIN_DETECTABILITY_FOR_REJECT",
     "REJECT_CONFIDENCE_FLOOR",
     "VerdictResult",
@@ -168,3 +171,126 @@ def _result(verdict: Verdict, reasons: list[str]) -> VerdictResult:
     return VerdictResult(
         verdict=verdict, psa10_candidate=_CANDIDATE[verdict], reasons=reasons
     )
+
+
+class CombinedResult(BaseModel):
+    """The fused verdict (stub — Task 35)."""
+
+    verdict: Verdict
+    psa10_candidate: Psa10Candidate
+    psa10_rank_score: int | None = None
+    rankable: bool = False
+    estimated_psa_grade: str | None = None
+    review_confidence: ReviewConfidence = ReviewConfidence.LOW
+    coverage: Coverage = Coverage.INADEQUATE
+    #: Raw, per-producer findings retained for calibration.
+    findings: list[Finding] = Field(default_factory=list)
+    #: The fused view scoring and the verdict actually consumed.
+    fused: list["FusedFinding"] = Field(default_factory=list)
+    reasons: list[str] = Field(default_factory=list)
+    vision_present: bool = False
+    policy_version: str = COMBINATION_POLICY_VERSION
+
+
+def combine(
+    heuristic,
+    vision,
+    coverage,
+    *,
+    card_context_known: bool,
+    scoped_rules: list,
+    manifest_index: dict | None = None,
+    detectability: dict | None = None,
+    required_face_missing: bool = False,
+) -> CombinedResult:
+    """Fuse both producers' findings into one verdict.
+
+    The order is load-bearing:
+
+      1. Resolve provider findings against the manifest, so provenance
+         survives the round trip.
+      2. Fuse across producers, so one physical defect penalizes once and
+         I3 sees the union of everything supporting it.
+      3. Enforce I3, demoting enhancement-only observations before anything
+         can act on them.
+      4. Resolve each fused finding to its matched rules and authority,
+         which also decides psa10_relevant.
+      5. Decide the verdict, then score with I1-awareness.
+    """
+    from ..findings import enforce_i3
+    from ..fusion import fuse
+    from ..heuristic import best_detectability
+    from ..relevance import resolve_relevance
+    from ..vision.provider import resolve_vision_findings
+    from .scoring_v1 import estimated_grade, rank_score, review_confidence
+
+    raw: list[Finding] = list(heuristic.findings)
+    if vision is not None:
+        raw.extend(resolve_vision_findings(vision, manifest_index or {}))
+
+    # Fuse BEFORE enforcing I3, so the invariant is evaluated over the union
+    # of a defect's evidence. Running I3 first would demote a finding one
+    # producer saw only under enhancement even when the other saw it plainly.
+    fused = fuse(raw)
+    checked = enforce_i3([f.as_finding() for f in fused])
+    fused = [
+        f.model_copy(update={"state": c.state,
+                             "demotion_reason": c.demotion_reason})
+        for f, c in zip(fused, checked)
+    ]
+
+    resolved = resolve_relevance([f.as_finding() for f in fused], scoped_rules)
+
+    detectability = detectability or {}
+    triples: list[tuple[Finding, Authority, Scale]] = [
+        (rf.finding, rf.authority,
+         best_detectability(detectability, rf.finding.category,
+                            rf.finding.defect_type))
+        for rf in resolved
+    ]
+
+    # Contradictions are carried per finding so REJECT precedence cannot fire
+    # on a contested defect. `ambiguity` alone is consulted at row 3, which is
+    # too late — row 1 would already have rejected.
+    contradicted = {
+        id(rf.finding)
+        for rf, fu in zip(resolved, fused)
+        if fu.material_contradiction
+    }
+    disagreed = any(f.producers_disagreed for f in fused)
+    contradictions = [f for f in fused if f.material_contradiction]
+
+    result = decide_verdict(
+        triples, coverage.outcome, contradicted=contradicted,
+        ambiguity=bool(heuristic.unevaluable_reasons or disagreed),
+    )
+
+    # Scoring needs to know which findings actually cleared I1: only those
+    # get the hard floor, so an unresolved concern stays rankable.
+    others = [(f, d) for f, _, d in triples]
+    scored = [
+        (rf.finding, rf.authority,
+         i1_satisfied(rf.finding, scale, others,
+                      material_contradiction=id(rf.finding) in contradicted))
+        for rf, (_f, _a, scale) in zip(resolved, triples)
+    ]
+
+    return CombinedResult(
+        verdict=result.verdict, psa10_candidate=result.psa10_candidate,
+        psa10_rank_score=rank_score(scored, coverage.outcome),
+        rankable=coverage.rankable,
+        estimated_psa_grade=estimated_grade(scored, coverage.outcome),
+        review_confidence=review_confidence(
+            coverage.outcome, contradictions, disagreed, card_context_known,
+            required_face_missing=required_face_missing,
+        ),
+        coverage=coverage.outcome, findings=raw, fused=fused,
+        reasons=result.reasons, vision_present=vision is not None,
+    )
+
+
+# Resolve the forward reference now that FusedFinding is importable at
+# runtime — combine_v1 must remain importable before fusion exists.
+from ..fusion import FusedFinding  # noqa: E402
+
+CombinedResult.model_rebuild()

@@ -18,3 +18,12 @@ def rubric_rules(rubric):
     context = CardContext(canonical_card_types=["chrome"],
                           provenance=Provenance.SUPPLIED, confidence=1.0)
     return applicable(scope_rules(rubric.for_card(["chrome"], None), context))
+
+
+@pytest.fixture
+def rubric_scoped(rubric):
+    """Scoped rules for a known-chrome card, as the pipeline passes them to
+    relevance resolution inside combine."""
+    context = CardContext(canonical_card_types=["chrome"],
+                          provenance=Provenance.SUPPLIED, confidence=1.0)
+    return scope_rules(rubric.for_card(["chrome"], None), context)
