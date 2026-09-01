@@ -54,13 +54,24 @@ def test_best_detectability_returns_none_when_nothing_is_registered():
 
 
 def test_a_measurement_type_may_reach_observed(rules_known):
-    """Corner rounding is geometric — CV can establish it outright."""
+    """Centering is the one defect type a measurement establishes outright."""
+    a = _assembled(centering={"horizontal": 75.0, "vertical": 50.0,
+                              "measurable": True})
+    f = next(f for f in evaluate(a, rules_known).findings
+             if f.category == "centering")
+    assert f.state is FindingState.OBSERVED
+
+
+def test_a_corner_anomaly_cannot_be_confirmed_by_cv_alone(rules_known):
+    """The CV layer flags corner damage with a contrast heuristic, not a
+    measurement. Letting that confirm a defect would reject clean cards on
+    the border-to-artwork transition every normal card has."""
     a = _assembled(anomalies=[{"defect_type": "rounding", "category": "corners",
-                               "region": "bottom_left", "confidence": 0.95,
-                               "severity": "moderate"}])
+                               "region": "bottom_left", "confidence": 0.99,
+                               "severity": "severe"}])
     f = next(f for f in evaluate(a, rules_known).findings
              if f.defect_type == "rounding")
-    assert f.state is FindingState.OBSERVED
+    assert f.state is FindingState.SUSPECTED
 
 
 def test_an_interpretive_type_can_never_exceed_suspected_from_cv_alone(rules_known):

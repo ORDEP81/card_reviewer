@@ -76,7 +76,10 @@ def build_manifest(assembled: Any, mode: Mode, rubric_rules: list) -> BuiltManif
             }
             for r in selected
         ],
-        "measurements": dict(assembled.centering),
+        # Nested under its own name: flattening it to bare horizontal/vertical
+        # loses the semantic path the canonicalizer resolves precision by, and
+        # tells the provider less about what the numbers are.
+        "measurements": {"centering": dict(assembled.centering)},
         # Detectability and its reason codes: without them the provider reads
         # absence of a defect as absence of the defect.
         "detectability": {f"{k}": str(v) for k, v in assembled.detectability.items()},

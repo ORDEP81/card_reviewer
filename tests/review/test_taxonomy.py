@@ -19,15 +19,26 @@ def test_every_defect_type_declares_a_promotion_level():
         assert spec.promotion in (tx.Promotion.MEASUREMENT, tx.Promotion.INTERPRETIVE)
 
 
-def test_measurement_types_are_exactly_the_declared_list():
+def test_only_defect_types_the_cv_layer_actually_measures_are_promotable():
+    """`measurement` promotion is a claim that a MEASUREMENT can establish
+    the defect outright, not that a heuristic can flag it.
+
+    Only the border ratio qualifies: it is computed from the border
+    segmentation with a declared precision. Corner rounding and whitening
+    have detectability but no measurement, so a contrast heuristic must not
+    be able to confirm them on its own.
+    """
     measurement = {
         k for k, v in tx.DEFECT_TYPES.items()
         if v.promotion is tx.Promotion.MEASUREMENT
     }
-    assert measurement == {
-        "centering:border_ratio", "corners:whitening",
-        "corners:rounding", "edges:whitening",
-    }
+    assert measurement == {"centering:border_ratio"}
+
+
+def test_corner_and_edge_defects_need_interpretation_to_be_confirmed():
+    for key in ("corners:rounding", "corners:whitening", "edges:whitening"):
+        category, name = key.split(":")
+        assert tx.promotion_of(category, name) is tx.Promotion.INTERPRETIVE
 
 
 def test_white_border_is_structural_and_glare_is_circumstantial():
@@ -49,7 +60,7 @@ def test_an_unknown_reason_code_raises_rather_than_defaulting():
 
 
 def test_promotion_of_takes_category_and_name():
-    assert tx.promotion_of("corners", "whitening") is tx.Promotion.MEASUREMENT
+    assert tx.promotion_of("centering", "border_ratio") is tx.Promotion.MEASUREMENT
     assert tx.promotion_of("surface", "print_lines") is tx.Promotion.INTERPRETIVE
 
 

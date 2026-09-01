@@ -55,17 +55,25 @@ def _spec(category: str, name: str, promotion: Promotion) -> tuple[str, DefectTy
 _M = Promotion.MEASUREMENT
 _I = Promotion.INTERPRETIVE
 
-# Whitening is `measurement`: a luminance step against a known border
-# segmentation. Rounding is geometric. Everything else needs semantics CV
-# cannot supply — fraying and roughness are indistinguishable from
-# compression artifacts and paper texture without interpretation.
+# `measurement` means a defect type a MEASUREMENT can establish outright —
+# not one a heuristic can flag. Only the border ratio qualifies today: it is
+# computed from the border segmentation with a declared precision.
+#
+# Corner rounding, corner whitening and edge whitening were classified
+# `measurement` in the first draft, but nothing in the CV layer measures
+# them. What exists is a contrast heuristic over a crop, which fires on the
+# border-to-artwork transition of any normal card. Leaving them
+# `measurement` let that heuristic confirm defects on its own and reject
+# clean cards — precisely what "OpenCV emits measurements and candidates, not
+# verdicts" forbids. They are interpretive until a validated measurement
+# exists, at which point this table is where that changes.
 DEFECT_TYPES: dict[str, DefectTypeSpec] = dict(
     [
         _spec("centering", "border_ratio", _M),
-        _spec("corners", "whitening", _M),
-        _spec("corners", "rounding", _M),
+        _spec("corners", "whitening", _I),
+        _spec("corners", "rounding", _I),
         _spec("corners", "fraying", _I),
-        _spec("edges", "whitening", _M),
+        _spec("edges", "whitening", _I),
         _spec("edges", "chipping", _I),
         _spec("edges", "roughness", _I),
         _spec("surface", "scratches", _I),
