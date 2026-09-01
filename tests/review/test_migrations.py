@@ -9,7 +9,8 @@ from card_reviewer.review.storage.migrations import SCHEMA_VERSION, connect, mig
 def conn(tmp_path):
     c = connect(tmp_path / "t.db")
     migrate(c)
-    return c
+    yield c
+    c.close()
 
 
 def test_migrate_creates_every_table_the_spec_declares(conn):
@@ -23,9 +24,14 @@ def test_migrate_creates_every_table_the_spec_declares(conn):
 
 
 def test_migrate_is_idempotent(tmp_path):
-    c = connect(tmp_path / "t.db")
-    assert migrate(c) == SCHEMA_VERSION
-    assert migrate(c) == SCHEMA_VERSION
+    """The second call must be a no-op on a database that is already at the
+    current version, so this needs an UNmigrated connection of its own."""
+    c = connect(tmp_path / "fresh.db")
+    try:
+        assert migrate(c) == SCHEMA_VERSION
+        assert migrate(c) == SCHEMA_VERSION
+    finally:
+        c.close()
 
 
 def test_stage_result_is_unique_on_the_cache_identity(conn):

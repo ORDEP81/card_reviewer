@@ -23,15 +23,29 @@ __all__ = ["ReviewContext", "build_provider", "open_context", "review_card"]
 
 
 class ReviewContext:
-    """The wired-up components for one data directory."""
+    """The wired-up components for one data directory.
+
+    Owns a database connection, so it is closeable and usable as a context
+    manager. Screening a batch opens one context, not one per card.
+    """
 
     def __init__(self, data_dir: Path | str) -> None:
         self.data_dir = Path(data_dir)
-        conn = connect(self.data_dir / "card_reviewer.db")
-        migrate(conn)
-        self.repo = SqliteRepository(conn)
+        self._conn = connect(self.data_dir / "card_reviewer.db")
+        migrate(self._conn)
+        self.repo = SqliteRepository(self._conn)
         self.store = ArtifactStore(self.data_dir / "artifacts")
         self.pipeline = ReviewPipeline(self.repo, self.store)
+
+    def close(self) -> None:
+        """Idempotent, so a `with` block and an explicit close can coexist."""
+        self._conn.close()
+
+    def __enter__(self) -> "ReviewContext":
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        self.close()
 
 
 def open_context(data_dir: Path | str) -> ReviewContext:
@@ -58,9 +72,20 @@ def review_card(
     mode: Mode = Mode.SMART,
     data_dir: Path | str = "data",
     provider: VisionProvider | None = None,
+    context: ReviewContext | None = None,
 ) -> CardReview:
-    context = open_context(data_dir)
-    resolved = ManualAdapter(context.store).resolve(candidate)
-    if provider is None and mode is not Mode.OFF:
-        provider = build_provider(context.store)
-    return context.pipeline.review(resolved, mode, provider)
+    """Screen one card.
+
+    A caller that already holds a context passes it in; we then neither open
+    a second connection to the same database nor close one we do not own.
+    """
+    owned = context is None
+    context = context or open_context(data_dir)
+    try:
+        resolved = ManualAdapter(context.store).resolve(candidate)
+        if provider is None and mode is not Mode.OFF:
+            provider = build_provider(context.store)
+        return context.pipeline.review(resolved, mode, provider)
+    finally:
+        if owned:
+            context.close()

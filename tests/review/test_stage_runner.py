@@ -14,7 +14,8 @@ class Out(BaseModel):
 def runner(tmp_path):
     conn = connect(tmp_path / "t.db")
     migrate(conn)
-    return StageRunner(SqliteRepository(conn))
+    yield StageRunner(SqliteRepository(conn))
+    conn.close()
 
 
 _PRE = {"preflight_version": "1.0.0", "config": {}}

@@ -1,8 +1,10 @@
 import json
+from pathlib import Path
 
 import pytest
 from typer.testing import CliRunner
 
+from card_reviewer.review import cli
 from card_reviewer.review.cli import app
 from card_reviewer.review.imaging.synthetic import CardSpec, render_png
 
@@ -85,7 +87,8 @@ def test_outcome_records_a_psa_result_joinable_to_its_review(card, tmp_path):
     assert result.exit_code == 0, result.output
 
 
-def test_a_recorded_outcome_joins_back_to_the_prediction(card, tmp_path):
+def test_a_recorded_outcome_joins_back_to_the_prediction(card, tmp_path,
+                                                        request):
     data = tmp_path / "data"
     _screen(card, data)
     runner.invoke(app, ["outcome", "1", "--grade", "10", "--cert", "1",
@@ -93,6 +96,7 @@ def test_a_recorded_outcome_joins_back_to_the_prediction(card, tmp_path):
     from card_reviewer.review.storage.migrations import connect
 
     conn = connect(data / "card_reviewer.db")
+    request.addfinalizer(conn.close)
     row = conn.execute(
         "SELECT r.verdict, g.grade FROM review r"
         " JOIN grading_submission g ON g.candidate_id = r.candidate_id"
@@ -100,7 +104,8 @@ def test_a_recorded_outcome_joins_back_to_the_prediction(card, tmp_path):
     assert row is not None and row[1] == "10"
 
 
-def test_recording_a_second_outcome_does_not_overwrite_the_first(card, tmp_path):
+def test_recording_a_second_outcome_does_not_overwrite_the_first(
+        card, tmp_path, request):
     """Cards get cracked and resubmitted; history is append-only."""
     data = tmp_path / "data"
     _screen(card, data)
@@ -110,6 +115,7 @@ def test_recording_a_second_outcome_does_not_overwrite_the_first(card, tmp_path)
     from card_reviewer.review.storage.migrations import connect
 
     conn = connect(data / "card_reviewer.db")
+    request.addfinalizer(conn.close)
     assert conn.execute(
         "SELECT COUNT(*) FROM grading_submission").fetchone()[0] == 2
 
@@ -188,7 +194,8 @@ def test_off_mode_never_constructs_a_provider_even_with_credentials(
     assert built == []
 
 
-def test_two_grading_submissions_for_one_card_both_survive(card, tmp_path):
+def test_two_grading_submissions_for_one_card_both_survive(card, tmp_path,
+                                                           request):
     """A card can be cracked and resubmitted; the first result is history and
     must not be replaced."""
     data = tmp_path / "data"
@@ -199,6 +206,42 @@ def test_two_grading_submissions_for_one_card_both_survive(card, tmp_path):
     from card_reviewer.review.storage.migrations import connect
 
     conn = connect(data / "card_reviewer.db")
+    request.addfinalizer(conn.close)
     grades = [r[0] for r in conn.execute(
         "SELECT grade FROM grading_submission ORDER BY cert_number")]
     assert grades == ["9", "10"]
+
+
+def test_the_cli_writes_no_sql_of_its_own():
+    """repository.py is the only module that writes SQL. Reaching through
+    `repo._conn` from the CLI makes a storage change a CLI change too."""
+    source = Path(cli.__file__).read_text()
+    assert "_conn" not in source
+    for keyword in ("INSERT ", "SELECT ", "UPDATE ", "DELETE "):
+        assert keyword not in source, f"the CLI writes SQL: {keyword.strip()}"
+
+
+def test_each_command_opens_one_connection(card, tmp_path, monkeypatch):
+    """Every command used to open a context and then call a helper that
+    opened another against the same database."""
+    from card_reviewer.review import service
+
+    opened = []
+    real = service.connect
+    monkeypatch.setattr(
+        service, "connect",
+        lambda path: (opened.append(path), real(path))[1])
+
+    assert _screen(card, tmp_path).exit_code == 0
+    assert len(opened) == 1, f"screen opened {len(opened)} connections"
+
+    opened.clear()
+    assert runner.invoke(
+        app, ["show", "1", "--data-dir", str(tmp_path)]).exit_code == 0
+    assert len(opened) == 1, f"show opened {len(opened)} connections"
+
+    opened.clear()
+    assert runner.invoke(
+        app, ["outcome", "1", "--grade", "10",
+              "--data-dir", str(tmp_path)]).exit_code == 0
+    assert len(opened) == 1, f"outcome opened {len(opened)} connections"

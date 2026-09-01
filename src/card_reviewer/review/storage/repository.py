@@ -38,6 +38,18 @@ class Repository(Protocol):
         candidate_id: str | None = None,
     ) -> int: ...
 
+    def get_review(self, review_id: int) -> "sqlite3.Row | None": ...
+
+    def record_grading_outcome(
+        self,
+        candidate_id: str,
+        grade: str,
+        *,
+        grader: str = "PSA",
+        cert_number: str = "",
+        returned_on: str | None = None,
+    ) -> str: ...
+
     def record_attempt(
         self,
         stage: str,
@@ -223,3 +235,33 @@ class SqliteRepository:
                 (candidate_id,),
             )
         )
+
+    def get_review(self, review_id: int) -> sqlite3.Row | None:
+        return self._conn.execute(
+            "SELECT * FROM review WHERE id=?", (review_id,)
+        ).fetchone()
+
+    def record_grading_outcome(
+        self,
+        candidate_id: str,
+        grade: str,
+        *,
+        grader: str = "PSA",
+        cert_number: str = "",
+        returned_on: str | None = None,
+    ) -> str:
+        """Append a grading result. A card can be cracked and resubmitted, so
+        this only ever inserts — a later outcome never overwrites an earlier
+        one, and both stay joinable to the review that predicted them."""
+        import datetime as dt
+        import uuid
+
+        submission_id = uuid.uuid4().hex[:16]
+        self._conn.execute(
+            "INSERT INTO grading_submission(id, candidate_id, grader, grade,"
+            " cert_number, returned_on, status) VALUES(?,?,?,?,?,?,?)",
+            (submission_id, candidate_id, grader, grade, cert_number,
+             returned_on or dt.date.today().isoformat(), "returned"),
+        )
+        self._conn.commit()
+        return submission_id

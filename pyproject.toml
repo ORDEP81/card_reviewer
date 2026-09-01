@@ -35,3 +35,10 @@ packages = ["src/card_reviewer"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# A leaked sqlite connection is a real defect in a long-running screening
+# process, and it surfaces as a warning attributed to whichever unlucky test
+# was running when the collector ran. Fail on it instead.
+filterwarnings = [
+    "error::ResourceWarning",
+    "error::pytest.PytestUnraisableExceptionWarning",
+]

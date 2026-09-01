@@ -30,7 +30,8 @@ def rig(tmp_path):
     conn = connect(tmp_path / "t.db")
     migrate(conn)
     store = ArtifactStore(tmp_path / "store")
-    return ReviewPipeline(SqliteRepository(conn), store), store, SqliteRepository(conn)
+    yield ReviewPipeline(SqliteRepository(conn), store), store, SqliteRepository(conn)
+    conn.close()
 
 
 def _candidate(tmp_path, store, specs, title="2023 Topps Chrome test",

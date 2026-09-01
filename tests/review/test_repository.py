@@ -10,7 +10,8 @@ def repo(tmp_path):
     migrate(conn)
     r = SqliteRepository(conn)
     r.save_candidate(id="c1", source="manual", title="t")
-    return r
+    yield r
+    conn.close()
 
 
 def test_a_stored_result_is_returned_for_the_same_cache_identity(repo):

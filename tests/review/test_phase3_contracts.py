@@ -33,7 +33,8 @@ def rig(tmp_path):
         source="manual", title="2023 Topps Chrome Julio Rodriguez #150",
         image_paths=[front, back],
         supplied_roles={str(front): "front", str(back): "back"}))
-    return SqliteRepository(conn), store, resolved
+    yield SqliteRepository(conn), store, resolved
+    conn.close()
 
 
 def test_the_adapters_supplied_roles_drive_role_resolution(rig):
