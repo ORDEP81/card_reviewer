@@ -25,6 +25,38 @@ CLAHE_GRID = 8
 SHARPEN_AMOUNT = 1.5
 ANOMALY_CONTRAST = 38.0
 
+#: Per-view thresholds on the local-outlier reading. One number cannot serve
+#: all four: a Canny view of ordinary artwork sits near 60 while the same
+#: card's unenhanced view sits near 21.
+#:
+#: Calibrated over 8 seeds x 3 border colours, clean against two rendered
+#: scratches:
+#:
+#:     view      clean max   clean p50   scratched min   scratched p50
+#:     original       44.5        20.7            24.7            37.2
+#:     clahe          53.0        25.1            18.7            27.9
+#:     sharpen        64.6        25.2            33.4            54.3
+#:     edge           76.1        59.2            66.5            73.2
+#:
+#: Read that honestly: the two populations OVERLAP on every view. There is no
+#: threshold on this measure that separates a scratched card from a clean
+#: one, so this producer cannot detect scratches, and pretending otherwise
+#: would mean accusing clean cards. The thresholds therefore sit above the
+#: observed clean maximum: the producer stays silent on everything the corpus
+#: covers and speaks only for a gross departure.
+#:
+#: That is the right division of labour rather than a workaround. Every
+#: surface defect type is INTERPRETIVE in the taxonomy — CV cannot establish
+#: one — and this producer's real output is the four VIEWS the vision layer
+#: inspects, together with the provenance I3 depends on. Missing a candidate
+#: is safe; inventing one is not.
+VIEW_THRESHOLDS: dict[str, float] = {
+    "original": 50.0,
+    "clahe": 58.0,
+    "sharpen": 70.0,
+    "edge": 82.0,
+}
+
 #: Reproducible parameters, recorded on every enhanced reference. An
 #: enhancement whose method is unrecorded cannot be audited or repeated.
 ENHANCEMENTS = {
@@ -68,6 +100,7 @@ def measure_surface(
     # candidates were raised on all of them. A scratch is a LOCAL departure
     # from the surrounding surface, so that is what is measured.
     original_contrast = _local_outlier(gray)
+    original_exceeds = original_contrast > VIEW_THRESHOLDS["original"]
 
     views = {
         "clahe": cv2.createCLAHE(CLAHE_CLIP, (CLAHE_GRID, CLAHE_GRID)).apply(gray),
@@ -93,8 +126,8 @@ def measure_surface(
         )
 
         contrast = _local_outlier(np.asarray(view))
-        if contrast > ANOMALY_CONTRAST:
-            visible_in_original = original_contrast > ANOMALY_CONTRAST
+        if contrast > VIEW_THRESHOLDS[name]:
+            visible_in_original = original_exceeds
             result.anomalies.append(
                 {
                     "kind": "candidate", "category": "surface",

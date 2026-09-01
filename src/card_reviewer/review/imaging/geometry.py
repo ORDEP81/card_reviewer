@@ -50,6 +50,23 @@ BORDER_BAND_PX = 24
 #: the whole reference.
 RELIABLE_BORDER_STD = 30.0
 
+#: Past this share of the frame the detected quad already IS the frame, so
+#: there is no second reading to consider.
+FILLS_FRAME_AREA_RATIO = 0.92
+
+#: How much more uniform the full frame's band must be than the inner
+#: reading's before we conclude the inner reading was the artwork. A factor
+#: rather than a difference, since the two readings are being ranked against
+#: each other rather than against an absolute idea of "uniform".
+BORDER_UNIFORMITY_MARGIN = 3.0
+
+#: A trading card is 2.5 x 3.5 inches.
+CARD_ASPECT = 2.5 / 3.5
+
+#: How far the frame's aspect ratio may sit from a card's before "the photo
+#: was cropped to the card" stops being a credible reading of it.
+ASPECT_TOLERANCE = 0.06
+
 
 class GeometryResult(BaseModel):
     """Cache-safe: scalars and artifact ids only."""
@@ -114,6 +131,11 @@ def analyze(
     matrix = cv2.getPerspectiveTransform(quad.astype(np.float32), dst)
     normalized = cv2.warpPerspective(img, matrix, (NORM_W, NORM_H))
     mask, reliable = _segment_border(normalized)
+    if reliable and _boundary_may_be_the_artwork(img, quad, cv2):
+        # The frame has a markedly cleaner border than the region we
+        # detected, so the region may be the artwork inside a cropped card.
+        # Centering must not describe a rectangle we are unsure of.
+        reliable = False
 
     # `face/` is geometry's own directory; measurement crops live under
     # corners/, edges/ and surface/ and are invalidated by their own stage.
@@ -178,6 +200,114 @@ def _detect_quad(img: np.ndarray, cv2) -> tuple[np.ndarray | None, float]:
         # than no card, which is what a borderless design would otherwise get.
         corners = np.asarray(cv2.boxPoints(rect), dtype=np.float32)
     return _order(corners), confidence
+
+
+def _boundary_may_be_the_artwork(
+    img: np.ndarray, corners: np.ndarray, cv2
+) -> bool:
+    """Might the region we detected be the artwork rather than the card?
+
+    On a tightly cropped listing photograph the flood-fill seeds land ON the
+    card's border, that border is claimed as background, and the surviving
+    contour is the PRINTED ART PANEL — returned at confidence 1.000, so every
+    later measurement described the wrong rectangle and a 90/10 miscut read
+    as perfectly centred.
+
+    On a tightly cropped listing photograph the flood-fill seeds land ON the
+    card's border, that border is claimed as background, and the surviving
+    contour is the PRINTED ART PANEL — previously returned at confidence
+    1.000, so every later measurement described the wrong rectangle and a
+    90/10 miscut read as perfectly centred.
+
+    We do not try to CHOOSE between the two readings. Every signal that
+    separates them here — which band is more uniform, the frame's aspect
+    ratio — also fires on a borderless card sitting on a plain backdrop, and
+    picking the frame there hands a borderless design the centering reference
+    it definitionally does not have. Manufacturing a border is a worse
+    failure than declining to measure one.
+
+    So this reports only that the two readings are not distinguishable, and
+    the caller withholds the border reference. Centering — the one
+    measurement that can reject a card on its own — then declines rather than
+    describing whichever rectangle happened to win.
+
+    The readings are compared on the same measure the rectified card is
+    already judged by: how uniform is this reading's outer band?
+
+      - card on a backdrop: the inner reading IS the card, so its band is the
+        card's border and is very uniform, while the full frame's band mixes
+        backdrop with border and is not.
+      - card cropped to its edges: the inner reading is the artwork panel, so
+        its band is artwork, while the full frame's band is the card's own
+        border.
+
+    The comparison is relative rather than against a fixed threshold, because
+    an absolute one cannot separate a smoothly varying artwork edge from a
+    border — measured at MAD 14.3 for artwork against a 30.0 threshold, well
+    inside "reliable" — whereas a real border sits near zero. Comparing the
+    discarded ring against the full frame's outer band instead would be
+    circular: they are largely the same pixels.
+    """
+    height, width = img.shape[:2]
+    inner = _quad_area(corners) / float(height * width)
+    if inner >= FILLS_FRAME_AREA_RATIO:
+        # A short-circuit, NOT a safety gate. When the quad already fills the
+        # frame the two readings sample almost the same pixels, so the
+        # comparison below returns False on its own — mutation-testing the
+        # branch away changes no outcome. It is kept because it saves two
+        # warps per image, and labelled so nobody later reads it as the thing
+        # protecting this case.
+        return False
+
+    dst = np.float32([[0, 0], [NORM_W, 0], [NORM_W, NORM_H], [0, NORM_H]])
+
+    def spread(quad):
+        view = cv2.warpPerspective(
+            img, cv2.getPerspectiveTransform(quad.astype(np.float32), dst),
+            (NORM_W, NORM_H))
+        gray = view.mean(axis=2)
+        mask, _ = _segment_border(view)
+        return _band_spread(gray, mask)
+
+    frame = _order(np.float32([[0, 0], [width - 1, 0],
+                               [width - 1, height - 1], [0, height - 1]]))
+    whole_spread = spread(frame)
+    if whole_spread >= RELIABLE_BORDER_STD:
+        # The frame has no usable border either, so it is no rival reading.
+        return False
+    return whole_spread * BORDER_UNIFORMITY_MARGIN < spread(corners)
+
+
+def _aspect(width: float, height: float) -> float:
+    """Short side over long side, so orientation does not matter."""
+    if width <= 0 or height <= 0:
+        return 0.0
+    return min(width, height) / max(width, height)
+
+
+def _quad_area(corners: np.ndarray) -> float:
+    x, y = corners[:, 0], corners[:, 1]
+    return 0.5 * abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
+
+
+def _ring_between(img: np.ndarray, corners: np.ndarray) -> np.ndarray | None:
+    """The pixels inside the frame but outside `corners`."""
+    import cv2
+
+    height, width = img.shape[:2]
+    mask = np.zeros((height, width), np.uint8)
+    cv2.fillConvexPoly(mask, corners.astype(np.int32), 255)
+    outside = img.mean(axis=2)[mask == 0]
+    return outside if outside.size else None
+
+
+def _outer_band(normalized: np.ndarray) -> np.ndarray:
+    band = max(2, int(min(normalized.shape[:2]) * 0.04))
+    gray = normalized.mean(axis=2)
+    return np.concatenate([
+        gray[:band, :].ravel(), gray[-band:, :].ravel(),
+        gray[:, :band].ravel(), gray[:, -band:].ravel(),
+    ])
 
 
 def _quad_from_contour(contour: np.ndarray, cv2) -> np.ndarray | None:
@@ -256,7 +386,11 @@ def _segment_border(normalized: np.ndarray) -> tuple[np.ndarray, bool]:
     # to a single glare patch is exactly the over-conservatism that costs
     # recall. Median absolute deviation ignores that minority; a genuinely
     # varied borderless band still fails.
+    robust_std = _band_spread(gray, mask)
+    return mask, bool(robust_std < RELIABLE_BORDER_STD)
+
+
+def _band_spread(gray: np.ndarray, mask: np.ndarray) -> float:
     values = gray[mask > 0]
     median = np.median(values)
-    robust_std = 1.4826 * float(np.median(np.abs(values - median)))
-    return mask, bool(robust_std < RELIABLE_BORDER_STD)
+    return 1.4826 * float(np.median(np.abs(values - median)))

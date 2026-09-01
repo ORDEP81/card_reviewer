@@ -51,6 +51,10 @@ class CardSpec(BaseModel):
     rotation_deg: float = 0.0
     perspective: float = 0.0
     glare_regions: list[str] = Field(default_factory=list)
+    #: Surface scratches, as (severity 0-1) values. A surface defect is what
+    #: the surface producer exists to find, and without one in the corpus its
+    #: threshold could only ever be calibrated against clean cards.
+    scratches: list[float] = Field(default_factory=list)
     background: tuple[int, int, int] = (10, 10, 10)
     seed: int = 0
 
@@ -102,6 +106,39 @@ def render(spec: CardSpec) -> np.ndarray:
     return _place_on_background(card, spec, cv2)
 
 
+def _artwork(height: int, width: int, base, rng: np.random.Generator):
+    """Pictorial content, not a flat panel of `base`.
+
+    A solid rectangle is not what a card looks like, and the difference is
+    load-bearing rather than cosmetic: a flat panel has a UNIFORM EDGE BAND,
+    so it is indistinguishable from a card's border by any test that asks
+    "does this region have a clean border?". Geometry needs exactly that
+    question to tell a cropped card from its own artwork, and against flat
+    art every answer was yes.
+
+    A smooth gradient with a few soft shapes keeps the fixture deterministic
+    while giving the artwork the property real artwork has: it varies.
+    """
+    ys = np.linspace(-1.0, 1.0, height)[:, None]
+    xs = np.linspace(-1.0, 1.0, width)[None, :]
+    field = 0.5 + 0.5 * np.sin(3.0 * xs + 1.7) * np.cos(2.3 * ys - 0.4)
+
+    art = np.empty((height, width, 3), np.float64)
+    for channel in range(3):
+        art[:, :, channel] = base[channel] * (0.55 + 0.45 * field)
+
+    for _ in range(4):
+        cy = int(rng.integers(height // 5, height * 4 // 5))
+        cx = int(rng.integers(width // 5, width * 4 // 5))
+        ry = int(rng.integers(height // 12, height // 5))
+        rx = int(rng.integers(width // 12, width // 5))
+        blob = np.s_[max(0, cy - ry):cy + ry, max(0, cx - rx):cx + rx]
+        art[blob] = np.clip(art[blob] * rng.uniform(0.55, 1.45), 0, 255)
+
+    art += rng.normal(0.0, 3.0, art.shape)
+    return np.clip(art, 0, 255).astype(np.uint8)
+
+
 def _draw_card(spec: CardSpec, rng: np.random.Generator) -> np.ndarray:
     img = np.zeros((spec.card_h, spec.card_w, 3), np.uint8)
     img[:] = spec.border_color
@@ -123,13 +160,30 @@ def _draw_card(spec: CardSpec, rng: np.random.Generator) -> np.ndarray:
         art_h = spec.card_h - 2 * spec.border_px
         left = int(round((spec.card_w - art_w) * spec.h_centering / 100.0))
         top = int(round((spec.card_h - art_h) * spec.v_centering / 100.0))
-        img[top:top + art_h, left:left + art_w] = spec.art_color
+        img[top:top + art_h, left:left + art_w] = _artwork(
+            art_h, art_w, spec.art_color, rng)
 
     if spec.text_heavy:
         step = 24
         for y in range(step, spec.card_h - step, step):
             for x in range(step, spec.card_w - step, step):
                 img[y:y + 8, x:x + 16] = (30, 30, 30)
+
+    for severity in spec.scratches:
+        # A thin bright line across the face, which is what a scratch on a
+        # printed surface looks like: it cuts across the artwork rather than
+        # following it.
+        thickness = max(1, int(3 * severity))
+        y0 = int(rng.integers(spec.card_h // 5, spec.card_h * 4 // 5))
+        x0 = int(rng.integers(spec.card_w // 6, spec.card_w // 3))
+        length = int(spec.card_w * 0.45 * severity)
+        slope = float(rng.uniform(-0.4, 0.4))
+        for step in range(length):
+            y = int(y0 + slope * step)
+            if 0 <= y < spec.card_h - thickness and x0 + step < spec.card_w:
+                img[y:y + thickness, x0 + step] = np.clip(
+                    img[y:y + thickness, x0 + step].astype(int)
+                    + int(120 * severity), 0, 255).astype(np.uint8)
 
     for name, severity in spec.corner_damage.items():
         row, col = _CORNERS[name]
