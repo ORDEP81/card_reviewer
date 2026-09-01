@@ -18,6 +18,7 @@ dependencies = [
 
 [project.scripts]
 card-knowledge = "card_reviewer.knowledge.cli:app"
+card-review = "card_reviewer.review.cli:app"
 
 [dependency-groups]
 dev = ["pytest>=8"]
