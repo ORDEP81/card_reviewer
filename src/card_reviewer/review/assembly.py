@@ -16,7 +16,7 @@ from .provenance import EvidenceRef
 from .roles import ImageRole
 from .versions import ASSEMBLY_VERSION
 
-__all__ = ["ASSEMBLY_VERSION", "Assembled"]
+__all__ = ["ASSEMBLY_VERSION", "Assembled", "ImageStageOutputs"]
 
 
 class Assembled(BaseModel):
@@ -56,3 +56,22 @@ class Assembled(BaseModel):
     @property
     def faces(self) -> tuple[ImageRole, ...]:
         return tuple(ImageRole(f) for f in self.faces_present)
+
+
+class ImageStageOutputs(BaseModel):
+    """Every image-tier stage's output for one photograph, as cached dicts.
+
+    The pipeline collects these; keeping the raw stage outputs means the
+    assembly fingerprint is over exactly what the stages produced.
+    """
+
+    image_hash: str
+    preflight: dict[str, Any] = Field(default_factory=dict)
+    geometry: dict[str, Any] | None = None
+    observability: dict[str, Any] | None = None
+    cv_measurements: dict[str, Any] | None = None
+    role_features: dict[str, Any] | None = None
+
+    @property
+    def usable(self) -> bool:
+        return self.geometry is not None
