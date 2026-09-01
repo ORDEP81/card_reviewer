@@ -135,12 +135,24 @@ def test_a_white_border_is_structural_while_glare_on_a_dark_card_is_not(store):
         UndetectabilityClass.CIRCUMSTANTIAL)
 
 
-def test_glare_on_a_white_card_does_not_become_a_photo_request(store):
+def test_a_uniformly_white_card_does_not_become_a_photo_request(store):
     """A white-bordered card is bright everywhere; treating that as glare
-    would generate a photo request no photograph could satisfy."""
+    would generate a photo request no photograph could satisfy.
+
+    The fixture used to include glare_regions=["top_left"], which is not
+    what this rationale describes — a localized highlight is exactly what a
+    better photograph fixes. Asserting no GLARE there pinned the defect that
+    a flashed corner on a white card was reported as fully detectable.
+    """
+    r = _obs(CardSpec(border_color=(255, 255, 255), seed=2), store)
+    assert all(code != "GLARE" for code in r.reason_codes.values())
+
+
+def test_a_flashed_corner_on_a_white_card_does_become_a_photo_request(store):
+    """The other half: this one a better photograph can fix."""
     r = _obs(CardSpec(border_color=(255, 255, 255), glare_regions=["top_left"],
                       seed=2), store)
-    assert all(code != "GLARE" for code in r.reason_codes.values())
+    assert r.reason_codes[("top_left", "corners", "rounding")] == "GLARE"
 
 
 def test_a_borderless_card_reports_centering_as_structurally_undetectable(store):

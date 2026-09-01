@@ -49,6 +49,12 @@ GLARE_LUMA = 245.0
 OCCLUSION_LUMA = 12.0
 GLARE_FRACTION = 0.15
 
+#: How far a region's clipped fraction must rise above the median of its
+#: sibling regions before it counts as a specular highlight rather than the
+#: card's own brightness. Measured on a white-bordered card: every corner
+#: sits at 0.48 unglared, and a flashed corner reaches 0.79.
+GLARE_EXCESS_FRACTION = 0.15
+
 
 class ObservabilityResult(BaseModel):
     """Cache-safe: JSON-serializable scalars plus artifact ids.
@@ -120,9 +126,23 @@ def analyze(
     det: dict[Key, Scale] = {}
     reasons: dict[Key, str] = {}
     for category in CATEGORIES:
-        for region in REGIONS_FOR_CATEGORY[category]:
+        regions = REGIONS_FOR_CATEGORY[category]
+        # Glare is what stands out from THIS card, not what crosses a fixed
+        # line. On a white-bordered card every corner clips against an
+        # absolute threshold together, so an absolute test either flags all
+        # four (an impossible photo request) or — as it did — none of them,
+        # including a corner the flash genuinely blew out. Measured on a
+        # white card: 0.48 clipped at every corner unglared, 0.79 at the
+        # glared one. The excess is the signal.
+        fractions = {
+            region: float((_patch(gray, region) >= GLARE_LUMA).mean())
+            for region in regions
+        }
+        baseline = float(np.median(list(fractions.values())))
+        for region in regions:
             patch = _patch(gray, region)
-            clipped = float((patch >= GLARE_LUMA).mean()) > GLARE_FRACTION
+            clipped = fractions[region] > GLARE_FRACTION
+            stands_out = fractions[region] > baseline + GLARE_EXCESS_FRACTION
             bright = float(patch.mean()) >= WHITE_BORDER_LUMA
             for defect_type in defect_types_for(category):
                 key = (region, category, defect_type)
@@ -132,7 +152,10 @@ def analyze(
                     # A white corner cannot show whitening. Structural: no
                     # photograph of THIS card could ever show it.
                     det[key], reasons[key] = Scale.LOW, "WHITE_BORDER"
-                elif clipped and not border_is_white:
+                elif stands_out or (clipped and not border_is_white):
+                    # `stands_out` catches the highlight a white border used
+                    # to hide; the absolute arm still catches a dark card
+                    # blown out so evenly that nothing stands out from it.
                     det[key], reasons[key] = Scale.LOW, "GLARE"
                 elif category == "centering" and not geometry.has_reliable_border:
                     det[key], reasons[key] = Scale.LOW, "BORDERLESS_DESIGN"
