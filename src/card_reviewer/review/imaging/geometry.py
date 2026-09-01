@@ -320,24 +320,6 @@ def _quad_area(corners: np.ndarray) -> float:
     return 0.5 * abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
 
 
-def _ring_between(img: np.ndarray, corners: np.ndarray) -> np.ndarray | None:
-    """The pixels inside the frame but outside `corners`."""
-    import cv2
-
-    height, width = img.shape[:2]
-    mask = np.zeros((height, width), np.uint8)
-    cv2.fillConvexPoly(mask, corners.astype(np.int32), 255)
-    outside = img.mean(axis=2)[mask == 0]
-    return outside if outside.size else None
-
-
-def _outer_band(normalized: np.ndarray) -> np.ndarray:
-    band = max(2, int(min(normalized.shape[:2]) * 0.04))
-    gray = normalized.mean(axis=2)
-    return np.concatenate([
-        gray[:band, :].ravel(), gray[-band:, :].ravel(),
-        gray[:, :band].ravel(), gray[:, -band:].ravel(),
-    ])
 
 
 def _quad_from_contour(contour: np.ndarray, cv2) -> np.ndarray | None:

@@ -91,6 +91,24 @@ def i1_satisfied(
     return not _material_contradiction(finding, others)
 
 
+def _at_adopted_state(fused) -> Finding:
+    """The fused finding carrying only the evidence that argues for its state.
+
+    A source that reached a WEAKER state cannot vouch for a stronger one, and
+    its refs are what laundered I3: assembly attaches surface_original to
+    every surface defect type whether or not it shows anything, so a merely
+    SUSPECTED neighbour donated an unenhanced ref to an enhancement-only
+    OBSERVED finding and the union satisfied I3 every time.
+    """
+    finding = fused.as_finding()
+    supporting = [
+        ref
+        for source in fused.sources if source.state is fused.state
+        for ref in source.evidence
+    ]
+    return finding.model_copy(update={"evidence": supporting or finding.evidence})
+
+
 def _material_contradiction(
     finding: Finding, others: list[tuple[Finding, Scale]]
 ) -> bool:
@@ -240,7 +258,17 @@ def combine(
     # of a defect's evidence. Running I3 first would demote a finding one
     # producer saw only under enhancement even when the other saw it plainly.
     fused = fuse(raw, image_roles)
-    checked = enforce_i3([f.as_finding() for f in fused])
+    # I3 is judged per SOURCE, and only against sources that reached the
+    # state being claimed. Running it over the fused finding's evidence
+    # UNION let any co-located finding's unenhanced ref launder an
+    # enhancement-only one — and assembly attaches surface_original to every
+    # surface defect type whether or not it shows anything, so the union
+    # always contained one. Restricting to sources AT the adopted state is
+    # what keeps the original reason for fusing first (a producer that saw
+    # the defect plainly should not be demoted because another only saw it
+    # enhanced) without letting a mere SUSPECTED neighbour vouch for an
+    # OBSERVED conclusion.
+    checked = enforce_i3([_at_adopted_state(f) for f in fused])
     fused = [
         f.model_copy(update={"state": c.state,
                              "demotion_reason": c.demotion_reason})

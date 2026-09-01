@@ -115,3 +115,40 @@ def test_an_unmeasurable_reading_cannot_win_on_a_stale_number():
     assert out.centering["measurable"] is True
     assert out.centering["horizontal"] == 78.0, (
         "an unmeasurable reading's leftover number was carried forward")
+
+
+def test_a_declined_centering_measurement_reaches_the_provider(tmp_path):
+    """`limitations` was assembled BEFORE the centering downgrade that the
+    same change added, so the list could never mention a failed centering
+    measurement — and that list is what the manifest sends to the provider
+    as image_limitations. The vision layer was never told the border could
+    not be measured.
+    """
+    from card_reviewer.review.imaging.geometry import analyze as geometry_analyze
+    from card_reviewer.review.imaging.measure import measure_all
+    from card_reviewer.review.imaging.observability import (
+        analyze as observability_analyze,
+    )
+    from card_reviewer.review.imaging.synthetic import CardSpec, render_png
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+
+    store = ArtifactStore(tmp_path / "store")
+    # A tilt steep enough that the border is not separable from the art.
+    data = render_png(CardSpec(rotation_deg=20.0))
+    image_hash = store.put_image(data)
+    geometry = geometry_analyze(data, store, image_hash)
+    cv = measure_all(geometry, store, image_hash)
+    if cv.centering["measurable"]:
+        pytest.skip("this fixture no longer declines")
+
+    outputs = ImageStageOutputs(
+        image_hash=image_hash, preflight={"global_sharpness": 120.0},
+        geometry=geometry.model_dump(),
+        observability=observability_analyze(
+            geometry, store, image_hash).model_dump(),
+        cv_measurements=cv.model_dump())
+    evidence = to_image_evidence([outputs])[0]
+
+    assert any("centering" in limitation
+               for limitation in evidence.limitations), (
+        f"no centering limitation among {evidence.limitations}")

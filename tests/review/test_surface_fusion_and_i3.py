@@ -153,3 +153,63 @@ def test_a_real_surface_ref_carries_a_region(tmp_path):
     assert cv.surface.evidence_refs, "no surface evidence at all"
     assert any(ref.region is not None for ref in cv.surface.evidence_refs), (
         "no surface ref carries a region, so no surface finding can fuse")
+
+
+def _combine(group):
+    from card_reviewer.review.enums import Coverage
+    from card_reviewer.review.heuristic import HeuristicResult
+    from card_reviewer.review.policies.combine_v1 import combine
+    from card_reviewer.review.policies.coverage_v1 import CoverageResult
+
+    return combine(
+        HeuristicResult(findings=group), None,
+        CoverageResult(outcome=Coverage.SUFFICIENT, rankable=True),
+        card_context_known=True, scoped_rules=[])
+
+
+def test_a_weaker_neighbour_cannot_launder_enhancement_only_evidence():
+    """`combine` fuses BEFORE enforcing I3 so the invariant saw the UNION of
+    a defect's evidence — and assembly attaches surface_original to every
+    surface defect type whether or not it shows anything, so the union always
+    contained an unenhanced ref and I3 was satisfied every time.
+
+    The reason for fusing first is real: a producer that saw the defect
+    plainly should not be demoted because another only saw it enhanced. But
+    that is a claim about a source which reached the state, not about a pile
+    of refs — so I3 is now judged against the evidence of sources AT the
+    adopted state.
+    """
+    clahe_only = _surface(
+        FindingProducer.VISION,
+        [_ref("surface_clahe", EvidenceOrigin.ENHANCED, "clahe")])
+    merely_suspected = _surface(
+        FindingProducer.HEURISTIC,
+        [_ref("surface_original"),
+         _ref("surface_clahe", EvidenceOrigin.ENHANCED, "clahe")],
+        state=FindingState.SUSPECTED)
+
+    result = _combine([merely_suspected, clahe_only])
+    assert result.fused[0].state is not FindingState.OBSERVED
+    assert result.fused[0].demotion_reason
+
+
+def test_a_producer_that_saw_it_plainly_still_keeps_it_observed():
+    """The behaviour fusing-before-I3 exists for, which must survive."""
+    clahe_only = _surface(
+        FindingProducer.VISION,
+        [_ref("surface_clahe", EvidenceOrigin.ENHANCED, "clahe")])
+    seen_plainly = _surface(
+        FindingProducer.HEURISTIC, [_ref("surface_original")])
+
+    result = _combine([seen_plainly, clahe_only])
+    assert result.fused[0].state is FindingState.OBSERVED
+    assert not result.fused[0].demotion_reason
+
+
+def test_enhancement_only_evidence_alone_is_still_demoted():
+    clahe_only = _surface(
+        FindingProducer.VISION,
+        [_ref("surface_clahe", EvidenceOrigin.ENHANCED, "clahe")])
+    result = _combine([clahe_only])
+    assert result.fused[0].state is not FindingState.OBSERVED
+    assert result.fused[0].demotion_reason

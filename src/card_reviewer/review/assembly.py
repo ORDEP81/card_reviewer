@@ -260,10 +260,6 @@ def to_image_evidence(image_outputs: list[ImageStageOutputs]) -> list[ImageEvide
         # was structurally always empty — and the manifest sends it to the
         # provider, which CLAUDE.md requires to carry the image limitations.
         # The provider read "[]" on every card, however bad the photograph.
-        limitations = sorted(
-            f"{code} at {region} ({category}/{defect_type})"
-            for (region, category, defect_type), code in obs.reason_codes.items()
-        )
         detectability = dict(obs.detectability)
         reason_codes = dict(obs.reason_codes)
         if cv.centering.get("measurable"):
@@ -280,6 +276,15 @@ def to_image_evidence(image_outputs: list[ImageStageOutputs]) -> list[ImageEvide
                 if key[1] == "centering":
                     detectability[key] = min(detectability[key], Scale.LOW)
                     reason_codes[key] = reason
+
+        # Built AFTER the centering downgrade above, not before it. Built
+        # first, the list could never mention a declined centering
+        # measurement — the very limitation the same commit added — so the
+        # provider's image_limitations still said nothing about it.
+        limitations = sorted(
+            f"{code} at {region} ({category}/{defect_type})"
+            for (region, category, defect_type), code in reason_codes.items()
+        )
 
         out.append(
             ImageEvidence(
