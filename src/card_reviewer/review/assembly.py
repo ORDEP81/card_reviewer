@@ -159,9 +159,34 @@ def assemble(
     out.faces_present = sorted(face.value for face in faces)
     out.best_for = _best_for(images, roles)
     out.conflicts = _conflicts(images, roles)
-    fronts = [i for i in images if roles[i.image_hash].role is ImageRole.FRONT]
-    out.centering = fronts[0].centering if fronts else {}
+    out.centering = _centering(images, roles)
     return out
+
+
+def _centering(
+    images: list[ImageEvidence], roles: dict[str, ResolvedRole]
+) -> dict[str, Any]:
+    """The front's centering, chosen rather than taken from position zero.
+
+    `fronts[0]` made the answer depend on the order the photographs happened
+    to be listed in: with an unmeasurable photo first, a 78/22 miscut
+    DISAPPEARED and coverage still counted centering as assessed. Among
+    measurable readings the WORST is carried forward — a card is as miscut as
+    it is, and preferring the kinder photograph is the same mistake in a
+    politer form. Disagreement between photographs is separately recorded by
+    `_conflicts`, so nothing is lost by not averaging them.
+    """
+    fronts = [i for i in images if roles[i.image_hash].role is ImageRole.FRONT]
+    if not fronts:
+        return {}
+    measured = [f.centering for f in fronts if f.centering.get("measurable")]
+    if not measured:
+        return fronts[0].centering
+    return max(
+        measured,
+        key=lambda c: max(abs(float(c.get("horizontal", 50.0)) - 50.0),
+                          abs(float(c.get("vertical", 50.0)) - 50.0)),
+    )
 
 
 def _best_for(
@@ -231,6 +256,14 @@ def to_image_evidence(image_outputs: list[ImageStageOutputs]) -> list[ImageEvide
                         ).append(ref)
                     refs.setdefault(f"{category}:{defect_type}", []).append(ref)
 
+        # Limitations were never populated here, so `assembled.limitations`
+        # was structurally always empty — and the manifest sends it to the
+        # provider, which CLAUDE.md requires to carry the image limitations.
+        # The provider read "[]" on every card, however bad the photograph.
+        limitations = sorted(
+            f"{code} at {region} ({category}/{defect_type})"
+            for (region, category, defect_type), code in obs.reason_codes.items()
+        )
         detectability = dict(obs.detectability)
         reason_codes = dict(obs.reason_codes)
         if cv.centering.get("measurable"):
@@ -253,6 +286,7 @@ def to_image_evidence(image_outputs: list[ImageStageOutputs]) -> list[ImageEvide
                 image_hash=image.image_hash,
                 detectability=detectability,
                 reason_codes=reason_codes,
+                limitations=limitations,
                 sharpness=float(image.preflight.get("global_sharpness", 0.0)),
                 centering=cv.centering,
                 anomalies=cv.anomalies,

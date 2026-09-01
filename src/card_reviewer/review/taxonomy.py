@@ -111,6 +111,8 @@ REASON_CODES: dict[str, UndetectabilityClass] = {
     # generally can be, which is what makes this circumstantial rather than
     # a property of the card's design.
     "BORDER_NOT_SEPARABLE_FROM_ART": _C,
+    # The opposite of GLARE, and it needs the opposite advice.
+    "UNDEREXPOSED": _C,
     "MISSING_FACE": _C,
     # Metadata-resolvable: identifying the card resolves it. Not a photo
     # defect, so it must never generate a photo request.

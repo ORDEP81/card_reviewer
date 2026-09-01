@@ -42,7 +42,12 @@ def analyze(image_bytes: bytes) -> PreflightResult:
     height, width = img.shape[:2]
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     sharpness = float(cv2.Laplacian(gray, cv2.CV_64F).var())
-    clipped = float(((gray >= 250) | (gray <= 5)).mean())
+    # Sign-aware. Counting both ends together reported an UNDEREXPOSED
+    # photograph as GLARE, whose photo request reads "avoid direct flash" —
+    # advice that makes a too-dark picture worse. They are opposite problems
+    # with opposite remedies.
+    blown = float((gray >= 250).mean())
+    crushed = float((gray <= 5).mean())
 
     # Clipping is tested BEFORE sharpness. A blown-out image has no
     # Laplacian variance *because* it is blown out, so checking sharpness
@@ -53,12 +58,14 @@ def analyze(image_bytes: bytes) -> PreflightResult:
     reason: str | None = None
     if width < MIN_WIDTH or height < MIN_HEIGHT:
         reason = "LOW_RESOLUTION"
-    elif clipped > MAX_CLIPPED_FRACTION:
+    elif blown > MAX_CLIPPED_FRACTION:
         reason = "GLARE"
+    elif crushed > MAX_CLIPPED_FRACTION:
+        reason = "UNDEREXPOSED"
     elif sharpness < MIN_SHARPNESS:
         reason = "BLUR"
 
     return PreflightResult(
         usable=reason is None, width=width, height=height,
-        global_sharpness=sharpness, clipped_fraction=clipped, reason_code=reason,
+        global_sharpness=sharpness, clipped_fraction=blown + crushed, reason_code=reason,
     )

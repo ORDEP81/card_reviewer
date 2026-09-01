@@ -47,6 +47,7 @@ MIN_FRONT_CATEGORIES_FOR_PARTIAL = 2
 
 PHOTO_REQUESTS: dict[str, str] = {
     "GLARE": "a diffuse-lit photograph of the {face} (avoid direct flash)",
+    "UNDEREXPOSED": "a brighter photograph of the {face}, in more even light",
     "BLUR": "a sharper close-up of the {face} {category}",
     "LOW_RESOLUTION": "a higher-resolution close-up of the {face} {category}",
     "OCCLUSION": "the {face} out of its holder, or with the obstruction moved",
