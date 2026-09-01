@@ -160,11 +160,22 @@ def test_a_suspected_severe_defect_does_not_grade_as_a_confirmed_one():
     assert grade != "<=8"
 
 
-def test_an_observed_finding_failing_i1_does_not_lower_the_grade():
+def test_an_observed_finding_failing_i1_is_not_graded_as_a_confirmed_defect():
     """It is an unresolved concern, not a confirmed defect — it costs score
-    and routes to REVIEW, but the grade reports what is established."""
-    assert estimated_grade([_f(FindingState.OBSERVED, Severity.SEVERE, i1=False)],
-                           Coverage.SUFFICIENT) == "10"
+    and routes to REVIEW rather than producing the "<=8" a confirmed severe
+    defect would.
+
+    It does not grade "10" either, which is what this asserted before. That
+    made the estimate non-monotone in evidence strength: a merely SUSPECTED
+    severe defect gave "9-10" while this STRONGER evidence gave "10". A card
+    the engine has an open question about is not an outright 10 whichever
+    state the question is recorded in.
+    """
+    grade = estimated_grade(
+        [_f(FindingState.OBSERVED, Severity.SEVERE, i1=False)],
+        Coverage.SUFFICIENT)
+    assert grade == "9-10"
+    assert grade != "<=8"
 
 
 def test_the_grade_is_not_a_conversion_of_the_score():

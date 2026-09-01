@@ -67,9 +67,14 @@ BORDER_UNIFORMITY_MARGIN = 3.0
 #: A trading card is 2.5 x 3.5 inches.
 CARD_ASPECT = 2.5 / 3.5
 
-#: How far the frame's aspect ratio may sit from a card's before "the photo
-#: was cropped to the card" stops being a credible reading of it.
-ASPECT_TOLERANCE = 0.06
+#: How far a detected region's aspect ratio may sit from a card's before it
+#: stops being credible as a card. This is the card-likeness signal that
+#: replaced area_ratio in the confidence formula — dropping area removed the
+#: only check on WHAT was detected, and nothing took its place, so a plain
+#: grey rectangle scored 1.000 and PASSed at grade 10 with no findings.
+#: Measured: real cards span 0.714-0.791 including tilt and perspective,
+#: while a 200x120 rectangle reads 0.602 and a square 1.000.
+ASPECT_TOLERANCE = 0.10
 
 
 class GeometryResult(BaseModel):
@@ -194,13 +199,18 @@ def _detect_quad(img: np.ndarray, cv2) -> tuple[np.ndarray | None, float]:
     if rect_area <= 0:
         return None, 0.0
     rectangularity = float(min(1.0, area / rect_area))
-    # Certainty about the SHAPE, not about the size. Multiplying in
-    # area_ratio mixed two different questions and got the asymmetry exactly
-    # backwards: a cropped photo's artwork panel scored 1.000 while a
-    # crisply detected card below ~31% of the frame was discarded as
-    # INSUFFICIENT_IMAGES. How large the card sits in frame is a RESOLUTION
-    # fact; it belongs to detectability, where it becomes a LOW_RESOLUTION
-    # limitation and a photo request the owner can act on.
+    # Certainty about the SHAPE, and about the shape being a CARD's — never
+    # about size. Multiplying in area_ratio mixed size with certainty and got
+    # the asymmetry backwards: a cropped photo's artwork panel scored 1.000
+    # while a crisply detected card below ~31% of the frame was discarded.
+    # How large the card sits in frame is a RESOLUTION fact and belongs to
+    # detectability. But removing area also removed the only check on WHAT
+    # was detected, so aspect ratio carries that: a trading card is 2.5x3.5
+    # whatever else varies, and a shape that is not card-shaped is not a
+    # card however cleanly it was found.
+    box = cv2.minAreaRect(largest)[1]
+    if abs(_aspect(box[0], box[1]) - CARD_ASPECT) > ASPECT_TOLERANCE:
+        return None, 0.0
     confidence = rectangularity
 
     # Prefer the contour's own four corners. A photographed card is usually a

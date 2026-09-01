@@ -55,12 +55,35 @@ GLARE_FRACTION = 0.15
 #: sits at 0.48 unglared, and a flashed corner reaches 0.79.
 GLARE_EXCESS_FRACTION = 0.15
 
+#: Clipping so heavy that the region is blown out whatever the card's design.
+#: The relative test above is blind once HALF the regions are glared — the
+#: median moves with them and nothing stands out — and the old absolute arm
+#: was switched off on white borders, which is exactly the population that
+#: clips. Measured over 6 seeds x 3 border colours: clean regions top out at
+#: 0.480 and every glared region starts at 0.695.
+HEAVY_CLIP_FRACTION = 0.60
+
 #: Fraction of a region that must be under an obstruction before the region
 #: stops being assessable. A thumb, a finger, a holder's clip: opaque, and no
 #: amount of interpretation recovers what is behind it. Measured over 8 seeds
 #: x 3 border colours, clean regions reach 0.014 and an obstructed corner
 #: starts at 0.189 — a clean separation, so the threshold sits between them.
 OCCLUSION_FRACTION = 0.10
+
+#: Darkness so complete that nothing is behind it but the obstruction. The
+#: fraction alone cannot be absolute the way it was: a card with dark artwork
+#: reads 0.42-0.49 of its own regions as "dark" and was reported obstructed
+#: everywhere, turning the card's design into a photograph problem. Excess
+#: Occlusion is judged ONLY between regions of the same kind — the four
+#: corners against each other. The centre is artwork and a corner region
+#: contains border, so comparing them compares two materials: a card with
+#: dark artwork reads 0.92 at its centre against 0.51 at its corners and was
+#: reported obstructed there, with a photo request to move an obstruction
+#: that does not exist. No absolute arm either, for the same reason — a dark
+#: card is uniformly dark, and every absolute threshold low enough to catch a
+#: real obstruction also catches the design.
+COMPARABLE_OCCLUSION_REGIONS = ("top_left", "top_right",
+                                "bottom_left", "bottom_right")
 
 # There is deliberately NO region-level blur test here.
 #
@@ -178,6 +201,12 @@ def analyze(
             for region in regions
         }
         baseline = float(np.median(list(fractions.values())))
+        # Only the corner regions, and only against each other.
+        dark = {
+            region: float((_patch(gray, region) <= OCCLUSION_LUMA).mean())
+            for region in regions if region in COMPARABLE_OCCLUSION_REGIONS
+        }
+        dark_baseline = float(np.median(list(dark.values()))) if dark else 0.0
         for region in regions:
             patch = _patch(gray, region)
             clipped = fractions[region] > GLARE_FRACTION
@@ -185,8 +214,14 @@ def analyze(
             bright = float(patch.mean()) >= WHITE_BORDER_LUMA
             # Everything that used to fall through to HIGH. The occlusion
             # mask was already being computed here and then thrown away.
-            occluded = float((patch <= OCCLUSION_LUMA).mean()) > (
-                OCCLUSION_FRACTION)
+            # Relative to the card's own darkness, plus an absolute arm for
+            # the case the relative test cannot see — every region obstructed
+            # at once, where there is no unobstructed sibling to stand out
+            # from.
+            occluded = (
+                region in dark
+                and dark[region] > dark_baseline + OCCLUSION_FRACTION
+            )
             too_small = min(patch.shape[:2]) * scale < REGION_MIN_PX
             for defect_type in defect_types_for(category):
                 key = (region, category, defect_type)

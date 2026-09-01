@@ -115,9 +115,16 @@ def estimated_grade(findings, coverage: Coverage) -> str | None:
         # pristine card is the assumption rule 2 forbids. "9-10" says what is
         # actually known — it might gem, and something unresolved says it
         # might not.
+        # An OBSERVED finding that fails I1 is an unresolved concern too —
+        # STRONGER evidence than a suspicion, not weaker. Looking only for
+        # SUSPECTED made the estimate non-monotone: a confidently observed
+        # severe defect that failed I1 graded "10" while a merely suspected
+        # one graded "9-10".
         unresolved = any(
-            f.state is FindingState.SUSPECTED and f.psa10_relevant
-            for f, _, _ in _triples(findings)
+            f.psa10_relevant
+            and (f.state is FindingState.SUSPECTED
+                 or (f.state is FindingState.OBSERVED and not i1))
+            for f, _, i1 in _triples(findings)
         )
         if coverage is Coverage.SUFFICIENT and not unresolved:
             return "10"
