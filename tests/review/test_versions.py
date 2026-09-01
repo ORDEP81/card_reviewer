@@ -61,11 +61,19 @@ def test_the_placeholder_never_reaches_a_stamped_review():
 def test_every_other_stage_version_is_carried_through_unchanged():
     from card_reviewer.review.versions import VERSIONS, effective_versions
 
+    from card_reviewer.review.versions import SUPPORTING_VERSIONS
+
     stamped = effective_versions(vision_signature=None)
-    assert set(stamped) == set(VERSIONS)
+    # The supporting versions join the stage versions rather than replacing
+    # them: taxonomy, authority, relevance, scoring, fusion and
+    # canonicalization all change the numbers, and calibration should not
+    # have to reconstruct them by joining stage rows.
+    assert set(stamped) == set(VERSIONS) | set(SUPPORTING_VERSIONS)
     for stage, version in VERSIONS.items():
         if stage != "vision":
             assert stamped[stage] == version
+    for component, version in SUPPORTING_VERSIONS.items():
+        assert stamped[component] == version
 
 
 def test_an_incomplete_vision_signature_is_rejected():

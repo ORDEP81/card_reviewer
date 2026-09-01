@@ -150,8 +150,15 @@ def evaluate_coverage(
                 if not shortfalls:
                     continue
                 for region, _value in shortfalls:
+                    # NOT a default of LOW_RESOLUTION. Guessing generated a
+                    # "higher-resolution close-up" request that may be
+                    # wrong, and `class_of` raises on unknown codes
+                    # precisely so reason codes are not invented.
+                    # UNRECORDED_SHORTFALL says what is true: something
+                    # lowered detectability and did not say what.
                     code = reason_codes.get(
-                        (face, region, category, defect_type), "LOW_RESOLUTION")
+                        (face, region, category, defect_type),
+                        "UNRECORDED_SHORTFALL")
                     klass = class_of(code)
                     limitations.append(
                         Limitation(

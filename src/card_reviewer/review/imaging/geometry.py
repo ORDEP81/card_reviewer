@@ -213,7 +213,13 @@ def _detect_quad(img: np.ndarray, cv2) -> tuple[np.ndarray | None, float]:
         # Fall back to the bounding rectangle: better an approximate card
         # than no card, which is what a borderless design would otherwise get.
         corners = np.asarray(cv2.boxPoints(rect), dtype=np.float32)
-    return _order(corners), confidence
+    try:
+        return _order(corners), confidence
+    except ValueError:
+        # Degenerate at this orientation. Declining is the point: the
+        # alternative was a finite garbage homography and measurements of a
+        # rectangle that was never on the card.
+        return None, 0.0
 
 
 def _boundary_may_be_the_artwork(
@@ -371,14 +377,28 @@ def _foreground_mask(img: np.ndarray, cv2) -> np.ndarray:
 
 
 def _order(pts: np.ndarray) -> np.ndarray:
-    """Top-left, top-right, bottom-right, bottom-left."""
+    """Top-left, top-right, bottom-right, bottom-left.
+
+    Raises when the four selections are not four distinct points. Near 45
+    degrees `argmin(sum)` and `argmin(diff)` pick the SAME corner, so one is
+    emitted twice and another dropped — and `getPerspectiveTransform` accepts
+    that silently, returning a finite garbage homography. Every measurement
+    downstream then describes a rectangle that was never on the card, which
+    is worse than having no quad at all.
+    """
     total = pts.sum(axis=1)
     diff = np.diff(pts, axis=1).ravel()
-    return np.array(
+    ordered = np.array(
         [pts[np.argmin(total)], pts[np.argmin(diff)],
          pts[np.argmax(total)], pts[np.argmax(diff)]],
         dtype=np.float32,
     )
+    if len({tuple(point) for point in ordered}) != 4:
+        raise ValueError(
+            "corner ordering did not yield four distinct points; the "
+            f"quad {pts.tolist()} is degenerate at this orientation"
+        )
+    return ordered
 
 
 def _segment_border(normalized: np.ndarray) -> tuple[np.ndarray, bool]:

@@ -71,7 +71,12 @@ def decide_routing(
                 f"{finding.category}/{finding.defect_type} suspected and resolvable"
             )
 
-    if not reasons and not findings and provisional is Coverage.SUFFICIENT:
+    # `not reasons`, not `not findings`. A real card produces many
+    # NOT_OBSERVED findings — the reviewer measured 18 — so requiring an
+    # empty finding list made this branch effectively dead and SMART never
+    # took the confirming call on a clean card. What qualifies a gem
+    # candidate is that nothing is WRONG, which is what `reasons` records.
+    if not reasons and provisional is Coverage.SUFFICIENT:
         reasons.append("strong gem candidate worth confirming")
 
     return RoutingDecision(mode=mode, call_vision=bool(reasons),

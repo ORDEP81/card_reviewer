@@ -113,6 +113,11 @@ REASON_CODES: dict[str, UndetectabilityClass] = {
     "BORDER_NOT_SEPARABLE_FROM_ART": _C,
     # The opposite of GLARE, and it needs the opposite advice.
     "UNDEREXPOSED": _C,
+    # A producer lowered detectability without recording why. Circumstantial
+    # by default because a better photograph is the likelier remedy, but it
+    # generates no photo request: we do not know what to ask for, and
+    # guessing is how a wrong request gets sent.
+    "UNRECORDED_SHORTFALL": _C,
     "MISSING_FACE": _C,
     # Metadata-resolvable: identifying the card resolves it. Not a photo
     # defect, so it must never generate a photo request.

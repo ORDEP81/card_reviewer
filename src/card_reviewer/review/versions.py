@@ -110,6 +110,7 @@ def effective_versions(
     provider identity or an explicit "did not run".
     """
     stamped = dict(VERSIONS)
+    stamped.update(SUPPORTING_VERSIONS)
     stamped["vision"] = (
         VISION_NOT_RUN
         if vision_signature is None
