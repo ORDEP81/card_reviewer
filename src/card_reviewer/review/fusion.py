@@ -113,20 +113,34 @@ def _fuse_group(group: list[Finding]) -> FusedFinding:
 
     producers = {f.producer for f in group}
     states = {f.state for f in group}
-    # One source says it is there, another looked with adequate evidence and
-    # says it is not.
+    # The spec gives two prongs, and only the first was implemented. Because
+    # decide_verdict runs on FUSED findings, combine's own cross-producer
+    # check could never fire for a pair that fused — and fusion's merge
+    # condition is exactly that check's precondition, so the clause was dead.
+    disagreed = len(producers) > 1 and len(states) > 1
     contradicted = (
-        any(f.state is FindingState.OBSERVED for f in group)
-        and any(f.state is FindingState.NOT_OBSERVED for f in group)
+        # One source says it is there, another looked with adequate evidence
+        # and says it is not.
+        (any(f.state is FindingState.OBSERVED for f in group)
+         and any(f.state is FindingState.NOT_OBSERVED for f in group))
+        # ...or the two layers simply report different states for the same
+        # defect at an overlapping location.
+        or disagreed
     )
+
+    # The confidence of the state we ADOPTED, never the group maximum. Taking
+    # the max across mismatched states let a SUSPECTED finding at 1.0 hand its
+    # number to an OBSERVED one at 0.5, and the fused finding then cleared a
+    # REJECT floor that neither source reached on its own.
+    at_state = [f.confidence for f in group if f.state is strongest.state]
 
     return FusedFinding(
         category=strongest.category, defect_type=strongest.defect_type,
-        state=strongest.state, confidence=max(f.confidence for f in group),
+        state=strongest.state, confidence=max(at_state),
         psa10_relevant=any(f.psa10_relevant for f in group),
         severity=(max(severities, key=lambda s: _SEVERITY_RANK[s])
                   if severities else None),
         location=strongest.location, evidence=evidence, sources=list(group),
-        producers_disagreed=len(producers) > 1 and len(states) > 1,
+        producers_disagreed=disagreed,
         material_contradiction=contradicted,
     )

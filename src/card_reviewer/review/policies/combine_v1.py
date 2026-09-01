@@ -95,7 +95,13 @@ def _material_contradiction(
     finding: Finding, others: list[tuple[Finding, Scale]]
 ) -> bool:
     for other, other_detectability in others:
-        if other is finding or other.defect_type != finding.defect_type:
+        # The category matters as much as the defect type: `whitening`
+        # exists in both corners and edges, and a corner box overlaps the top
+        # edge strip. fusion._correlates already compares the pair.
+        if other is finding or (
+            (other.category, other.defect_type)
+            != (finding.category, finding.defect_type)
+        ):
             continue
         if finding.location is None or other.location is None:
             continue

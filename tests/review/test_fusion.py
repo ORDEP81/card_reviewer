@@ -84,10 +84,25 @@ def test_an_observed_versus_not_observed_pair_is_a_material_contradiction():
     assert out[0].material_contradiction is True
 
 
-def test_corroboration_is_not_a_material_contradiction():
+def test_producers_at_different_states_is_a_material_contradiction():
+    """This test previously read SUSPECTED + OBSERVED as corroboration and
+    asserted no contradiction. The spec says otherwise, in as many words: a
+    material unresolved contradiction is a not_observed at an overlapping
+    location with adequate detectability, OR "the heuristic and vision layers
+    report different states for the same defect type and overlapping
+    location". One layer saying "maybe" while the other says "definitely" is
+    the second case, and it routes to REVIEW rather than REJECT — which is
+    what I1 is for."""
     out = fuse([_f(FindingProducer.HEURISTIC, FindingState.SUSPECTED, (0, 0, .3, .3)),
                 _f(FindingProducer.VISION, FindingState.OBSERVED, (0, 0, .3, .3))])
+    assert out[0].material_contradiction is True
+
+
+def test_producers_at_the_same_state_corroborate_without_contradicting():
+    out = fuse([_f(FindingProducer.HEURISTIC, FindingState.OBSERVED, (0, 0, .3, .3)),
+                _f(FindingProducer.VISION, FindingState.OBSERVED, (0, 0, .3, .3))])
     assert out[0].material_contradiction is False
+    assert out[0].producers_disagreed is False
 
 
 def test_disagreement_between_producers_is_recorded():
