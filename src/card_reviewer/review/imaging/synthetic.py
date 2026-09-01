@@ -164,9 +164,15 @@ def _draw_card(spec: CardSpec, rng: np.random.Generator) -> np.ndarray:
             art_h, art_w, spec.art_color, rng)
 
     if spec.text_heavy:
+        # Inside the ART, not across the border. Starting at a fixed 24px
+        # inset put printing INSIDE a 40px border, so the ink threshold
+        # legitimately found art where the border should be and a card back
+        # rendered as 50/50 measured 43.6. That is the generator drawing
+        # something no card looks like, not the measurement misreading it.
         step = 24
-        for y in range(step, spec.card_h - step, step):
-            for x in range(step, spec.card_w - step, step):
+        inset = spec.border_px + step
+        for y in range(inset, spec.card_h - inset, step):
+            for x in range(inset, spec.card_w - inset, step):
                 img[y:y + 8, x:x + 16] = (30, 30, 30)
 
     for severity in spec.scratches:
