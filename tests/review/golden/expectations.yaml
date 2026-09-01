@@ -1,0 +1,72 @@
+- file: angled_card.png
+  synthetic: true
+  preflight_usable: true
+  boundary_detected: true
+  has_reliable_border: true
+  centering_measurable: true
+  detectability:
+    bottom_left.corners.whitening: low
+    center.surface.scratches: high
+  corner_whitening_reason: WHITE_BORDER
+- file: borderless_chrome.png
+  synthetic: true
+  preflight_usable: true
+  boundary_detected: true
+  has_reliable_border: false
+  centering_measurable: false
+  detectability:
+    bottom_left.corners.whitening: high
+    center.surface.scratches: high
+- file: card_back.png
+  synthetic: true
+  preflight_usable: true
+  boundary_detected: true
+  has_reliable_border: true
+  centering_measurable: true
+  detectability:
+    bottom_left.corners.whitening: low
+    center.surface.scratches: high
+  corner_whitening_reason: WHITE_BORDER
+- file: dark_border_clean.png
+  synthetic: true
+  preflight_usable: true
+  boundary_detected: true
+  has_reliable_border: true
+  centering_measurable: true
+  detectability:
+    bottom_left.corners.whitening: high
+    center.surface.scratches: high
+- file: glare_heavy.png
+  synthetic: true
+  preflight_usable: true
+  boundary_detected: true
+  has_reliable_border: true
+  centering_measurable: true
+  detectability:
+    bottom_left.corners.whitening: high
+    center.surface.scratches: high
+  corner_whitening_reason: GLARE
+- file: miscut.png
+  synthetic: true
+  preflight_usable: true
+  boundary_detected: true
+  has_reliable_border: true
+  centering_measurable: true
+  detectability:
+    bottom_left.corners.whitening: low
+    center.surface.scratches: high
+  corner_whitening_reason: WHITE_BORDER
+- file: thumbnail_too_small.png
+  synthetic: true
+  preflight_usable: false
+  preflight_reason: LOW_RESOLUTION
+- file: white_border_clean.png
+  synthetic: true
+  preflight_usable: true
+  boundary_detected: true
+  has_reliable_border: true
+  centering_measurable: true
+  detectability:
+    bottom_left.corners.whitening: low
+    center.surface.scratches: high
+  corner_whitening_reason: WHITE_BORDER
