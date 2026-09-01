@@ -145,9 +145,19 @@ def test_the_grade_is_null_when_coverage_is_inadequate():
     assert estimated_grade([], Coverage.INADEQUATE) is None
 
 
-def test_suspected_findings_do_not_lower_the_grade_estimate():
-    assert estimated_grade([_f(FindingState.SUSPECTED, Severity.SEVERE, i1=False)],
-                           Coverage.SUFFICIENT) == "10"
+def test_a_suspected_severe_defect_does_not_grade_as_a_confirmed_one():
+    """A suspicion must not be priced as a confirmed defect — a SEVERE
+    suspicion is not the "<=8" a SEVERE confirmed defect produces.
+
+    It does stop the estimate claiming an outright 10, though. Asserting "10"
+    here meant a card with a suspected severe defect read exactly like a
+    pristine one, which is what rule 2 forbids.
+    """
+    grade = estimated_grade(
+        [_f(FindingState.SUSPECTED, Severity.SEVERE, i1=False)],
+        Coverage.SUFFICIENT)
+    assert grade == "9-10"
+    assert grade != "<=8"
 
 
 def test_an_observed_finding_failing_i1_does_not_lower_the_grade():
@@ -158,10 +168,22 @@ def test_an_observed_finding_failing_i1_does_not_lower_the_grade():
 
 
 def test_the_grade_is_not_a_conversion_of_the_score():
-    """They answer different questions and must be able to disagree."""
-    fs = [_f(FindingState.SUSPECTED, i1=False) for _ in range(4)]
-    assert rank_score(fs, Coverage.SUFFICIENT) < 90
-    assert estimated_grade(fs, Coverage.SUFFICIENT) == "10"
+    """They answer different questions and must be able to disagree.
+
+    This used to assert grade "10" for four suspected findings, which is the
+    assumption rule 2 forbids — the same reading a pristine card gets. The
+    point it was making survives without that: the score collapses while the
+    grade moves a single step, because unconfirmed concerns are not
+    confirmed defects.
+    """
+    one = [_f(FindingState.SUSPECTED, i1=False)]
+    many = [_f(FindingState.SUSPECTED, i1=False) for _ in range(4)]
+
+    assert rank_score(many, Coverage.SUFFICIENT) < rank_score(
+        one, Coverage.SUFFICIENT)
+    assert estimated_grade(many, Coverage.SUFFICIENT) == estimated_grade(
+        one, Coverage.SUFFICIENT) == "9-10"
+    assert estimated_grade([], Coverage.SUFFICIENT) == "10"
 
 
 # --- review confidence -----------------------------------------------------
@@ -208,3 +230,50 @@ def test_a_high_score_can_carry_low_confidence():
     assert rank_score([], Coverage.PARTIAL) >= 85
     assert review_confidence(Coverage.PARTIAL, [], False, True,
                              required_face_missing=True) is ReviewConfidence.LOW
+
+
+def _suspected(category="corners", defect_type="rounding", severity=None):
+    from card_reviewer.review.enums import FindingState
+    from card_reviewer.review.findings import Finding, FindingProducer
+    from card_reviewer.review.provenance import (
+        EvidenceOrigin, EvidenceRef, NormalizedBox,
+    )
+
+    box = NormalizedBox(x0=0.0, y0=0.0, x1=0.2, y1=0.2)
+    return Finding(
+        defect_type=defect_type, category=category,
+        state=FindingState.SUSPECTED, producer=FindingProducer.HEURISTIC,
+        confidence=0.6, psa10_relevant=True, severity=severity, location=box,
+        evidence=[EvidenceRef(artifact_id="a", image_hash="h",
+                              origin=EvidenceOrigin.ORIGINAL,
+                              view="corner_top_left", region=box)])
+
+
+def test_an_unresolved_suspicion_stops_the_estimate_claiming_a_ten():
+    """Non-negotiable rule 2: never automatically assume PSA 10, and search
+    for visible reasons a card may not gem.
+
+    A suspicion is not a confirmed defect and must not drag the grade down as
+    if it were — but a card the engine has open questions about cannot be
+    reported as an outright 10 either. It read exactly the same as a pristine
+    card, which is the claim the rule forbids.
+    """
+    from card_reviewer.review.enums import Authority, Coverage, Scale
+    from card_reviewer.review.policies.scoring_v1 import estimated_grade
+
+    clean = estimated_grade([], Coverage.SUFFICIENT)
+    with_a_concern = estimated_grade(
+        [(_suspected(), Authority.BINDING, Scale.HIGH)], Coverage.SUFFICIENT)
+
+    assert clean == "10"
+    assert with_a_concern != "10"
+    assert with_a_concern == "9-10"
+
+
+def test_an_irrelevant_suspicion_does_not_move_the_estimate():
+    from card_reviewer.review.enums import Authority, Coverage, Scale
+    from card_reviewer.review.policies.scoring_v1 import estimated_grade
+
+    finding = _suspected().model_copy(update={"psa10_relevant": False})
+    assert estimated_grade([(finding, Authority.BINDING, Scale.HIGH)],
+                           Coverage.SUFFICIENT) == "10"

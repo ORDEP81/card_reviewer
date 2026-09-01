@@ -109,7 +109,19 @@ def estimated_grade(findings, coverage: Coverage) -> str | None:
         if f.state is FindingState.OBSERVED and f.psa10_relevant and i1
     ]
     if not observed:
-        return "10" if coverage is Coverage.SUFFICIENT else "9-10"
+        # A suspicion is not a confirmed defect and must not drag the grade
+        # down as if it were. But a card the engine has an open question
+        # about is not an outright 10 either: reporting one identically to a
+        # pristine card is the assumption rule 2 forbids. "9-10" says what is
+        # actually known — it might gem, and something unresolved says it
+        # might not.
+        unresolved = any(
+            f.state is FindingState.SUSPECTED and f.psa10_relevant
+            for f, _, _ in _triples(findings)
+        )
+        if coverage is Coverage.SUFFICIENT and not unresolved:
+            return "10"
+        return "9-10"
     severities = [f.severity for f in observed if f.severity]
     if not severities:
         return "9"
