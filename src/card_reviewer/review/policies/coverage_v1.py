@@ -193,3 +193,16 @@ def _requests(limitations: list[Limitation]) -> tuple[list[str], bool]:
             if text not in photos:
                 photos.append(text)
     return photos, identify
+
+
+def unevaluable_fingerprint_content(
+    gaps: "list[UnevaluableRule]",
+) -> list[list[str]]:
+    """The part of an unevaluable rule a coverage cache key depends on.
+
+    `evaluate_coverage` reads exactly these three fields off each gap, so they
+    are the consumed value. Sorted: the rubric's iteration order is not part
+    of the evidence, and letting it into the key would split one result across
+    two rows.
+    """
+    return sorted([g.rule_id, g.category, g.reason_code] for g in gaps)

@@ -84,7 +84,17 @@ STAGE_FINGERPRINT_INPUTS: dict[str, tuple[str, ...]] = {
     ),
     "evidence_assembly": ("roles", "context", "per_image_outputs"),
     "heuristic": ("assembled_evidence", "applicable_rubric_rules"),
-    "coverage_provisional": ("assembled_detectability", "applicable_rubric_rules"),
+    # Reason codes are not decoration: coverage classes each one as
+    # structural (does not block the category) or circumstantial (does), so
+    # the same detectability with a different reason is a different outcome.
+    # The unevaluable set adds metadata-resolvable limitations, blocks
+    # categories and drives the identification request.
+    "coverage_provisional": (
+        "assembled_detectability",
+        "assembled_reason_codes",
+        "applicable_rubric_rules",
+        "unevaluable_rubric_rules",
+    ),
     "routing": (
         "mode",
         "heuristic_output",
@@ -104,8 +114,10 @@ STAGE_FINGERPRINT_INPUTS: dict[str, tuple[str, ...]] = {
     "vision": ("provider_evidence_payload",),
     "coverage": (
         "assembled_detectability",
+        "assembled_reason_codes",
         "vision_category_assessability",
         "applicable_rubric_rules",
+        "unevaluable_rubric_rules",
     ),
     # Everything `combine` reads. The three stage outputs are the obvious
     # part; the rest arrive as separate arguments and are just as capable of

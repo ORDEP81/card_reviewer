@@ -218,6 +218,7 @@ class ReviewPipeline:
         from .policies.coverage_v1 import (
             COVERAGE_POLICY_VERSION, REQUIRED_FACES, CoverageResult,
             UnevaluableRule, evaluate_coverage,
+            unevaluable_fingerprint_content,
         )
         from .policies.relevance_v1 import RELEVANCE_POLICY_VERSION
         from .policies.routing_v1 import (
@@ -294,11 +295,14 @@ class ReviewPipeline:
                             reason_code=s.reason)
             for s in scoped if s.evaluability is RuleEvaluability.UNEVALUABLE
         ]
+        unevaluable_content = unevaluable_fingerprint_content(unevaluable)
 
         prov, prov_id = run_id(
             "coverage_provisional",
             {"assembled_detectability": asm["detectability_flat"],
-             "applicable_rubric_rules": rules},
+             "assembled_reason_codes": asm["reason_codes_flat"],
+             "applicable_rubric_rules": rules,
+             "unevaluable_rubric_rules": unevaluable_content},
             {"coverage_policy_version": COVERAGE_POLICY_VERSION,
              "taxonomy_version": TAXONOMY_VERSION},
             lambda: evaluate_coverage(
@@ -347,7 +351,9 @@ class ReviewPipeline:
             "coverage",
             {"assembled_detectability": asm["detectability_flat"],
              "vision_category_assessability": assessability,
-             "applicable_rubric_rules": rules},
+             "assembled_reason_codes": asm["reason_codes_flat"],
+             "applicable_rubric_rules": rules,
+             "unevaluable_rubric_rules": unevaluable_content},
             {"coverage_policy_version": COVERAGE_POLICY_VERSION,
              "taxonomy_version": TAXONOMY_VERSION},
             lambda: evaluate_coverage(

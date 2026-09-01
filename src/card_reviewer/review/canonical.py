@@ -57,6 +57,12 @@ PRECISION_MAP: dict[str, float] = {
     # mean the same thing.
     "centering.horizontal": 1.5,
     "centering.vertical": 1.5,
+    # The values two photographs disagreed on ARE centering readings, so they
+    # carry centering's precision. Recorded disagreement is the one case
+    # `_conflicts` exists to preserve, and it used to abort the run: the
+    # floats reached the fingerprinter under a path with no declared
+    # precision, before any attempt row was written.
+    "conflicts.values": 1.5,
     # Confidences are compared against coarse thresholds, never summed.
     "confidence": 0.01,
     # Normalized card coordinates, wherever they appear — EvidenceRef.region
