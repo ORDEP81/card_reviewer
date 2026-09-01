@@ -68,6 +68,24 @@ PRECISION_MAP: dict[str, float] = {
     "y1": 1e-3,
     # Pixel-space measurements are integers in practice.
     "border_px": 1.0,
+    # Image-tier scalars. All are compared against coarse thresholds, never
+    # summed, so two readings a hundredth apart mean the same thing.
+    "boundary_confidence": 0.01,
+    "clipped_fraction": 0.01,
+    "text_density": 0.01,
+    "layout_confidence": 0.01,
+    "contrast": 0.5,
+    # Laplacian variance spans orders of magnitude and is only ever compared
+    # against a floor, so a whole unit is finer than the decision needs.
+    "global_sharpness": 1.0,
+    "sharpness": 1.0,
+    # Detected card corners, in source-image pixels. Sub-pixel differences
+    # are below what the detector can resolve, so one pixel is the unit.
+    "quad": 1.0,
+    # Homography entries are dimensionless and normalized (h22 = 1). A
+    # difference this small cannot change a rectified pixel, and the
+    # transform is fully determined by the quad above in any case.
+    "transform": 1e-6,
 }
 
 #: Non-semantic fields: they describe the run, not the evidence, so they must

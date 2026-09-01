@@ -81,9 +81,17 @@ def _draw_card(spec: CardSpec, rng: np.random.Generator) -> np.ndarray:
     img[:] = spec.border_color
 
     if spec.borderless:
-        img[:] = spec.art_color
-        noise = rng.integers(-25, 25, img.shape, dtype=np.int16)
-        img = np.clip(img.astype(np.int16) + noise, 0, 255).astype(np.uint8)
+        # Edge-to-edge artwork, not a uniform panel: a real borderless card
+        # has picture content running to the trim, which is precisely why no
+        # reliable border reference exists. Rendering it as flat colour plus
+        # fine noise would produce a band uniform enough to measure against,
+        # making the generator disagree with the thing it is modelling.
+        block = 60
+        for y in range(0, spec.card_h, block):
+            for x in range(0, spec.card_w, block):
+                img[y:y + block, x:x + block] = rng.integers(
+                    0, 255, 3, dtype=np.uint8
+                )
     else:
         art_w = spec.card_w - 2 * spec.border_px
         art_h = spec.card_h - 2 * spec.border_px
