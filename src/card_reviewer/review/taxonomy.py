@@ -106,6 +106,11 @@ REASON_CODES: dict[str, UndetectabilityClass] = {
     "OCCLUSION": _C,
     "LOW_RESOLUTION": _C,
     "SEVERE_PERSPECTIVE": _C,
+    # The rectified border could not be told apart from the printed art, so
+    # no border ratio was computed. A straighter, better-lit photograph
+    # generally can be, which is what makes this circumstantial rather than
+    # a property of the card's design.
+    "BORDER_NOT_SEPARABLE_FROM_ART": _C,
     "MISSING_FACE": _C,
     # Metadata-resolvable: identifying the card resolves it. Not a photo
     # defect, so it must never generate a photo request.

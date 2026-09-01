@@ -41,7 +41,10 @@
   preflight_usable: true
   boundary_detected: true
   has_reliable_border: true
-  centering_measurable: true
+  # Was `true` when the ink threshold was taken against the peak column: the
+  # glare spike became the reference and a border ratio was reported that the
+  # image cannot support. Declining is the correct observation here.
+  centering_measurable: false
   detectability:
     bottom_left.corners.whitening: high
     center.surface.scratches: high

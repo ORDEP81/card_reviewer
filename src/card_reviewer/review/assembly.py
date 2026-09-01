@@ -222,16 +222,28 @@ def to_image_evidence(image_outputs: list[ImageStageOutputs]) -> list[ImageEvide
                         ).append(ref)
                     refs.setdefault(f"{category}:{defect_type}", []).append(ref)
 
+        detectability = dict(obs.detectability)
+        reason_codes = dict(obs.reason_codes)
         if cv.centering.get("measurable"):
             refs["centering:border_ratio"] = [
                 r for r in cv.surface.evidence_refs if r.view == "surface_original"
             ]
+        else:
+            # The measurement declined. Without this the heuristic emits no
+            # centering finding and coverage counts centering as assessed —
+            # "could not measure" would silently read as "nothing wrong",
+            # which is the I2 failure exactly.
+            reason = cv.centering.get("reason") or "BORDERLESS_DESIGN"
+            for key in list(detectability):
+                if key[1] == "centering":
+                    detectability[key] = min(detectability[key], Scale.LOW)
+                    reason_codes[key] = reason
 
         out.append(
             ImageEvidence(
                 image_hash=image.image_hash,
-                detectability=obs.detectability,
-                reason_codes=obs.reason_codes,
+                detectability=detectability,
+                reason_codes=reason_codes,
                 sharpness=float(image.preflight.get("global_sharpness", 0.0)),
                 centering=cv.centering,
                 anomalies=cv.anomalies,

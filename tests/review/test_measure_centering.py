@@ -46,7 +46,7 @@ def test_a_borderless_design_reports_not_measurable_with_a_reason(store):
     m = measure_centering(geom(render_png(CardSpec(borderless=True)), store, "h"),
                           store)
     assert m.measurable is False
-    assert m.reason == "BORDERLESS_OR_NO_RELIABLE_REFERENCE"
+    assert m.reason == "BORDERLESS_DESIGN"
 
 
 def test_no_ratio_is_forced_onto_a_borderless_card(store):
@@ -120,4 +120,6 @@ def test_the_ink_threshold_ignores_faint_border_noise():
     variance[:10] = 0.5      # faint noise across the leading border
     variance[90:] = 0.5      # and the trailing one
     variance[30:70] = 40.0   # the printed art
-    assert _ratio(variance) == pytest.approx(50.0, abs=1.0)
+    value, reason = _ratio(variance)
+    assert reason is None
+    assert value == pytest.approx(50.0, abs=1.0)
