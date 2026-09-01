@@ -83,7 +83,15 @@ STAGE_FINGERPRINT_INPUTS: dict[str, tuple[str, ...]] = {
         "supplied_roles",
     ),
     "evidence_assembly": ("roles", "context", "per_image_outputs"),
-    "heuristic": ("assembled_evidence", "applicable_rubric_rules"),
+    # The unevaluable set as well as the applicable one: `evaluate` returns
+    # unevaluable_reasons(scoped), and combine turns that into `ambiguity`,
+    # which decides PASS against REVIEW. `applicable_rubric_rules` contains
+    # applicable rules only, so it cannot stand in for it.
+    "heuristic": (
+        "assembled_evidence",
+        "applicable_rubric_rules",
+        "unevaluable_rubric_rules",
+    ),
     # Reason codes are not decoration: coverage classes each one as
     # structural (does not block the category) or circumstantial (does), so
     # the same detectability with a different reason is a different outcome.

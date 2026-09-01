@@ -129,7 +129,7 @@ def assemble(
         role = roles[image.image_hash].role
         if role is ImageRole.UNKNOWN:
             # Still contributes face-independent work, but never claims a face.
-            out.anomalies.extend(image.anomalies)
+            out.anomalies.extend(_tagged(image))
             continue
 
         faces.add(role)
@@ -152,7 +152,7 @@ def assemble(
                     out.reason_codes_flat.pop(key, None)
 
         out.limitations.extend(image.limitations)
-        out.anomalies.extend(image.anomalies)
+        out.anomalies.extend(_tagged(image))
         for purpose, refs in image.evidence_refs.items():
             out.evidence_refs.setdefault(purpose, []).extend(refs)
 
@@ -294,6 +294,35 @@ def to_image_evidence(image_outputs: list[ImageStageOutputs]) -> list[ImageEvide
             )
         )
     return out
+
+
+def _tagged(image: "ImageEvidence") -> list[dict[str, Any]]:
+    """Anomalies carrying the image they were found in.
+
+    Evidence refs are unioned across images under one key, so without this a
+    finding raised from the FRONT also carries the back's refs — and then it
+    belongs to no single face, which defeats both I1's per-face adequacy and
+    fusion's per-face separation.
+    """
+    return [dict(anomaly, image_hash=image.image_hash)
+            for anomaly in image.anomalies]
+
+
+def face_of_finding(finding: Any, roles: dict | None) -> ImageRole | None:
+    """The face a finding sits on, from the image that established it.
+
+    None when the evidence spans more than one face or no role map was
+    supplied — in which case detectability falls back to the weakest face,
+    which is the safe direction.
+    """
+    if not roles:
+        return None
+    faces = set()
+    for ref in getattr(finding, "evidence", []) or []:
+        role = roles.get(ref.image_hash)
+        faces.add(getattr(role, "role", role))
+    faces.discard(None)
+    return faces.pop() if len(faces) == 1 else None
 
 
 def region_of_finding(finding: Any) -> str | None:

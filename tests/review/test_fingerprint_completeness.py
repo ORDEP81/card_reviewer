@@ -176,3 +176,18 @@ def test_the_rubrics_iteration_order_is_not_part_of_a_coverage_key():
     # ...but a different gap is still a different key.
     assert (fingerprint({"u": unevaluable_fingerprint_content(gaps)})
             != fingerprint({"u": unevaluable_fingerprint_content(gaps[:1])}))
+
+
+def test_the_heuristic_stage_declares_the_unevaluable_rules_it_reads():
+    """`evaluate()` returns `unevaluable_reasons(scoped)`, and `combine`
+    turns that into `ambiguity`, which decides PASS against REVIEW. The
+    heuristic fingerprinted only `applicable_rubric_rules`, which by
+    construction contains applicable rules ONLY — so two runs differing
+    exactly in their unevaluable set shared a cache key.
+
+    Both coverage stages were given this input for the same reason; the
+    heuristic stage, which consumes the same thing, was missed.
+    """
+    from card_reviewer.review.fingerprint import STAGE_FINGERPRINT_INPUTS
+
+    assert "unevaluable_rubric_rules" in STAGE_FINGERPRINT_INPUTS["heuristic"]

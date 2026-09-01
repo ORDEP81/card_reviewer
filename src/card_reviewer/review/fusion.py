@@ -73,11 +73,12 @@ class FusedFinding(BaseModel):
         )
 
 
-def fuse(findings: list[Finding]) -> list[FusedFinding]:
+def fuse(findings: list[Finding],
+         roles: dict | None = None) -> list[FusedFinding]:
     groups: list[list[Finding]] = []
     for finding in findings:
         for group in groups:
-            if _correlates(group[0], finding):
+            if _correlates(group[0], finding, roles):
                 group.append(finding)
                 break
         else:
@@ -85,18 +86,32 @@ def fuse(findings: list[Finding]) -> list[FusedFinding]:
     return [_fuse_group(group) for group in groups]
 
 
-def _correlates(a: Finding, b: Finding) -> bool:
-    """Same defect AND overlapping region.
+def _correlates(a: Finding, b: Finding, roles: dict | None = None) -> bool:
+    """Same defect, same FACE, and overlapping region.
 
     Region is required: two findings about different corners are not one
     defect, and merging them would suppress a real flaw. Without locations
     we cannot establish they are the same thing, so we do not merge.
+
+    Face is required for the same reason one dimension up. Normalized boxes
+    are per card, so the front's top-left corner and the back's occupy the
+    SAME box — without this a card damaged on both faces reported one
+    defect, and "do not double-penalize corroboration" became "do not count
+    the second face".
     """
     if (a.category, a.defect_type) != (b.category, b.defect_type):
         return False
     if a.location is None or b.location is None:
         return False
+    if _face_of(a, roles) != _face_of(b, roles):
+        return False
     return a.location.overlaps(b.location)
+
+
+def _face_of(finding: Finding, roles: dict | None):
+    from .assembly import face_of_finding
+
+    return face_of_finding(finding, roles)
 
 
 def _fuse_group(group: list[Finding]) -> FusedFinding:

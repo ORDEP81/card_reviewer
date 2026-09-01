@@ -50,6 +50,7 @@ def detectability_for(
     category: str,
     defect_type: str,
     region: str | None = None,
+    face: Any | None = None,
 ) -> Scale:
     """Detectability for one (category, defect_type), narrowed by `region`.
 
@@ -60,14 +61,22 @@ def detectability_for(
     of them would let a clean top-left corner vouch for a glared bottom-right
     one, or a sharp front vouch for a blown-out back.
 
+    The same applies to the FACE, and getting that wrong ran the docstring's
+    own example backwards: judging a front finding against the worse of the
+    two faces let a borderless BACK weaken a positively measured miscut on
+    the front. A face is a different piece of card, not another look at the
+    same one.
+
     Callers that know the region must pass it. Callers hold a 4-tuple-keyed
     map; looking it up with a shorter tuple would miss every time and return
     the default, which is how an invariant quietly stops binding. NONE when
     nothing is registered — absent evidence must never read as adequate.
     """
     values = [
-        v for (_face, r, c, d), v in detectability.items()
-        if c == category and d == defect_type and (region is None or r == region)
+        v for (f, r, c, d), v in detectability.items()
+        if c == category and d == defect_type
+        and (region is None or r == region)
+        and (face is None or f == face)
     ]
     return Scale(min(values)) if values else Scale.NONE
 
@@ -96,7 +105,8 @@ def evaluate(assembled: Assembled, scoped_rules: list[ScopedRule]) -> HeuristicR
     for anomaly in assembled.anomalies:
         category = anomaly["category"]
         defect_type = anomaly["defect_type"]
-        refs = _refs_for(assembled, category, defect_type, anomaly.get("region"))
+        refs = _refs_for(assembled, category, defect_type,
+                         anomaly.get("region"), anomaly.get("image_hash"))
         if not refs:
             # A finding with no evidence cannot support anything downstream.
             continue
@@ -134,16 +144,29 @@ def evaluate(assembled: Assembled, scoped_rules: list[ScopedRule]) -> HeuristicR
 
 
 def _refs_for(
-    assembled: Assembled, category: str, defect_type: str, region: str | None
+    assembled: Assembled, category: str, defect_type: str,
+    region: str | None, image_hash: str | None = None,
 ) -> list[EvidenceRef]:
-    """Prefer the refs for the anomaly's own region, so its location is that
-    region rather than the union of every region in the category."""
+    """The refs for the anomaly's own region AND its own image.
+
+    Region so its location is that region rather than the union of every
+    region in the category. Image because refs are unioned across images
+    under one key: without narrowing, a finding raised from the front also
+    carries the back's refs, belongs to no single face, and defeats both
+    I1's per-face adequacy and fusion's per-face separation.
+    """
+    def _own(refs: list[EvidenceRef]) -> list[EvidenceRef]:
+        if not image_hash:
+            return refs
+        mine = [r for r in refs if r.image_hash == image_hash]
+        return mine or refs
+
     key = f"{category}:{defect_type}"
     if region:
         scoped = assembled.evidence_refs.get(f"{key}:{region}")
         if scoped:
-            return scoped
-    return assembled.evidence_refs.get(key) or []
+            return _own(scoped)
+    return _own(assembled.evidence_refs.get(key) or [])
 
 
 def _location_of(

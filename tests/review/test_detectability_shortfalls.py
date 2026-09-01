@@ -110,6 +110,15 @@ def test_a_soft_corner_is_deliberately_not_claimed_to_be_detectable(store):
     result = _observe(_soft_corner(CardSpec()), store)
     assert "BLUR" not in result.reason_codes.values()
 
+    # And say what the consequence IS, rather than only what it is not: the
+    # region reports HIGH with no reason code. That is the "highly
+    # detectable here, and none observed" claim CLAUDE.md forbids, and it is
+    # the actual cost of having no working measure — recorded so the gap is
+    # legible rather than implied by an absence.
+    key = ("top_left", "corners", "rounding")
+    assert result.detectability[key] is Scale.HIGH
+    assert key not in result.reason_codes
+
 
 def test_the_sharp_corners_of_that_card_stay_assessable(store):
     result = _observe(_soft_corner(CardSpec()), store)

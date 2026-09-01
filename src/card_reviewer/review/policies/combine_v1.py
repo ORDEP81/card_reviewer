@@ -207,6 +207,7 @@ def combine(
     scoped_rules: list,
     manifest_index: dict | None = None,
     detectability: dict | None = None,
+    image_roles: dict | None = None,
     required_face_missing: bool = False,
 ) -> CombinedResult:
     """Fuse both producers' findings into one verdict.
@@ -225,7 +226,7 @@ def combine(
     """
     from ..findings import enforce_i3
     from ..fusion import fuse
-    from ..assembly import region_of_finding
+    from ..assembly import face_of_finding, region_of_finding
     from ..heuristic import detectability_for
     from ..relevance import resolve_relevance
     from ..vision.provider import resolve_vision_findings
@@ -238,7 +239,7 @@ def combine(
     # Fuse BEFORE enforcing I3, so the invariant is evaluated over the union
     # of a defect's evidence. Running I3 first would demote a finding one
     # producer saw only under enhancement even when the other saw it plainly.
-    fused = fuse(raw)
+    fused = fuse(raw, image_roles)
     checked = enforce_i3([f.as_finding() for f in fused])
     fused = [
         f.model_copy(update={"state": c.state,
@@ -255,7 +256,8 @@ def combine(
          # location that established the finding, not at the card's best one.
          detectability_for(detectability, rf.finding.category,
                             rf.finding.defect_type,
-                            region_of_finding(rf.finding)))
+                            region_of_finding(rf.finding),
+                            face_of_finding(rf.finding, image_roles)))
         for rf in resolved
     ]
 

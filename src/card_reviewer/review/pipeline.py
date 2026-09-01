@@ -288,9 +288,20 @@ class ReviewPipeline:
                   schema=Assembled, candidate_id=cid)
         assembled = Assembled.model_validate(asm)
 
+        # Computed before the heuristic runs, because the heuristic reads
+        # the unevaluable set too — via unevaluable_reasons, which becomes
+        # `ambiguity` and decides PASS against REVIEW.
+        unevaluable = [
+            UnevaluableRule(rule_id=s_.rule.id, category=s_.rule.category.value,
+                            reason_code=s_.reason)
+            for s_ in scoped if s_.evaluability is RuleEvaluability.UNEVALUABLE
+        ]
+        unevaluable_content = unevaluable_fingerprint_content(unevaluable)
+
         heur, heur_id = run_id(
             "heuristic",
-            {"assembled_evidence": asm, "applicable_rubric_rules": rules},
+            {"assembled_evidence": asm, "applicable_rubric_rules": rules,
+             "unevaluable_rubric_rules": unevaluable_content},
             {"scorer_version": SCORER_VERSION,
              "taxonomy_version": TAXONOMY_VERSION, "weights": {}},
             lambda: evaluate(assembled, scoped).model_dump(),
@@ -299,12 +310,6 @@ class ReviewPipeline:
 
         # Rubric gaps arrive as themselves, never simulated by lowering some
         # defect type's pixel detectability.
-        unevaluable = [
-            UnevaluableRule(rule_id=s.rule.id, category=s.rule.category.value,
-                            reason_code=s.reason)
-            for s in scoped if s.evaluability is RuleEvaluability.UNEVALUABLE
-        ]
-        unevaluable_content = unevaluable_fingerprint_content(unevaluable)
 
         prov, prov_id = run_id(
             "coverage_provisional",
@@ -391,6 +396,11 @@ class ReviewPipeline:
                 heuristic, vision, coverage,
                 card_context_known=context.is_known, scoped_rules=scoped,
                 manifest_index=index, detectability=assembled.detectability,
+                # Which face each finding sits on. Without it a front
+                # finding's I1 adequacy is judged against the worse of the
+                # two faces, and a defect on the front fuses with a
+                # different one at the same corner of the back.
+                image_roles=role_context.roles,
                 required_face_missing=missing_face).model_dump(),
             schema=CombinedResult, candidate_id=cid)
 
