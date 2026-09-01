@@ -69,3 +69,31 @@ def test_the_output_canonicalizes_for_a_fingerprint():
 
     rc = resolve_role_context(_candidate(), _outputs([_FRONT, _BACK]))
     assert canonicalize(rc.model_dump(mode="json"))
+
+
+def test_a_supplied_role_wins_over_ambiguous_layout_features():
+    """Isolates the supplied path.
+
+    The main test gives supplied roles AND matching features, so inference
+    reaches the same answer and dropping `supplied_role` changes nothing.
+    Here the features are deliberately ambiguous — inference alone would
+    return UNKNOWN — so only the supplied value can produce a face.
+    """
+    from card_reviewer.review.enums import Provenance
+
+    ambiguous = {"text_density": 0.30, "has_central_image_region": True,
+                 "layout_confidence": 0.9}
+    rc = resolve_role_context(_candidate(roles=("back", "front")),
+                              _outputs([ambiguous, ambiguous]))
+    assert rc.roles["h0"].role is ImageRole.BACK
+    assert rc.roles["h1"].role is ImageRole.FRONT
+    assert all(r.provenance is Provenance.SUPPLIED for r in rc.roles.values())
+
+
+def test_the_same_ambiguous_features_without_a_supplied_role_are_unknown():
+    """The converse, proving the previous test depends on the supplied path."""
+    ambiguous = {"text_density": 0.30, "has_central_image_region": True,
+                 "layout_confidence": 0.9}
+    rc = resolve_role_context(_candidate(roles=(None, None)),
+                              _outputs([ambiguous, ambiguous]))
+    assert all(r.role is ImageRole.UNKNOWN for r in rc.roles.values())
