@@ -13,7 +13,7 @@ from typing import Any
 import numpy as np
 from pydantic import BaseModel, Field
 
-from ...provenance import EvidenceOrigin, EvidenceRef
+from ...provenance import EvidenceOrigin, EvidenceRef, NormalizedBox
 from ...storage.artifacts import ArtifactStore
 from ..geometry import GeometryResult, load_geometry
 from .corners import confidence_for, severity_for
@@ -117,15 +117,20 @@ def measure_surface(
             cv2.imencode(".png", view)[1].tobytes(),
         )
         result.crops[name] = artifact_id
+        contrast, box = _local_outlier_at(np.asarray(view))
         result.evidence_refs.append(
             EvidenceRef(
                 artifact_id=artifact_id, image_hash=image_hash,
                 origin=EvidenceOrigin.ENHANCED, enhancement=ENHANCEMENTS[name],
                 view=f"surface_{name}",
+                # Where this view's strongest departure sits. Without a
+                # region a surface finding has no location, and fusion
+                # refuses to merge without one — so one scratch seen by both
+                # producers was penalised twice.
+                region=box,
             )
         )
 
-        contrast = _local_outlier(np.asarray(view))
         if contrast > VIEW_THRESHOLDS[name]:
             visible_in_original = original_exceeds
             result.anomalies.append(
@@ -158,6 +163,10 @@ SURFACE_MARGIN_FRACTION = 0.18
 
 
 def _local_outlier(view: "np.ndarray") -> float:
+    return _local_outlier_at(view)[0]
+
+
+def _local_outlier_at(view: "np.ndarray") -> tuple[float, "NormalizedBox | None"]:
     """How far the most unusual tile departs from the card's typical tile.
 
     Tiling and comparing against the median tile is what separates damage
@@ -179,7 +188,7 @@ def _local_outlier(view: "np.ndarray") -> float:
     tile = max(8, int(min(height, width) * TILE_FRACTION))
     rows, cols = height // tile, width // tile
     if rows < 3 or cols < 3:
-        return 0.0
+        return 0.0, None
 
     trimmed = data[: rows * tile, : cols * tile]
     tiles = trimmed.reshape(rows, tile, cols, tile).swapaxes(1, 2)
@@ -187,8 +196,21 @@ def _local_outlier(view: "np.ndarray") -> float:
 
     baseline = float(np.median(texture))
     spread = float(np.median(np.abs(texture - baseline))) * 1.4826
+
+    # WHERE the outlier is, not just how far out it is. Without a location a
+    # surface finding cannot fuse, so one scratch reported by both producers
+    # was charged twice — and surface is 7 of the 14 defect types.
+    row, col = np.unravel_index(int(np.argmax(texture)), texture.shape)
+    height_total = float(rows * tile + 2 * margin_y)
+    width_total = float(cols * tile + 2 * margin_x)
+    box = NormalizedBox(
+        x0=(margin_x + col * tile) / width_total,
+        y0=(margin_y + row * tile) / height_total,
+        x1=min(1.0, (margin_x + (col + 1) * tile) / width_total),
+        y1=min(1.0, (margin_y + (row + 1) * tile) / height_total),
+    )
     if spread <= 1e-6:
         # A perfectly uniform card: any tile that differs at all is the
         # outlier, and there is no scale to express it against.
-        return float(texture.max() - baseline)
-    return float((texture.max() - baseline) / spread)
+        return float(texture.max() - baseline), box
+    return float((texture.max() - baseline) / spread), box
