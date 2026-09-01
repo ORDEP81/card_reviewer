@@ -1,7 +1,15 @@
 """Human-readable rendering of a CardReview (spec §16).
 
 Limitations are always shown, never elided — non-negotiable rule 3. The rank
-score is labelled as a ranking score and never as a probability.
+score is labelled as a ranking score and never as a probability, and the
+qualitative PSA-10 view is not labelled a "chance" either: it is an enum, and
+"chance" is the probability language the spec asks to avoid.
+
+Findings are rendered in their ADJUDICATED state — after I3 and fusion — with
+the demotion reason when there is one. Showing the raw producer state made
+the report assert `observed` for a finding the engine itself had refused to
+treat as observed. The raw findings remain recoverable for calibration; this
+governs what is displayed.
 """
 
 from __future__ import annotations
@@ -16,7 +24,7 @@ def render(review: CardReview) -> str:
         f"Candidate      {review.candidate_id}",
         f"Title          {review.title or '(untitled)'}",
         f"Verdict        {review.verdict}",
-        f"PSA 10 chance  {review.psa10_candidate}",
+        f"PSA 10 view    {review.psa10_candidate}",
         f"Rank score     {_score(review)}  (ranking score, not a probability)",
         f"Rough grade    {review.estimated_psa_grade or 'not estimable'}",
         f"Confidence     {review.review_confidence}  (in the review, not the card)",
@@ -27,10 +35,18 @@ def render(review: CardReview) -> str:
         lines.append("")
         lines.append("Findings")
         for finding in review.defects_found:
-            lines.append(
+            line = (
                 f"  [{finding['state']:14}] {finding['category']}/"
                 f"{finding['defect_type']}  ({finding['producer']})"
             )
+            # The state shown is the ADJUDICATED one, so when it was demoted
+            # the reader is told why. I3 exists to stop enhancement-only
+            # evidence establishing a defect; a report that shows the demoted
+            # state without the reason hides the invariant doing its job.
+            reason = finding.get("demotion_reason")
+            if reason:
+                line += f"  — demoted: {reason}"
+            lines.append(line)
 
     # Always rendered, even when empty: silence would read as "nothing was
     # limited", which is a claim the photographs may not support.

@@ -476,7 +476,16 @@ class ReviewPipeline:
             coverage=coverage.outcome.value,
             coverage_detail=coverage.assessed,
             roles_and_context=role_context.model_dump(mode="json"),
-            defects_found=[f.model_dump(mode="json") for f in combined.findings],
+            # The ADJUDICATED view — after fusion and I3 — because this is
+            # what the report renders and what the verdict was actually
+            # decided on. Showing the raw producer state made the report
+            # assert `observed` for a finding the engine had demoted.
+            defects_found=[f.as_finding().model_dump(mode="json")
+                           for f in combined.fused],
+            # ...and the raw producer findings stay recoverable beside it.
+            # Calibrating OpenCV against Claude against the PSA outcome needs
+            # both sides intact, so fusion must never be the only record.
+            raw_findings=[f.model_dump(mode="json") for f in combined.findings],
             limitations=limitations,
             recommended_additional_photos=coverage.recommended_additional_photos,
             card_identification_request=coverage.card_identification_request,

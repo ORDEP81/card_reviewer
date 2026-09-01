@@ -85,7 +85,13 @@ class CardReview(BaseModel):
     image_quality: dict[str, Any] = Field(default_factory=dict)
     roles_and_context: dict[str, Any] = Field(default_factory=dict)
 
+    #: Findings as adjudicated: fused, then I3-checked. What the report
+    #: shows and the verdict rests on.
     defects_found: list[dict[str, Any]] = Field(default_factory=list)
+    #: The producers' own findings, before fusion or demotion. Preserved
+    #: because calibration compares the layers against each other and against
+    #: the eventual PSA result, which fusion alone cannot support.
+    raw_findings: list[dict[str, Any]] = Field(default_factory=list)
     limitations: list[dict[str, Any]] = Field(default_factory=list)
     recommended_additional_photos: list[str] = Field(default_factory=list)
     card_identification_request: bool = False
