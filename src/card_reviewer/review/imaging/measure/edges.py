@@ -9,7 +9,10 @@ from pydantic import BaseModel, Field
 from ...provenance import EvidenceOrigin, EvidenceRef, NormalizedBox
 from ...storage.artifacts import ArtifactStore
 from ..geometry import GeometryResult, load_geometry
-from .corners import ANOMALY_CONTRAST, confidence_for, severity_for
+from .corners import (
+    ANOMALY_CONTRAST, border_reference, confidence_for, departure_from,
+    severity_for,
+)
 
 __all__ = ["EdgeResult", "measure_edges"]
 
@@ -31,9 +34,13 @@ def measure_edges(
     if not geometry.usable:
         return result
 
-    img = load_geometry(geometry, store).normalized
+    artifacts = load_geometry(geometry, store)
+    img = artifacts.normalized
+    border_mask = artifacts.border_mask
     height, width = img.shape[:2]
     band_y, band_x = int(height * EDGE_FRACTION), int(width * EDGE_FRACTION)
+    reference = border_reference(
+        img, max(2, int(width * 0.045)), max(2, int(height * 0.045)), border_mask)
 
     slices = {
         "top": (slice(0, band_y), slice(0, width)),
@@ -60,7 +67,11 @@ def measure_edges(
             )
         )
 
-        contrast = float(patch.mean(axis=2).std())
+        # Against this card's own border, not the strip's internal spread.
+        # An edge strip crosses the border/artwork boundary on every bordered
+        # card, so its standard deviation described the design rather than
+        # the condition and fired on clean cards.
+        contrast = departure_from(img, (ys, xs), reference, border_mask)
         if contrast > ANOMALY_CONTRAST:
             result.anomalies.append(
                 {

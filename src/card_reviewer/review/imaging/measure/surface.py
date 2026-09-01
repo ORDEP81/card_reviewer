@@ -63,7 +63,11 @@ def measure_surface(
             origin=EvidenceOrigin.NORMALIZED, view="surface_original",
         )
     )
-    original_contrast = float(gray.std())
+    # NOT gray.std(). The standard deviation of a printed card measures how
+    # busy its artwork is, so every card cleared the threshold and surface
+    # candidates were raised on all of them. A scratch is a LOCAL departure
+    # from the surrounding surface, so that is what is measured.
+    original_contrast = _local_outlier(gray)
 
     views = {
         "clahe": cv2.createCLAHE(CLAHE_CLIP, (CLAHE_GRID, CLAHE_GRID)).apply(gray),
@@ -88,7 +92,7 @@ def measure_surface(
             )
         )
 
-        contrast = float(np.asarray(view).std())
+        contrast = _local_outlier(np.asarray(view))
         if contrast > ANOMALY_CONTRAST:
             visible_in_original = original_contrast > ANOMALY_CONTRAST
             result.anomalies.append(
@@ -106,3 +110,52 @@ def measure_surface(
                 }
             )
     return result
+
+
+#: Side of the square tile the surface is read in, as a fraction of the card.
+#: Small enough that a scratch dominates its own tile, large enough to carry
+#: texture rather than noise.
+TILE_FRACTION = 0.08
+
+#: Margin excluded from the surface reading, as a fraction of the card. The
+#: border/artwork boundary is the strongest texture edge on a plain card and
+#: it is DESIGN, not damage — left in, it is always the outlier. Edge and
+#: corner condition is measured by their own producers, against the border.
+SURFACE_MARGIN_FRACTION = 0.18
+
+
+def _local_outlier(view: "np.ndarray") -> float:
+    """How far the most unusual tile departs from the card's typical tile.
+
+    Tiling and comparing against the median tile is what separates damage
+    from design: printed artwork raises EVERY tile's texture together and so
+    moves the median with it, while a scratch, crease or print line raises
+    one tile above its neighbours. A global standard deviation cannot tell
+    those apart — it reports a busy card and a damaged one identically.
+    """
+    import numpy as np
+
+    data = np.asarray(view, dtype=float)
+    if data.ndim > 2:
+        data = data.mean(axis=2)
+    margin_y = int(data.shape[0] * SURFACE_MARGIN_FRACTION)
+    margin_x = int(data.shape[1] * SURFACE_MARGIN_FRACTION)
+    if margin_y and margin_x:
+        data = data[margin_y:-margin_y, margin_x:-margin_x]
+    height, width = data.shape
+    tile = max(8, int(min(height, width) * TILE_FRACTION))
+    rows, cols = height // tile, width // tile
+    if rows < 3 or cols < 3:
+        return 0.0
+
+    trimmed = data[: rows * tile, : cols * tile]
+    tiles = trimmed.reshape(rows, tile, cols, tile).swapaxes(1, 2)
+    texture = tiles.reshape(rows, cols, -1).std(axis=2)
+
+    baseline = float(np.median(texture))
+    spread = float(np.median(np.abs(texture - baseline))) * 1.4826
+    if spread <= 1e-6:
+        # A perfectly uniform card: any tile that differs at all is the
+        # outlier, and there is no scale to express it against.
+        return float(texture.max() - baseline)
+    return float((texture.max() - baseline) / spread)
