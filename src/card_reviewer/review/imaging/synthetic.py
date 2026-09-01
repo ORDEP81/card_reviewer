@@ -116,8 +116,11 @@ def _draw_card(spec: CardSpec, rng: np.random.Generator) -> np.ndarray:
         row, col = _CORNERS[region]
         ys = slice(0, 120) if row == 0 else slice(spec.card_h - 120, spec.card_h)
         xs = slice(0, 120) if col == 0 else slice(spec.card_w - 120, spec.card_w)
+        # Real glare is a specular highlight: it saturates rather than
+        # merely brightening. A +90 offset leaves a dark border at 110,
+        # which no clipping test would ever call glare.
         img[ys, xs] = np.clip(
-            img[ys, xs].astype(np.int16) + 90, 0, 255
+            img[ys, xs].astype(np.int16) * 0.05 + 245, 0, 255
         ).astype(np.uint8)
 
     return img

@@ -40,7 +40,9 @@ MIN_BOUNDARY_CONFIDENCE = 0.5
 #: produces exactly that, and without this guard it scored full confidence.
 MAX_AREA_RATIO = 0.92
 BORDER_BAND_PX = 24
-#: A border band this uniform can serve as a centering reference.
+#: A border band this uniform can serve as a centering reference. Measured
+#: robustly (see _segment_border) so one glared corner does not disqualify
+#: the whole reference.
 RELIABLE_BORDER_STD = 30.0
 
 
@@ -210,4 +212,14 @@ def _segment_border(normalized: np.ndarray) -> tuple[np.ndarray, bool]:
     mask[-BORDER_BAND_PX:, :] = 255
     mask[:, :BORDER_BAND_PX] = 255
     mask[:, -BORDER_BAND_PX:] = 255
-    return mask, bool(gray[mask > 0].std() < RELIABLE_BORDER_STD)
+
+    # Robust spread, not the plain standard deviation. A specular highlight
+    # on one corner is a small minority of the band but inflates the plain
+    # std enough to fail the threshold — and losing the centering reference
+    # to a single glare patch is exactly the over-conservatism that costs
+    # recall. Median absolute deviation ignores that minority; a genuinely
+    # varied borderless band still fails.
+    values = gray[mask > 0]
+    median = np.median(values)
+    robust_std = 1.4826 * float(np.median(np.abs(values - median)))
+    return mask, bool(robust_std < RELIABLE_BORDER_STD)
