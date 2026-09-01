@@ -136,13 +136,37 @@ def test_no_grading_logic_lives_in_the_cli():
         assert forbidden not in source
 
 
-def test_provider_smoke_is_the_only_command_that_reaches_the_api():
+def test_provider_smoke_is_the_only_command_that_reaches_the_api_unasked():
+    """Renamed, because the old name claimed an exclusivity the assertion
+    never tested and the module's own docstring denies: `screen` in SMART or
+    DEEP reaches the API too. What is actually true — and worth guarding —
+    is that provider-smoke is the only command that goes to the API without
+    being asked for a mode that needs it.
+    """
     import inspect
 
     import card_reviewer.review.cli as mod
 
     source = inspect.getsource(mod)
     assert "provider_smoke" in source or "provider-smoke" in source
+
+    from typer.testing import CliRunner
+
+    # Every other command, with no mode argument, must not construct a
+    # provider at all.
+    calls = []
+    original = mod.build_provider
+
+    def recording(*args, **kwargs):
+        calls.append(args)
+        return original(*args, **kwargs)
+
+    mod.build_provider = recording
+    try:
+        CliRunner().invoke(mod.app, ["--help"])
+    finally:
+        mod.build_provider = original
+    assert calls == []
 
 
 def _review(**kw):

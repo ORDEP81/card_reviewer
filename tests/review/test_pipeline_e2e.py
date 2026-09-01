@@ -221,8 +221,21 @@ def test_cv_and_vision_assessments_stay_separately_recoverable(rig, tmp_path):
     pipeline, store, _ = rig
     resolved = _candidate(tmp_path, store, [CardSpec(), CardSpec(text_heavy=True)])
     review = pipeline.review(resolved, Mode.DEEP, _provider())
+
+    # Not merely "is not None": replacing the payload with {} passed that,
+    # so the assertion held nothing. The CV side must carry real
+    # measurements, and the vision side must be DISTINGUISHABLE from a run
+    # where vision never happened — calibration compares the layers against
+    # each other, which needs to know which layers spoke.
     assert review.cv_assessment
+    assert any(measurements for measurements in review.cv_assessment.values())
     assert review.vision_assessment is not None
+    assert "fused" in review.vision_assessment
+
+    off = pipeline.review(resolved, Mode.OFF)
+    assert off.vision_assessment is None, (
+        "a run without vision is indistinguishable from one with it")
+    assert off.cv_assessment, "the CV side vanished when vision did"
 
 
 def test_a_crash_after_the_provider_response_does_not_rebill(rig, tmp_path):
