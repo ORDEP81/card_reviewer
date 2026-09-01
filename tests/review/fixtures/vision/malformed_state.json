@@ -1,0 +1,23 @@
+{
+  "findings": [
+    {
+      "defect_type": "print_lines",
+      "category": "surface",
+      "state": "definitely_bad",
+      "confidence": 0.6,
+      "psa10_relevant": true,
+      "evidence_artifact_ids": [
+        "__ARTIFACT__"
+      ],
+      "explanation": "faint diagonal line"
+    }
+  ],
+  "category_assessability": {
+    "centering": true,
+    "corners": true,
+    "edges": true,
+    "surface": true
+  },
+  "gem_view": "possible_psa10_disqualifier",
+  "disagreements": []
+}
