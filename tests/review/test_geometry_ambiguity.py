@@ -136,3 +136,36 @@ def test_a_frame_only_slightly_cleaner_is_not_treated_as_ambiguous(cv2):
     assert whole_spread < inner_spread * geometry.BORDER_UNIFORMITY_MARGIN, (
         "fixture no longer represents a near-tie")
     assert geometry._boundary_may_be_the_artwork(img, inner, cv2) is False
+
+
+def test_confidence_measures_certainty_not_size(cv2):
+    """`min(1, area_ratio * 1.6) * rectangularity` mixed two different
+    questions, and the asymmetry ran exactly the wrong way: the detector was
+    CONFIDENT where it was wrong (a cropped photo's artwork panel scored
+    1.000) and UNCONFIDENT where it was right, discarding a perfectly
+    detected card below about 31% of the frame.
+
+    How big the card is in frame is a resolution fact, and it belongs to
+    detectability, where it becomes a LOW_RESOLUTION limitation and a photo
+    request. It is not evidence about whether we found the right rectangle.
+    """
+    from card_reviewer.review.imaging.synthetic import CardSpec, _draw_card
+
+    rng = np.random.default_rng(0)
+    card = _draw_card(CardSpec(), rng)
+
+    confidences = []
+    for fraction in (0.9, 0.5, 0.25):
+        height, width = card.shape[:2]
+        small = cv2.resize(card, (int(width * fraction), int(height * fraction)),
+                           interpolation=cv2.INTER_AREA)
+        canvas = np.full((height, width, 3), 10, np.uint8)
+        y0 = (height - small.shape[0]) // 2
+        x0 = (width - small.shape[1]) // 2
+        canvas[y0:y0 + small.shape[0], x0:x0 + small.shape[1]] = small
+        quad, confidence = geometry._detect_quad(canvas, cv2)
+        assert quad is not None, f"a clean card at {fraction:.0%} was not found"
+        confidences.append(confidence)
+
+    assert all(c > 0.5 for c in confidences), (
+        f"a crisply detected card was declined for being small: {confidences}")

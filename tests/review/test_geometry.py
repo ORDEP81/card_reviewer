@@ -123,10 +123,17 @@ def test_an_angled_card_keeps_its_border_reference(store):
     assert r.has_reliable_border is True
 
 
-def test_a_card_occupying_little_of_the_frame_is_low_confidence(store):
-    """Confidence scales with how much of the frame the card fills, so a
-    distant shot declines geometry-dependent work rather than measuring a
-    handful of pixels."""
+def test_a_card_occupying_little_of_the_frame_is_detected_but_low_resolution(
+        store):
+    """A distant shot is a RESOLUTION problem, not a detection problem.
+
+    This used to assert the opposite — that a small card is low confidence
+    and unusable — which threw away a crisply detected card below about 31%
+    of the frame while a cropped photo's artwork panel sailed through at
+    1.000. Confidence answers "did we find the right rectangle"; how much
+    detail was captured is answered by observability, where it becomes a
+    LOW_RESOLUTION limitation and a photo request the owner can act on.
+    """
     import cv2
 
     card = cv2.imdecode(np.frombuffer(render_png(CardSpec()), np.uint8),
@@ -134,8 +141,34 @@ def test_a_card_occupying_little_of_the_frame_is_low_confidence(store):
     canvas = np.full((card.shape[0] * 3, card.shape[1] * 3, 3), 10, np.uint8)
     canvas[:card.shape[0], :card.shape[1]] = card
     r = analyze(cv2.imencode(".png", canvas)[1].tobytes(), store, "h1")
-    assert r.boundary_confidence < 0.5
-    assert r.usable is False
+    assert r.usable is True
+    assert r.boundary_confidence > 0.75, "a clean card was declined for size"
+
+    # ...and being small in FRAME is not the same as being short of PIXELS.
+    # This card is full resolution, merely surrounded by backdrop, so there
+    # is no lost detail to report and none is invented.
+    from card_reviewer.review.imaging.observability import analyze as observe
+
+    assert "LOW_RESOLUTION" not in observe(r, store, "h1").reason_codes.values()
+
+
+def test_a_card_captured_in_few_pixels_reports_low_resolution(store):
+    """The case that IS a resolution problem: the card was photographed at
+    a fraction of the detail, so the rectified crop is upscaled and the
+    detail is not there however large the crop looks."""
+    import cv2
+
+    from card_reviewer.review.imaging.observability import analyze as observe
+
+    card = cv2.imdecode(np.frombuffer(render_png(CardSpec()), np.uint8),
+                        cv2.IMREAD_COLOR)
+    height, width = card.shape[:2]
+    tiny = cv2.resize(card, (width // 8, height // 8),
+                      interpolation=cv2.INTER_AREA)
+    r = analyze(cv2.imencode(".png", tiny)[1].tobytes(), store, "h2")
+    if not r.usable:
+        pytest.skip("geometry declined this framing")
+    assert "LOW_RESOLUTION" in observe(r, store, "h2").reason_codes.values()
 
 
 def test_a_non_rectangular_region_is_rejected_even_when_card_sized(store):

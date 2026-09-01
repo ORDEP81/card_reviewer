@@ -34,7 +34,11 @@ __all__ = [
 ]
 
 NORM_W, NORM_H = 600, 840
-MIN_BOUNDARY_CONFIDENCE = 0.5
+#: Confidence is now rectangularity alone, so the floor is a statement about
+#: SHAPE. Measured: a real card comes back at 0.999 whatever fraction of the
+#: frame it occupies, while a cross-shaped blob reaches only 0.63. 0.75 sits
+#: in that gap with room on both sides.
+MIN_BOUNDARY_CONFIDENCE = 0.75
 #: A photographed card always sits against something. A contour covering
 #: essentially the whole frame is the frame, not a card — random noise
 #: produces exactly that, and without this guard it scored full confidence.
@@ -165,8 +169,11 @@ def _detect_quad(img: np.ndarray, cv2) -> tuple[np.ndarray | None, float]:
     reference. Separating foreground from background by intensity is the
     property a photographed card actually has, whatever is printed on it.
 
-    Confidence combines how much of the frame the card occupies with how
-    rectangular the region is, so a ragged blob scores low even when large.
+    Confidence is how RECTANGULAR the region is, so a ragged blob scores low
+    however large it is. It deliberately says nothing about how much of the
+    frame the card fills: that is a resolution question, answered by
+    observability as effective resolution, and conflating the two made the
+    detector confident where it was wrong and unconfident where it was right.
     """
     mask = _foreground_mask(img, cv2)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -187,7 +194,14 @@ def _detect_quad(img: np.ndarray, cv2) -> tuple[np.ndarray | None, float]:
     if rect_area <= 0:
         return None, 0.0
     rectangularity = float(min(1.0, area / rect_area))
-    confidence = float(min(1.0, max(0.0, area_ratio * 1.6)) * rectangularity)
+    # Certainty about the SHAPE, not about the size. Multiplying in
+    # area_ratio mixed two different questions and got the asymmetry exactly
+    # backwards: a cropped photo's artwork panel scored 1.000 while a
+    # crisply detected card below ~31% of the frame was discarded as
+    # INSUFFICIENT_IMAGES. How large the card sits in frame is a RESOLUTION
+    # fact; it belongs to detectability, where it becomes a LOW_RESOLUTION
+    # limitation and a photo request the owner can act on.
+    confidence = rectangularity
 
     # Prefer the contour's own four corners. A photographed card is usually a
     # trapezoid, not a rectangle, and minAreaRect wraps a trapezoid in a

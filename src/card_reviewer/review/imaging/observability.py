@@ -55,6 +55,41 @@ GLARE_FRACTION = 0.15
 #: sits at 0.48 unglared, and a flashed corner reaches 0.79.
 GLARE_EXCESS_FRACTION = 0.15
 
+#: Fraction of a region that must be under an obstruction before the region
+#: stops being assessable. A thumb, a finger, a holder's clip: opaque, and no
+#: amount of interpretation recovers what is behind it. Measured over 8 seeds
+#: x 3 border colours, clean regions reach 0.014 and an obstructed corner
+#: starts at 0.189 — a clean separation, so the threshold sits between them.
+OCCLUSION_FRACTION = 0.10
+
+# There is deliberately NO region-level blur test here.
+#
+# Whole-image softness is preflight's job and it does the job: a 31-pixel
+# blur takes global sharpness to 0.7 against a floor of 25. What preflight
+# cannot see is a card sharp overall and soft in one place, and two measures
+# were tried for it. Both fail on the same rock — a region can be smooth
+# BY DESIGN, and neither measure separates that from out of focus:
+#
+#     Laplacian variance vs sibling regions
+#         clean minimum ratio 0.137, genuinely soft corner 0.489
+#         (the clean card looks SOFTER than the blurred one)
+#     Laplacian variance normalised by the region's own contrast
+#         clean minimum 0.0475, genuinely soft corner up to 0.0937
+#
+# Either threshold would report BLUR on clean cards and ask their owners to
+# re-photograph something already in focus, or sit low enough to never fire.
+# Occlusion and resolution are kept because they DO separate: occlusion by a
+# factor of 13, resolution because it is an exact pixel count rather than an
+# estimate.
+
+#: Minimum ORIGINAL pixels across a region's short side. Effective
+#: resolution, not rectified size: the rectified card is always NORM_W x
+#: NORM_H, so measuring the normalized patch asks a constant and answers
+#: itself. What matters is how many photographed pixels back that patch —
+#: a card occupying a small part of a low-resolution photo is upscaled into
+#: the same rectangle, and the detail is not there however large the crop.
+REGION_MIN_PX = 24
+
 
 class ObservabilityResult(BaseModel):
     """Cache-safe: JSON-serializable scalars plus artifact ids.
@@ -123,6 +158,10 @@ def analyze(
     # for a better photograph of something no photograph can change.
     border_is_white = _border_is_white(gray, artifacts.border_mask)
 
+    # Original pixels per rectified pixel. Below 1.0 the warp upscaled, and
+    # a region's apparent size overstates the detail actually captured.
+    scale = _capture_scale(geometry, gray.shape)
+
     det: dict[Key, Scale] = {}
     reasons: dict[Key, str] = {}
     for category in CATEGORIES:
@@ -144,6 +183,11 @@ def analyze(
             clipped = fractions[region] > GLARE_FRACTION
             stands_out = fractions[region] > baseline + GLARE_EXCESS_FRACTION
             bright = float(patch.mean()) >= WHITE_BORDER_LUMA
+            # Everything that used to fall through to HIGH. The occlusion
+            # mask was already being computed here and then thrown away.
+            occluded = float((patch <= OCCLUSION_LUMA).mean()) > (
+                OCCLUSION_FRACTION)
+            too_small = min(patch.shape[:2]) * scale < REGION_MIN_PX
             for defect_type in defect_types_for(category):
                 key = (region, category, defect_type)
                 if defect_type == "whitening" and (bright or clipped) and (
@@ -159,6 +203,10 @@ def analyze(
                     det[key], reasons[key] = Scale.LOW, "GLARE"
                 elif category == "centering" and not geometry.has_reliable_border:
                     det[key], reasons[key] = Scale.LOW, "BORDERLESS_DESIGN"
+                elif occluded:
+                    det[key], reasons[key] = Scale.LOW, "OCCLUSION"
+                elif too_small:
+                    det[key], reasons[key] = Scale.LOW, "LOW_RESOLUTION"
                 else:
                     det[key] = Scale.HIGH
 
@@ -227,3 +275,22 @@ def _suitability(det: dict[Key, Scale]) -> dict[str, Scale]:
         values = [v for (_r, c, _d), v in det.items() if c == category]
         out[category] = Scale(min(values)) if values else Scale.NONE
     return out
+
+
+def _capture_scale(geometry: "GeometryResult", normalized_shape) -> float:
+    """How many photographed pixels back one rectified pixel.
+
+    Taken from the detected quad's area against the rectified area, so a card
+    photographed small — or a thumbnail padded up to a usable size — reports
+    the resolution it actually has rather than the resolution it was
+    stretched to.
+    """
+    quad = np.asarray(geometry.quad or [], dtype=float)
+    if quad.shape != (4, 2):
+        return 1.0
+    x, y = quad[:, 0], quad[:, 1]
+    area = 0.5 * abs(float(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1))))
+    rectified = float(normalized_shape[0] * normalized_shape[1])
+    if rectified <= 0 or area <= 0:
+        return 1.0
+    return (area / rectified) ** 0.5
