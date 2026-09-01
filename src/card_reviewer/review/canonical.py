@@ -81,6 +81,8 @@ PRECISION_MAP: dict[str, float] = {
     "sharpness": 1.0,
     # Detected card corners, in source-image pixels. Sub-pixel differences
     # are below what the detector can resolve, so one pixel is the unit.
+    # A declared precision figure is itself a value in a cached output.
+    "precision_pp": 0.1,
     "quad": 1.0,
     # Homography entries are dimensionless and normalized (h22 = 1). A
     # difference this small cannot change a rectified pixel, and the

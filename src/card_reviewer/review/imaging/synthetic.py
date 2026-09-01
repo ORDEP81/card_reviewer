@@ -14,7 +14,14 @@ from __future__ import annotations
 import numpy as np
 from pydantic import BaseModel, Field
 
-__all__ = ["CardSpec", "card_bounds", "card_region", "render", "render_png"]
+__all__ = [
+    "CardSpec",
+    "achieved_centering",
+    "card_bounds",
+    "card_region",
+    "render",
+    "render_png",
+]
 
 #: Every render sits on a margin of background so the card has a findable
 #: boundary. A render that fills the frame gives geometry nothing to detect,
@@ -46,6 +53,25 @@ class CardSpec(BaseModel):
     glare_regions: list[str] = Field(default_factory=list)
     background: tuple[int, int, int] = (10, 10, 10)
     seed: int = 0
+
+
+def achieved_centering(spec: CardSpec) -> tuple[float, float]:
+    """The centering actually rendered, as (horizontal, vertical).
+
+    Borders land on integer pixels, so a requested 62.0 may render as 62.5.
+    The rendered value is the ground truth a measurement should be compared
+    against — comparing against the request would charge the measurement for
+    the generator's rounding.
+    """
+    art_w = spec.card_w - 2 * spec.border_px
+    art_h = spec.card_h - 2 * spec.border_px
+    slack_w, slack_h = spec.card_w - art_w, spec.card_h - art_h
+    left = int(round(slack_w * spec.h_centering / 100.0))
+    top = int(round(slack_h * spec.v_centering / 100.0))
+    return (
+        100.0 * left / slack_w if slack_w else 50.0,
+        100.0 * top / slack_h if slack_h else 50.0,
+    )
 
 
 def card_bounds(spec: CardSpec) -> tuple[int, int, int, int]:
