@@ -5,6 +5,9 @@ mistake in opposite directions: a value that reaches a stage but not its key.
 """
 
 import pytest
+from detectability_helpers import (
+    detectability_map, regions_for, set_every_region,
+)
 
 from card_reviewer.review.enums import Coverage, Scale
 from card_reviewer.review.fingerprint import fingerprint
@@ -35,7 +38,7 @@ def test_a_conflict_is_quantized_at_centerings_declared_precision():
 
 
 def _detectability(value=Scale.HIGH):
-    return {(f, c, d): value for f in REQUIRED_FACES
+    return {(f, "top_left", c, d): value for f in REQUIRED_FACES
             for c in CATEGORIES for d in defect_types_for(c)}
 
 
@@ -47,26 +50,28 @@ def test_reason_codes_change_coverage_so_they_must_change_its_key():
     detectability = _detectability()
     for face in REQUIRED_FACES:
         for category in ("corners", "edges"):
-            detectability[(face, category, "whitening")] = Scale.LOW
+            set_every_region(detectability, face, category, "whitening", Scale.LOW)
 
-    structural = {(f, c, "whitening"): "WHITE_BORDER"
-                  for f in REQUIRED_FACES for c in ("corners", "edges")}
-    circumstantial = {(f, c, "whitening"): "GLARE"
-                      for f in REQUIRED_FACES for c in ("corners", "edges")}
+    structural, circumstantial = {}, {}
+    for face in REQUIRED_FACES:
+        for category in ("corners", "edges"):
+            for region in regions_for(category):
+                structural[(face, region, category, "whitening")] = "WHITE_BORDER"
+                circumstantial[(face, region, category, "whitening")] = "GLARE"
 
     assert evaluate_coverage(detectability, structural, {},
                              REQUIRED_FACES).outcome is Coverage.SUFFICIENT
     assert evaluate_coverage(detectability, circumstantial, {},
                              REQUIRED_FACES).outcome is not Coverage.SUFFICIENT
 
-    flat = {f"{f.value}|{c}|{d}": v.label
-            for (f, c, d), v in detectability.items()}
+    flat = {f"{f.value}|{r}|{c}|{d}": v.label
+            for (f, r, c, d), v in detectability.items()}
 
     def key(reasons):
         return fingerprint({
             "assembled_detectability": flat,
-            "assembled_reason_codes": {f"{f.value}|{c}|{d}": code
-                                       for (f, c, d), code in reasons.items()},
+            "assembled_reason_codes": {f"{f.value}|{r}|{c}|{d}": code
+                                       for (f, r, c, d), code in reasons.items()},
             "applicable_rubric_rules": [],
         })
 

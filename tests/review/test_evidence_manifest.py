@@ -21,7 +21,7 @@ def _refs(n, origin=EvidenceOrigin.NORMALIZED):
 def _assembled(refs, **kw):
     base = dict(evidence_refs={"corners:rounding": refs},
                 detectability_flat={
-                    Assembled.key(ImageRole.FRONT, "corners", "rounding"):
+                    Assembled.key(ImageRole.FRONT, "top_left", "corners", "rounding"):
                     Scale.HIGH.label},
                 reason_codes_flat={},
                 centering={"measurable": True, "horizontal": 52.0},
@@ -137,7 +137,7 @@ def test_the_manifest_carries_every_field_the_design_promised(rubric_rules):
     a = _assembled(
         _refs(3),
         reason_codes_flat={
-            Assembled.key(ImageRole.FRONT, "corners", "whitening"):
+            Assembled.key(ImageRole.FRONT, "top_left", "corners", "whitening"):
             "WHITE_BORDER"},
         conflicts=[{"field": "centering.horizontal", "values": [52.0, 61.0]}],
         limitations=["front is glared"],
@@ -186,3 +186,30 @@ def test_the_built_manifest_serializes_for_the_cache():
     revived = BuiltManifest.model_validate(json.loads(built.model_dump_json()))
     assert revived.payload == built.payload
     assert set(revived.index) == set(built.index)
+
+
+def test_detectability_keys_are_stable_strings_not_python_reprs():
+    """The manifest payload IS the vision input fingerprint.
+
+    Formatting the tuple key gave "(<ImageRole.FRONT: 'front'>, 'corners',
+    'whitening')" — a CPython enum repr. That is not a declared part of this
+    system's cache identity and has changed between releases, so a Python
+    upgrade would silently re-bill every card. It is also unreadable for the
+    provider that has to act on it.
+    """
+    from card_reviewer.review.assembly import Assembled
+    from card_reviewer.review.enums import Mode, Scale
+    from card_reviewer.review.roles import ImageRole
+
+    key = Assembled.key(ImageRole.FRONT, "top_left", "corners", "whitening")
+    assembled = Assembled(detectability_flat={key: Scale.LOW.label},
+                          reason_codes_flat={key: "GLARE"})
+    payload = build_manifest(assembled, Mode.SMART, []).payload
+
+    assert set(payload["detectability"]) == {"front|top_left|corners|whitening"}
+    assert set(payload["detectability_reasons"]) == {
+        "front|top_left|corners|whitening"}
+    for section in ("detectability", "detectability_reasons"):
+        for k in payload[section]:
+            assert "<" not in k and "ImageRole" not in k, (
+                f"{section} key {k!r} carries a Python repr")

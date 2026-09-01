@@ -27,3 +27,4 @@ def rubric_scoped(rubric):
     context = CardContext(canonical_card_types=["chrome"],
                           provenance=Provenance.SUPPLIED, confidence=1.0)
     return scope_rules(rubric.for_card(["chrome"], None), context)
+

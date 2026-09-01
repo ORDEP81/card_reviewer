@@ -40,24 +40,30 @@ class Assembled(BaseModel):
     version: str = ASSEMBLY_VERSION
 
     @staticmethod
-    def key(role: ImageRole, category: str, defect_type: str) -> str:
-        return f"{role.value}|{category}|{defect_type}"
+    def key(role: ImageRole, region: str, category: str, defect_type: str) -> str:
+        """The region is part of the identity, not a detail to average away.
+
+        I1's adequacy prong is defined at the finding's own location, and a
+        limitation that loses its region can never become a photo request
+        for the corner that actually needs one.
+        """
+        return f"{role.value}|{region}|{category}|{defect_type}"
 
     @staticmethod
-    def _unkey(k: str) -> tuple[ImageRole, str, str]:
-        role, category, defect_type = k.split("|")
-        return (ImageRole(role), category, defect_type)
+    def _unkey(k: str) -> tuple[ImageRole, str, str, str]:
+        role, region, category, defect_type = k.split("|")
+        return (ImageRole(role), region, category, defect_type)
 
     @property
-    def detectability(self) -> dict[tuple[ImageRole, str, str], Scale]:
+    def detectability(self) -> dict[tuple[ImageRole, str, str, str], Scale]:
         return {self._unkey(k): Scale(v) for k, v in self.detectability_flat.items()}
 
     @property
-    def reason_codes(self) -> dict[tuple[ImageRole, str, str], str]:
+    def reason_codes(self) -> dict[tuple[ImageRole, str, str, str], str]:
         return {self._unkey(k): v for k, v in self.reason_codes_flat.items()}
 
     @property
-    def provenance(self) -> dict[tuple[ImageRole, str, str], str]:
+    def provenance(self) -> dict[tuple[ImageRole, str, str, str], str]:
         return {self._unkey(k): v for k, v in self.provenance_flat.items()}
 
     @property
@@ -128,9 +134,12 @@ def assemble(
 
         faces.add(role)
         for (region, category, defect_type), value in image.detectability.items():
-            key = Assembled.key(role, category, defect_type)
-            # Best-of across images: a defect visible in ANY photo is
-            # observable, and the reason travels with the value it explains.
+            key = Assembled.key(role, region, category, defect_type)
+            # Best-of across IMAGES OF THE SAME REGION: a defect visible in
+            # any photograph of that corner is observable. Across regions it
+            # is not best-of at all — a clean top-left corner says nothing
+            # about a glared bottom-right one, and taking the max there let a
+            # card PASS with a corner nobody could see.
             if value > Scale(out.detectability_flat.get(key, Scale.NONE.label)):
                 out.detectability_flat[key] = value.label
                 out.provenance_flat[key] = image.image_hash
@@ -251,6 +260,19 @@ def to_image_evidence(image_outputs: list[ImageStageOutputs]) -> list[ImageEvide
             )
         )
     return out
+
+
+def region_of_finding(finding: Any) -> str | None:
+    """The region a finding sits in, read from the evidence that established
+    it. None when its evidence carries no region — a surface view, say — in
+    which case detectability must fall back to the weakest region rather than
+    the strongest.
+    """
+    regions = {
+        _region_of(ref.view) for ref in getattr(finding, "evidence", []) or []
+    }
+    regions.discard(None)
+    return regions.pop() if len(regions) == 1 else None
 
 
 def _region_of(view: str) -> str | None:

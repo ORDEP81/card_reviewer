@@ -1,4 +1,5 @@
 import pytest
+from detectability_helpers import regions_for
 
 from card_reviewer.review.enums import (
     Coverage, FindingState, ReviewConfidence, Scale, Verdict,
@@ -32,9 +33,16 @@ def _cov(outcome=Coverage.SUFFICIENT):
 
 
 def _det(scale=Scale.HIGH, category="corners", defect="rounding"):
+    """Every region of one (category, defect_type) at `scale`.
+
+    Detectability is answered at the WEAKEST candidate region, so a map
+    covering only one region would read as that region's value everywhere and
+    hide which region a finding was actually judged against.
+    """
     from card_reviewer.review.roles import ImageRole
 
-    return {(ImageRole.FRONT, category, defect): scale}
+    return {(ImageRole.FRONT, region, category, defect): scale
+            for region in regions_for(category)}
 
 
 def test_off_mode_produces_a_complete_result_without_any_vision(rubric_scoped):
@@ -202,3 +210,41 @@ def test_a_confirmed_reject_scores_below_an_unresolved_concern(rubric_scoped):
                          card_context_known=True, scoped_rules=rubric_scoped,
                          detectability=_det(Scale.LOW))
     assert confirmed.psa10_rank_score < unresolved.psa10_rank_score
+
+
+def _corner_finding(region, box, producer=FindingProducer.HEURISTIC):
+    return Finding(
+        defect_type="rounding", category="corners",
+        state=FindingState.OBSERVED, producer=producer, confidence=0.95,
+        psa10_relevant=True, location=box,
+        evidence=[EvidenceRef(artifact_id=f"a-{region}", image_hash="h1",
+                              origin=EvidenceOrigin.ORIGINAL,
+                              view=f"corner_{region}", region=box)])
+
+
+def test_i1_is_judged_at_the_findings_own_corner(rubric_scoped):
+    """The spec ties adequacy to detectability at the finding's location on
+    the image that established it. A clear top-left corner must not vouch for
+    a finding in a glared bottom-right one, and vice versa."""
+    from card_reviewer.review.roles import ImageRole
+
+    detectability = {
+        (ImageRole.FRONT, "top_left", "corners", "rounding"): Scale.HIGH,
+        (ImageRole.FRONT, "top_right", "corners", "rounding"): Scale.HIGH,
+        (ImageRole.FRONT, "bottom_left", "corners", "rounding"): Scale.HIGH,
+        (ImageRole.FRONT, "bottom_right", "corners", "rounding"): Scale.LOW,
+    }
+    clear = NormalizedBox(x0=0.0, y0=0.0, x1=0.2, y1=0.2)
+    glared = NormalizedBox(x0=0.8, y0=0.8, x1=1.0, y1=1.0)
+
+    def verdict(region, box):
+        return combine(
+            HeuristicResult(findings=[_corner_finding(region, box)]),
+            None,
+            CoverageResult(outcome=Coverage.SUFFICIENT, rankable=True),
+            card_context_known=True, scoped_rules=rubric_scoped,
+            detectability=detectability,
+        ).verdict
+
+    assert verdict("top_left", clear) is Verdict.REJECT
+    assert verdict("bottom_right", glared) is not Verdict.REJECT

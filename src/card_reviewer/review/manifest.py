@@ -82,10 +82,14 @@ def build_manifest(assembled: Any, mode: Mode, rubric_rules: list) -> BuiltManif
         "measurements": {"centering": dict(assembled.centering)},
         # Detectability and its reason codes: without them the provider reads
         # absence of a defect as absence of the defect.
-        "detectability": {f"{k}": str(v) for k, v in assembled.detectability.items()},
-        "detectability_reasons": {
-            f"{k}": v for k, v in assembled.reason_codes.items()
-        },
+        # The stable flat form, NOT f-string of the tuple. That produced
+        # "(<ImageRole.FRONT: 'front'>, 'corners', 'whitening')" — a CPython
+        # enum repr, which is not a declared part of this system's cache
+        # identity and has changed between releases, so a Python upgrade
+        # would silently re-bill every card. It is also unreadable for the
+        # provider that has to act on it.
+        "detectability": dict(assembled.detectability_flat),
+        "detectability_reasons": dict(assembled.reason_codes_flat),
         "image_limitations": list(assembled.limitations),
         # Disagreements between photographs, preserved not averaged.
         "conflicts": list(assembled.conflicts),

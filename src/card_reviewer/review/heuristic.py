@@ -23,7 +23,7 @@ from .versions import SCORER_VERSION
 if TYPE_CHECKING:
     from .assembly import Assembled
 
-__all__ = ["HeuristicResult", "best_detectability", "evaluate"]
+__all__ = ["HeuristicResult", "detectability_for", "evaluate"]
 
 MIN_DETECTABILITY_FOR_OBSERVED = Scale.MODERATE
 MIN_CONFIDENCE_FOR_OBSERVED = 0.8
@@ -45,21 +45,31 @@ class HeuristicResult(BaseModel):
     scorer_version: str = SCORER_VERSION
 
 
-def best_detectability(
-    detectability: dict[tuple[Any, str, str], Scale], category: str, defect_type: str
+def detectability_for(
+    detectability: dict[tuple[Any, str, str, str], Scale],
+    category: str,
+    defect_type: str,
+    region: str | None = None,
 ) -> Scale:
-    """Max over faces for one (category, defect_type).
+    """Detectability for one (category, defect_type), narrowed by `region`.
 
-    Callers hold a 3-tuple-keyed map; looking it up with a 2-tuple would miss
-    every time and return the default, which is how an invariant quietly
-    stops binding. NONE when nothing is registered — absent evidence must
-    never read as adequate evidence.
+    The answer is the WEAKEST value among the entries that could be the
+    finding's own, never the strongest. I1's adequacy prong is defined at the
+    finding's location on the image that established it, so anything we have
+    not narrowed to is a place the finding might be — and claiming the best
+    of them would let a clean top-left corner vouch for a glared bottom-right
+    one, or a sharp front vouch for a blown-out back.
+
+    Callers that know the region must pass it. Callers hold a 4-tuple-keyed
+    map; looking it up with a shorter tuple would miss every time and return
+    the default, which is how an invariant quietly stops binding. NONE when
+    nothing is registered — absent evidence must never read as adequate.
     """
     values = [
-        v for (_face, c, d), v in detectability.items()
-        if c == category and d == defect_type
+        v for (_face, r, c, d), v in detectability.items()
+        if c == category and d == defect_type and (region is None or r == region)
     ]
-    return Scale(max(values)) if values else Scale.NONE
+    return Scale(min(values)) if values else Scale.NONE
 
 
 def _state_for(
@@ -97,7 +107,8 @@ def evaluate(assembled: Assembled, scoped_rules: list[ScopedRule]) -> HeuristicR
                 category=category,
                 state=_state_for(
                     category, defect_type, confidence,
-                    best_detectability(detectability, category, defect_type),
+                    detectability_for(detectability, category, defect_type,
+                                       anomaly.get("region")),
                 ),
                 producer=FindingProducer.HEURISTIC,
                 confidence=confidence,
@@ -151,7 +162,7 @@ def _location_of(
 
 def _centering_findings(
     assembled: Assembled,
-    detectability: dict[tuple[Any, str, str], Scale],
+    detectability: dict[tuple[Any, str, str, str], Scale],
     rules_by_category: dict[str, list[str]],
 ) -> list[Finding]:
     """Centering is a measurement, not an anomaly candidate.
@@ -179,7 +190,8 @@ def _centering_findings(
             category="centering",
             state=_state_for(
                 "centering", "border_ratio", CENTERING_CONFIDENCE,
-                best_detectability(detectability, "centering", "border_ratio"),
+                detectability_for(detectability, "centering", "border_ratio",
+                                   "center"),
             ),
             producer=FindingProducer.HEURISTIC,
             confidence=CENTERING_CONFIDENCE,

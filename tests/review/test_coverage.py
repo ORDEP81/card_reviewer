@@ -9,9 +9,11 @@ from card_reviewer.review.roles import ImageRole
 from card_reviewer.review.taxonomy import CATEGORIES, defect_types_for
 
 
+from detectability_helpers import detectability_map, regions_for, set_every_region
+
+
 def _good(faces=(ImageRole.FRONT, ImageRole.BACK)):
-    return {(f, c, d): Scale.HIGH
-            for f in faces for c in CATEGORIES for d in defect_types_for(c)}
+    return detectability_map(faces)
 
 
 def test_full_evidence_on_both_faces_is_sufficient():
@@ -26,8 +28,9 @@ def test_a_white_bordered_card_can_still_reach_sufficient():
     det, reasons = _good(), {}
     for face in REQUIRED_FACES:
         for cat in ("corners", "edges"):
-            det[(face, cat, "whitening")] = Scale.LOW
-            reasons[(face, cat, "whitening")] = "WHITE_BORDER"
+            set_every_region(det, face, cat, "whitening", Scale.LOW)
+            for _r in regions_for(cat):
+                reasons[(face, _r, cat, "whitening")] = "WHITE_BORDER"
     r = evaluate_coverage(det, reasons, {}, REQUIRED_FACES)
     assert r.outcome is Coverage.SUFFICIENT
     assert any(l.undetectability_class is UndetectabilityClass.STRUCTURAL
@@ -36,7 +39,7 @@ def test_a_white_bordered_card_can_still_reach_sufficient():
 
 def test_glare_on_the_same_corner_is_circumstantial_and_blocks_sufficient():
     det = _good()
-    det[(ImageRole.FRONT, "corners", "whitening")] = Scale.LOW
+    set_every_region(det, ImageRole.FRONT, "corners", "whitening", Scale.LOW)
     r = evaluate_coverage(det, {(ImageRole.FRONT, "corners", "whitening"): "GLARE"},
                           {}, REQUIRED_FACES)
     assert r.outcome is Coverage.PARTIAL
@@ -49,8 +52,7 @@ def test_a_usable_front_only_card_is_partial_and_rankable():
 
 
 def test_an_unassessable_front_is_inadequate_and_unrankable():
-    det = {(ImageRole.FRONT, c, d): Scale.NONE
-           for c in CATEGORIES for d in defect_types_for(c)}
+    det = detectability_map((ImageRole.FRONT,), Scale.NONE)
     r = evaluate_coverage(det, {}, {}, (ImageRole.FRONT,))
     assert r.outcome is Coverage.INADEQUATE
     assert r.rankable is False
@@ -88,10 +90,13 @@ def test_perfect_photos_with_unknown_product_are_partial_and_rankable():
 
 def test_photo_requests_derive_from_circumstantial_limitations_only():
     det = _good()
-    det[(ImageRole.FRONT, "corners", "whitening")] = Scale.LOW
-    det[(ImageRole.FRONT, "surface", "scratches")] = Scale.LOW
-    reasons = {(ImageRole.FRONT, "corners", "whitening"): "WHITE_BORDER",
-               (ImageRole.FRONT, "surface", "scratches"): "GLARE"}
+    set_every_region(det, ImageRole.FRONT, "corners", "whitening", Scale.LOW)
+    set_every_region(det, ImageRole.FRONT, "surface", "scratches", Scale.LOW)
+    reasons = {}
+    for _r in regions_for("corners"):
+        reasons[(ImageRole.FRONT, _r, "corners", "whitening")] = "WHITE_BORDER"
+    for _r in regions_for("surface"):
+        reasons[(ImageRole.FRONT, _r, "surface", "scratches")] = "GLARE"
     r = evaluate_coverage(det, reasons, {}, REQUIRED_FACES)
     assert any("diffuse" in p.lower() for p in r.recommended_additional_photos)
     assert not any("white" in p.lower() for p in r.recommended_additional_photos)
@@ -132,8 +137,9 @@ def test_a_structural_limitation_yields_no_photo_request_even_if_templated(
                         "a photograph of the {face} {category} on dark backing")
     det, reasons = _good(), {}
     for face in REQUIRED_FACES:
-        det[(face, "corners", "whitening")] = Scale.LOW
-        reasons[(face, "corners", "whitening")] = "WHITE_BORDER"
+        set_every_region(det, face, "corners", "whitening", Scale.LOW)
+        for _r in regions_for("corners"):
+            reasons[(face, _r, "corners", "whitening")] = "WHITE_BORDER"
     r = evaluate_coverage(det, reasons, {}, REQUIRED_FACES)
     assert any(l.reason_code == "WHITE_BORDER" for l in r.limitations)
     assert r.recommended_additional_photos == []

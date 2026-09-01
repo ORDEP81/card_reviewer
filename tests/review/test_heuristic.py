@@ -5,7 +5,9 @@ from card_reviewer.review.assembly import Assembled
 from card_reviewer.review.context import CardContext
 from card_reviewer.review.enums import FindingState, Provenance, Scale
 from card_reviewer.review.evaluability import scope_rules
-from card_reviewer.review.heuristic import best_detectability, evaluate
+from detectability_helpers import regions_for
+
+from card_reviewer.review.heuristic import detectability_for, evaluate
 from card_reviewer.review.provenance import EvidenceOrigin, EvidenceRef, NormalizedBox
 from card_reviewer.review.roles import ImageRole
 
@@ -29,10 +31,11 @@ def _ev(view="corner_bottom_left"):
 
 
 def _assembled(**kw):
-    flat = {Assembled.key(ImageRole.FRONT, c, d): Scale.HIGH.label
+    flat = {Assembled.key(ImageRole.FRONT, _region, c, d): Scale.HIGH.label
             for c, d in (("corners", "rounding"), ("corners", "whitening"),
                          ("surface", "scratches"), ("surface", "print_lines"),
-                         ("centering", "border_ratio"))}
+                         ("centering", "border_ratio"))
+            for _region in regions_for(c)}
     base = dict(
         centering={"horizontal": 52.0, "vertical": 51.0, "measurable": True},
         detectability_flat=flat, anomalies=[], faces_present=["front"],
@@ -42,15 +45,25 @@ def _assembled(**kw):
     return Assembled(**(base | kw))
 
 
-def test_best_detectability_takes_the_max_across_faces():
-    d = {(ImageRole.FRONT, "corners", "rounding"): Scale.LOW,
-         (ImageRole.BACK, "corners", "rounding"): Scale.HIGH}
-    assert best_detectability(d, "corners", "rounding") is Scale.HIGH
+def test_detectability_takes_the_weakest_candidate_not_the_strongest():
+    """A sharp back does not vouch for a glared front. Whatever we have not
+    narrowed to is somewhere the finding might be, so the answer is the
+    weakest of them — anything else lets missing evidence create evidence."""
+    d = {(ImageRole.FRONT, "top_left", "corners", "rounding"): Scale.LOW,
+         (ImageRole.BACK, "top_left", "corners", "rounding"): Scale.HIGH}
+    assert detectability_for(d, "corners", "rounding") is Scale.LOW
+
+
+def test_a_named_region_is_answered_from_that_region_alone():
+    d = {(ImageRole.FRONT, "top_left", "corners", "rounding"): Scale.LOW,
+         (ImageRole.FRONT, "bottom_right", "corners", "rounding"): Scale.HIGH}
+    assert detectability_for(d, "corners", "rounding", "bottom_right") is Scale.HIGH
+    assert detectability_for(d, "corners", "rounding", "top_left") is Scale.LOW
 
 
 def test_best_detectability_returns_none_when_nothing_is_registered():
     """Absent evidence must never look like adequate evidence."""
-    assert best_detectability({}, "corners", "rounding") is Scale.NONE
+    assert detectability_for({}, "corners", "rounding") is Scale.NONE
 
 
 def test_a_measurement_type_may_reach_observed(rules_known):
@@ -86,7 +99,7 @@ def test_an_interpretive_type_can_never_exceed_suspected_from_cv_alone(rules_kno
 
 def test_low_detectability_prevents_observed_even_for_measurement_types(rules_known):
     a = _assembled(
-        detectability_flat={Assembled.key(ImageRole.FRONT, "corners", "rounding"):
+        detectability_flat={Assembled.key(ImageRole.FRONT, "top_left", "corners", "rounding"):
                             Scale.LOW.label},
         anomalies=[{"defect_type": "rounding", "category": "corners",
                     "region": "bottom_left", "confidence": 0.99,

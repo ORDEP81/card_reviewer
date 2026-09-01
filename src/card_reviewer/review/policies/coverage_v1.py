@@ -69,6 +69,9 @@ class Limitation(BaseModel):
     defect_type: str
     reason_code: str
     undetectability_class: UndetectabilityClass
+    #: Which part of the card could not be assessed. None when the gap is not
+    #: regional — a missing face, or a rubric rule that could not be applied.
+    region: str | None = None
 
 
 class CoverageResult(BaseModel):
@@ -83,8 +86,8 @@ class CoverageResult(BaseModel):
 
 
 def evaluate_coverage(
-    detectability: dict[tuple[ImageRole, str, str], Scale],
-    reason_codes: dict[tuple[ImageRole, str, str], str],
+    detectability: dict[tuple[ImageRole, str, str, str], Scale],
+    reason_codes: dict[tuple[ImageRole, str, str, str], str],
     vision_assessability: dict[str, bool],
     faces_present: tuple[ImageRole, ...],
     *,
@@ -125,24 +128,41 @@ def evaluate_coverage(
                     )
                     ok = False
                     continue
-                if detectability.get((face, category, defect_type), Scale.NONE) >= (
-                    MIN_ASSESSED
-                ):
-                    continue
-                code = reason_codes.get((face, category, defect_type),
-                                        "LOW_RESOLUTION")
-                klass = class_of(code)
-                limitations.append(
-                    Limitation(
-                        face=face.value, category=category,
-                        defect_type=defect_type, reason_code=code,
-                        undetectability_class=klass,
-                    )
+                # EVERY region this defect type can occur in has to be
+                # assessable. Taking the best region would let a clean corner
+                # speak for a glared one, which is how a card reached PASS
+                # with a corner nobody could see.
+                shortfalls = [
+                    (region, value)
+                    for (f, region, c, d), value in detectability.items()
+                    if f == face and c == category and d == defect_type
+                    and value < MIN_ASSESSED
+                ]
+                registered = any(
+                    f == face and c == category and d == defect_type
+                    for (f, _region, c, d) in detectability
                 )
-                # Structural gaps are reported but do not block: no photograph
-                # could ever supply the evidence.
-                if klass is not UndetectabilityClass.STRUCTURAL:
-                    ok = False
+                if not registered:
+                    # Nothing measured it at all. Absent evidence is not
+                    # adequate evidence.
+                    shortfalls = [(None, Scale.NONE)]
+                if not shortfalls:
+                    continue
+                for region, _value in shortfalls:
+                    code = reason_codes.get(
+                        (face, region, category, defect_type), "LOW_RESOLUTION")
+                    klass = class_of(code)
+                    limitations.append(
+                        Limitation(
+                            face=face.value, category=category, region=region,
+                            defect_type=defect_type, reason_code=code,
+                            undetectability_class=klass,
+                        )
+                    )
+                    # Structural gaps are reported but do not block: no
+                    # photograph could ever supply the evidence.
+                    if klass is not UndetectabilityClass.STRUCTURAL:
+                        ok = False
             # Vision may veto a category CV suitability alone allowed.
             if vision_assessability.get(category) is False:
                 ok = False

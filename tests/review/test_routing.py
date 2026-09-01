@@ -1,5 +1,7 @@
 import json
 
+from detectability_helpers import regions_for
+
 from card_reviewer.review.assembly import Assembled
 from card_reviewer.review.enums import Coverage, FindingState, Mode, Scale
 from card_reviewer.review.findings import Finding, FindingProducer
@@ -17,7 +19,8 @@ def _f(state=FindingState.SUSPECTED, category="surface", defect="print_lines"):
 
 
 def _det(scale=Scale.HIGH, category="surface", defect="print_lines"):
-    return {(ImageRole.FRONT, category, defect): scale}
+    return {(ImageRole.FRONT, region, category, defect): scale
+            for region in regions_for(category)}
 
 
 def test_off_never_calls():

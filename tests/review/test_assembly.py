@@ -28,7 +28,7 @@ def test_a_corner_glared_in_one_photo_and_clear_in_another_is_observable():
     b = _img("h2", {("bottom_left", "corners", "rounding"): Scale.HIGH})
     out = assemble([a, b], {"h1": _role("h1", ImageRole.FRONT),
                             "h2": _role("h2", ImageRole.FRONT)})
-    assert out.detectability[(ImageRole.FRONT, "corners", "rounding")] is Scale.HIGH
+    assert out.detectability[(ImageRole.FRONT, "bottom_left", "corners", "rounding")] is Scale.HIGH
 
 
 def test_assembly_records_which_image_established_a_value():
@@ -36,7 +36,7 @@ def test_assembly_records_which_image_established_a_value():
     b = _img("h2", {("bottom_left", "corners", "rounding"): Scale.HIGH})
     out = assemble([a, b], {"h1": _role("h1", ImageRole.FRONT),
                             "h2": _role("h2", ImageRole.FRONT)})
-    assert out.provenance[(ImageRole.FRONT, "corners", "rounding")] == "h2"
+    assert out.provenance[(ImageRole.FRONT, "bottom_left", "corners", "rounding")] == "h2"
 
 
 def test_reason_codes_survive_assembly_so_coverage_can_classify_them():
@@ -45,7 +45,7 @@ def test_reason_codes_survive_assembly_so_coverage_can_classify_them():
     a = _img("h1", {("bottom_left", "corners", "whitening"): Scale.LOW},
              {("bottom_left", "corners", "whitening"): "WHITE_BORDER"})
     out = assemble([a], {"h1": _role("h1", ImageRole.FRONT)})
-    assert out.reason_codes[(ImageRole.FRONT, "corners", "whitening")] == (
+    assert out.reason_codes[(ImageRole.FRONT, "bottom_left", "corners", "whitening")] == (
         "WHITE_BORDER")
 
 
@@ -172,3 +172,22 @@ def test_region_specific_refs_keep_corners_apart(measured):
     bl = evidence.evidence_refs["corners:rounding:bottom_left"]
     tr = evidence.evidence_refs["corners:rounding:top_right"]
     assert not bl[0].region.overlaps(tr[0].region)
+
+
+def test_a_clean_corner_never_speaks_for_a_glared_one():
+    """Best-of is across images OF THE SAME REGION. Across regions it is not
+    best-of at all: this used to keep the maximum over every corner, so one
+    clear corner made a glared one read as fully assessable and the GLARE
+    reason was dropped."""
+    glared = {("bottom_left", "corners", "rounding"): Scale.LOW,
+              ("top_right", "corners", "rounding"): Scale.HIGH}
+    out = assemble([_img("h1", glared,
+                         {("bottom_left", "corners", "rounding"): "GLARE"})],
+                   {"h1": _role("h1", ImageRole.FRONT)})
+
+    assert out.detectability[
+        (ImageRole.FRONT, "bottom_left", "corners", "rounding")] is Scale.LOW
+    assert out.detectability[
+        (ImageRole.FRONT, "top_right", "corners", "rounding")] is Scale.HIGH
+    assert out.reason_codes[
+        (ImageRole.FRONT, "bottom_left", "corners", "rounding")] == "GLARE"

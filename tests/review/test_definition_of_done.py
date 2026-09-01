@@ -6,6 +6,9 @@ whole contract can be checked in one run.
 
 import pytest
 
+from detectability_helpers import (
+    detectability_map, regions_for, set_every_region,
+)
 from card_reviewer.review.enums import Coverage, Mode, Scale, Verdict
 from card_reviewer.review.imaging.synthetic import CardSpec, render_png
 from card_reviewer.review.ingest.adapter import ManualAdapter
@@ -156,8 +159,7 @@ def test_dod7_coverage_returns_three_outcomes_and_gates_pass():
     )
     from card_reviewer.review.roles import ImageRole
 
-    full = {(f, c, d): Scale.HIGH for f in REQUIRED_FACES
-            for c in CATEGORIES for d in defect_types_for(c)}
+    full = detectability_map(REQUIRED_FACES)
     assert evaluate_coverage(full, {}, {}, REQUIRED_FACES).outcome is (
         Coverage.SUFFICIENT)
     assert evaluate_coverage(full, {}, {}, (ImageRole.FRONT,)).outcome is (
@@ -198,13 +200,12 @@ def test_dod10_a_white_bordered_card_can_still_reach_sufficient_coverage():
         REQUIRED_FACES, evaluate_coverage,
     )
 
-    det = {(f, c, d): Scale.HIGH for f in REQUIRED_FACES
-           for c in CATEGORIES for d in defect_types_for(c)}
+    det = detectability_map(REQUIRED_FACES)
     reasons = {}
     for face in REQUIRED_FACES:
         for category in ("corners", "edges"):
-            det[(face, category, "whitening")] = Scale.LOW
-            reasons[(face, category, "whitening")] = "WHITE_BORDER"
+            det[(face, "top_left", category, "whitening")] = Scale.LOW
+            reasons[(face, "top_left", category, "whitening")] = "WHITE_BORDER"
     assert evaluate_coverage(det, reasons, {}, REQUIRED_FACES).outcome is (
         Coverage.SUFFICIENT)
 
@@ -252,8 +253,7 @@ def test_dod13_vision_not_assessable_prevents_sufficient_coverage():
         REQUIRED_FACES, evaluate_coverage,
     )
 
-    det = {(f, c, d): Scale.HIGH for f in REQUIRED_FACES
-           for c in CATEGORIES for d in defect_types_for(c)}
+    det = detectability_map(REQUIRED_FACES)
     assert evaluate_coverage(det, {}, {}, REQUIRED_FACES).outcome is (
         Coverage.SUFFICIENT)
     assert evaluate_coverage(det, {}, {"surface": False},

@@ -219,7 +219,8 @@ def combine(
     """
     from ..findings import enforce_i3
     from ..fusion import fuse
-    from ..heuristic import best_detectability
+    from ..assembly import region_of_finding
+    from ..heuristic import detectability_for
     from ..relevance import resolve_relevance
     from ..vision.provider import resolve_vision_findings
     from .scoring_v1 import estimated_grade, rank_score, review_confidence
@@ -244,8 +245,11 @@ def combine(
     detectability = detectability or {}
     triples: list[tuple[Finding, Authority, Scale]] = [
         (rf.finding, rf.authority,
-         best_detectability(detectability, rf.finding.category,
-                            rf.finding.defect_type))
+         # At the finding's OWN region: I1's adequacy prong is defined at the
+         # location that established the finding, not at the card's best one.
+         detectability_for(detectability, rf.finding.category,
+                            rf.finding.defect_type,
+                            region_of_finding(rf.finding)))
         for rf in resolved
     ]
 

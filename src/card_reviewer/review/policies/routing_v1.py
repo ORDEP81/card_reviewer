@@ -62,7 +62,8 @@ def decide_routing(
             continue
         resolvable = any(
             value >= MIN_DETECTABILITY_TO_RESOLVE
-            for (_face, category, defect_type), value in detectability.items()
+            for (_face, _region, category, defect_type), value
+            in detectability.items()
             if category == finding.category and defect_type == finding.defect_type
         )
         if resolvable:
