@@ -114,10 +114,24 @@ def evaluate_coverage(
         blocked_categories.add(gap.category)
 
     assessed: dict[str, list[str]] = {}
+    # Two different questions. `assessed` means every region of every defect
+    # type was visible, and it gates SUFFICIENT — that is what stops a clean
+    # corner vouching for a glared one. `partly` means SOMETHING was visible,
+    # and it gates PARTIAL against INADEQUATE: corners, edges and surface all
+    # share the corner regions, so one glared corner blocks three categories
+    # outright, and treating that as an unusable photograph drops a card that
+    # a human should still see.
+    partly: dict[str, list[str]] = {}
     for face in REQUIRED_FACES:
         assessed_here: list[str] = []
+        partly_here: list[str] = []
         for category in CATEGORIES:
             ok = True
+            any_region_seen = face in faces_present and any(
+                value >= MIN_ASSESSED
+                for (f, _region, c, _d), value in detectability.items()
+                if f == face and c == category
+            )
             for defect_type in defect_types_for(category):
                 if face not in faces_present:
                     limitations.append(
@@ -179,9 +193,12 @@ def evaluate_coverage(
                 ok = False
             if ok:
                 assessed_here.append(category)
+            if any_region_seen and category not in blocked_categories:
+                partly_here.append(category)
         assessed[face.value] = assessed_here
+        partly[face.value] = partly_here
 
-    front = assessed.get(ImageRole.FRONT.value, [])
+    front = partly.get(ImageRole.FRONT.value, [])
     complete = all(
         len(assessed.get(f.value, [])) == len(CATEGORIES) for f in REQUIRED_FACES
     )
