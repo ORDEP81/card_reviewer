@@ -130,3 +130,32 @@ def test_an_attempt_records_its_cost_and_latency_for_accounting(repo):
     row = repo._conn.execute(
         "SELECT error_kind, latency_ms FROM stage_attempt").fetchone()
     assert row[0] == "rate_limit" and row[1] == 1200
+
+
+def test_get_review_returns_the_review_asked_for(repo):
+    """With one review stored, a missing WHERE clause is invisible."""
+    repo.save_candidate(id="c2", source="manual", title="second")
+    rd = repo.save_routing_decision(candidate_id="c1", policy_version="1.0.0",
+                                    mode="off", call_vision=False,
+                                    trigger_reasons=[], input_fingerprint="fp")
+    ids = {}
+    for candidate, verdict in (("c1", "REVIEW"), ("c2", "PASS")):
+        ids[verdict] = repo.save_review(
+            candidate_id=candidate, mode="off", routing_decision_id=rd,
+            verdict=verdict, psa10_candidate="uncertain", psa10_rank_score=50,
+            rankable=True, review_confidence="medium", coverage="PARTIAL",
+            rubric_version="4.0.0", output={"verdict": verdict})
+
+    for verdict, review_id in ids.items():
+        assert repo.get_review(review_id)["verdict"] == verdict
+    assert repo.get_review(max(ids.values()) + 1000) is None
+
+
+def test_each_grading_outcome_gets_its_own_identity(repo):
+    """Append-only rests on a fresh id per submission, not on the SQL verb."""
+    first = repo.record_grading_outcome("c1", "9")
+    second = repo.record_grading_outcome("c1", "10")
+    assert first != second
+    grades = [r["grade"] for r in repo._conn.execute(
+        "SELECT grade FROM grading_submission ORDER BY rowid")]
+    assert grades == ["9", "10"]
