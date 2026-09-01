@@ -136,3 +136,50 @@ def test_every_supporting_version_is_stamped_on_a_review():
     stamped = effective_versions()
     for component in SUPPORTING_VERSIONS:
         assert component in stamped, f"{component} is not stamped on a review"
+
+
+def test_the_vision_dependent_categories_match_the_taxonomy():
+    """The list said corners were CV-establishable; the taxonomy says the
+    opposite and deliberately so. A category every one of whose defect types
+    is INTERPRETIVE cannot be concluded on without vision, and saying
+    otherwise would let a missing vision layer read as an assessed category.
+    """
+    from card_reviewer.review.pipeline import VISION_DEPENDENT_CATEGORIES
+    from card_reviewer.review.taxonomy import (
+        CATEGORIES, Promotion, defect_types_for, promotion_of,
+    )
+
+    for category in CATEGORIES:
+        interpretive = all(
+            promotion_of(category, defect_type) is Promotion.INTERPRETIVE
+            for defect_type in defect_types_for(category)
+        )
+        assert interpretive is (category in VISION_DEPENDENT_CATEGORIES), (
+            f"{category}: every defect type interpretive={interpretive}, but "
+            f"vision-dependent={category in VISION_DEPENDENT_CATEGORIES}")
+
+
+def test_a_non_finite_value_names_the_field_it_broke_on():
+    """The guard already held — quantize's math.floor raises on NaN — but it
+    raised "cannot convert float NaN to integer", naming neither the field
+    nor the reason. Cache identity is correctness-critical, so its failures
+    should say what broke."""
+    from card_reviewer.review.canonical import canonicalize
+
+    for bad in (float("nan"), float("inf"), float("-inf")):
+        with pytest.raises(ValueError, match="non-finite"):
+            canonicalize({"centering": {"horizontal": bad}})
+
+
+def test_the_repository_protocol_describes_what_the_pipeline_calls():
+    """Six methods the pipeline calls on a Repository-typed field were
+    missing from the Protocol, so a type checker could not have caught a
+    mismatched signature — the one thing it exists for."""
+    from card_reviewer.review.storage.repository import Repository, SqliteRepository
+
+    required = {name for name in vars(Repository) if not name.startswith("_")}
+    for name in ("save_candidate", "save_image", "link_image",
+                 "save_routing_decision", "save_review", "reviews_for"):
+        assert name in required, f"{name} is not declared on the Protocol"
+        assert hasattr(SqliteRepository, name), (
+            f"{name} is declared but the real repository does not have it")

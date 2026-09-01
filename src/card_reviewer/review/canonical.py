@@ -155,6 +155,16 @@ def _walk(node: Any, path: str) -> Any:
     if isinstance(node, bool):
         return node
     if isinstance(node, float):
+        if not math.isfinite(node):
+            # The guard already held — quantize's math.floor raises on NaN —
+            # but it raised "cannot convert float NaN to integer", naming
+            # neither the field nor the reason. Cache identity is
+            # correctness-critical, so its failures should say what broke.
+            raise ValueError(
+                f"non-finite float at {path or '<root>'}: {node!r}. NaN and "
+                "infinity have no canonical form and cannot appear in a "
+                "cache key."
+            )
         return round(quantize(path, node), 12)
     if node is None or isinstance(node, (str, int)):
         return node

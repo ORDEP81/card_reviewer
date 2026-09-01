@@ -108,10 +108,19 @@ class MissingProviderError(Exception):
 
 
 #: Categories whose defect types are interpretive, so a missing vision layer
-#: genuinely leaves them unassessed. Centering and corner rounding are
-#: measurements CV establishes on its own, and vetoing all four would drop a
-#: perfectly photographed card out of the ranked list entirely.
-VISION_DEPENDENT_CATEGORIES = ("surface", "edges")
+#: genuinely leaves them unassessed.
+#:
+#: The rationale here used to say corner rounding is a measurement CV
+#: establishes on its own. The taxonomy says otherwise and deliberately so —
+#: corner rounding and whitening were reclassified INTERPRETIVE because
+#: nothing measures them, leaving centering:border_ratio as the only
+#: MEASUREMENT type. Corners therefore belong on this list: with no vision
+#: layer, no corner defect can be concluded on.
+#:
+#: Centering stays off it, and is the reason the list is not simply "all
+#: four": it IS measured, so vetoing it would drop a perfectly photographed
+#: card out of the ranked list for evidence the CV layer actually has.
+VISION_DEPENDENT_CATEGORIES = ("surface", "edges", "corners")
 
 
 class ReviewPipeline:

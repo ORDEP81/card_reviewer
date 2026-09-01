@@ -24,6 +24,28 @@ class StageResult:
 
 
 class Repository(Protocol):
+    """What ReviewPipeline requires of a store.
+
+    The six candidate/image/review methods below were missing while the
+    pipeline called all of them on a Repository-typed field, so a type
+    checker could not have caught a mismatched signature — the one thing the
+    Protocol exists for.
+    """
+
+    def save_candidate(self, candidate: Any) -> None: ...
+
+    def save_image(self, image_hash: str, **fields: Any) -> None: ...
+
+    def link_image(self, candidate_id: str, image_hash: str,
+                   **fields: Any) -> None: ...
+
+    def save_routing_decision(self, candidate_id: str,
+                              decision: Any) -> int: ...
+
+    def save_review(self, review: Any, **fields: Any) -> int: ...
+
+    def reviews_for(self, candidate_id: str) -> list[Any]: ...
+
     def get_stage_result(self, stage: str, fp: str, sig: str) -> StageResult | None: ...
 
     def put_stage_result(
