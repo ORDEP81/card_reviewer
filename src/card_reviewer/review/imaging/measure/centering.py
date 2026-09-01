@@ -26,6 +26,14 @@ PRECISION_PP = 1.5
 #: not.
 INK_VARIANCE_FRACTION = 0.25
 
+#: Fraction of each edge ignored when locating the printed art. A detected
+#: card boundary is approximate by nature, so the rectified image can carry
+#: a sliver of background at the very edge — high-variance, and otherwise
+#: read as artwork reaching the trim, which makes the border measure as zero
+#: and the card as unmeasurable. Trimming is symmetric and the border widths
+#: are still measured against the full width, so the ratio is unbiased.
+EDGE_TRIM_FRACTION = 0.02
+
 
 class CenteringMeasurement(BaseModel):
     measurable: bool
@@ -65,8 +73,12 @@ def _ratio(variance: np.ndarray) -> float | None:
 
     50.0 means centred; above 50 means the leading border is wider.
     """
-    threshold = variance.max() * INK_VARIANCE_FRACTION
-    inked = np.where(variance > threshold)[0]
+    trim = max(1, int(variance.size * EDGE_TRIM_FRACTION))
+    interior = variance[trim:-trim]
+    if interior.size < 2:
+        return None
+    threshold = interior.max() * INK_VARIANCE_FRACTION
+    inked = np.where(interior > threshold)[0] + trim
     if inked.size < 2:
         return None
     leading = float(inked[0])

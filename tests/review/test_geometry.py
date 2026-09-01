@@ -166,3 +166,23 @@ def test_the_serialized_output_stays_small_because_pixels_are_referenced(store):
     hundreds of kilobytes of JSON per image."""
     r = analyze(render_png(CardSpec()), store, "h1")
     assert len(r.model_dump_json()) < 2000
+
+
+def test_a_dark_card_on_a_dark_background_detects_the_card_not_the_art(store):
+    """The failure this detection strategy exists to prevent.
+
+    Thresholding by intensity finds whichever boundary is strongest. On a
+    dark card against a dark backdrop that is the PRINTED ART — the card's
+    own border blends into the background while the artwork stands out — and
+    the art was being detected at 0.74 confidence, high enough to be used.
+    Every downstream measurement would then describe the wrong rectangle:
+    centering meaningless, corners taken from the artwork, and nothing to
+    signal that anything was wrong.
+    """
+    spec = CardSpec(border_color=(20, 20, 20))
+    r = analyze(render_png(spec), store, "h1")
+    quad = np.array(r.quad)
+    width = quad[:, 0].max() - quad[:, 0].min()
+    height = quad[:, 1].max() - quad[:, 1].min()
+    assert width == pytest.approx(spec.card_w, abs=10)
+    assert height == pytest.approx(spec.card_h, abs=10)

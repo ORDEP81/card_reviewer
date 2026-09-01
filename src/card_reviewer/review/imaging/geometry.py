@@ -39,6 +39,11 @@ MIN_BOUNDARY_CONFIDENCE = 0.5
 #: essentially the whole frame is the frame, not a card — random noise
 #: produces exactly that, and without this guard it scored full confidence.
 MAX_AREA_RATIO = 0.92
+
+#: How close in intensity a pixel must be to the backdrop to count as more
+#: backdrop. Small, because a card only slightly darker than its surroundings
+#: is still a distinct surface.
+BACKGROUND_TOLERANCE = 6
 BORDER_BAND_PX = 24
 #: A border band this uniform can serve as a centering reference. Measured
 #: robustly (see _segment_border) so one glared corner does not disqualify
@@ -141,11 +146,7 @@ def _detect_quad(img: np.ndarray, cv2) -> tuple[np.ndarray | None, float]:
     Confidence combines how much of the frame the card occupies with how
     rectangular the region is, so a ragged blob scores low even when large.
     """
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-    _, mask = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
-
+    mask = _foreground_mask(img, cv2)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     if not contours:
         return None, 0.0
@@ -187,6 +188,42 @@ def _quad_from_contour(contour: np.ndarray, cv2) -> np.ndarray | None:
         if len(approx) == 4 and cv2.isContourConvex(approx):
             return approx.reshape(4, 2).astype(np.float32)
     return None
+
+
+def _foreground_mask(img: np.ndarray, cv2) -> np.ndarray:
+    """Separate card from background by growing the background inward.
+
+    Thresholding by intensity finds whichever boundary happens to be
+    strongest, which on a dark card against a dark backdrop is the PRINTED
+    ART — the card's own border blends into the background while the artwork
+    stands out sharply. Detecting the art and calling it the card silently
+    makes every downstream measurement describe the wrong rectangle.
+
+    The property that actually distinguishes them is connectivity: the
+    background touches the frame edge and the card does not. Flooding inward
+    from the corners therefore claims the backdrop whatever its brightness,
+    and whatever is left is the card.
+    """
+    height, width = img.shape[:2]
+    blurred = cv2.GaussianBlur(img, (5, 5), 0)
+    filled = np.zeros((height + 2, width + 2), np.uint8)
+
+    # Tight tolerance: a backdrop only a little darker than the card is still
+    # a different surface, and leaking across that step would swallow the
+    # card entirely.
+    tolerance = (BACKGROUND_TOLERANCE,) * 3
+    for seed in ((0, 0), (width - 1, 0), (0, height - 1), (width - 1, height - 1)):
+        # FIXED_RANGE compares each candidate against the SEED, not against
+        # its neighbour. With a floating range the fill walks up the blur
+        # gradient at the card's edge one step at a time and swallows the
+        # card whole.
+        cv2.floodFill(
+            blurred.copy(), filled, seed, 255, tolerance, tolerance,
+            cv2.FLOODFILL_MASK_ONLY | cv2.FLOODFILL_FIXED_RANGE | (255 << 8),
+        )
+
+    foreground = np.where(filled[1:-1, 1:-1] > 0, 0, 255).astype(np.uint8)
+    return cv2.morphologyEx(foreground, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
 
 
 def _order(pts: np.ndarray) -> np.ndarray:
