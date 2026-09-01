@@ -50,6 +50,15 @@ EDGE_TRIM_FRACTION = 0.02
 #: unmeasurable. It is also how a person eyeballs centering.
 CENTRAL_BAND_FRACTION = 0.6
 
+#: How far the ratio measured from one half of the central band may differ
+#: from the other before the reading is refused. A real border is consistent
+#: along its length, so a large disagreement means something local — an
+#: obstruction, a shadow, a finger — is being read as the border. Measured: a
+#: thumb over one corner made the two halves disagree by 30pp while giving a
+#: single-band answer of 20.8 against a rendered 50.0, and the card was
+#: reported as badly miscut.
+HALVES_AGREE_PP = 8.0
+
 
 
 class CenteringMeasurement(BaseModel):
@@ -72,8 +81,8 @@ def measure_centering(
         )
 
     gray = load_geometry(geometry, store).normalized.mean(axis=2)
-    horizontal, h_reason = _ratio(_central(gray, axis=0).std(axis=0))
-    vertical, v_reason = _ratio(_central(gray, axis=1).std(axis=1))
+    horizontal, h_reason = _consistent_ratio(gray, axis=0)
+    vertical, v_reason = _consistent_ratio(gray, axis=1)
     if horizontal is None or vertical is None:
         return CenteringMeasurement(
             measurable=False,
@@ -86,10 +95,55 @@ def measure_centering(
     )
 
 
+def _consistent_ratio(
+    gray: np.ndarray, axis: int
+) -> tuple[float | None, str | None]:
+    """The border ratio, refused unless the band agrees with itself.
+
+    The whole central band gives the answer; each half of it is then measured
+    separately as a check. A border is consistent along its length, so when
+    the halves disagree materially something LOCAL is being read as the
+    border — an obstruction, a shadow, a finger — and the single number the
+    whole band produces is fiction rather than a measurement.
+    """
+    band = _central(gray, axis)
+    value, reason = _ratio(band.std(axis=axis))
+    if value is None:
+        return None, reason
+
+    # Split the span being AVERAGED OVER, not the profile itself. For the
+    # horizontal ratio the profile runs across columns and is averaged down
+    # rows, so the halves are top rows against bottom rows; for the vertical
+    # ratio it is the other way round. Splitting the profile instead gives
+    # each half only part of the border/art structure and compares two
+    # different things.
+    axis_to_split = 0 if axis == 0 else 1
+    split = band.shape[axis_to_split] // 2
+    first = band[:split, :] if axis == 0 else band[:, :split]
+    second = band[split:, :] if axis == 0 else band[:, split:]
+
+    halves = [_ratio(part.std(axis=axis))[0] for part in (first, second)]
+    if any(half is None for half in halves):
+        return value, None
+    if abs(halves[0] - halves[1]) > HALVES_AGREE_PP:
+        return None, "BORDER_NOT_SEPARABLE_FROM_ART"
+    return value, None
+
+
 def _central(gray: np.ndarray, axis: int) -> np.ndarray:
-    """The middle band of the span perpendicular to the one being measured."""
-    length = gray.shape[1 - axis] if axis == 0 else gray.shape[1 - axis]
-    margin = int(length * (1.0 - CENTRAL_BAND_FRACTION) / 2.0)
+    """The middle band of the span perpendicular to the one being measured.
+
+    axis=0 measures the HORIZONTAL ratio from column variance, so it trims
+    ROWS; axis=1 measures the vertical ratio and trims COLUMNS. The trim must
+    therefore be sized against the dimension being trimmed. Both branches of
+    the old ternary read `shape[1 - axis]`, which is the dimension being
+    MEASURED — so the horizontal band was cut against the width and the
+    vertical band against the height. On a tilted card that put the vertical
+    reading 30pp out (20.4 against a rendered 50.0) while the horizontal one
+    looked fine, and the card was REJECTED for centering it did not have.
+    """
+    trimmed_axis = 0 if axis == 0 else 1
+    margin = int(gray.shape[trimmed_axis] * (1.0 - CENTRAL_BAND_FRACTION) / 2.0)
     if margin < 1:
         return gray
     return gray[margin:-margin, :] if axis == 0 else gray[:, margin:-margin]

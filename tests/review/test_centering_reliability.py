@@ -111,3 +111,98 @@ def test_a_border_thinner_than_the_trim_declines_on_either_edge():
     both_borders_real[50:150] = 40.0
     value, reason = _ratio(both_borders_real)
     assert reason is None and value == pytest.approx(50.0, abs=1.0)
+
+
+@pytest.mark.parametrize("tilt", [0.0, 5.0, 10.0, 12.0])
+def test_both_axes_are_measured_against_their_own_dimension(tilt, store):
+    """The horizontal fix left the vertical axis broken for weeks.
+
+    `_central` trims the span perpendicular to the one being measured, and
+    both branches of its ternary read the dimension being MEASURED rather
+    than the one being trimmed — so the horizontal band was cut against the
+    width and the vertical band against the height. Every test above
+    exercised only the horizontal axis, so a tilted card read 50.7
+    horizontally and 20.4 VERTICALLY against a rendered 50/50, and was
+    REJECTED for centering it did not have.
+    """
+    from card_reviewer.review.imaging.synthetic import achieved_centering
+
+    spec = CardSpec(border_color=(20, 20, 20), rotation_deg=tilt)
+    _, measurement = _measure(spec, store)
+    if not measurement.measurable:
+        pytest.skip("declined at this tilt")
+
+    truth_h, truth_v = achieved_centering(spec)
+    assert abs(measurement.horizontal - truth_h) <= 3.0
+    assert abs(measurement.vertical - truth_v) <= 3.0, (
+        f"vertical read {measurement.vertical} against a rendered {truth_v}")
+
+
+@pytest.mark.parametrize("spec_kwargs,axis", [
+    ({"h_centering": 75.0}, "horizontal"),
+    ({"v_centering": 70.0}, "vertical"),
+])
+def test_a_miscut_on_either_axis_is_measured_on_that_axis(spec_kwargs, axis,
+                                                          store):
+    """A vertical miscut must not read as a horizontal one, or vice versa."""
+    from card_reviewer.review.imaging.synthetic import achieved_centering
+
+    spec = CardSpec(border_color=(20, 20, 20), **spec_kwargs)
+    _, measurement = _measure(spec, store)
+    assert measurement.measurable
+
+    truth_h, truth_v = achieved_centering(spec)
+    assert abs(measurement.horizontal - truth_h) <= 3.0
+    assert abs(measurement.vertical - truth_v) <= 3.0
+
+    off_axis = "vertical" if axis == "horizontal" else "horizontal"
+    assert abs(getattr(measurement, off_axis) - 50.0) <= 3.0, (
+        f"a {axis} miscut moved the {off_axis} reading")
+
+
+def test_an_obstruction_makes_the_measurement_decline_not_guess(store):
+    """A thumb over one corner creates a local high-variance band that the
+    ink threshold reads as the art's edge. Measured on the whole band it
+    gave a vertical ratio of 20.8 against a rendered 50.0 — a covered corner
+    reported as a severe miscut, which is the fabrication this module exists
+    to stop.
+
+    A border is consistent along its length, so the two halves of the band
+    are measured separately as a check: when they disagree materially,
+    something LOCAL is being read as the border and no number is reported.
+    """
+    import cv2
+
+    from card_reviewer.review.imaging.synthetic import (
+        _draw_card, _place_on_background,
+    )
+
+    spec = CardSpec(border_color=(20, 20, 20))
+    card = _draw_card(spec, np.random.default_rng(spec.seed))
+    card[0:260, 0:260] = 4
+    data = cv2.imencode(".png", _place_on_background(card, spec, cv2))[1].tobytes()
+
+    image_hash = store.put_image(data)
+    from card_reviewer.review.imaging.geometry import analyze
+
+    measurement = measure_centering(analyze(data, store, image_hash), store)
+    if measurement.measurable:
+        assert abs(measurement.vertical - 50.0) <= 5.0, (
+            f"an obstructed corner measured {measurement.vertical}")
+    else:
+        assert measurement.reason == "BORDER_NOT_SEPARABLE_FROM_ART"
+
+
+def test_the_halves_check_does_not_refuse_an_honest_miscut(store):
+    """A real miscut is consistent along the border's length, so the check
+    must not cost the measurement it exists to protect."""
+    from card_reviewer.review.imaging.synthetic import achieved_centering
+
+    for kwargs in ({"h_centering": 72.0, "v_centering": 58.0},
+                   {"h_centering": 75.0}, {"v_centering": 70.0}):
+        spec = CardSpec(border_color=(20, 20, 20), **kwargs)
+        _, measurement = _measure(spec, store)
+        assert measurement.measurable, f"{kwargs} was refused"
+        truth_h, truth_v = achieved_centering(spec)
+        assert abs(measurement.horizontal - truth_h) <= 3.0
+        assert abs(measurement.vertical - truth_v) <= 3.0
