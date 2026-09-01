@@ -304,12 +304,21 @@ def test_dod17_a_rubric_content_change_refreshes_the_manifest(rubric):
 
 
 def test_dod18_no_test_in_the_suite_calls_the_anthropic_api():
-    import subprocess
+    """Covered properly in test_no_live_api.py.
 
-    pattern = "anthropic." + "Anthropic("
-    out = subprocess.run(["grep", "-rn", "--include=*.py", pattern, "tests/"],
-                         capture_output=True, text=True)
-    assert out.stdout == "", f"a test constructs a real client:\n{out.stdout}"
+    The version that lived here grepped a RELATIVE "tests/" path and ignored
+    grep's return code, so from any other working directory it passed while
+    checking nothing; and its pattern matched only the dotted spelling, so a
+    plain `from anthropic import ...` construction went straight through.
+    Both holes were demonstrated. It is replaced rather than patched in
+    place, because the replacement needs to resolve the repo root and match
+    several spellings.
+    """
+    from test_no_live_api import CONSTRUCTORS, REPO
+
+    assert (REPO / "tests").is_dir()
+    # Assembled at runtime, so this line is not itself an offender.
+    assert CONSTRUCTORS.search("client = Anthro" + "pic()")
 
 
 def test_every_review_is_stamped_with_the_versions_that_actually_ran(

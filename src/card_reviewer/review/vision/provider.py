@@ -104,6 +104,19 @@ def parse_assessment(
         )
 
     for finding in assessment.findings:
+        # A category we do not recognise must refuse the RESPONSE, never
+        # quietly drop the FINDING. resolve_relevance decides relevance from
+        # `category in CATEGORIES`, so an unrecognised one used to erase the
+        # finding from the verdict, the score and the grade alike — a
+        # confidently observed crease reported as "Surface" shipped as a
+        # PASS at grade 10. Refusing routes to the provider-failure path,
+        # where the categories go unassessed and the card cannot PASS.
+        if finding.category not in CATEGORIES:
+            raise ProviderContractError(
+                f"finding reports category {finding.category!r}, which is not "
+                f"one of {sorted(CATEGORIES)} — it cannot be scoped to a "
+                "rubric rule, and dropping it would hide a defect"
+            )
         unknown = set(finding.evidence_artifact_ids) - allowed_artifact_ids
         if unknown:
             raise ProviderContractError(
