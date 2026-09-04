@@ -37,9 +37,18 @@ REGIONS = ("top_left", "top_right", "bottom_left", "bottom_right", "center")
 #: in assembly is what would make a white-bordered card's corner whitening
 #: look HIGH — the centre is never bright — so the structural exemption
 #: would never fire end to end even though its unit test passed.
+#: Where each category's defects can occur, in the SAME vocabulary its
+#: producer uses. Edges were declared with the four corner names while
+#: edges.py emits top / bottom / left / right, so an edge anomaly looked up
+#: detectability that existed only under corner keys and got NONE — below the
+#: promotion floor, so every edge finding was forced to `suspected` and I1's
+#: adequacy prong could never be satisfied for the whole category. Nothing
+#: failed loudly; the edge detectability that observability computed
+#: described regions no edge finding could ever be at.
 REGIONS_FOR_CATEGORY: dict[str, tuple[str, ...]] = {
     "corners": ("top_left", "top_right", "bottom_left", "bottom_right"),
-    "edges": ("top_left", "top_right", "bottom_left", "bottom_right"),
+    # An edge runs along a side, not around a corner.
+    "edges": ("top", "bottom", "left", "right"),
     "surface": REGIONS,
     "centering": ("center",),
 }

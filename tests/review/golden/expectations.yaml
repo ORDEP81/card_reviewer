@@ -17,9 +17,6 @@
     bottom_right.corners.fraying: high
     bottom_right.corners.rounding: high
     bottom_right.corners.whitening: low
-    bottom_right.edges.chipping: high
-    bottom_right.edges.roughness: high
-    bottom_right.edges.whitening: low
     bottom_right.surface.crease: high
     bottom_right.surface.dimples: high
     bottom_right.surface.gloss_break: high
@@ -27,12 +24,23 @@
     bottom_right.surface.print_lines: high
     bottom_right.surface.scratches: high
     bottom_right.surface.stains: high
+    center.centering.border_ratio: high
+    center.surface.crease: high
+    center.surface.dimples: high
+    center.surface.gloss_break: high
+    center.surface.paper_loss: high
+    center.surface.print_lines: high
+    center.surface.scratches: high
+    center.surface.stains: high
+    right.edges.chipping: high
+    right.edges.roughness: high
+    right.edges.whitening: high
+    top.edges.chipping: high
+    top.edges.roughness: high
+    top.edges.whitening: high
     top_left.corners.fraying: high
     top_left.corners.rounding: high
     top_left.corners.whitening: low
-    top_left.edges.chipping: high
-    top_left.edges.roughness: high
-    top_left.edges.whitening: low
     top_left.surface.crease: high
     top_left.surface.dimples: high
     top_left.surface.gloss_break: high
@@ -43,9 +51,7 @@
   surface_outlier: 30.0
   reason_codes:
     bottom_right.corners.whitening: WHITE_BORDER
-    bottom_right.edges.whitening: WHITE_BORDER
     top_left.corners.whitening: WHITE_BORDER
-    top_left.edges.whitening: WHITE_BORDER
   rendered_centering:
   - 50.0
   - 50.0
@@ -61,9 +67,6 @@
     bottom_right.corners.fraying: high
     bottom_right.corners.rounding: high
     bottom_right.corners.whitening: high
-    bottom_right.edges.chipping: high
-    bottom_right.edges.roughness: high
-    bottom_right.edges.whitening: high
     bottom_right.surface.crease: high
     bottom_right.surface.dimples: high
     bottom_right.surface.gloss_break: high
@@ -71,12 +74,23 @@
     bottom_right.surface.print_lines: high
     bottom_right.surface.scratches: high
     bottom_right.surface.stains: high
+    center.centering.border_ratio: high
+    center.surface.crease: high
+    center.surface.dimples: high
+    center.surface.gloss_break: high
+    center.surface.paper_loss: high
+    center.surface.print_lines: high
+    center.surface.scratches: high
+    center.surface.stains: high
+    right.edges.chipping: high
+    right.edges.roughness: high
+    right.edges.whitening: high
+    top.edges.chipping: high
+    top.edges.roughness: high
+    top.edges.whitening: high
     top_left.corners.fraying: high
     top_left.corners.rounding: high
     top_left.corners.whitening: high
-    top_left.edges.chipping: high
-    top_left.edges.roughness: high
-    top_left.edges.whitening: high
     top_left.surface.crease: high
     top_left.surface.dimples: high
     top_left.surface.gloss_break: high
@@ -100,9 +114,6 @@
     bottom_right.corners.fraying: high
     bottom_right.corners.rounding: high
     bottom_right.corners.whitening: high
-    bottom_right.edges.chipping: high
-    bottom_right.edges.roughness: high
-    bottom_right.edges.whitening: high
     bottom_right.surface.crease: high
     bottom_right.surface.dimples: high
     bottom_right.surface.gloss_break: high
@@ -110,12 +121,23 @@
     bottom_right.surface.print_lines: high
     bottom_right.surface.scratches: high
     bottom_right.surface.stains: high
+    center.centering.border_ratio: low
+    center.surface.crease: high
+    center.surface.dimples: high
+    center.surface.gloss_break: high
+    center.surface.paper_loss: high
+    center.surface.print_lines: high
+    center.surface.scratches: high
+    center.surface.stains: high
+    right.edges.chipping: high
+    right.edges.roughness: high
+    right.edges.whitening: high
+    top.edges.chipping: high
+    top.edges.roughness: high
+    top.edges.whitening: high
     top_left.corners.fraying: high
     top_left.corners.rounding: high
     top_left.corners.whitening: high
-    top_left.edges.chipping: high
-    top_left.edges.roughness: high
-    top_left.edges.whitening: high
     top_left.surface.crease: high
     top_left.surface.dimples: high
     top_left.surface.gloss_break: high
@@ -124,7 +146,8 @@
     top_left.surface.scratches: high
     top_left.surface.stains: high
   surface_outlier: 6.5
-  reason_codes: {}
+  reason_codes:
+    center.centering.border_ratio: BORDERLESS_DESIGN
 - file: glare_heavy.png
   synthetic: true
   preflight_usable: true
@@ -137,9 +160,6 @@
     bottom_right.corners.fraying: low
     bottom_right.corners.rounding: low
     bottom_right.corners.whitening: low
-    bottom_right.edges.chipping: low
-    bottom_right.edges.roughness: low
-    bottom_right.edges.whitening: low
     bottom_right.surface.crease: low
     bottom_right.surface.dimples: low
     bottom_right.surface.gloss_break: low
@@ -147,12 +167,23 @@
     bottom_right.surface.print_lines: low
     bottom_right.surface.scratches: low
     bottom_right.surface.stains: low
+    center.centering.border_ratio: high
+    center.surface.crease: high
+    center.surface.dimples: high
+    center.surface.gloss_break: high
+    center.surface.paper_loss: high
+    center.surface.print_lines: high
+    center.surface.scratches: high
+    center.surface.stains: high
+    right.edges.chipping: high
+    right.edges.roughness: high
+    right.edges.whitening: high
+    top.edges.chipping: high
+    top.edges.roughness: high
+    top.edges.whitening: high
     top_left.corners.fraying: low
     top_left.corners.rounding: low
     top_left.corners.whitening: low
-    top_left.edges.chipping: low
-    top_left.edges.roughness: low
-    top_left.edges.whitening: low
     top_left.surface.crease: low
     top_left.surface.dimples: low
     top_left.surface.gloss_break: low
@@ -165,9 +196,6 @@
     bottom_right.corners.fraying: GLARE
     bottom_right.corners.rounding: GLARE
     bottom_right.corners.whitening: WHITE_BORDER
-    bottom_right.edges.chipping: GLARE
-    bottom_right.edges.roughness: GLARE
-    bottom_right.edges.whitening: WHITE_BORDER
     bottom_right.surface.crease: GLARE
     bottom_right.surface.dimples: GLARE
     bottom_right.surface.gloss_break: GLARE
@@ -178,9 +206,6 @@
     top_left.corners.fraying: GLARE
     top_left.corners.rounding: GLARE
     top_left.corners.whitening: WHITE_BORDER
-    top_left.edges.chipping: GLARE
-    top_left.edges.roughness: GLARE
-    top_left.edges.whitening: WHITE_BORDER
     top_left.surface.crease: GLARE
     top_left.surface.dimples: GLARE
     top_left.surface.gloss_break: GLARE
@@ -203,9 +228,6 @@
     bottom_right.corners.fraying: high
     bottom_right.corners.rounding: high
     bottom_right.corners.whitening: low
-    bottom_right.edges.chipping: high
-    bottom_right.edges.roughness: high
-    bottom_right.edges.whitening: low
     bottom_right.surface.crease: high
     bottom_right.surface.dimples: high
     bottom_right.surface.gloss_break: high
@@ -213,12 +235,23 @@
     bottom_right.surface.print_lines: high
     bottom_right.surface.scratches: high
     bottom_right.surface.stains: high
+    center.centering.border_ratio: high
+    center.surface.crease: high
+    center.surface.dimples: high
+    center.surface.gloss_break: high
+    center.surface.paper_loss: high
+    center.surface.print_lines: high
+    center.surface.scratches: high
+    center.surface.stains: high
+    right.edges.chipping: high
+    right.edges.roughness: high
+    right.edges.whitening: high
+    top.edges.chipping: high
+    top.edges.roughness: high
+    top.edges.whitening: high
     top_left.corners.fraying: high
     top_left.corners.rounding: high
     top_left.corners.whitening: low
-    top_left.edges.chipping: high
-    top_left.edges.roughness: high
-    top_left.edges.whitening: low
     top_left.surface.crease: high
     top_left.surface.dimples: high
     top_left.surface.gloss_break: high
@@ -229,9 +262,7 @@
   surface_outlier: 29.5
   reason_codes:
     bottom_right.corners.whitening: WHITE_BORDER
-    bottom_right.edges.whitening: WHITE_BORDER
     top_left.corners.whitening: WHITE_BORDER
-    top_left.edges.whitening: WHITE_BORDER
   rendered_centering:
   - 50.0
   - 50.0
@@ -247,9 +278,6 @@
     bottom_right.corners.fraying: high
     bottom_right.corners.rounding: high
     bottom_right.corners.whitening: low
-    bottom_right.edges.chipping: high
-    bottom_right.edges.roughness: high
-    bottom_right.edges.whitening: low
     bottom_right.surface.crease: high
     bottom_right.surface.dimples: high
     bottom_right.surface.gloss_break: high
@@ -257,12 +285,23 @@
     bottom_right.surface.print_lines: high
     bottom_right.surface.scratches: high
     bottom_right.surface.stains: high
+    center.centering.border_ratio: high
+    center.surface.crease: high
+    center.surface.dimples: high
+    center.surface.gloss_break: high
+    center.surface.paper_loss: high
+    center.surface.print_lines: high
+    center.surface.scratches: high
+    center.surface.stains: high
+    right.edges.chipping: high
+    right.edges.roughness: high
+    right.edges.whitening: high
+    top.edges.chipping: high
+    top.edges.roughness: high
+    top.edges.whitening: high
     top_left.corners.fraying: high
     top_left.corners.rounding: high
     top_left.corners.whitening: low
-    top_left.edges.chipping: high
-    top_left.edges.roughness: high
-    top_left.edges.whitening: low
     top_left.surface.crease: low
     top_left.surface.dimples: low
     top_left.surface.gloss_break: low
@@ -273,9 +312,7 @@
   surface_outlier: 32.4
   reason_codes:
     bottom_right.corners.whitening: WHITE_BORDER
-    bottom_right.edges.whitening: WHITE_BORDER
     top_left.corners.whitening: WHITE_BORDER
-    top_left.edges.whitening: WHITE_BORDER
     top_left.surface.crease: GLARE
     top_left.surface.dimples: GLARE
     top_left.surface.gloss_break: GLARE
@@ -298,9 +335,6 @@
     bottom_right.corners.fraying: high
     bottom_right.corners.rounding: high
     bottom_right.corners.whitening: low
-    bottom_right.edges.chipping: high
-    bottom_right.edges.roughness: high
-    bottom_right.edges.whitening: low
     bottom_right.surface.crease: high
     bottom_right.surface.dimples: high
     bottom_right.surface.gloss_break: high
@@ -308,12 +342,23 @@
     bottom_right.surface.print_lines: high
     bottom_right.surface.scratches: high
     bottom_right.surface.stains: high
+    center.centering.border_ratio: high
+    center.surface.crease: high
+    center.surface.dimples: high
+    center.surface.gloss_break: high
+    center.surface.paper_loss: high
+    center.surface.print_lines: high
+    center.surface.scratches: high
+    center.surface.stains: high
+    right.edges.chipping: high
+    right.edges.roughness: high
+    right.edges.whitening: high
+    top.edges.chipping: high
+    top.edges.roughness: high
+    top.edges.whitening: high
     top_left.corners.fraying: high
     top_left.corners.rounding: high
     top_left.corners.whitening: low
-    top_left.edges.chipping: high
-    top_left.edges.roughness: high
-    top_left.edges.whitening: low
     top_left.surface.crease: high
     top_left.surface.dimples: high
     top_left.surface.gloss_break: high
@@ -324,9 +369,7 @@
   surface_outlier: 2.0
   reason_codes:
     bottom_right.corners.whitening: WHITE_BORDER
-    bottom_right.edges.whitening: WHITE_BORDER
     top_left.corners.whitening: WHITE_BORDER
-    top_left.edges.whitening: WHITE_BORDER
   rendered_centering:
   - 50.0
   - 50.0
@@ -346,9 +389,6 @@
     bottom_right.corners.fraying: high
     bottom_right.corners.rounding: high
     bottom_right.corners.whitening: high
-    bottom_right.edges.chipping: high
-    bottom_right.edges.roughness: high
-    bottom_right.edges.whitening: high
     bottom_right.surface.crease: high
     bottom_right.surface.dimples: high
     bottom_right.surface.gloss_break: high
@@ -356,12 +396,23 @@
     bottom_right.surface.print_lines: high
     bottom_right.surface.scratches: high
     bottom_right.surface.stains: high
+    center.centering.border_ratio: high
+    center.surface.crease: high
+    center.surface.dimples: high
+    center.surface.gloss_break: high
+    center.surface.paper_loss: high
+    center.surface.print_lines: high
+    center.surface.scratches: high
+    center.surface.stains: high
+    right.edges.chipping: high
+    right.edges.roughness: high
+    right.edges.whitening: high
+    top.edges.chipping: high
+    top.edges.roughness: high
+    top.edges.whitening: high
     top_left.corners.fraying: high
     top_left.corners.rounding: high
     top_left.corners.whitening: high
-    top_left.edges.chipping: high
-    top_left.edges.roughness: high
-    top_left.edges.whitening: high
     top_left.surface.crease: high
     top_left.surface.dimples: high
     top_left.surface.gloss_break: high
@@ -385,9 +436,6 @@
     bottom_right.corners.fraying: high
     bottom_right.corners.rounding: high
     bottom_right.corners.whitening: high
-    bottom_right.edges.chipping: high
-    bottom_right.edges.roughness: high
-    bottom_right.edges.whitening: high
     bottom_right.surface.crease: high
     bottom_right.surface.dimples: high
     bottom_right.surface.gloss_break: high
@@ -395,12 +443,23 @@
     bottom_right.surface.print_lines: high
     bottom_right.surface.scratches: high
     bottom_right.surface.stains: high
+    center.centering.border_ratio: high
+    center.surface.crease: high
+    center.surface.dimples: high
+    center.surface.gloss_break: high
+    center.surface.paper_loss: high
+    center.surface.print_lines: high
+    center.surface.scratches: high
+    center.surface.stains: high
+    right.edges.chipping: high
+    right.edges.roughness: high
+    right.edges.whitening: high
+    top.edges.chipping: high
+    top.edges.roughness: high
+    top.edges.whitening: high
     top_left.corners.fraying: low
     top_left.corners.rounding: low
     top_left.corners.whitening: low
-    top_left.edges.chipping: low
-    top_left.edges.roughness: low
-    top_left.edges.whitening: low
     top_left.surface.crease: low
     top_left.surface.dimples: low
     top_left.surface.gloss_break: low
@@ -413,9 +472,6 @@
     top_left.corners.fraying: OCCLUSION
     top_left.corners.rounding: OCCLUSION
     top_left.corners.whitening: OCCLUSION
-    top_left.edges.chipping: OCCLUSION
-    top_left.edges.roughness: OCCLUSION
-    top_left.edges.whitening: OCCLUSION
     top_left.surface.crease: OCCLUSION
     top_left.surface.dimples: OCCLUSION
     top_left.surface.gloss_break: OCCLUSION

@@ -66,8 +66,11 @@ CASES: dict[str, CardSpec] = {
     "occluded_corner.png": CardSpec(border_color=(20, 20, 20)),
 }
 
-#: Regions reported per case, so an expectation names the corner it is about.
-REPORTED_REGIONS = ("top_left", "bottom_right")
+#: Regions reported per case, so an expectation names the part it is about.
+#: One of each KIND — a corner, an edge, the centre — because the three
+#: categories use different region vocabularies and listing only corner names
+#: silently dropped every edge expectation when edges were renamed to sides.
+REPORTED_REGIONS = ("top_left", "bottom_right", "top", "right", "center")
 
 
 def _occlude(data: bytes) -> bytes:

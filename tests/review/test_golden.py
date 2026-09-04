@@ -147,3 +147,61 @@ def test_the_expectations_disclose_that_they_come_from_the_implementation():
     assert (GOLDEN / "generate.py").exists(), (
         "the fixtures cannot be regenerated, so `synthetic: true` is an "
         "unverifiable claim about opaque PNGs")
+
+
+def test_the_expectations_cover_every_category():
+    """The generator reports only a chosen set of regions, and the three
+    categories use DIFFERENT region vocabularies — corners are named for
+    corners, edges for sides, centering for the centre. Listing only corner
+    names silently deleted every edge expectation the day edges were renamed,
+    and nothing failed: the file simply got smaller.
+    """
+    from card_reviewer.review.taxonomy import CATEGORIES
+
+    seen = {
+        key.split(".")[1]
+        for case in CASES
+        for key in case.get("detectability", {})
+    }
+    missing = set(CATEGORIES) - seen - {"centering"}
+    assert not missing, (
+        f"no golden case asserts detectability for {sorted(missing)} — the "
+        "generator's REPORTED_REGIONS probably no longer names a region that "
+        "category uses")
+
+
+def test_the_generator_reports_a_region_from_every_category():
+    """Checked on the CONSTANT, not only on the file it produced.
+
+    The committed expectations can be correct while the generator that
+    rebuilds them has quietly stopped covering a category — and the loss only
+    appears the next time someone regenerates, as a file that got smaller
+    with no test failing.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "golden_generate", GOLDEN / "generate.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    from card_reviewer.review.imaging.observability import REGIONS_FOR_CATEGORY
+    from card_reviewer.review.taxonomy import CATEGORIES
+
+    reported = set(module.REPORTED_REGIONS)
+    for category in CATEGORIES:
+        assert reported & set(REGIONS_FOR_CATEGORY[category]), (
+            f"REPORTED_REGIONS names no region belonging to {category}, so "
+            "regenerating would drop that category entirely")
+
+
+def test_the_expectations_name_regions_the_engine_actually_uses():
+    """A region in the file that the engine never emits is an expectation
+    nothing can ever check."""
+    from card_reviewer.review.imaging.observability import REGIONS_FOR_CATEGORY
+
+    for case in CASES:
+        for key in case.get("detectability", {}):
+            region, category, _defect = key.split(".")
+            assert region in REGIONS_FOR_CATEGORY[category], (
+                f"{case['file']}: {category} has no region {region!r}")
