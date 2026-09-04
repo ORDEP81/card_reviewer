@@ -34,11 +34,22 @@ __all__ = [
 ]
 
 NORM_W, NORM_H = 600, 840
-#: Confidence is now rectangularity alone, so the floor is a statement about
-#: SHAPE. Measured: a real card comes back at 0.999 whatever fraction of the
-#: frame it occupies, while a cross-shaped blob reaches only 0.63. 0.75 sits
-#: in that gap with room on both sides.
-MIN_BOUNDARY_CONFIDENCE = 0.75
+#: Confidence is rectangularity, and this floor now catches only DEGENERATE
+#: detections — not merely ragged ones.
+#:
+#: 0.75 was set when rectangularity was the sole card-likeness signal and the
+#: only evidence was synthetic, where a card scores 0.999 and a cross 0.63.
+#: On real photographs the two populations overlap completely: genuine cards
+#: run 0.611 to 1.000, because a flood mask over a real card picks up
+#: shadows, sleeve edges and a gradient backdrop. A floor high enough to
+#: exclude the cross excluded real cards — including one whose bounding
+#: aspect was 0.714, which is a textbook trading card.
+#:
+#: Card-likeness is now carried by ASPECT, which rejects the cross, a square
+#: and an off-shape rectangle outright and does not care how ragged the mask
+#: is. This is left low enough to admit a ragged card and still refuse a
+#: detection that has fallen apart.
+MIN_BOUNDARY_CONFIDENCE = 0.55
 #: A photographed card always sits against something. A contour covering
 #: essentially the whole frame is the frame, not a card — random noise
 #: produces exactly that, and without this guard it scored full confidence.
@@ -47,7 +58,17 @@ MAX_AREA_RATIO = 0.92
 #: How close in intensity a pixel must be to the backdrop to count as more
 #: backdrop. Small, because a card only slightly darker than its surroundings
 #: is still a distinct surface.
-BACKGROUND_TOLERANCE = 6
+#: Floor and ceiling on the background tolerance, which is otherwise derived
+#: from the image (see _background_tolerance). The floor keeps the synthetic
+#: corpus behaving exactly as before — a uniform backdrop needs no slack. The
+#: ceiling stops a chaotic background flooding across the card's own edge.
+MIN_BACKGROUND_TOLERANCE = 6
+MAX_BACKGROUND_TOLERANCE = 60
+
+#: How many robust standard deviations of the frame's outer ring the flood is
+#: allowed to span. Three covers ordinary variation in a wall, worktop or
+#: shadow without reaching the card.
+BACKGROUND_TOLERANCE_SIGMAS = 3.0
 BORDER_BAND_PX = 24
 #: A border band this uniform can serve as a centering reference. Measured
 #: robustly (see _segment_border) so one glared corner does not disqualify
@@ -63,6 +84,14 @@ FILLS_FRAME_AREA_RATIO = 0.92
 #: rather than a difference, since the two readings are being ranked against
 #: each other rather than against an absolute idea of "uniform".
 BORDER_UNIFORMITY_MARGIN = 3.0
+
+#: Above this share of a card-shaped frame, a region the ambiguity check
+#: flagged is the ARTWORK inside a card that fills its frame, rather than a
+#: card sitting on a backdrop. A card's artwork panel is most of the card,
+#: while a photographed card leaves backdrop around it. Measured: the
+#: artwork panel of a frame-filling card is 0.787 of the frame, a borderless
+#: card on a backdrop 0.593.
+FILLS_FRAME_INNER_RATIO = 0.70
 
 #: A trading card is 2.5 x 3.5 inches.
 CARD_ASPECT = 2.5 / 3.5
@@ -140,11 +169,25 @@ def analyze(
     matrix = cv2.getPerspectiveTransform(quad.astype(np.float32), dst)
     normalized = cv2.warpPerspective(img, matrix, (NORM_W, NORM_H))
     mask, reliable = _segment_border(normalized)
-    if reliable and _boundary_may_be_the_artwork(img, quad, cv2):
-        # The frame has a markedly cleaner border than the region we
-        # detected, so the region may be the artwork inside a cropped card.
-        # Centering must not describe a rectangle we are unsure of.
-        reliable = False
+    if _boundary_may_be_the_artwork(img, quad, cv2):
+        # Two different situations reach here, and the frame decides which.
+        # If the frame is card-shaped and the region we found is most of it,
+        # the card fills the photograph and what we detected is its artwork —
+        # so the frame is the card, and refusing to measure at all would lose
+        # an ordinary listing. Otherwise the reading stays ambiguous and the
+        # border reference is withheld rather than guessed at.
+        height, width = img.shape[:2]
+        inner = _quad_area(quad) / float(height * width)
+        card_shaped = abs(_aspect(width, height) - CARD_ASPECT) <= ASPECT_TOLERANCE
+        if card_shaped and inner > FILLS_FRAME_INNER_RATIO:
+            quad = _order(np.float32([[0, 0], [width - 1, 0],
+                                      [width - 1, height - 1], [0, height - 1]]))
+            matrix = cv2.getPerspectiveTransform(quad.astype(np.float32), dst)
+            normalized = cv2.warpPerspective(img, matrix, (NORM_W, NORM_H))
+            mask, reliable = _segment_border(normalized)
+        else:
+            reliable = False
+
 
     # `face/` is geometry's own directory; measurement crops live under
     # corners/, edges/ and surface/ and are invalidated by their own stage.
@@ -192,6 +235,16 @@ def _detect_quad(img: np.ndarray, cv2) -> tuple[np.ndarray | None, float]:
 
     area_ratio = area / (img.shape[0] * img.shape[1])
     if area_ratio > MAX_AREA_RATIO:
+        # The flood found essentially no background. Either it failed, or the
+        # card really does fill the frame — a seller cropping to the card is
+        # ordinary, and then the boundary is simply not in the picture and
+        # the frame IS the card. The aspect ratio decides which: a photograph
+        # cropped to a card has the card's shape, and a wall does not.
+        height, width = img.shape[:2]
+        if abs(_aspect(width, height) - CARD_ASPECT) <= ASPECT_TOLERANCE:
+            frame = np.float32([[0, 0], [width - 1, 0],
+                                [width - 1, height - 1], [0, height - 1]])
+            return _order(frame), 1.0
         return None, 0.1
 
     rect = cv2.minAreaRect(largest)
@@ -350,10 +403,14 @@ def _foreground_mask(img: np.ndarray, cv2) -> np.ndarray:
     blurred = cv2.GaussianBlur(img, (5, 5), 0)
     filled = np.zeros((height + 2, width + 2), np.uint8)
 
-    # Tight tolerance: a backdrop only a little darker than the card is still
-    # a different surface, and leaking across that step would swallow the
-    # card entirely.
-    tolerance = (BACKGROUND_TOLERANCE,) * 3
+    # Derived from THIS image, not fixed. A fixed +/-6 is generous for a
+    # synthetic backdrop and hopeless for a real one: on 28 real listing
+    # photographs it found almost no background at all, and 24 of 26 raw
+    # cards were refused before anything was measured. Raising it globally
+    # is not the answer either — at 12 it swallows a card whose backdrop and
+    # border are ten levels apart. How much slack is safe is a property of
+    # the background in front of us.
+    tolerance = (_background_tolerance(img),) * 3
     for seed in ((0, 0), (width - 1, 0), (0, height - 1), (width - 1, height - 1)):
         # FIXED_RANGE compares each candidate against the SEED, not against
         # its neighbour. With a floating range the fill walks up the blur
@@ -366,6 +423,28 @@ def _foreground_mask(img: np.ndarray, cv2) -> np.ndarray:
 
     foreground = np.where(filled[1:-1, 1:-1] > 0, 0, 255).astype(np.uint8)
     return cv2.morphologyEx(foreground, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
+
+
+def _background_tolerance(img: np.ndarray) -> int:
+    """How much this image's own background varies, as a flood tolerance.
+
+    Measured from the frame's outer ring, which is background in any framing
+    that has some. A uniform synthetic backdrop reads ~0 and floors at
+    MIN_BACKGROUND_TOLERANCE, so the synthetic corpus is untouched; a wall or
+    worktop reads 15-20 and gets the slack it needs to be crossed.
+    """
+    gray = img.mean(axis=2)
+    height, width = gray.shape
+    band = max(2, int(min(height, width) * 0.02))
+    ring = np.concatenate([
+        gray[:band, :].ravel(), gray[-band:, :].ravel(),
+        gray[:, :band].ravel(), gray[:, -band:].ravel(),
+    ])
+    median = np.median(ring)
+    spread = 1.4826 * float(np.median(np.abs(ring - median)))
+    return int(min(MAX_BACKGROUND_TOLERANCE,
+                   max(MIN_BACKGROUND_TOLERANCE,
+                       BACKGROUND_TOLERANCE_SIGMAS * spread)))
 
 
 def _order(pts: np.ndarray) -> np.ndarray:
