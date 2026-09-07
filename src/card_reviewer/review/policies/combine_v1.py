@@ -1,0 +1,336 @@
+"""Verdict resolution and the three invariants (spec §14, §15).
+
+The four states are mutually exclusive and evaluated in STRICT ORDER — first
+match wins. Stating them as independent conditions would leave a card with
+both an observed crease and PARTIAL coverage matching two rows at once.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from pydantic import BaseModel, Field
+
+from ..enums import (
+    Authority, Coverage, FindingState, Psa10Candidate, ReviewConfidence,
+    Scale, Verdict,
+)
+from ..findings import Finding, i3_satisfied
+from ..versions import COMBINATION_POLICY_VERSION
+
+if TYPE_CHECKING:
+    from ..fusion import FusedFinding
+
+__all__ = [
+    "COMBINATION_POLICY_VERSION",
+    "CombinedResult",
+    "combine",
+    "MIN_DETECTABILITY_FOR_REJECT",
+    "REJECT_CONFIDENCE_FLOOR",
+    "VerdictResult",
+    "decide_verdict",
+    "i1_satisfied",
+]
+
+MIN_DETECTABILITY_FOR_REJECT = Scale.MODERATE
+
+# Spec §15 declares the floor as HIGH on the shared scale. Findings carry a
+# float confidence, so the mapping is stated once here rather than a bare
+# 0.8 appearing as an unexplained magic number.
+CONFIDENCE_BANDS: dict[Scale, float] = {
+    Scale.LOW: 0.0,
+    Scale.MODERATE: 0.5,
+    Scale.HIGH: 0.8,
+}
+REJECT_CONFIDENCE_FLOOR = CONFIDENCE_BANDS[Scale.HIGH]
+
+
+class VerdictResult(BaseModel):
+    verdict: Verdict
+    psa10_candidate: Psa10Candidate
+    reasons: list[str] = Field(default_factory=list)
+    policy_version: str = COMBINATION_POLICY_VERSION
+
+
+_CANDIDATE: dict[Verdict, Psa10Candidate] = {
+    Verdict.PASS: Psa10Candidate.YES,
+    Verdict.REVIEW: Psa10Candidate.UNCERTAIN,
+    Verdict.REJECT: Psa10Candidate.NO,
+    Verdict.INSUFFICIENT_IMAGES: Psa10Candidate.UNKNOWN,
+}
+
+
+def i1_satisfied(
+    finding: Finding,
+    detectability: Scale,
+    others: list[tuple[Finding, Scale]],
+    *,
+    material_contradiction: bool = False,
+) -> bool:
+    """I1 — ambiguity never rejects.
+
+    The adequacy prong binds the ASSERTING finding rather than hoping for a
+    contradicting one: on a badly photographed card no contradicting finding
+    could reach MODERATE, so a contradiction-only test would weaken exactly
+    where it is needed most.
+    """
+    if finding.state is not FindingState.OBSERVED:
+        return False
+    if not i3_satisfied(finding):
+        return False
+    if detectability < MIN_DETECTABILITY_FOR_REJECT:
+        return False
+    if finding.confidence < REJECT_CONFIDENCE_FLOOR:
+        return False
+    # Carried from fusion, which saw the raw sources. Fusion selects the
+    # STRONGEST state, so by the time a fused finding reaches here the
+    # contradicting NOT_OBSERVED source is no longer in `others` — without
+    # this flag a contested defect would reject as though uncontested.
+    if material_contradiction:
+        return False
+    return not _material_contradiction(finding, others)
+
+
+def _at_adopted_state(fused) -> Finding:
+    """The fused finding carrying only the evidence that argues for its state.
+
+    A source that reached a WEAKER state cannot vouch for a stronger one, and
+    its refs are what laundered I3: assembly attaches surface_original to
+    every surface defect type whether or not it shows anything, so a merely
+    SUSPECTED neighbour donated an unenhanced ref to an enhancement-only
+    OBSERVED finding and the union satisfied I3 every time.
+    """
+    finding = fused.as_finding()
+    supporting = [
+        ref
+        for source in fused.sources if source.state is fused.state
+        for ref in source.evidence
+    ]
+    return finding.model_copy(update={"evidence": supporting or finding.evidence})
+
+
+def _material_contradiction(
+    finding: Finding, others: list[tuple[Finding, Scale]]
+) -> bool:
+    for other, other_detectability in others:
+        # The category matters as much as the defect type: `whitening`
+        # exists in both corners and edges, and a corner box overlaps the top
+        # edge strip. fusion._correlates already compares the pair.
+        if other is finding or (
+            (other.category, other.defect_type)
+            != (finding.category, finding.defect_type)
+        ):
+            continue
+        if finding.location is None or other.location is None:
+            continue
+        if not finding.location.overlaps(other.location):
+            continue
+        if (
+            other.state is FindingState.NOT_OBSERVED
+            and other_detectability >= MIN_DETECTABILITY_FOR_REJECT
+        ):
+            return True
+        if other.state is not finding.state and other.producer is not finding.producer:
+            return True
+    return False
+
+
+def decide_verdict(
+    findings: list[tuple[Finding, Authority, Scale]],
+    coverage: Coverage,
+    *,
+    ambiguity: bool,
+    contradicted: set[int] | None = None,
+) -> VerdictResult:
+    others = [(f, d) for f, _, d in findings]
+    contradicted = contradicted or set()
+    reasons: list[str] = []
+
+    # Rule 1 — REJECT. A confidently observed disqualifier is knowledge, not
+    # absence of it, so it outranks inadequate coverage: a missing back bars
+    # passing, never rejecting.
+    for finding, authority, detectability in findings:
+        if not finding.psa10_relevant or authority is not Authority.BINDING:
+            continue
+        if i1_satisfied(
+            finding, detectability, others,
+            material_contradiction=id(finding) in contradicted,
+        ):
+            return _result(
+                Verdict.REJECT,
+                [f"{finding.category}/{finding.defect_type} observed and "
+                 "I1-satisfying"],
+            )
+
+    # Rule 2 — INSUFFICIENT_IMAGES.
+    if coverage is Coverage.INADEQUATE:
+        return _result(Verdict.INSUFFICIENT_IMAGES, ["coverage INADEQUATE"])
+
+    # Rule 3 — REVIEW. Includes an observed disqualifier that FAILS I1:
+    # something looked like a defect and could not be established. That is an
+    # unresolved concern, not an absence of one, and must never reach PASS.
+    if coverage is Coverage.PARTIAL:
+        reasons.append("coverage PARTIAL")
+    for finding, _authority, _d in findings:
+        if not finding.psa10_relevant:
+            continue
+        if finding.state is FindingState.OBSERVED:
+            reasons.append(
+                f"{finding.category}/{finding.defect_type} observed but not "
+                "adequately evidenced to reject"
+            )
+        elif finding.state is FindingState.SUSPECTED:
+            reasons.append(f"{finding.category}/{finding.defect_type} suspected")
+    if ambiguity:
+        reasons.append("unresolved ambiguity")
+    if reasons:
+        return _result(Verdict.REVIEW, reasons)
+
+    # Rule 4 — otherwise. Reached only with SUFFICIENT coverage; stating it
+    # as `otherwise` is what makes the function total.
+    return _result(Verdict.PASS, ["coverage SUFFICIENT, no disqualifier"])
+
+
+def _result(verdict: Verdict, reasons: list[str]) -> VerdictResult:
+    return VerdictResult(
+        verdict=verdict, psa10_candidate=_CANDIDATE[verdict], reasons=reasons
+    )
+
+
+class CombinedResult(BaseModel):
+    """The fused verdict (stub — Task 35)."""
+
+    verdict: Verdict
+    psa10_candidate: Psa10Candidate
+    psa10_rank_score: int | None = None
+    rankable: bool = False
+    estimated_psa_grade: str | None = None
+    review_confidence: ReviewConfidence = ReviewConfidence.LOW
+    coverage: Coverage = Coverage.INADEQUATE
+    #: Raw, per-producer findings retained for calibration.
+    findings: list[Finding] = Field(default_factory=list)
+    #: The fused view scoring and the verdict actually consumed.
+    fused: list["FusedFinding"] = Field(default_factory=list)
+    reasons: list[str] = Field(default_factory=list)
+    vision_present: bool = False
+    policy_version: str = COMBINATION_POLICY_VERSION
+
+
+def combine(
+    heuristic,
+    vision,
+    coverage,
+    *,
+    card_context_known: bool,
+    scoped_rules: list,
+    manifest_index: dict | None = None,
+    detectability: dict | None = None,
+    image_roles: dict | None = None,
+    required_face_missing: bool = False,
+) -> CombinedResult:
+    """Fuse both producers' findings into one verdict.
+
+    The order is load-bearing:
+
+      1. Resolve provider findings against the manifest, so provenance
+         survives the round trip.
+      2. Fuse across producers, so one physical defect penalizes once and
+         I3 sees the union of everything supporting it.
+      3. Enforce I3, demoting enhancement-only observations before anything
+         can act on them.
+      4. Resolve each fused finding to its matched rules and authority,
+         which also decides psa10_relevant.
+      5. Decide the verdict, then score with I1-awareness.
+    """
+    from ..findings import enforce_i3
+    from ..fusion import fuse
+    from ..assembly import face_of_finding, region_of_finding
+    from ..heuristic import detectability_for
+    from ..relevance import resolve_relevance
+    from ..vision.provider import resolve_vision_findings
+    from .scoring_v1 import estimated_grade, rank_score, review_confidence
+
+    raw: list[Finding] = list(heuristic.findings)
+    if vision is not None:
+        raw.extend(resolve_vision_findings(vision, manifest_index or {}))
+
+    # Fuse BEFORE enforcing I3, so the invariant is evaluated over the union
+    # of a defect's evidence. Running I3 first would demote a finding one
+    # producer saw only under enhancement even when the other saw it plainly.
+    fused = fuse(raw, image_roles)
+    # I3 is judged per SOURCE, and only against sources that reached the
+    # state being claimed. Running it over the fused finding's evidence
+    # UNION let any co-located finding's unenhanced ref launder an
+    # enhancement-only one — and assembly attaches surface_original to every
+    # surface defect type whether or not it shows anything, so the union
+    # always contained one. Restricting to sources AT the adopted state is
+    # what keeps the original reason for fusing first (a producer that saw
+    # the defect plainly should not be demoted because another only saw it
+    # enhanced) without letting a mere SUSPECTED neighbour vouch for an
+    # OBSERVED conclusion.
+    checked = enforce_i3([_at_adopted_state(f) for f in fused])
+    fused = [
+        f.model_copy(update={"state": c.state,
+                             "demotion_reason": c.demotion_reason})
+        for f, c in zip(fused, checked)
+    ]
+
+    resolved = resolve_relevance([f.as_finding() for f in fused], scoped_rules)
+
+    detectability = detectability or {}
+    triples: list[tuple[Finding, Authority, Scale]] = [
+        (rf.finding, rf.authority,
+         # At the finding's OWN region: I1's adequacy prong is defined at the
+         # location that established the finding, not at the card's best one.
+         detectability_for(detectability, rf.finding.category,
+                            rf.finding.defect_type,
+                            region_of_finding(rf.finding),
+                            face_of_finding(rf.finding, image_roles)))
+        for rf in resolved
+    ]
+
+    # Contradictions are carried per finding so REJECT precedence cannot fire
+    # on a contested defect. `ambiguity` alone is consulted at row 3, which is
+    # too late — row 1 would already have rejected.
+    contradicted = {
+        id(rf.finding)
+        for rf, fu in zip(resolved, fused)
+        if fu.material_contradiction
+    }
+    disagreed = any(f.producers_disagreed for f in fused)
+    contradictions = [f for f in fused if f.material_contradiction]
+
+    result = decide_verdict(
+        triples, coverage.outcome, contradicted=contradicted,
+        ambiguity=bool(heuristic.unevaluable_reasons or disagreed),
+    )
+
+    # Scoring needs to know which findings actually cleared I1: only those
+    # get the hard floor, so an unresolved concern stays rankable.
+    others = [(f, d) for f, _, d in triples]
+    scored = [
+        (rf.finding, rf.authority,
+         i1_satisfied(rf.finding, scale, others,
+                      material_contradiction=id(rf.finding) in contradicted))
+        for rf, (_f, _a, scale) in zip(resolved, triples)
+    ]
+
+    return CombinedResult(
+        verdict=result.verdict, psa10_candidate=result.psa10_candidate,
+        psa10_rank_score=rank_score(scored, coverage.outcome),
+        rankable=coverage.rankable,
+        estimated_psa_grade=estimated_grade(scored, coverage.outcome),
+        review_confidence=review_confidence(
+            coverage.outcome, contradictions, disagreed, card_context_known,
+            required_face_missing=required_face_missing,
+        ),
+        coverage=coverage.outcome, findings=raw, fused=fused,
+        reasons=result.reasons, vision_present=vision is not None,
+    )
+
+
+# Resolve the forward reference now that FusedFinding is importable at
+# runtime — combine_v1 must remain importable before fusion exists.
+from ..fusion import FusedFinding  # noqa: E402
+
+CombinedResult.model_rebuild()

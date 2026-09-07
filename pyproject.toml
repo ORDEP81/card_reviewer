@@ -11,10 +11,14 @@ dependencies = [
     "imagehash>=4.3",
     "pillow>=11",
     "mlx-whisper>=0.4.3",
+    "opencv-python-headless>=4.10",
+    "numpy>=2.1",
+    "anthropic>=0.40",
 ]
 
 [project.scripts]
 card-knowledge = "card_reviewer.knowledge.cli:app"
+card-review = "card_reviewer.review.cli:app"
 
 [dependency-groups]
 dev = ["pytest>=8"]
@@ -26,5 +30,15 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/card_reviewer"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"src/card_reviewer/review/storage/schema.sql" = "card_reviewer/review/storage/schema.sql"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# A leaked sqlite connection is a real defect in a long-running screening
+# process, and it surfaces as a warning attributed to whichever unlucky test
+# was running when the collector ran. Fail on it instead.
+filterwarnings = [
+    "error::ResourceWarning",
+    "error::pytest.PytestUnraisableExceptionWarning",
+]
