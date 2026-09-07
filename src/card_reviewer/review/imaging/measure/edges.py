@@ -72,7 +72,12 @@ def measure_edges(
         # card, so its standard deviation described the design rather than
         # the condition and fired on clean cards.
         contrast = departure_from(img, (ys, xs), reference, border_mask)
-        if contrast > ANOMALY_CONTRAST:
+        # A boundary we assumed is not one we saw. This producer measures a
+        # departure from the card's BORDER, and with an assumed boundary the
+        # outermost pixels may be backdrop or holder — which is exactly where
+        # it measures. Crops still go to the vision layer; only the CONCLUSION
+        # is withheld, the same way centering already declines here.
+        if geometry.boundary_observed and contrast > ANOMALY_CONTRAST:
             result.anomalies.append(
                 {
                     "kind": "candidate", "region": name, "category": "edges",

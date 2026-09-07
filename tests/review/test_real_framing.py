@@ -20,6 +20,9 @@ Two independent causes, and both are fixed here:
   card is ordinary — and then the frame IS the card.
 """
 
+import tempfile
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -81,12 +84,44 @@ def test_a_varied_backdrop_gets_a_tolerance_that_can_cross_it():
 
 
 def test_the_tolerance_is_bounded_at_both_ends():
-    """Unbounded, a chaotic background would flood the card away."""
+    """Unbounded, a chaotic background floods the card away.
+
+    Asserted against ABSOLUTE values. The first version of this compared
+    against MIN_BACKGROUND_TOLERANCE and MAX_BACKGROUND_TOLERANCE — but the
+    function returns min(MAX, max(MIN, x)), so those held for every possible
+    value of both constants and the cap could be raised to 255 unnoticed.
+    That is the third tautology of this shape in this codebase.
+    """
     chaos = _textured_backdrop(400, 560, base=128, spread=90)
-    image = _decode(_card_on(chaos, margin=0.08))
-    tolerance = geometry._background_tolerance(image)
-    assert geometry.MIN_BACKGROUND_TOLERANCE <= tolerance
-    assert tolerance <= geometry.MAX_BACKGROUND_TOLERANCE
+    tolerance = geometry._background_tolerance(_decode(_card_on(chaos, 0.08)))
+    assert 6 <= tolerance <= 70, (
+        f"a chaotic backdrop produced a tolerance of {tolerance}; past about "
+        "70 the flood crosses a card's own border")
+
+    quiet = _decode(render_png(CardSpec(border_color=(20, 20, 20))))
+    assert geometry._background_tolerance(quiet) <= 10
+
+
+def test_a_card_survives_a_chaotic_backdrop():
+    """The consequence the cap exists for: without it the flood crosses the
+    card's edge and the card is lost entirely."""
+    import cv2
+
+    store = ArtifactStore(Path(tempfile.mkdtemp()))
+    chaos = _textured_backdrop(400, 560, base=128, spread=90)
+    data = _card_on(chaos, margin=0.08)
+    result = analyze(data, store, store.put_image(data))
+    assert result.usable, "a chaotic backdrop swallowed the card"
+
+
+def test_the_sigma_multiplier_stays_in_a_sane_band():
+    """Measured: a real backdrop's ring spread is 15-20, so three sigmas
+    lands near 50 and crosses it. Eight sigmas would hit the cap on every
+    photograph and make the derivation meaningless."""
+    assert 2.0 <= geometry.BACKGROUND_TOLERANCE_SIGMAS <= 4.0
+
+    varied = _decode(_card_on(_textured_backdrop(400, 560, 120, 18), 0.08))
+    assert 20 < geometry._background_tolerance(varied) < 70
 
 
 @pytest.mark.parametrize("spread", [8, 15, 25])

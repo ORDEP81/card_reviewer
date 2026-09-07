@@ -50,6 +50,11 @@ NORM_W, NORM_H = 600, 840
 #: is. This is left low enough to admit a ragged card and still refuse a
 #: detection that has fallen apart.
 MIN_BOUNDARY_CONFIDENCE = 0.55
+
+#: Reported when the frame is read as the card. Above the floor, so the card
+#: is still measured for what does not depend on the boundary — but distinct,
+#: so an assumed boundary is never mistaken for a confident one.
+ASSUMED_BOUNDARY_CONFIDENCE = 0.60
 #: A photographed card always sits against something. A contour covering
 #: essentially the whole frame is the frame, not a card — random noise
 #: produces exactly that, and without this guard it scored full confidence.
@@ -115,6 +120,16 @@ class GeometryResult(BaseModel):
     normalized_artifact_id: str | None = None
     border_mask_artifact_id: str | None = None
     has_reliable_border: bool = False
+    #: Was the card's boundary actually SEEN, or assumed?
+    #:
+    #: False when the flood found no background and the frame was read as the
+    #: card. That is often nearly right, but the outermost pixels are then a
+    #: strip of backdrop or holder the flood could not separate — and corners
+    #: and edges measure a departure from the card's BORDER, which is exactly
+    #: where those pixels are. Measured on the real corpus: four cards a
+    #: human labelled clean emitted severe corner and edge anomalies read off
+    #: the photograph's own edges.
+    boundary_observed: bool = True
     version: str = GEOMETRY_VERSION
 
     @property
@@ -160,6 +175,7 @@ def analyze(
         return GeometryResult(boundary_confidence=0.0)
 
     quad, confidence = _detect_quad(img, cv2)
+    observed = confidence != ASSUMED_BOUNDARY_CONFIDENCE
     if quad is None or confidence < MIN_BOUNDARY_CONFIDENCE:
         # Decline geometry-dependent work rather than producing plausible
         # numbers from a bad quad.
@@ -185,6 +201,7 @@ def analyze(
             matrix = cv2.getPerspectiveTransform(quad.astype(np.float32), dst)
             normalized = cv2.warpPerspective(img, matrix, (NORM_W, NORM_H))
             mask, reliable = _segment_border(normalized)
+            observed = False
         else:
             reliable = False
 
@@ -204,6 +221,7 @@ def analyze(
             cv2.imencode(".png", mask)[1].tobytes(),
         ),
         has_reliable_border=reliable,
+        boundary_observed=observed,
     )
 
 
@@ -244,7 +262,10 @@ def _detect_quad(img: np.ndarray, cv2) -> tuple[np.ndarray | None, float]:
         if abs(_aspect(width, height) - CARD_ASPECT) <= ASPECT_TOLERANCE:
             frame = np.float32([[0, 0], [width - 1, 0],
                                 [width - 1, height - 1], [0, height - 1]])
-            return _order(frame), 1.0
+            # Confidence 1.0 would claim certainty about a boundary that was
+            # never seen. The caller is told it is assumed, and the
+            # border-relative producers stand down.
+            return _order(frame), ASSUMED_BOUNDARY_CONFIDENCE
         return None, 0.1
 
     rect = cv2.minAreaRect(largest)
