@@ -107,11 +107,31 @@ def test_two_producers_on_the_same_face_still_fuse():
     assert len(fused[0].sources) == 2
 
 
-def test_fusion_without_roles_still_works():
-    """Roles are optional: callers that do not have them must not crash, and
-    must not silently start merging across faces either."""
+def test_fusion_without_roles_does_not_merge_across_photographs():
+    """`>= 1` asserted nothing — it held whether fusion merged or not.
+
+    Without a role map `_face_of` returns None for both findings, and
+    `None != None` is false, so two findings from DIFFERENT photographs
+    correlated and merged: exactly the bug the face dimension exists to
+    prevent, still reachable through every caller that has no roles.
+
+    Merging requires positive evidence that two findings are the same
+    thing. Different images with no map to say they are the same face is
+    not that evidence.
+    """
     fused = fuse([_finding("front-hash"), _finding("back-hash")])
-    assert len(fused) >= 1
+    assert len(fused) == 2, "two photographs' findings merged with no roles"
+
+
+def test_two_producers_on_one_photograph_fuse_without_roles():
+    """The other half: refusing to merge without roles must not become
+    refusing to merge at all. Two producers describing one defect on ONE
+    photograph are the same defect whether or not anything named its face,
+    and splitting them would double-penalize corroboration."""
+    fused = fuse([_finding("front-hash", FindingProducer.HEURISTIC),
+                  _finding("front-hash", FindingProducer.VISION)])
+    assert len(fused) == 1
+    assert len(fused[0].sources) == 2
 
 
 def test_the_pipeline_supplies_the_role_map(tmp_path):
@@ -290,3 +310,30 @@ def test_the_centering_finding_rests_only_on_the_photo_it_was_measured_from():
     assert {r.image_hash for f in findings for r in f.evidence} == {"front-hash"}, (
         "the centering finding carries evidence from a photo it was not "
         "measured from")
+
+
+def test_a_finding_whose_evidence_spans_photos_still_fuses_with_a_front_one():
+    """A face can be unknown even WITH a role map: `face_of_finding` returns
+    None when a finding's evidence spans more than one image.
+
+    So the two branches of `_same_face` are not "roles or no roles" — they
+    are "both faces known" against "at least one unknown", and requiring
+    only ONE known face would send this pair down the equality branch,
+    where `front != None` refuses the merge. Two producers describing one
+    corner would then be counted twice, which is the double-penalty rule
+    the correlation exists to honour.
+    """
+    spanning = Finding(
+        defect_type="rounding", category="corners",
+        state=FindingState.OBSERVED, producer=FindingProducer.VISION,
+        confidence=0.9, psa10_relevant=True, severity=Severity.MODERATE,
+        location=BOX,
+        evidence=[EvidenceRef(artifact_id=f"a-{h}", image_hash=h,
+                              origin=EvidenceOrigin.ORIGINAL,
+                              view="corner_top_left", region=BOX)
+                  for h in ("front-hash", "back-hash")])
+    roles = {"front-hash": ImageRole.FRONT, "back-hash": ImageRole.BACK}
+
+    fused = fuse([_finding("front-hash"), spanning], roles)
+    assert len(fused) == 1, "corroboration on one corner was counted twice"
+    assert len(fused[0].sources) == 2

@@ -103,9 +103,33 @@ def _correlates(a: Finding, b: Finding, roles: dict | None = None) -> bool:
         return False
     if a.location is None or b.location is None:
         return False
-    if _face_of(a, roles) != _face_of(b, roles):
+    if not _same_face(a, b, roles):
         return False
     return a.location.overlaps(b.location)
+
+
+def _same_face(a: Finding, b: Finding, roles: dict | None) -> bool:
+    """Positive evidence that two findings sit on one face.
+
+    A known face on both sides answers it directly. When either face is
+    unknown — no role map, or evidence spanning images — `None == None`
+    used to read as agreement, so two findings from DIFFERENT photographs
+    merged: the very thing the face dimension exists to prevent, still
+    reachable through every caller without roles.
+
+    The fallback is the images themselves. Findings resting on a shared
+    photograph are on one face by construction, which keeps corroboration
+    from two producers fusing; findings resting on disjoint photographs
+    are not established to be the same thing, so they stay apart.
+    """
+    face_a, face_b = _face_of(a, roles), _face_of(b, roles)
+    if face_a is not None and face_b is not None:
+        return face_a == face_b
+    return bool(_hashes(a) & _hashes(b))
+
+
+def _hashes(finding: Finding) -> set[str]:
+    return {ref.image_hash for ref in finding.evidence or []}
 
 
 def _face_of(finding: Finding, roles: dict | None):
