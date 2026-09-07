@@ -75,3 +75,39 @@ def test_an_unregioned_finding_still_fuses_by_overlap():
     assert len(fused) == 1, (
         "a finding with no region was treated as a different place rather "
         "than an unknown one")
+
+
+def test_greedy_grouping_is_order_dependent_on_an_overlap_chain():
+    """A RECORDED GAP, not a passing behaviour.
+
+    Grouping is greedy: each finding joins the first group whose every
+    member it correlates with, else starts its own. On a CHAIN — A overlaps
+    B, B overlaps C, A does not overlap C — the number of groups depends on
+    the order findings arrive in, because whichever pair meets first claims
+    B.
+
+    Not reachable on the 120-photograph corpus (68 cards x 60 shuffles were
+    stable), and the region rule above removes the case that actually bit.
+    Closing it properly means choosing a clustering policy — maximal
+    cliques, or a canonical order — and that is a product decision about
+    what "one defect" means, not an implementation detail to settle here.
+
+    This test asserts the CURRENT behaviour so the day it changes is
+    visible, and names what would have to be decided to remove it.
+    """
+    import itertools
+
+    a = _edge("edge_top", NormalizedBox(x0=0.0, y0=0.0, x1=0.3, y1=0.2),
+              Severity.MINOR)
+    b = _edge("edge_top", NormalizedBox(x0=0.2, y0=0.0, x1=0.6, y1=0.2),
+              Severity.MODERATE)
+    c = _edge("edge_top", NormalizedBox(x0=0.5, y0=0.0, x1=0.9, y1=0.2),
+              Severity.SEVERE)
+    assert a.location.overlaps(b.location) and b.location.overlaps(c.location)
+    assert not a.location.overlaps(c.location), "fixture is not a chain"
+
+    counts = {len(fuse(list(order), ROLES))
+              for order in itertools.permutations([a, b, c])}
+    assert counts == {2}, (
+        f"grouping of an overlap chain changed shape: {counts}. If this now "
+        f"varies, a clustering policy has to be chosen deliberately.")
