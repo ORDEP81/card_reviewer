@@ -34,10 +34,10 @@
     center.surface.stains: high
     right.edges.chipping: high
     right.edges.roughness: high
-    right.edges.whitening: high
+    right.edges.whitening: low
     top.edges.chipping: high
     top.edges.roughness: high
-    top.edges.whitening: high
+    top.edges.whitening: low
     top_left.corners.fraying: high
     top_left.corners.rounding: high
     top_left.corners.whitening: low
@@ -51,6 +51,8 @@
   surface_outlier: 30.0
   reason_codes:
     bottom_right.corners.whitening: WHITE_BORDER
+    right.edges.whitening: WHITE_BORDER
+    top.edges.whitening: WHITE_BORDER
     top_left.corners.whitening: WHITE_BORDER
   rendered_centering:
   - 50.0
@@ -177,10 +179,10 @@
     center.surface.stains: high
     right.edges.chipping: high
     right.edges.roughness: high
-    right.edges.whitening: high
+    right.edges.whitening: low
     top.edges.chipping: high
     top.edges.roughness: high
-    top.edges.whitening: high
+    top.edges.whitening: low
     top_left.corners.fraying: low
     top_left.corners.rounding: low
     top_left.corners.whitening: low
@@ -203,6 +205,8 @@
     bottom_right.surface.print_lines: GLARE
     bottom_right.surface.scratches: GLARE
     bottom_right.surface.stains: GLARE
+    right.edges.whitening: WHITE_BORDER
+    top.edges.whitening: WHITE_BORDER
     top_left.corners.fraying: GLARE
     top_left.corners.rounding: GLARE
     top_left.corners.whitening: WHITE_BORDER
@@ -245,10 +249,10 @@
     center.surface.stains: high
     right.edges.chipping: high
     right.edges.roughness: high
-    right.edges.whitening: high
+    right.edges.whitening: low
     top.edges.chipping: high
     top.edges.roughness: high
-    top.edges.whitening: high
+    top.edges.whitening: low
     top_left.corners.fraying: high
     top_left.corners.rounding: high
     top_left.corners.whitening: low
@@ -262,6 +266,8 @@
   surface_outlier: 29.5
   reason_codes:
     bottom_right.corners.whitening: WHITE_BORDER
+    right.edges.whitening: WHITE_BORDER
+    top.edges.whitening: WHITE_BORDER
     top_left.corners.whitening: WHITE_BORDER
   rendered_centering:
   - 50.0
@@ -295,10 +301,10 @@
     center.surface.stains: high
     right.edges.chipping: high
     right.edges.roughness: high
-    right.edges.whitening: high
+    right.edges.whitening: low
     top.edges.chipping: high
     top.edges.roughness: high
-    top.edges.whitening: high
+    top.edges.whitening: low
     top_left.corners.fraying: high
     top_left.corners.rounding: high
     top_left.corners.whitening: low
@@ -312,6 +318,8 @@
   surface_outlier: 32.4
   reason_codes:
     bottom_right.corners.whitening: WHITE_BORDER
+    right.edges.whitening: WHITE_BORDER
+    top.edges.whitening: WHITE_BORDER
     top_left.corners.whitening: WHITE_BORDER
     top_left.surface.crease: GLARE
     top_left.surface.dimples: GLARE
@@ -352,10 +360,10 @@
     center.surface.stains: high
     right.edges.chipping: high
     right.edges.roughness: high
-    right.edges.whitening: high
+    right.edges.whitening: low
     top.edges.chipping: high
     top.edges.roughness: high
-    top.edges.whitening: high
+    top.edges.whitening: low
     top_left.corners.fraying: high
     top_left.corners.rounding: high
     top_left.corners.whitening: low
@@ -369,6 +377,8 @@
   surface_outlier: 2.0
   reason_codes:
     bottom_right.corners.whitening: WHITE_BORDER
+    right.edges.whitening: WHITE_BORDER
+    top.edges.whitening: WHITE_BORDER
     top_left.corners.whitening: WHITE_BORDER
   rendered_centering:
   - 50.0
@@ -454,9 +464,9 @@
     right.edges.chipping: high
     right.edges.roughness: high
     right.edges.whitening: high
-    top.edges.chipping: high
-    top.edges.roughness: high
-    top.edges.whitening: high
+    top.edges.chipping: low
+    top.edges.roughness: low
+    top.edges.whitening: low
     top_left.corners.fraying: low
     top_left.corners.rounding: low
     top_left.corners.whitening: low
@@ -469,6 +479,9 @@
     top_left.surface.stains: low
   surface_outlier: 60.2
   reason_codes:
+    top.edges.chipping: OCCLUSION
+    top.edges.roughness: OCCLUSION
+    top.edges.whitening: OCCLUSION
     top_left.corners.fraying: OCCLUSION
     top_left.corners.rounding: OCCLUSION
     top_left.corners.whitening: OCCLUSION

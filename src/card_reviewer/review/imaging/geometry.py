@@ -122,6 +122,11 @@ class GeometryResult(BaseModel):
     has_reliable_border: bool = False
     #: Was the card's boundary actually SEEN, or assumed?
     #:
+    #: Defaults to FALSE, deliberately. A row cached before this field
+    #: existed deserializes to the default, and the default has to be the
+    #: safe answer — claiming a boundary was observed when the record cannot
+    #: say is how a stale row keeps the old, unsafe behaviour.
+    #:
     #: False when the flood found no background and the frame was read as the
     #: card. That is often nearly right, but the outermost pixels are then a
     #: strip of backdrop or holder the flood could not separate — and corners
@@ -129,7 +134,7 @@ class GeometryResult(BaseModel):
     #: where those pixels are. Measured on the real corpus: four cards a
     #: human labelled clean emitted severe corner and edge anomalies read off
     #: the photograph's own edges.
-    boundary_observed: bool = True
+    boundary_observed: bool = False
     version: str = GEOMETRY_VERSION
 
     @property
@@ -203,6 +208,21 @@ def analyze(
             mask, reliable = _segment_border(normalized)
             observed = False
         else:
+            # The border reference is withheld, but the boundary is NOT
+            # marked unobserved. This arm has a known false positive: a
+            # BORDERLESS card on a backdrop trips it every time, because its
+            # outer band is artwork while the backdrop's is uniform — yet its
+            # boundary is perfectly visible and its corners and edges are
+            # measurable. Standing the producers down here would penalise a
+            # design property, which is the structural-versus-circumstantial
+            # confusion in another guise.
+            #
+            # A review found the cost of that decision: 9 of 88 corpus
+            # photographs take this arm, and those that are genuinely
+            # cropped rather than borderless still measure a border that may
+            # be an artwork edge. Separating the two needs a signal this
+            # branch does not have, and is recorded in
+            # test_the_ambiguity_arm_cannot_yet_separate_cropped_from_borderless.
             reliable = False
 
 

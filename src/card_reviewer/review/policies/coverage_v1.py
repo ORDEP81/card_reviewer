@@ -53,6 +53,9 @@ PHOTO_REQUESTS: dict[str, str] = {
     "OCCLUSION": "the {face} out of its holder, or with the obstruction moved",
     "MISSING_FACE": "a photograph of the {face}",
     "SEVERE_PERSPECTIVE": "a square-on photograph of the {face}",
+    "BOUNDARY_NOT_OBSERVED":
+        "a photograph of the whole {face} with a margin around the card, so "
+        "its edges are inside the frame",
 }
 
 
@@ -193,7 +196,14 @@ def evaluate_coverage(
                 ok = False
             if ok:
                 assessed_here.append(category)
-            if any_region_seen and category not in blocked_categories:
+            # Fully assessed counts as partly assessed, obviously — but it
+            # has to be said, because `ok` is also true when every gap was
+            # STRUCTURAL and waived. Testing only for a region at MIN_ASSESSED
+            # missed those, so a borderless card's centering or a white
+            # border's whitening was waived by one test and penalised by the
+            # other, and the card was dropped as INADEQUATE for a limitation
+            # no photograph could ever close.
+            if (ok or any_region_seen) and category not in blocked_categories:
                 partly_here.append(category)
         assessed[face.value] = assessed_here
         partly[face.value] = partly_here

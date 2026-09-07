@@ -111,6 +111,11 @@ REASON_CODES: dict[str, UndetectabilityClass] = {
     # generally can be, which is what makes this circumstantial rather than
     # a property of the card's design.
     "BORDER_NOT_SEPARABLE_FROM_ART": _C,
+    # The card's edge was never in the picture, so the border-relative
+    # producers have nothing trustworthy to measure against. A photograph
+    # framed with more margin around the card resolves it, which is what
+    # makes it circumstantial rather than a property of the card.
+    "BOUNDARY_NOT_OBSERVED": _C,
     # The opposite of GLARE, and it needs the opposite advice.
     "UNDEREXPOSED": _C,
     # A producer lowered detectability without recording why. Circumstantial

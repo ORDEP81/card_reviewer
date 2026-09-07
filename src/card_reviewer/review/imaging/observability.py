@@ -91,8 +91,16 @@ OCCLUSION_FRACTION = 0.10
 #: that does not exist. No absolute arm either, for the same reason — a dark
 #: card is uniformly dark, and every absolute threshold low enough to catch a
 #: real obstruction also catches the design.
-COMPARABLE_OCCLUSION_REGIONS = ("top_left", "top_right",
-                                "bottom_left", "bottom_right")
+#: Grouped by KIND: a region is only compared with regions of its own sort.
+#: Corners against corners, edges against edges. The centre has no sibling —
+#: comparing it with corners compared artwork against border and reported a
+#: dark card as obstructed everywhere. Listing only the corner names left
+#: edges with an empty comparison set, so occlusion could never fire for
+#: them at all.
+COMPARABLE_OCCLUSION_GROUPS = (
+    ("top_left", "top_right", "bottom_left", "bottom_right"),
+    ("top", "bottom", "left", "right"),
+)
 
 # There is deliberately NO region-level blur test here.
 #
@@ -194,6 +202,15 @@ def analyze(
     # a region's apparent size overstates the detail actually captured.
     scale = _capture_scale(geometry, gray.shape)
 
+    # A boundary we assumed is not one we saw, and corners and edges measure
+    # a departure from the card's BORDER — which, with an assumed boundary,
+    # may be backdrop or holder. Silencing those producers was not enough on
+    # its own: withholding a measurement without recording that it is MISSING
+    # reads as cleanliness, and a card labelled corners:fraying scored BETTER
+    # than before it was silenced. Missing evidence removes evidence; it never
+    # improves the outcome.
+    boundary_assumed = not geometry.boundary_observed
+
     det: dict[Key, Scale] = {}
     reasons: dict[Key, str] = {}
     for category in CATEGORIES:
@@ -210,10 +227,13 @@ def analyze(
             for region in regions
         }
         baseline = float(np.median(list(fractions.values())))
-        # Only the corner regions, and only against each other.
+        # Only regions with siblings of their own kind, and only against
+        # those siblings.
+        group = next((g for g in COMPARABLE_OCCLUSION_GROUPS
+                      if any(r in g for r in regions)), ())
         dark = {
             region: float((_patch(gray, region) <= OCCLUSION_LUMA).mean())
-            for region in regions if region in COMPARABLE_OCCLUSION_REGIONS
+            for region in regions if region in group
         }
         dark_baseline = float(np.median(list(dark.values()))) if dark else 0.0
         for region in regions:
@@ -247,6 +267,8 @@ def analyze(
                     det[key], reasons[key] = Scale.LOW, "GLARE"
                 elif category == "centering" and not geometry.has_reliable_border:
                     det[key], reasons[key] = Scale.LOW, "BORDERLESS_DESIGN"
+                elif boundary_assumed and category in ("corners", "edges"):
+                    det[key], reasons[key] = Scale.LOW, "BOUNDARY_NOT_OBSERVED"
                 elif occluded:
                     det[key], reasons[key] = Scale.LOW, "OCCLUSION"
                 elif too_small:
@@ -280,6 +302,16 @@ def _border_is_white(gray: np.ndarray, border_mask: np.ndarray | None) -> bool:
 
 
 def _patch(gray: np.ndarray, region: str) -> np.ndarray:
+    """The part of the card a region names.
+
+    Corners are boxes, edges are BANDS running the length of their side, the
+    centre is the middle. There is deliberately no default: an unrecognised
+    region used to fall through to the centre, so when edges were renamed to
+    side names all four of them silently started measuring the card's
+    artwork — identical values for every edge, glare on an edge invisible,
+    and a blown-out card reporting its edges as fully assessable. A region
+    nobody declared is a bug, not a request for the middle of the card.
+    """
     h, w = gray.shape
     match region:
         case "top_left":
@@ -290,8 +322,24 @@ def _patch(gray: np.ndarray, region: str) -> np.ndarray:
             return gray[-h // 5 :, : w // 5]
         case "bottom_right":
             return gray[-h // 5 :, -w // 5 :]
-        case _:
+        case "top":
+            return gray[: h // 5, :]
+        case "bottom":
+            return gray[-h // 5 :, :]
+        case "left":
+            return gray[:, : w // 5]
+        case "right":
+            return gray[:, -w // 5 :]
+        case "center":
             return gray[h // 4 : 3 * h // 4, w // 4 : 3 * w // 4]
+        case _:
+            declared = sorted(
+                {r for rs in REGIONS_FOR_CATEGORY.values() for r in rs}
+            )
+            raise KeyError(
+                f"no patch defined for region {region!r}; "
+                f"declared regions are {declared}"
+            )
 
 
 def _build(

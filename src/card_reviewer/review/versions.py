@@ -9,9 +9,13 @@ from __future__ import annotations
 import json
 
 PREFLIGHT_VERSION = "1.0.0"
-GEOMETRY_VERSION = "1.0.0"
+# 1.1.0: GeometryResult gained boundary_observed, which changes whether the
+# border-relative producers run at all. Cached rows from 1.0.0 cannot answer
+# the question, so they must be recomputed rather than defaulted.
+GEOMETRY_VERSION = "1.1.0"
 OBSERVABILITY_VERSION = "1.0.0"
-CV_VERSION = "1.0.0"
+# 1.1.0: corners and edges now consult boundary_observed before concluding.
+CV_VERSION = "1.1.0"
 ROLE_FEATURES_VERSION = "1.0.0"
 RESOLVER_VERSION = "1.0.0"
 VOCABULARY_VERSION = "1.0.0"

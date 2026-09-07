@@ -162,3 +162,133 @@ def test_the_artwork_frame_fill_also_reports_an_assumed_boundary(store):
     measured = measure_all(result, store, store.put_image(data))
     assert not [a for a in measured.anomalies
                 if a["category"] in ("corners", "edges")]
+
+
+def test_an_assumed_boundary_is_recorded_as_unassessed_not_as_clean(store):
+    """Silencing the producers was not enough, and made things worse.
+
+    Withholding a measurement without recording that it is MISSING reads as
+    cleanliness. Verified end to end: a card labelled `corners:fraying` came
+    back score 90, grade 9-10, zero findings — identical to a clean card,
+    and BETTER than the 45 it scored before the silencing. Missing evidence
+    must remove evidence, never improve the outcome.
+    """
+    from card_reviewer.review.enums import Scale
+    from card_reviewer.review.imaging.observability import analyze as observe
+
+    data = _card_with_a_sliver()
+    result = analyze(data, store, store.put_image(data))
+    if not result.usable or result.boundary_observed:
+        pytest.skip("fixture no longer reaches the frame fallback")
+
+    observed = observe(result, store, store.put_image(data))
+    border_relative = {
+        (region, category, defect): value
+        for (region, category, defect), value in observed.detectability.items()
+        if category in ("corners", "edges")
+    }
+    assert border_relative, "no corner or edge detectability at all"
+    assert all(v < Scale.MODERATE for v in border_relative.values()), (
+        "an assumed boundary still reports its corners and edges as "
+        f"assessable: {border_relative}")
+
+    reasons = {observed.reason_codes.get(k) for k in border_relative}
+    assert None not in reasons, "a lowered region with no reason at all"
+    assert "BOUNDARY_NOT_OBSERVED" in reasons, (
+        f"the gap is not explained: {reasons}")
+    # WHITE_BORDER may also appear — a white border hides whitening whatever
+    # the boundary — and that one is STRUCTURAL, so it waives rather than
+    # blocks. The circumstantial reason has to reach the types it does not
+    # cover, or the category would still count as assessed.
+    assert "BOUNDARY_NOT_OBSERVED" in {
+        observed.reason_codes.get(k) for k in border_relative
+        if k[2] != "whitening"
+    }
+
+
+def test_an_assumed_boundary_stops_the_card_reaching_sufficient(store):
+    """The consequence that matters: the recorded gap must actually block
+    PASS, not merely appear in a list."""
+    from card_reviewer.review.enums import Coverage
+    from card_reviewer.review.imaging.observability import analyze as observe
+    from card_reviewer.review.policies.coverage_v1 import (
+        REQUIRED_FACES, evaluate_coverage,
+    )
+    from card_reviewer.review.roles import ImageRole
+
+    data = _card_with_a_sliver()
+    result = analyze(data, store, store.put_image(data))
+    if not result.usable or result.boundary_observed:
+        pytest.skip("fixture no longer reaches the frame fallback")
+
+    observed = observe(result, store, store.put_image(data))
+    detectability, reasons = {}, {}
+    for face in REQUIRED_FACES:
+        for (region, category, defect), value in observed.detectability.items():
+            detectability[(face, region, category, defect)] = value
+            code = observed.reason_codes.get((region, category, defect))
+            if code:
+                reasons[(face, region, category, defect)] = code
+
+    coverage = evaluate_coverage(detectability, reasons, {}, REQUIRED_FACES)
+    assert coverage.outcome is not Coverage.SUFFICIENT
+    assert any(limitation.reason_code == "BOUNDARY_NOT_OBSERVED"
+               for limitation in coverage.limitations)
+    assert any("margin" in photo
+               for photo in coverage.recommended_additional_photos)
+
+
+def test_that_gap_is_circumstantial_so_it_asks_for_a_better_photograph(store):
+    """A boundary we could not see is a property of THIS photograph — one
+    framed with more margin would show it."""
+    from card_reviewer.review.taxonomy import REASON_CODES, UndetectabilityClass, class_of
+
+    assert "BOUNDARY_NOT_OBSERVED" in REASON_CODES
+    assert class_of("BOUNDARY_NOT_OBSERVED") is UndetectabilityClass.CIRCUMSTANTIAL
+
+
+def test_the_ambiguity_arm_cannot_yet_separate_cropped_from_borderless(store):
+    """A KNOWN GAP, recorded rather than papered over.
+
+    When the ambiguity check fires but the frame-fill test is refused,
+    geometry has concluded it cannot tell the card from its artwork. A review
+    found that 9 of 88 corpus photographs take this arm and still emit corner
+    and edge findings measured against what may be an artwork edge — up to 5
+    severe, including on cards labelled clean.
+
+    Marking those unobserved was tried and reverted. The arm has a known
+    false positive: a BORDERLESS card on a backdrop trips it every time,
+    because its outer band is artwork while the backdrop's is uniform. Its
+    boundary is perfectly visible and its corners and edges are measurable,
+    so standing the producers down there penalises a design property — the
+    structural-versus-circumstantial confusion again, and it made a
+    borderless card strictly worse.
+
+    Separating "cropped, so the boundary was never seen" from "borderless, so
+    there is no band to measure" needs a signal this branch does not have.
+    Until then the border reference is withheld (centering declines) and the
+    border-relative producers keep running.
+    """
+    from card_reviewer.review.imaging.synthetic import CardSpec, render_png
+
+    data = render_png(CardSpec(borderless=True))
+    result = analyze(data, store, store.put_image(data))
+    assert result.usable
+    assert result.has_reliable_border is False, "borderless has no band"
+    assert result.boundary_observed is True, (
+        "this arm no longer marks a borderless card's boundary unobserved — "
+        "if the two cases can now be separated, replace this test with the "
+        "positive assertion and record how")
+
+
+def test_the_geometry_version_moves_when_its_output_changes():
+    """A cached row from before this change deserializes boundary_observed to
+    its default. Unless the stage version moves, the fix never reaches a card
+    already in the cache — and the default is the UNSAFE value."""
+    from card_reviewer.review.versions import CV_VERSION, GEOMETRY_VERSION
+
+    assert GEOMETRY_VERSION != "1.0.0", (
+        "geometry's output gained a field that changes downstream behaviour; "
+        "the version must move or cached rows keep the old answer")
+    assert CV_VERSION != "1.0.0", (
+        "cv_measurements now consults boundary_observed")
