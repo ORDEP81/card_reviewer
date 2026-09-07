@@ -32,15 +32,30 @@ class Repository(Protocol):
     Protocol exists for.
     """
 
-    # Keyword-only, matching both SqliteRepository and every call site. The
-    # first version of these declarations invented positional signatures
-    # that nothing implements and nothing calls — a Protocol that disagrees
-    # with its implementation is worse than none, because it looks checked.
+    # These must match SqliteRepository and the call sites exactly. A
+    # Protocol that disagrees with its implementation is worse than none,
+    # because it looks checked — the first version invented positional
+    # signatures nothing implements, and the second declared `**fields` for
+    # two methods the pipeline calls POSITIONALLY.
     def save_candidate(self, **fields: Any) -> None: ...
 
-    def save_image(self, **fields: Any) -> None: ...
+    def save_image(
+        self,
+        image_hash: str,
+        path: Any,
+        width: int | None = None,
+        height: int | None = None,
+    ) -> None: ...
 
-    def link_image(self, **fields: Any) -> None: ...
+    def link_image(
+        self,
+        candidate_id: str,
+        image_hash: str,
+        *,
+        supplied_role: str | None = None,
+        source_url: str | None = None,
+        ordering: int = 0,
+    ) -> None: ...
 
     def save_routing_decision(self, **fields: Any) -> int: ...
 

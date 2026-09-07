@@ -104,3 +104,32 @@ def test_the_regions_the_producer_emits_are_the_ones_the_consumer_looks_up(
         assert refs, f"the consumer could not resolve {key}"
         assert refs == assembled.evidence_refs[key], (
             f"{key} resolved to a different ref set than the producer wrote")
+
+
+def test_the_repository_protocol_accepts_the_calls_the_pipeline_makes():
+    """A Protocol that disagrees with its implementation is worse than none,
+    because it looks checked.
+
+    `save_image` and `link_image` were declared `(**fields)` — keyword-only
+    — under a comment claiming they matched "every call site", while the
+    pipeline calls both POSITIONALLY and SqliteRepository declares them
+    positionally. A checker reading the Protocol would reject the working
+    call. Binding the real call shapes against both signatures is what
+    makes the two agree.
+    """
+    import inspect
+
+    from card_reviewer.review.storage.repository import Repository, SqliteRepository
+
+    calls = {
+        "save_image": (("hash-a", "/tmp/a.png"), {}),
+        "link_image": (("cand-1", "hash-a"),
+                       {"supplied_role": "front", "ordering": 0}),
+        "save_candidate": ((), {"id": "cand-1", "source": "manual",
+                                "title": "t", "supplied_card_type": None,
+                                "supplied_set": None}),
+    }
+    for name, (args, kwargs) in calls.items():
+        for owner in (Repository, SqliteRepository):
+            signature = inspect.signature(getattr(owner, name))
+            signature.bind(object(), *args, **kwargs)
