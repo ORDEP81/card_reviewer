@@ -7,7 +7,7 @@ the numbers.
 
 ## Framing
 
-    117 raw cards (2 slabs excluded)
+    117 raw cards (3 slabs excluded)
      88 reach the measurement stages
      29 declined by geometry
       0 questionable quads

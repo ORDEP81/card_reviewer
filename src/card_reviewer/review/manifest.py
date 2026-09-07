@@ -51,6 +51,20 @@ def _rank(view: str) -> int:
     return len(VIEW_PRIORITY)
 
 
+def _anomaly_artifacts(assembled: Any) -> set[str]:
+    """The artifacts anomaly candidates actually point at.
+
+    These outrank generic views. Ranking by view name alone let an
+    anomaly's own artifact fall outside the budget while the payload still
+    cited it, so the provider was told "a candidate at artifact X" and
+    never given X — a dangling id, and the opposite of sending the relevant
+    anomaly views. `corner_` sorts before `edge_` and then alphabetically,
+    so an anomaly on a later corner or any edge was the ordinary case.
+    """
+    return {a.get("artifact_id") for a in getattr(assembled, "anomalies", [])
+            if a.get("artifact_id")}
+
+
 def build_manifest(assembled: Any, mode: Mode, rubric_rules: list) -> BuiltManifest:
     seen: set[str] = set()
     candidates: list[EvidenceRef] = []
@@ -61,7 +75,13 @@ def build_manifest(assembled: Any, mode: Mode, rubric_rules: list) -> BuiltManif
             seen.add(ref.artifact_id)
             candidates.append(ref)
 
-    candidates.sort(key=lambda r: (_rank(r.view), r.view, r.artifact_id))
+    # Anomaly-backing artifacts first, then the fixed view priority. Still
+    # a total order over the same candidates, so selection stays
+    # deterministic and the budget is unchanged — what moves is which
+    # evidence is worth the room.
+    backing = _anomaly_artifacts(assembled)
+    candidates.sort(key=lambda r: (r.artifact_id not in backing,
+                                   _rank(r.view), r.view, r.artifact_id))
     selected = candidates[: BUDGETS[mode]]
 
     payload = {

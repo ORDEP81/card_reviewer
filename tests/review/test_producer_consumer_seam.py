@@ -129,7 +129,10 @@ def test_the_repository_protocol_declares_what_its_implementation_declares():
         kinds = {n: p.kind for n, p in parameters.items() if n != "self"}
         var_kw = {n for n, k in kinds.items()
                   if k is inspect.Parameter.VAR_KEYWORD}
-        return set(kinds) - var_kw, bool(var_kw)
+        # KIND as well as name. Comparing names alone let a Protocol declare
+        # positionally what the implementation takes keyword-only — the same
+        # class of mismatch this test was written for, one level down.
+        return {n: k for n, k in kinds.items() if n not in var_kw}, bool(var_kw)
 
     mismatched = {}
     for name in dir(Repository):
@@ -146,7 +149,9 @@ def test_the_repository_protocol_declares_what_its_implementation_declares():
                 f"Protocol takes **kwargs but the implementation names "
                 f"{sorted(actual)}")
         elif declared != actual:
-            mismatched[name] = f"declared {sorted(declared)} vs {sorted(actual)}"
+            mismatched[name] = (
+                f"declared {sorted((n, k.name) for n, k in declared.items())} "
+                f"vs {sorted((n, k.name) for n, k in actual.items())}")
 
     assert not mismatched, f"Protocol disagrees with SqliteRepository: {mismatched}"
 

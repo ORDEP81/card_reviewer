@@ -112,7 +112,31 @@ def _correlates(a: Finding, b: Finding, roles: dict | None = None) -> bool:
         return False
     if not _same_face(a, b, roles):
         return False
+    if not _same_place(a, b):
+        return False
     return a.location.overlaps(b.location)
+
+
+def _same_place(a: Finding, b: Finding) -> bool:
+    """Two NAMED regions are two places, whatever their boxes do.
+
+    Edge findings carry full-length strips, so `top` and `left` necessarily
+    overlap at the corner they share — geometrically unavoidable, and enough
+    for overlap alone to call them one defect. A minor top-edge chip and a
+    severe left-edge chip fused into a single SEVERE defect, which suppresses
+    a distinct flaw and misreports the severity of the one that survived.
+
+    `region_of_finding` already returns the value that separates them. When
+    either side has no region — a surface view has none — the question is
+    unanswered rather than answered no, so overlap decides, as it must:
+    refusing there would double-penalize corroboration.
+    """
+    from .assembly import region_of_finding
+
+    region_a, region_b = region_of_finding(a), region_of_finding(b)
+    if region_a is None or region_b is None:
+        return True
+    return region_a == region_b
 
 
 def _same_face(a: Finding, b: Finding, roles: dict | None) -> bool:

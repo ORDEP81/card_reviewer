@@ -213,3 +213,34 @@ def test_detectability_keys_are_stable_strings_not_python_reprs():
         for k in payload[section]:
             assert "<" not in k and "ImageRole" not in k, (
                 f"{section} key {k!r} carries a Python repr")
+
+
+def test_the_provider_receives_the_picture_of_every_anomaly_it_is_told_about():
+    """Selection ranked by generic view name, so an anomaly's own artifact
+    could fall outside the budget while the payload still cited it.
+
+    The provider was told "an anomaly candidate at artifact a37" and never
+    given a37 — a dangling id, against the rule that artifact ids map
+    deterministically to the exact image blocks sent, and against sending
+    the relevant anomaly views. `corner_` sorts before `edge_` and then
+    alphabetically, so an anomaly on a later corner or any edge was the
+    normal case, not an edge case.
+    """
+    refs = _refs(40)
+    anomalies = [{"category": "corners", "defect_type": "rounding",
+                  "region": "top_left", "artifact_id": refs[-1].artifact_id,
+                  "surfaced_by": "original", "visible_in_original": True},
+                 {"category": "edges", "defect_type": "chipping",
+                  "region": "left", "artifact_id": refs[-2].artifact_id,
+                  "surfaced_by": "original", "visible_in_original": True}]
+    payload = build_manifest(_assembled(refs, anomalies=anomalies),
+                             Mode.SMART, []).payload
+
+    sent = {a["artifact_id"] for a in payload["artifacts"]}
+    cited = {a["artifact_id"] for a in payload["anomaly_candidates"]
+             if a["artifact_id"]}
+    assert cited <= sent, (
+        f"the provider is told about anomalies whose pictures it never "
+        f"receives: {sorted(cited - sent)}")
+    assert len(payload["artifacts"]) <= BUDGETS[Mode.SMART], (
+        "the budget was abandoned rather than reprioritized")

@@ -440,8 +440,10 @@ def test_damage_in_a_photo_whose_role_is_unknown_is_not_silently_dropped(tmp_pat
 
     from_unknown = [a for a in assembled.anomalies
                     if a.get("image_hash") == odd_hash]
-    if not from_unknown:
-        pytest.skip("this fixture produced no anomaly on the unknown image")
+    # Asserted, not skipped. A skip here would silently disarm the test the
+    # day the fixture stopped producing anomalies, which is exactly when it
+    # would stop protecting anything.
+    assert from_unknown, "fixture produced no anomaly on the unknown-role image"
 
     carried = [r for refs in assembled.evidence_refs.values() for r in refs
                if r.image_hash == odd_hash]

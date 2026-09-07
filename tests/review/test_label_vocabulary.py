@@ -40,8 +40,11 @@ FINER_THAN_TAXONOMY = {
 #: Tokens that describe the PHOTOGRAPH rather than the card. They have no
 #: taxonomy pair by design — they are image limitations, and the engine
 #: models them as reason codes, not defects.
+#: `screenshot` and `listing_image` are deliberately absent: they are
+#: values of the `source` column, never of `has`, and listing them here
+#: would have quietly accepted them landing in the wrong column.
 PHOTO_TOKENS = {"glare", "blur", "underexposed", "occluded", "photo_ok",
-                "clean", "screenshot", "listing_image"}
+                "clean"}
 
 
 def _taxonomy() -> set[str]:

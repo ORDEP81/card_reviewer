@@ -33,7 +33,9 @@ RELEVANCE_POLICY_VERSION = "1.0.0"
 # 1.1.0: a category with a structural waiver is no longer penalized twice.
 COVERAGE_POLICY_VERSION = "1.1.0"
 ROUTING_POLICY_VERSION = "1.0.0"
-MANIFEST_BUILDER_VERSION = "1.0.0"
+# 1.1.0: artifacts backing anomaly candidates outrank generic views, so
+# the provider is never told about an anomaly whose picture it was not sent.
+MANIFEST_BUILDER_VERSION = "1.1.0"
 COMBINATION_POLICY_VERSION = "1.0.0"
 SCORING_POLICY_VERSION = "1.0.0"
 # 1.1.0: correlation needs positive evidence of a shared face, and a group
