@@ -35,12 +35,17 @@ COVERAGE_POLICY_VERSION = "1.1.0"
 ROUTING_POLICY_VERSION = "1.0.0"
 # 1.1.0: artifacts backing anomaly candidates outrank generic views, so
 # the provider is never told about an anomaly whose picture it was not sent.
-MANIFEST_BUILDER_VERSION = "1.1.0"
+# 1.2.0: whole-card overviews are pinned ahead of those crops, and an
+# anomaly whose crop did not fit stops claiming one.
+MANIFEST_BUILDER_VERSION = "1.2.0"
 COMBINATION_POLICY_VERSION = "1.0.0"
 SCORING_POLICY_VERSION = "1.0.0"
 # 1.1.0: correlation needs positive evidence of a shared face, and a group
 # is a clique rather than everything matching its first member.
-FUSION_VERSION = "1.1.0"
+# 1.2.0: two NAMED regions are two places. This changed combine's output on
+# 62 of 117 corpus photographs and the constant did not move with it, so a
+# cached row kept reporting a minor top edge as severe.
+FUSION_VERSION = "1.2.0"
 TAXONOMY_VERSION = "1.0.0"
 CANON_SCHEME_VERSION = "1.0.0"
 

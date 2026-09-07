@@ -244,3 +244,66 @@ def test_the_provider_receives_the_picture_of_every_anomaly_it_is_told_about():
         f"receives: {sorted(cited - sent)}")
     assert len(payload["artifacts"]) <= BUDGETS[Mode.SMART], (
         "the budget was abandoned rather than reprioritized")
+
+
+def _mixed_pool():
+    """A realistic pool: overviews plus per-region crops, as a real card
+    produces. `_refs` is corner views only, which is why the starvation
+    below was invisible to the test that introduced it."""
+    views = ["surface_original", "front_face", "back_face"] + [
+        f"corner_{c}" for c in ("bottom_left", "bottom_right",
+                                "top_left", "top_right")
+    ] + [f"edge_{e}" for e in ("bottom", "left", "right", "top")] + [
+        "surface_clahe", "surface_sharpen"]
+    return [EvidenceRef(artifact_id=f"a{i}", image_hash="h",
+                        origin=EvidenceOrigin.NORMALIZED, view=v)
+            for i, v in enumerate(views)]
+
+
+def _anomaly(ref, category="edges", defect_type="chipping"):
+    return {"category": category, "defect_type": defect_type,
+            "region": "left", "artifact_id": ref.artifact_id,
+            "surfaced_by": "original", "visible_in_original": True}
+
+
+def test_the_card_itself_is_still_sent_when_every_region_has_an_anomaly():
+    """Prioritizing anomaly crops took the whole budget on a card with eight
+    candidates: SMART sent eight crops and NO view of the card at all.
+
+    The provider is asked for print lines, dimples, stains and foil
+    artifacts and must answer `category_assessability["surface"]`, and it
+    was being given no overview and no surface view — so surface became
+    structurally unassessable. It fails safe, since unassessable surface
+    blocks PASS, but it is self-inflicted evidence removal, and the
+    provider payload is required to carry the useful originals.
+    """
+    refs = _mixed_pool()
+    crops = [r for r in refs if r.view.startswith(("corner_", "edge_"))]
+    payload = build_manifest(
+        _assembled(refs, anomalies=[_anomaly(r) for r in crops]),
+        Mode.SMART, []).payload
+
+    views = {a["view"] for a in payload["artifacts"]}
+    assert "surface_original" in views, (
+        f"SMART sent no view of the card as a whole: {sorted(views)}")
+
+
+def test_no_anomaly_claims_an_artifact_that_was_not_sent():
+    """The other half, which must hold at the SAME time: an id in the
+    payload names a block the provider actually received. When the budget
+    cannot carry an anomaly's crop, the candidate is still described — its
+    category, region and provenance are real information — but it stops
+    claiming a picture that is not there.
+    """
+    refs = _mixed_pool()
+    crops = [r for r in refs if r.view.startswith(("corner_", "edge_"))]
+    payload = build_manifest(
+        _assembled(refs, anomalies=[_anomaly(r) for r in crops]),
+        Mode.SMART, []).payload
+
+    sent = {a["artifact_id"] for a in payload["artifacts"]}
+    cited = {a["artifact_id"] for a in payload["anomaly_candidates"]
+             if a["artifact_id"]}
+    assert cited <= sent, f"dangling anomaly artifact ids: {sorted(cited - sent)}"
+    assert len(payload["anomaly_candidates"]) == len(crops), (
+        "an anomaly candidate was deleted rather than un-cited")

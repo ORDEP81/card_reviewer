@@ -78,22 +78,26 @@ def test_an_unregioned_finding_still_fuses_by_overlap():
 
 
 def test_greedy_grouping_is_order_dependent_on_an_overlap_chain():
-    """A RECORDED GAP, not a passing behaviour.
+    """A RECORDED GAP, asserted as the thing that actually varies.
 
     Grouping is greedy: each finding joins the first group whose every
     member it correlates with, else starts its own. On a CHAIN — A overlaps
-    B, B overlaps C, A does not overlap C — the number of groups depends on
-    the order findings arrive in, because whichever pair meets first claims
-    B.
+    B, B overlaps C, A does not overlap C — whichever pair meets first
+    claims B.
 
-    Not reachable on the 120-photograph corpus (68 cards x 60 shuffles were
-    stable), and the region rule above removes the case that actually bit.
-    Closing it properly means choosing a clustering policy — maximal
-    cliques, or a canonical order — and that is a product decision about
-    what "one defect" means, not an implementation detail to settle here.
+    The group COUNT cannot vary for a three-element chain; asserting it
+    would have recorded nothing. What varies is WHICH findings group and
+    therefore what severity each reported defect carries: the same three
+    findings come back as minor+severe or as moderate+severe depending on
+    the order they arrived in. That is severity migrating between physical
+    places — the same defect class the region rule above exists to stop,
+    one level up.
 
-    This test asserts the CURRENT behaviour so the day it changes is
-    visible, and names what would have to be decided to remove it.
+    Not reachable on the 120-photograph corpus (69 cards x 60 shuffles were
+    stable in count, shape and severity). Closing it means choosing a
+    clustering policy — maximal cliques, or a canonical order — which is a
+    product decision about what "one defect" means, not an implementation
+    detail to settle here.
     """
     import itertools
 
@@ -106,8 +110,11 @@ def test_greedy_grouping_is_order_dependent_on_an_overlap_chain():
     assert a.location.overlaps(b.location) and b.location.overlaps(c.location)
     assert not a.location.overlaps(c.location), "fixture is not a chain"
 
-    counts = {len(fuse(list(order), ROLES))
-              for order in itertools.permutations([a, b, c])}
-    assert counts == {2}, (
-        f"grouping of an overlap chain changed shape: {counts}. If this now "
-        f"varies, a clustering policy has to be chosen deliberately.")
+    outcomes = {
+        tuple(sorted(f.severity.value for f in fuse(list(order), ROLES)))
+        for order in itertools.permutations([a, b, c])
+    }
+    assert outcomes == {("minor", "severe"), ("moderate", "severe")}, (
+        f"the shape of this gap changed: {sorted(outcomes)}. If it is now "
+        f"one outcome the gap is closed and this test should assert that; "
+        f"if it is more, greedy grouping got worse.")

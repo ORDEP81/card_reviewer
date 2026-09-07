@@ -29,6 +29,13 @@ BUDGETS: dict[Mode, int] = {Mode.OFF: 0, Mode.SMART: 8, Mode.DEEP: 20}
 VIEW_PRIORITY = ("surface_original", "front_face", "back_face",
                  "corner_", "edge_", "surface_")
 
+#: How many entries of VIEW_PRIORITY are whole-card OVERVIEWS. They are
+#: pinned ahead of anomaly crops: a card whose every region raised a
+#: candidate filled the entire SMART budget with crops and sent no view of
+#: the card at all, which left the provider unable to answer for surface —
+#: the category with the fewest crops and the most to read from the whole.
+OVERVIEW_TIERS = 3
+
 
 class BuiltManifest(BaseModel):
     """The `manifest` stage's cached output.
@@ -80,9 +87,11 @@ def build_manifest(assembled: Any, mode: Mode, rubric_rules: list) -> BuiltManif
     # deterministic and the budget is unchanged — what moves is which
     # evidence is worth the room.
     backing = _anomaly_artifacts(assembled)
-    candidates.sort(key=lambda r: (r.artifact_id not in backing,
+    candidates.sort(key=lambda r: (_rank(r.view) >= OVERVIEW_TIERS,
+                                   r.artifact_id not in backing,
                                    _rank(r.view), r.view, r.artifact_id))
     selected = candidates[: BUDGETS[mode]]
+    sent = {r.artifact_id for r in selected}
 
     payload = {
         "artifacts": [
@@ -118,7 +127,18 @@ def build_manifest(assembled: Any, mode: Mode, rubric_rules: list) -> BuiltManif
         "anomaly_candidates": [
             {
                 "category": a.get("category"), "defect_type": a.get("defect_type"),
-                "region": a.get("region"), "artifact_id": a.get("artifact_id"),
+                "region": a.get("region"),
+                # Only when the block was actually sent. An id here names
+                # something the provider received; citing one it did not
+                # get is a dangling reference, and the ids are required to
+                # map deterministically onto the blocks in the payload.
+                #
+                # The candidate itself stays either way — its category,
+                # region and provenance are real information, and deleting
+                # it because the budget was tight would hide a limitation
+                # rather than report it.
+                "artifact_id": (a.get("artifact_id")
+                                if a.get("artifact_id") in sent else None),
                 "surfaced_by": a.get("surfaced_by", "original"),
                 "visible_in_original": a.get("visible_in_original", True),
             }
