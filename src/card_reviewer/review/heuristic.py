@@ -179,8 +179,11 @@ def _refs_for(
     def _own(refs: list[EvidenceRef]) -> list[EvidenceRef]:
         if not image_hash:
             return refs
-        mine = [r for r in refs if r.image_hash == image_hash]
-        return mine or refs
+        # No `or refs` fallback. An anomaly whose own photograph has no
+        # refs under this key has NO evidence, and `evaluate` drops it —
+        # borrowing another face's refs would fabricate provenance and put
+        # the finding on no single face, defeating I1's per-face adequacy.
+        return [r for r in refs if r.image_hash == image_hash]
 
     key = f"{category}:{defect_type}"
     if region:
@@ -218,7 +221,14 @@ def _centering_findings(
     centering = assembled.centering
     if not centering.get("measurable"):
         return []
-    refs = assembled.evidence_refs.get("centering:border_ratio") or []
+    # Narrowed to the image the measurement was actually taken from.
+    # Assembly records that in `best_for`; the unioned key spans faces, and
+    # a finding that spans faces satisfies I1's adequacy prong at no face in
+    # particular.
+    all_refs = assembled.evidence_refs.get("centering:border_ratio") or []
+    measured_on = assembled.best_for.get("centering")
+    refs = ([r for r in all_refs if r.image_hash == measured_on]
+            if measured_on else all_refs)
     if not refs:
         return []
 
@@ -237,9 +247,9 @@ def _centering_findings(
                 "centering", "border_ratio", CENTERING_CONFIDENCE,
                 detectability_for(detectability, "centering", "border_ratio",
                                    "center",
-                                   _face_of_hash(
-                                       (refs[0].image_hash if refs else None),
-                                       image_roles)),
+                                   _face_of_hash(measured_on
+                                                 or refs[0].image_hash,
+                                                 image_roles)),
             ),
             producer=FindingProducer.HEURISTIC,
             confidence=CENTERING_CONFIDENCE,

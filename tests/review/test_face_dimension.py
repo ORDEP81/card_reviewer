@@ -212,3 +212,81 @@ def test_the_heuristic_judges_a_front_finding_against_the_front(tmp_path):
         "a measured 78/22 miscut front was not promoted even with a good back")
     assert states["borderless back"] == states["normal back"], (
         f"the back changed the front's promotion: {states}")
+
+
+def _ref(image_hash, view="corner_bottom_left"):
+    from card_reviewer.review.provenance import EvidenceOrigin, EvidenceRef, NormalizedBox
+    return EvidenceRef(artifact_id=f"a-{image_hash}", image_hash=image_hash,
+                       origin=EvidenceOrigin.NORMALIZED, view=view,
+                       region=NormalizedBox(x0=0.0, y0=0.8, x1=0.2, y1=1.0))
+
+
+def test_a_finding_never_borrows_another_photographs_evidence():
+    """`_own` ended in `mine or refs`, so an anomaly whose OWN image had no
+    refs under that key silently inherited every other image's.
+
+    The docstring already claimed to narrow by image. The fallback defeated
+    it in exactly the case it existed for: the finding then belongs to no
+    single face, which breaks I1's per-face adequacy prong and fusion's
+    per-face separation — and it attributes the back's evidence to a front
+    finding, which is fabricated provenance.
+
+    A finding with no evidence from its own photograph has no evidence.
+    `evaluate` already drops findings with empty refs, so the honest
+    outcome is no finding at all.
+    """
+    from card_reviewer.review.assembly import Assembled
+    from card_reviewer.review.enums import Scale
+    from card_reviewer.review.heuristic import evaluate
+    from detectability_helpers import regions_for
+
+    flat = {Assembled.key(r, region, "corners", "whitening"): Scale.HIGH.label
+            for r in (ImageRole.FRONT, ImageRole.BACK)
+            for region in regions_for("corners")}
+    assembled = Assembled(
+        detectability_flat=flat, faces_present=["front", "back"],
+        centering={"measurable": False},
+        anomalies=[{"category": "corners", "defect_type": "whitening",
+                    "region": "bottom_left", "confidence": 0.9,
+                    "image_hash": "back-hash"}],
+        # Refs exist for the FRONT only. The anomaly is on the back.
+        evidence_refs={"corners:whitening": [_ref("front-hash")]})
+
+    findings = evaluate(assembled, []).findings
+    borrowed = [f for f in findings
+                if any(r.image_hash != "back-hash" for r in f.evidence)]
+    assert not borrowed, (
+        f"a back anomaly is carrying the front's evidence: "
+        f"{[[r.image_hash for r in f.evidence] for f in borrowed]}")
+
+
+def test_the_centering_finding_rests_only_on_the_photo_it_was_measured_from():
+    """Centering is measured on ONE image — assembly records which, in
+    `best_for["centering"]` — but the finding took every ref filed under
+    `centering:border_ratio`, unioned across images.
+
+    So a front measurement carried the back's refs, and the face used for
+    its promotion floor was whichever ref happened to sort first. A finding
+    that spans faces satisfies I1's adequacy prong at no face in particular.
+    """
+    from card_reviewer.review.assembly import Assembled
+    from card_reviewer.review.enums import Scale
+    from card_reviewer.review.heuristic import evaluate
+    from detectability_helpers import regions_for
+
+    flat = {Assembled.key(r, region, "centering", "border_ratio"): Scale.HIGH.label
+            for r in (ImageRole.FRONT, ImageRole.BACK)
+            for region in regions_for("centering")}
+    assembled = Assembled(
+        detectability_flat=flat, faces_present=["front", "back"],
+        centering={"horizontal": 78.0, "vertical": 50.0, "measurable": True},
+        best_for={"centering": "front-hash"},
+        evidence_refs={"centering:border_ratio": [_ref("back-hash", "surface_original"),
+                                                  _ref("front-hash", "surface_original")]})
+
+    findings = [f for f in evaluate(assembled, []).findings
+                if f.category == "centering"]
+    assert findings, "a 78/22 card produced no centering finding"
+    assert {r.image_hash for f in findings for r in f.evidence} == {"front-hash"}, (
+        "the centering finding carries evidence from a photo it was not "
+        "measured from")
