@@ -153,3 +153,62 @@ def test_the_pipeline_supplies_the_role_map(tmp_path):
     corners = [f for f in review.defects_found if f["category"] == "corners"]
     assert len(corners) >= 2, (
         "the same corner damaged on both faces was reported as one defect")
+
+
+def test_the_heuristic_judges_a_front_finding_against_the_front(tmp_path):
+    """The face was threaded into `combine` and not into `evaluate`.
+
+    `_state_for`'s promotion floor runs in the HEURISTIC, before combine ever
+    sees the finding — and it took the minimum across both faces. Once a
+    finding is `suspected` no face-aware lookup downstream can recover it,
+    because I1 requires OBSERVED. Verified end to end: a positively measured
+    78/22 miscut front was REJECT with a normal back and dropped to REVIEW
+    purely because the BACK was borderless.
+
+    It bites hardest on centering, which is the ONLY defect type CV can
+    promote to observed at all — so the face fix changed no heuristic
+    outcome whatsoever until this.
+    """
+    from card_reviewer.review.assembly import ImageStageOutputs, assemble, to_image_evidence
+    from card_reviewer.review.enums import FindingState, Provenance
+    from card_reviewer.review.heuristic import evaluate
+    from card_reviewer.review.imaging.geometry import analyze
+    from card_reviewer.review.imaging.measure import measure_all
+    from card_reviewer.review.imaging.observability import analyze as observe
+    from card_reviewer.review.imaging.synthetic import CardSpec, render_png
+    from card_reviewer.review.roles import ResolvedRole
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+
+    store = ArtifactStore(tmp_path / "store")
+
+    def outputs(spec):
+        data = render_png(spec)
+        image_hash = store.put_image(data)
+        geometry = analyze(data, store, image_hash)
+        return image_hash, ImageStageOutputs(
+            image_hash=image_hash, preflight={"global_sharpness": 120.0},
+            geometry=geometry.model_dump(),
+            observability=observe(geometry, store, image_hash).model_dump(),
+            cv_measurements=measure_all(geometry, store, image_hash).model_dump())
+
+    miscut = CardSpec(border_color=(20, 20, 20), h_centering=78.0)
+    states = {}
+    for label, back_spec in (("normal back", CardSpec(border_color=(20, 20, 20))),
+                             ("borderless back", CardSpec(borderless=True))):
+        front_hash, front = outputs(miscut)
+        back_hash, back = outputs(back_spec)
+        roles = {
+            front_hash: ResolvedRole(image_hash=front_hash, role=ImageRole.FRONT,
+                                     provenance=Provenance.SUPPLIED, confidence=1.0),
+            back_hash: ResolvedRole(image_hash=back_hash, role=ImageRole.BACK,
+                                    provenance=Provenance.SUPPLIED, confidence=1.0),
+        }
+        assembled = assemble(to_image_evidence([front, back]), roles)
+        result = evaluate(assembled, [], image_roles=roles)
+        centering = [f for f in result.findings if f.category == "centering"]
+        states[label] = centering[0].state if centering else None
+
+    assert states["normal back"] is FindingState.OBSERVED, (
+        "a measured 78/22 miscut front was not promoted even with a good back")
+    assert states["borderless back"] == states["normal back"], (
+        f"the back changed the front's promotion: {states}")

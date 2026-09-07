@@ -87,10 +87,15 @@ STAGE_FINGERPRINT_INPUTS: dict[str, tuple[str, ...]] = {
     # unevaluable_reasons(scoped), and combine turns that into `ambiguity`,
     # which decides PASS against REVIEW. `applicable_rubric_rules` contains
     # applicable rules only, so it cannot stand in for it.
+    # The role map is read directly: each finding's promotion floor is taken
+    # at its OWN face. Without it the floor was the minimum across both, and
+    # a measured miscut front dropped from REJECT to REVIEW because the back
+    # happened to be borderless.
     "heuristic": (
         "assembled_evidence",
         "applicable_rubric_rules",
         "unevaluable_rubric_rules",
+        "image_roles",
     ),
     # Reason codes are not decoration: coverage classes each one as
     # structural (does not block the category) or circumstantial (does), so

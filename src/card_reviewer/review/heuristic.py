@@ -94,7 +94,17 @@ def _state_for(
     return FindingState.OBSERVED
 
 
-def evaluate(assembled: Assembled, scoped_rules: list[ScopedRule]) -> HeuristicResult:
+def evaluate(assembled: Assembled, scoped_rules: list[ScopedRule],
+             image_roles: dict | None = None) -> HeuristicResult:
+    """`image_roles` lets a finding be judged against its OWN face.
+
+    The promotion floor in `_state_for` runs HERE, before combine sees
+    anything, and without the roles it took the minimum across both faces —
+    so a positively measured 78/22 miscut front dropped from REJECT to
+    REVIEW because the back happened to be a borderless design. Once a
+    finding is `suspected`, no face-aware lookup downstream can recover it,
+    because I1 requires OBSERVED.
+    """
     rules_by_category: dict[str, list[str]] = {}
     for rule in applicable(scoped_rules):
         rules_by_category.setdefault(rule.category.value, []).append(rule.id)
@@ -118,7 +128,9 @@ def evaluate(assembled: Assembled, scoped_rules: list[ScopedRule]) -> HeuristicR
                 state=_state_for(
                     category, defect_type, confidence,
                     detectability_for(detectability, category, defect_type,
-                                       anomaly.get("region")),
+                                       anomaly.get("region"),
+                                       _face_of_hash(anomaly.get("image_hash"),
+                                                     image_roles)),
                 ),
                 producer=FindingProducer.HEURISTIC,
                 confidence=confidence,
@@ -137,10 +149,19 @@ def evaluate(assembled: Assembled, scoped_rules: list[ScopedRule]) -> HeuristicR
             )
         )
 
-    findings.extend(_centering_findings(assembled, detectability, rules_by_category))
+    findings.extend(_centering_findings(assembled, detectability,
+                                        rules_by_category, image_roles))
     return HeuristicResult(
         findings=findings, unevaluable_reasons=unevaluable_reasons(scoped_rules)
     )
+
+
+def _face_of_hash(image_hash: str | None, roles: dict | None):
+    """The face an image was resolved to, if we were given the roles."""
+    if not image_hash or not roles:
+        return None
+    role = roles.get(image_hash)
+    return getattr(role, "role", role)
 
 
 def _refs_for(
@@ -187,6 +208,7 @@ def _centering_findings(
     assembled: Assembled,
     detectability: dict[tuple[Any, str, str, str], Scale],
     rules_by_category: dict[str, list[str]],
+    image_roles: dict | None = None,
 ) -> list[Finding]:
     """Centering is a measurement, not an anomaly candidate.
 
@@ -214,7 +236,10 @@ def _centering_findings(
             state=_state_for(
                 "centering", "border_ratio", CENTERING_CONFIDENCE,
                 detectability_for(detectability, "centering", "border_ratio",
-                                   "center"),
+                                   "center",
+                                   _face_of_hash(
+                                       (refs[0].image_hash if refs else None),
+                                       image_roles)),
             ),
             producer=FindingProducer.HEURISTIC,
             confidence=CENTERING_CONFIDENCE,

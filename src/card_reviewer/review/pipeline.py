@@ -301,10 +301,17 @@ class ReviewPipeline:
         heur, heur_id = run_id(
             "heuristic",
             {"assembled_evidence": asm, "applicable_rubric_rules": rules,
-             "unevaluable_rubric_rules": unevaluable_content},
+             "unevaluable_rubric_rules": unevaluable_content,
+             # The stage reads this map to judge each finding against its
+             # own face. In practice `assembled_evidence` moves with it,
+             # since detectability is keyed by role — but the key should
+             # name what the stage consumes, not what happens to correlate.
+             "image_roles": {h: r.role.value
+                             for h, r in role_context.roles.items()}},
             {"scorer_version": SCORER_VERSION,
              "taxonomy_version": TAXONOMY_VERSION, "weights": {}},
-            lambda: evaluate(assembled, scoped).model_dump(),
+            lambda: evaluate(assembled, scoped,
+                             image_roles=role_context.roles).model_dump(),
             schema=HeuristicResult, candidate_id=cid)
         heuristic = HeuristicResult.model_validate(heur)
 

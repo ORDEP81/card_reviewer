@@ -323,3 +323,27 @@ def test_an_unusable_image_is_dropped_before_any_geometry_runs(rig, tmp_path):
     rows = _rows_by_stage(repo)
     assert rows["preflight"] == 3
     assert rows["geometry"] == 2, "geometry ran on an image preflight rejected"
+
+
+def test_swapping_which_photo_is_the_front_reruns_the_heuristic(rig, tmp_path):
+    """The heuristic judges each finding against its own face, so the role
+    map changes its output and must change its key.
+
+    What this proves and what it does not: the key does separate the two
+    runs, but it would do so even without `image_roles`, because
+    `detectability_flat` is keyed `role|region|category|defect` and the two
+    photographs measure differently. The map is in the key because it is
+    what the stage READS; I could not construct two runs whose assembled
+    evidence was byte-identical under different roles, so that residual
+    case is argued, not demonstrated.
+    """
+    pipeline, store, repo = rig
+    specs = [CardSpec(h_centering=78.0), CardSpec(text_heavy=True)]
+    keys = set()
+    for roles in (("front", "back"), ("back", "front")):
+        resolved = _candidate(tmp_path, store, specs, roles=roles)
+        pipeline.review(resolved, Mode.OFF)
+        keys |= {r[0] for r in repo._conn.execute(
+            "SELECT input_fingerprint FROM stage_result WHERE stage='heuristic'")}
+
+    assert len(keys) == 2, "the role map does not reach the heuristic's key"
