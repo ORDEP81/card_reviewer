@@ -279,6 +279,16 @@ def test_a_finding_never_borrows_another_photographs_evidence():
         f"a back anomaly is carrying the front's evidence: "
         f"{[[r.image_hash for r in f.evidence] for f in borrowed]}")
 
+    # The assertion above also holds if the finding is simply deleted, so
+    # say what should happen when its own evidence IS present: the finding
+    # survives, citing only its own photograph. Deletion is safe only
+    # because assembly never emits an anomaly without own-image evidence —
+    # see test_every_anomaly_assembly_emits_carries_its_own_photographs_evidence.
+    assembled.evidence_refs["corners:whitening"].append(_ref("back-hash"))
+    kept = evaluate(assembled, []).findings
+    assert kept, "a back anomaly with its own evidence was dropped"
+    assert {r.image_hash for f in kept for r in f.evidence} == {"back-hash"}
+
 
 def test_the_centering_finding_rests_only_on_the_photo_it_was_measured_from():
     """Centering is measured on ONE image — assembly records which, in
@@ -337,3 +347,179 @@ def test_a_finding_whose_evidence_spans_photos_still_fuses_with_a_front_one():
     fused = fuse([_finding("front-hash"), spanning], roles)
     assert len(fused) == 1, "corroboration on one corner was counted twice"
     assert len(fused[0].sources) == 2
+
+
+def _outputs(store, spec):
+    from card_reviewer.review.assembly import ImageStageOutputs
+    from card_reviewer.review.imaging.geometry import analyze
+    from card_reviewer.review.imaging.measure import measure_all
+    from card_reviewer.review.imaging.observability import analyze as observe
+    from card_reviewer.review.imaging.synthetic import render_png
+
+    data = render_png(spec)
+    image_hash = store.put_image(data)
+    geometry = analyze(data, store, image_hash)
+    return image_hash, ImageStageOutputs(
+        image_hash=image_hash, preflight={"global_sharpness": 120.0},
+        geometry=geometry.model_dump(),
+        observability=observe(geometry, store, image_hash).model_dump(),
+        cv_measurements=measure_all(geometry, store, image_hash).model_dump())
+
+
+def test_a_miscut_survives_an_unmeasurable_photograph_listed_first(tmp_path):
+    """`best_for["centering"]` is NOT the image the measurement came from.
+
+    `_centering` deliberately carries the WORST measurable front, precisely
+    because `fronts[0]` "made the answer depend on the order the photographs
+    happened to be listed in: with an unmeasurable photo first, a 78/22
+    miscut DISAPPEARED". `_best_for` still returns `fronts[0]`.
+
+    So narrowing the finding's refs to `best_for` reintroduced that bug
+    through the consumer: refs under `centering:border_ratio` are written
+    only for photographs whose centering was measurable, so the borderless
+    first photo contributes none, the narrowing yields nothing, and
+    `evaluate` drops the finding. A measured 80/20 miscut disappears and
+    the card reads clean.
+    """
+    from card_reviewer.review.assembly import assemble, to_image_evidence
+    from card_reviewer.review.enums import Provenance
+    from card_reviewer.review.heuristic import evaluate
+    from card_reviewer.review.imaging.synthetic import CardSpec
+    from card_reviewer.review.roles import ResolvedRole
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+
+    store = ArtifactStore(tmp_path / "store")
+    borderless_hash, borderless = _outputs(store, CardSpec(borderless=True))
+    miscut_hash, miscut = _outputs(
+        store, CardSpec(border_color=(20, 20, 20), h_centering=80.0))
+
+    roles = {h: ResolvedRole(image_hash=h, role=ImageRole.FRONT,
+                             provenance=Provenance.SUPPLIED, confidence=1.0)
+             for h in (borderless_hash, miscut_hash)}
+    assembled = assemble(to_image_evidence([borderless, miscut]), roles)
+    assert assembled.centering.get("measurable"), "the miscut was not measured"
+
+    findings = [f for f in evaluate(assembled, []).findings
+                if f.category == "centering"]
+    assert findings, "a measured 80/20 miscut disappeared behind a borderless photo"
+    assert {r.image_hash for f in findings for r in f.evidence} == {miscut_hash}, (
+        "the finding cites a photograph the measurement did not come from")
+
+
+def test_damage_in_a_photo_whose_role_is_unknown_is_not_silently_dropped(tmp_path):
+    """An unknown-role image contributed anomalies but no evidence refs, so
+    once findings stopped borrowing another photograph's evidence its
+    anomalies resolved to nothing and were dropped by `evaluate`.
+
+    A photograph whose role could not be resolved then contributed NOTHING
+    and the card read clean — missing role metadata manufacturing a cleaner
+    result, which is I2. Its refs are keyed by category and region, never by
+    face, so they can be carried without claiming a face; detectability
+    still has no face key for it and so falls back to the weakest, which is
+    the conservative direction.
+    """
+    from card_reviewer.review.assembly import assemble, to_image_evidence
+    from card_reviewer.review.enums import Provenance
+    from card_reviewer.review.imaging.synthetic import CardSpec
+    from card_reviewer.review.roles import ResolvedRole
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+
+    store = ArtifactStore(tmp_path / "store")
+    front_hash, front = _outputs(store, CardSpec(border_color=(20, 20, 20)))
+    odd_hash, odd = _outputs(store, CardSpec(
+        border_color=(20, 20, 20),
+        corner_damage={"top_left": 0.9, "bottom_right": 0.9}))
+
+    roles = {
+        front_hash: ResolvedRole(image_hash=front_hash, role=ImageRole.FRONT,
+                                 provenance=Provenance.SUPPLIED, confidence=1.0),
+        odd_hash: ResolvedRole(image_hash=odd_hash, role=ImageRole.UNKNOWN,
+                               provenance=Provenance.INFERRED, confidence=0.2),
+    }
+    assembled = assemble(to_image_evidence([front, odd]), roles)
+
+    from_unknown = [a for a in assembled.anomalies
+                    if a.get("image_hash") == odd_hash]
+    if not from_unknown:
+        pytest.skip("this fixture produced no anomaly on the unknown image")
+
+    carried = [r for refs in assembled.evidence_refs.values() for r in refs
+               if r.image_hash == odd_hash]
+    assert carried, (
+        "an unknown-role photograph raised anomalies but carries no evidence, "
+        "so every one of them is dropped and the card reads clean")
+
+
+@pytest.mark.parametrize("role", [ImageRole.FRONT, ImageRole.BACK,
+                                  ImageRole.UNKNOWN])
+def test_every_anomaly_assembly_emits_carries_its_own_photographs_evidence(
+        tmp_path, role):
+    """The invariant that keeps the silent drop unreachable.
+
+    `evaluate` drops a finding whose own photograph contributed no evidence
+    refs. That is the right call for a finding with no evidence, but it is
+    only safe while assembly never emits such an anomaly — otherwise real
+    damage disappears with nothing recorded, which is I2.
+
+    Measured on the corpus at the time of writing: 0 of 422 anomalies
+    across 88 real photographs lacked own-image evidence. This holds that
+    line for every role, including UNKNOWN, which is where it was broken.
+    """
+    from card_reviewer.review.assembly import assemble, to_image_evidence
+    from card_reviewer.review.enums import Provenance
+    from card_reviewer.review.imaging.synthetic import CardSpec
+    from card_reviewer.review.roles import ResolvedRole
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+
+    store = ArtifactStore(tmp_path / "store")
+    image_hash, outputs = _outputs(store, CardSpec(
+        border_color=(20, 20, 20), scratches=[0.8],
+        corner_damage={"top_left": 0.9, "bottom_right": 0.9}))
+    roles = {image_hash: ResolvedRole(image_hash=image_hash, role=role,
+                                      provenance=Provenance.SUPPLIED,
+                                      confidence=1.0)}
+    assembled = assemble(to_image_evidence([outputs]), roles)
+    assert assembled.anomalies, "fixture produced no anomalies to check"
+
+    orphans = []
+    for anomaly in assembled.anomalies:
+        key = f"{anomaly.get('category')}:{anomaly.get('defect_type')}"
+        refs = (assembled.evidence_refs.get(f"{key}:{anomaly.get('region')}")
+                or assembled.evidence_refs.get(key) or [])
+        if not [r for r in refs if r.image_hash == anomaly.get("image_hash")]:
+            orphans.append(anomaly)
+
+    assert not orphans, (
+        f"{len(orphans)} anomalies carry no evidence from their own "
+        f"photograph, so `evaluate` deletes them without a trace: "
+        f"{[(a.get('category'), a.get('defect_type')) for a in orphans]}")
+
+
+def test_a_spanning_finding_cannot_bridge_two_faces_into_one_defect():
+    """`fuse` compares each finding against `group[0]` only, so a finding
+    whose evidence spans BOTH photographs can act as a bridge: it shares a
+    hash with the front finding and a hash with the back one, and all three
+    land in a single group.
+
+    That inverts the rule the face dimension exists for — the same corner on
+    two faces is two defects — and it is order-dependent, so it appears only
+    when the spanning finding happens to sort first. `raw` is heuristic
+    findings followed by vision findings, so a vision-only defect class puts
+    a spanning finding at the head of its group.
+    """
+    spanning = Finding(
+        defect_type="rounding", category="corners",
+        state=FindingState.OBSERVED, producer=FindingProducer.VISION,
+        confidence=0.9, psa10_relevant=True, severity=Severity.MODERATE,
+        location=BOX,
+        evidence=[EvidenceRef(artifact_id=f"a-{h}", image_hash=h,
+                              origin=EvidenceOrigin.ORIGINAL,
+                              view="corner_top_left", region=BOX)
+                  for h in ("front-hash", "back-hash")])
+    roles = {"front-hash": ImageRole.FRONT, "back-hash": ImageRole.BACK}
+
+    fused = fuse([spanning, _finding("front-hash"), _finding("back-hash")],
+                 roles)
+    assert len(fused) >= 2, (
+        "a finding spanning both photographs merged the front's damage and "
+        "the back's into one defect")

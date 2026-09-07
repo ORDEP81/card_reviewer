@@ -347,3 +347,28 @@ def test_swapping_which_photo_is_the_front_reruns_the_heuristic(rig, tmp_path):
             "SELECT input_fingerprint FROM stage_result WHERE stage='heuristic'")}
 
     assert len(keys) == 2, "the role map does not reach the heuristic's key"
+
+
+def test_a_borderless_back_does_not_rescue_a_miscut_front(rig, tmp_path):
+    """The heuristic fix is real but its WIRING was unguarded: deleting
+    `image_roles=role_context.roles` from the pipeline's `evaluate` call
+    left the whole suite green.
+
+    Through the real pipeline: a measured 78/22 miscut front with a
+    borderless back. Without the roles the promotion floor takes the
+    minimum across both faces, the borderless back drags centering down,
+    the finding never reaches OBSERVED, and I1 — which requires OBSERVED —
+    routes the card to REVIEW instead of REJECT.
+    """
+    pipeline, store, repo = rig
+    resolved = _candidate(tmp_path, store,
+                          [CardSpec(h_centering=78.0), CardSpec(borderless=True)])
+    review = pipeline.review(resolved, Mode.OFF)
+
+    centering = [d for d in review.defects_found if d["category"] == "centering"]
+    assert centering, "the miscut front produced no centering finding at all"
+    assert centering[0]["state"] == "observed", (
+        f"the borderless BACK demoted a measurement taken on the FRONT: "
+        f"{centering[0]['state']}")
+    assert review.verdict == "REJECT", (
+        f"a measured 78/22 miscut did not reject: {review.verdict}")

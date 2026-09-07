@@ -78,7 +78,14 @@ def fuse(findings: list[Finding],
     groups: list[list[Finding]] = []
     for finding in findings:
         for group in groups:
-            if _correlates(group[0], finding, roles):
+            # EVERY member, not just the first. Correlation is not
+            # transitive: a finding whose evidence spans both photographs
+            # correlates with a front finding and with a back one, and
+            # comparing against `group[0]` alone let it bridge them into a
+            # single defect — the same corner on two faces reported once,
+            # which is the rule the face dimension exists to enforce. It
+            # also depended on the order findings happened to arrive in.
+            if all(_correlates(member, finding, roles) for member in group):
                 group.append(finding)
                 break
         else:

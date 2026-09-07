@@ -128,8 +128,21 @@ def assemble(
     for image in images:
         role = roles[image.image_hash].role
         if role is ImageRole.UNKNOWN:
-            # Still contributes face-independent work, but never claims a face.
+            # Still contributes face-independent work, but never claims a
+            # face. Its evidence refs come too: they are keyed by category
+            # and region, never by face, so carrying them claims nothing.
+            #
+            # Without them its anomalies resolve to no evidence and are
+            # dropped outright, so a photograph whose role could not be
+            # resolved contributed NOTHING and the card read clean —
+            # missing metadata manufacturing a cleaner result, which is I2.
+            # Detectability still has no face key for this image, so it
+            # falls back to the weakest, which is the conservative
+            # direction: the finding is visible but cannot be promoted on
+            # the strength of a face nothing established.
             out.anomalies.extend(_tagged(image))
+            for purpose, refs in image.evidence_refs.items():
+                out.evidence_refs.setdefault(purpose, []).extend(refs)
             continue
 
         faces.add(role)
@@ -157,16 +170,27 @@ def assemble(
             out.evidence_refs.setdefault(purpose, []).extend(refs)
 
     out.faces_present = sorted(face.value for face in faces)
-    out.best_for = _best_for(images, roles)
     out.conflicts = _conflicts(images, roles)
-    out.centering = _centering(images, roles)
+    # One choice, used for both the measurement and the reference to it.
+    # These were computed independently and disagreed: `_centering` carries
+    # the worst measurable front while `_best_for` returned `fronts[0]`, so
+    # `best_for["centering"]` named a photograph the number did not come
+    # from.
+    chosen = _centering_image(images, roles)
+    out.centering = chosen.centering if chosen else {}
+    out.best_for = _best_for(images, roles, chosen)
     return out
 
 
-def _centering(
+def _centering_image(
     images: list[ImageEvidence], roles: dict[str, ResolvedRole]
-) -> dict[str, Any]:
-    """The front's centering, chosen rather than taken from position zero.
+) -> ImageEvidence | None:
+    """The front whose centering is carried forward — the IMAGE, not just
+    the number, so consumers can cite the photograph it came from.
+
+    Returning only the dict left `best_for["centering"]` free to name a
+    different photograph, and narrowing a finding's evidence to it deleted
+    a measured 80/20 miscut whenever an unmeasurable photo was listed first.
 
     `fronts[0]` made the answer depend on the order the photographs happened
     to be listed in: with an unmeasurable photo first, a 78/22 miscut
@@ -178,25 +202,29 @@ def _centering(
     """
     fronts = [i for i in images if roles[i.image_hash].role is ImageRole.FRONT]
     if not fronts:
-        return {}
-    measured = [f.centering for f in fronts if f.centering.get("measurable")]
+        return None
+    measured = [f for f in fronts if f.centering.get("measurable")]
     if not measured:
-        return fronts[0].centering
+        return fronts[0]
     return max(
         measured,
-        key=lambda c: max(abs(float(c.get("horizontal", 50.0)) - 50.0),
-                          abs(float(c.get("vertical", 50.0)) - 50.0)),
+        key=lambda i: max(
+            abs(float(i.centering.get("horizontal", 50.0)) - 50.0),
+            abs(float(i.centering.get("vertical", 50.0)) - 50.0)),
     )
 
 
 def _best_for(
-    images: list[ImageEvidence], roles: dict[str, ResolvedRole]
+    images: list[ImageEvidence], roles: dict[str, ResolvedRole],
+    centering_image: ImageEvidence | None = None,
 ) -> dict[str, str]:
     fronts = [i for i in images if roles[i.image_hash].role is ImageRole.FRONT]
     if not fronts:
         return {}
     sharpest = max(fronts, key=lambda i: i.sharpness)
-    return {"surface": sharpest.image_hash, "centering": fronts[0].image_hash}
+    chosen = centering_image or _centering_image(images, roles)
+    return {"surface": sharpest.image_hash,
+            "centering": (chosen or fronts[0]).image_hash}
 
 
 def _conflicts(

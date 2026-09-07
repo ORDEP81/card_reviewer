@@ -32,12 +32,27 @@ class Repository(Protocol):
     Protocol exists for.
     """
 
+    # `save_review` is `**fields` because its implementation genuinely is:
+    # it builds the INSERT from whatever keys it is given. Every other
+    # method below names its parameters, because its implementation does.
+    #
     # These must match SqliteRepository and the call sites exactly. A
     # Protocol that disagrees with its implementation is worse than none,
     # because it looks checked — the first version invented positional
     # signatures nothing implements, and the second declared `**fields` for
     # two methods the pipeline calls POSITIONALLY.
-    def save_candidate(self, **fields: Any) -> None: ...
+    def save_candidate(
+        self,
+        *,
+        id: str,
+        source: str,
+        title: str = "",
+        listing_url: str | None = None,
+        listing_id: str | None = None,
+        asking_price: str | None = None,
+        supplied_card_type: str | None = None,
+        supplied_set: str | None = None,
+    ) -> str: ...
 
     def save_image(
         self,
@@ -57,7 +72,16 @@ class Repository(Protocol):
         ordering: int = 0,
     ) -> None: ...
 
-    def save_routing_decision(self, **fields: Any) -> int: ...
+    def save_routing_decision(
+        self,
+        *,
+        candidate_id: str,
+        policy_version: str,
+        mode: str,
+        call_vision: bool,
+        trigger_reasons: list[str],
+        input_fingerprint: str,
+    ) -> int: ...
 
     def save_review(self, **fields: Any) -> int: ...
 

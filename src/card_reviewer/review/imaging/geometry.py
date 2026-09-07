@@ -179,8 +179,11 @@ def analyze(
     if img is None:
         return GeometryResult(boundary_confidence=0.0)
 
-    quad, confidence = _detect_quad(img, cv2)
-    observed = confidence != ASSUMED_BOUNDARY_CONFIDENCE
+    # The flag comes back from the detector rather than being recovered by
+    # comparing the confidence against a sentinel value. `rectangularity`
+    # can legitimately equal ASSUMED_BOUNDARY_CONFIDENCE, and a real
+    # boundary reading exactly 0.60 would have been recorded as assumed.
+    quad, confidence, observed = _detect_quad(img, cv2)
     if quad is None or confidence < MIN_BOUNDARY_CONFIDENCE:
         # Decline geometry-dependent work rather than producing plausible
         # numbers from a bad quad.
@@ -245,7 +248,9 @@ def analyze(
     )
 
 
-def _detect_quad(img: np.ndarray, cv2) -> tuple[np.ndarray | None, float]:
+def _detect_quad(
+    img: np.ndarray, cv2
+) -> tuple[np.ndarray | None, float, bool]:
     """Find the card as a foreground region against its background.
 
     Canny alone fails on borderless designs: edge-to-edge artwork produces
@@ -264,12 +269,12 @@ def _detect_quad(img: np.ndarray, cv2) -> tuple[np.ndarray | None, float]:
     mask = _foreground_mask(img, cv2)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     if not contours:
-        return None, 0.0
+        return None, 0.0, False
 
     largest = max(contours, key=cv2.contourArea)
     area = cv2.contourArea(largest)
     if area <= 0:
-        return None, 0.0
+        return None, 0.0, False
 
     area_ratio = area / (img.shape[0] * img.shape[1])
     if area_ratio > MAX_AREA_RATIO:
@@ -285,13 +290,13 @@ def _detect_quad(img: np.ndarray, cv2) -> tuple[np.ndarray | None, float]:
             # Confidence 1.0 would claim certainty about a boundary that was
             # never seen. The caller is told it is assumed, and the
             # border-relative producers stand down.
-            return _order(frame), ASSUMED_BOUNDARY_CONFIDENCE
-        return None, 0.1
+            return _order(frame), ASSUMED_BOUNDARY_CONFIDENCE, False
+        return None, 0.1, False
 
     rect = cv2.minAreaRect(largest)
     rect_area = rect[1][0] * rect[1][1]
     if rect_area <= 0:
-        return None, 0.0
+        return None, 0.0, False
     rectangularity = float(min(1.0, area / rect_area))
     # Certainty about the SHAPE, and about the shape being a CARD's — never
     # about size. Multiplying in area_ratio mixed size with certainty and got
@@ -304,7 +309,7 @@ def _detect_quad(img: np.ndarray, cv2) -> tuple[np.ndarray | None, float]:
     # card however cleanly it was found.
     box = cv2.minAreaRect(largest)[1]
     if abs(_aspect(box[0], box[1]) - CARD_ASPECT) > ASPECT_TOLERANCE:
-        return None, 0.0
+        return None, 0.0, False
     confidence = rectangularity
 
     # Prefer the contour's own four corners. A photographed card is usually a
@@ -318,12 +323,12 @@ def _detect_quad(img: np.ndarray, cv2) -> tuple[np.ndarray | None, float]:
         # than no card, which is what a borderless design would otherwise get.
         corners = np.asarray(cv2.boxPoints(rect), dtype=np.float32)
     try:
-        return _order(corners), confidence
+        return _order(corners), confidence, True
     except ValueError:
         # Degenerate at this orientation. Declining is the point: the
         # alternative was a finite garbage homography and measurements of a
         # rectangle that was never on the card.
-        return None, 0.0
+        return None, 0.0, False
 
 
 def _boundary_may_be_the_artwork(

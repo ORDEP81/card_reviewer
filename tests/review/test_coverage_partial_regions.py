@@ -134,3 +134,42 @@ def test_a_front_only_card_is_still_partial_and_rankable():
 
     assert front_only.outcome is Coverage.PARTIAL
     assert front_only.rankable is True
+
+
+def test_a_wholly_structural_gap_still_counts_as_partly_assessed():
+    """`ok` and `any_region_seen` answer different questions, and a category
+    waived entirely on structural grounds is where they disagree.
+
+    A borderless card's centering can be seen in NO region at MIN_ASSESSED —
+    there is no border to measure — so `any_region_seen` is false. But every
+    gap is STRUCTURAL, which never sets `ok` false, because no photograph
+    could supply the evidence. Testing partial assessment on the region
+    alone waived the category in one test and penalised it in the other, so
+    the card was dropped as INADEQUATE for a limitation no better photograph
+    could close.
+
+    Set up so centering's membership is decisive: corners is assessable,
+    edges and surface are not, and PARTIAL needs two. Both plausible
+    mutations of the condition — dropping `ok`, and joining the two with
+    `and` — drop centering and collapse the card to INADEQUATE.
+    """
+    detectability = detectability_map(REQUIRED_FACES)
+    reasons = {}
+    for face in REQUIRED_FACES:
+        for category, (scale, code) in (
+            ("centering", (Scale.NONE, "BORDERLESS_DESIGN")),
+            ("edges", (Scale.NONE, "GLARE")),
+            ("surface", (Scale.NONE, "GLARE")),
+        ):
+            for region in regions_for(category):
+                for defect_type in defect_types_for(category):
+                    key = (face, region, category, defect_type)
+                    detectability[key] = scale
+                    reasons[key] = code
+
+    result = evaluate_coverage(detectability, reasons, {}, REQUIRED_FACES)
+
+    assert result.outcome is Coverage.PARTIAL, (
+        f"a structurally waived category was penalised as though a better "
+        f"photograph could close it: {result.outcome}")
+    assert result.rankable

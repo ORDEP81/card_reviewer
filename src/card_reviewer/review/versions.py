@@ -13,22 +13,32 @@ PREFLIGHT_VERSION = "1.0.0"
 # border-relative producers run at all. Cached rows from 1.0.0 cannot answer
 # the question, so they must be recomputed rather than defaulted.
 GEOMETRY_VERSION = "1.1.0"
-OBSERVABILITY_VERSION = "1.0.0"
+# 1.1.0: each edge region gained a real band (they all read the card's
+# centre), and an assumed boundary now records BOUNDARY_NOT_OBSERVED. Its
+# fingerprint contains geometry's OUTPUT, which also moved — but that is
+# luck, not a guarantee, and a stage whose behaviour changed bumps.
+OBSERVABILITY_VERSION = "1.1.0"
 # 1.1.0: corners and edges now consult boundary_observed before concluding.
 CV_VERSION = "1.1.0"
 ROLE_FEATURES_VERSION = "1.0.0"
 RESOLVER_VERSION = "1.0.0"
 VOCABULARY_VERSION = "1.0.0"
-ASSEMBLY_VERSION = "1.0.0"
+# 1.1.0: best_for["centering"] now names the image the measurement was
+# taken from rather than fronts[0], and an unknown-role image contributes
+# its evidence refs.
+ASSEMBLY_VERSION = "1.1.0"
 SCORER_VERSION = "1.1.0"
 AUTHORITY_POLICY_VERSION = "1.0.0"
 RELEVANCE_POLICY_VERSION = "1.0.0"
-COVERAGE_POLICY_VERSION = "1.0.0"
+# 1.1.0: a category with a structural waiver is no longer penalized twice.
+COVERAGE_POLICY_VERSION = "1.1.0"
 ROUTING_POLICY_VERSION = "1.0.0"
 MANIFEST_BUILDER_VERSION = "1.0.0"
 COMBINATION_POLICY_VERSION = "1.0.0"
 SCORING_POLICY_VERSION = "1.0.0"
-FUSION_VERSION = "1.0.0"
+# 1.1.0: correlation needs positive evidence of a shared face, and a group
+# is a clique rather than everything matching its first member.
+FUSION_VERSION = "1.1.0"
 TAXONOMY_VERSION = "1.0.0"
 CANON_SCHEME_VERSION = "1.0.0"
 

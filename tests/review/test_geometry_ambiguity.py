@@ -163,7 +163,7 @@ def test_confidence_measures_certainty_not_size(cv2):
         y0 = (height - small.shape[0]) // 2
         x0 = (width - small.shape[1]) // 2
         canvas[y0:y0 + small.shape[0], x0:x0 + small.shape[1]] = small
-        quad, confidence = geometry._detect_quad(canvas, cv2)
+        quad, confidence, _observed = geometry._detect_quad(canvas, cv2)
         assert quad is not None, f"a clean card at {fraction:.0%} was not found"
         confidences.append(confidence)
 

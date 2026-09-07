@@ -105,6 +105,51 @@ def test_the_regions_the_producer_emits_are_the_ones_the_consumer_looks_up(
         assert refs == assembled.evidence_refs[key], (
             f"{key} resolved to a different ref set than the producer wrote")
 
+def test_the_repository_protocol_declares_what_its_implementation_declares():
+    """A Protocol that disagrees with its implementation is worse than none,
+    because it looks checked.
+
+    The first version invented positional signatures nothing implements. The
+    second declared `**fields` for two methods the pipeline calls
+    POSITIONALLY. The third fixed those two and left `save_candidate` and
+    `save_routing_decision` still declared `**fields` against keyword-only
+    implementations returning values — a mismatch a type checker reports and
+    a test binding hand-transcribed call shapes cannot see.
+
+    So compare the declarations themselves. `**fields` is honest only when
+    the implementation really does take arbitrary keywords; otherwise the
+    Protocol must name what the implementation names.
+    """
+    import inspect
+
+    from card_reviewer.review.storage.repository import Repository, SqliteRepository
+
+    def shape(func):
+        parameters = inspect.signature(func).parameters
+        kinds = {n: p.kind for n, p in parameters.items() if n != "self"}
+        var_kw = {n for n, k in kinds.items()
+                  if k is inspect.Parameter.VAR_KEYWORD}
+        return set(kinds) - var_kw, bool(var_kw)
+
+    mismatched = {}
+    for name in dir(Repository):
+        if name.startswith("_") or not callable(getattr(Repository, name, None)):
+            continue
+        impl = getattr(SqliteRepository, name, None)
+        if impl is None:
+            mismatched[name] = "not implemented at all"
+            continue
+        declared, declared_kw = shape(getattr(Repository, name))
+        actual, actual_kw = shape(impl)
+        if declared_kw and not actual_kw:
+            mismatched[name] = (
+                f"Protocol takes **kwargs but the implementation names "
+                f"{sorted(actual)}")
+        elif declared != actual:
+            mismatched[name] = f"declared {sorted(declared)} vs {sorted(actual)}"
+
+    assert not mismatched, f"Protocol disagrees with SqliteRepository: {mismatched}"
+
 
 def test_the_repository_protocol_accepts_the_calls_the_pipeline_makes():
     """A Protocol that disagrees with its implementation is worse than none,

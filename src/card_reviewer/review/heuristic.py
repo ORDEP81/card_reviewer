@@ -221,10 +221,15 @@ def _centering_findings(
     centering = assembled.centering
     if not centering.get("measurable"):
         return []
-    # Narrowed to the image the measurement was actually taken from.
-    # Assembly records that in `best_for`; the unioned key spans faces, and
-    # a finding that spans faces satisfies I1's adequacy prong at no face in
-    # particular.
+    # Narrowed to the image the measurement was taken from. `best_for`
+    # names that image only because `_centering_image` and `_best_for` now
+    # make ONE choice: they used to be computed independently, `_centering`
+    # carrying the worst measurable front while `_best_for` returned
+    # `fronts[0]`, and narrowing to the latter deleted a measured 80/20
+    # miscut whenever an unmeasurable photograph was listed first.
+    #
+    # The unioned key spans faces, and a finding that spans faces satisfies
+    # I1's adequacy prong at no face in particular.
     all_refs = assembled.evidence_refs.get("centering:border_ratio") or []
     measured_on = assembled.best_for.get("centering")
     refs = ([r for r in all_refs if r.image_hash == measured_on]
