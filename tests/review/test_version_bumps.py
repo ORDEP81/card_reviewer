@@ -65,7 +65,7 @@ GUARDED = {
     "imaging/observability.py": ("OBSERVABILITY_VERSION", "1.1.0", "7f2ef7eaa4866e02"),
     "imaging/preflight.py": ("PREFLIGHT_VERSION", "1.1.0", "972ee68643548a61"),
     "imaging/role_features.py": ("ROLE_FEATURES_VERSION", "1.0.0", "692c039193292c2f"),
-    "manifest.py": ("MANIFEST_BUILDER_VERSION", "1.2.0", "d7f8d7b370e8dbe9"),
+    "manifest.py": ("MANIFEST_BUILDER_VERSION", "1.3.0", "f8f82f93307266f8"),
     "normalize.py": ("VOCABULARY_VERSION", "1.0.0", "7a710b0ced1b4cf4"),
     "policies/authority_v1.py": ("AUTHORITY_POLICY_VERSION", "1.0.0", "a38e410e720a6641"),
     "policies/combine_v1.py": ("COMBINATION_POLICY_VERSION", "1.1.0", "6a0b5dea7c7aa25d"),

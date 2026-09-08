@@ -247,9 +247,15 @@ def test_the_provider_receives_the_picture_of_every_anomaly_it_is_told_about():
 
 
 def _mixed_pool():
-    """A realistic pool: overviews plus per-region crops, as a real card
-    produces. `_refs` is corner views only, which is why the starvation
-    below was invisible to the test that introduced it."""
+    """Overviews plus per-region crops. `_refs` is corner views only, which
+    is why the starvation below was invisible to the test that introduced
+    it.
+
+    `front_face` and `back_face` are in VIEW_PRIORITY but NO producer emits
+    them, so this pool is a superset of what the engine makes rather than a
+    copy of it — see
+    `test_a_real_assembled_card_produces_a_usable_manifest` for the real
+    thing."""
     views = ["surface_original", "front_face", "back_face"] + [
         f"corner_{c}" for c in ("bottom_left", "bottom_right",
                                 "top_left", "top_right")
@@ -307,3 +313,143 @@ def test_no_anomaly_claims_an_artifact_that_was_not_sent():
     assert cited <= sent, f"dangling anomaly artifact ids: {sorted(cited - sent)}"
     assert len(payload["anomaly_candidates"]) == len(crops), (
         "an anomaly candidate was deleted rather than un-cited")
+
+
+def _multi_image_pool(n_images):
+    """One overview plus four corner crops per photograph, which is what a
+    real multi-image listing assembles to."""
+    refs = []
+    for i in range(n_images):
+        refs.append(EvidenceRef(artifact_id=f"ov{i}", image_hash=f"h{i}",
+                                origin=EvidenceOrigin.NORMALIZED,
+                                view="surface_original"))
+        for corner in ("bottom_left", "bottom_right", "top_left", "top_right"):
+            refs.append(EvidenceRef(
+                artifact_id=f"c{i}_{corner}", image_hash=f"h{i}",
+                origin=EvidenceOrigin.NORMALIZED, view=f"corner_{corner}"))
+    return refs
+
+
+def test_overviews_do_not_multiply_with_the_number_of_photographs():
+    """Pinning whole-card views fixed single-photo starvation and broke the
+    multi-photo case: overviews are per IMAGE, so a six-photograph listing
+    spent six of SMART's eight slots on six copies of the same view and
+    sent ONE distinct region crop.
+
+    Measured on six real photographs before this cap: 6 overviews, 1
+    distinct region view, 39 of 41 candidates un-cited. Listings with many
+    photographs are the case the engine exists for, so the cap belongs
+    here rather than in the single-photo fixture that missed it.
+    """
+    refs = _multi_image_pool(6)
+    crops = [r for r in refs if r.view.startswith("corner_")]
+    payload = build_manifest(
+        _assembled(refs, anomalies=[_anomaly(r, "corners", "rounding")
+                                    for r in crops]),
+        Mode.SMART, []).payload
+
+    views = [a["view"] for a in payload["artifacts"]]
+    overviews = [v for v in views if not v.startswith(("corner_", "edge_"))]
+    assert 1 <= len(overviews) <= 2, (
+        f"{len(overviews)} whole-card views in an 8-slot budget: {views}")
+    assert len({a["artifact_id"] for a in payload["artifacts"]
+                if a["view"].startswith("corner_")}) >= 5, (
+        f"crops were crowded out by duplicate overviews: {views}")
+
+
+def test_the_crops_that_fit_cover_the_regions_rather_than_repeating_one():
+    """Sorting crops by view name clustered them alphabetically, so a
+    six-photograph listing spent every crop slot on `corner_bottom_left` —
+    the same corner six times, and no view at all of the other three.
+
+    The provider is asked to assess all four corners and can only answer
+    from what it was sent. Covering each region once before showing any
+    region twice is the same budget spent on evidence that differs.
+    """
+    refs = _multi_image_pool(6)
+    crops = [r for r in refs if r.view.startswith("corner_")]
+    payload = build_manifest(
+        _assembled(refs, anomalies=[_anomaly(r, "corners", "rounding")
+                                    for r in crops]),
+        Mode.SMART, []).payload
+
+    corner_views = {a["view"] for a in payload["artifacts"]
+                    if a["view"].startswith("corner_")}
+    assert len(corner_views) == 4, (
+        f"the crop budget went to {len(corner_views)} of the four corners: "
+        f"{sorted(corner_views)}")
+
+
+def test_one_photograph_still_gets_its_overview():
+    """The cap must not undo the fix it is capping."""
+    refs = _multi_image_pool(1)
+    crops = [r for r in refs if r.view.startswith("corner_")]
+    payload = build_manifest(
+        _assembled(refs, anomalies=[_anomaly(r, "corners", "rounding")
+                                    for r in crops]),
+        Mode.SMART, []).payload
+    assert "surface_original" in {a["view"] for a in payload["artifacts"]}
+
+
+def test_a_real_assembled_card_produces_a_usable_manifest(tmp_path):
+    """Every other test in this file hands `build_manifest` hand-built
+    refs, and one of those pools claims to be "as a real card produces"
+    while containing `front_face` and `back_face` views that NO producer in
+    this repository emits.
+
+    That gap is how the starvation bug hid: a fixture of corner views only
+    cannot show an overview being crowded out. This runs the real geometry,
+    observability and measurement producers into `assemble` and then into
+    the manifest, so the payload is checked against evidence the engine
+    actually makes.
+    """
+    from card_reviewer.review.assembly import (
+        ImageStageOutputs, assemble, to_image_evidence,
+    )
+    from card_reviewer.review.enums import Provenance
+    from card_reviewer.review.imaging.geometry import analyze
+    from card_reviewer.review.imaging.measure import measure_all
+    from card_reviewer.review.imaging.observability import analyze as observe
+    from card_reviewer.review.imaging.synthetic import CardSpec, render_png
+    from card_reviewer.review.roles import ResolvedRole
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+
+    store = ArtifactStore(tmp_path / "store")
+    outputs, roles = [], {}
+    for spec, role in ((CardSpec(border_color=(20, 20, 20),
+                                 corner_damage={"top_left": 0.9}),
+                        ImageRole.FRONT),
+                       (CardSpec(text_heavy=True), ImageRole.BACK)):
+        data = render_png(spec)
+        image_hash = store.put_image(data)
+        geometry = analyze(data, store, image_hash)
+        outputs.append(ImageStageOutputs(
+            image_hash=image_hash, preflight={"global_sharpness": 120.0},
+            geometry=geometry.model_dump(),
+            observability=observe(geometry, store, image_hash).model_dump(),
+            cv_measurements=measure_all(geometry, store,
+                                        image_hash).model_dump()))
+        roles[image_hash] = ResolvedRole(
+            image_hash=image_hash, role=role,
+            provenance=Provenance.SUPPLIED, confidence=1.0)
+
+    assembled = assemble(to_image_evidence(outputs), roles)
+    built = build_manifest(assembled, Mode.SMART, [])
+    payload = built.payload
+
+    sent = {a["artifact_id"] for a in payload["artifacts"]}
+    assert sent, "a real two-photograph card produced an empty payload"
+    assert len(sent) <= BUDGETS[Mode.SMART]
+
+    cited = {a["artifact_id"] for a in payload["anomaly_candidates"]
+             if a["artifact_id"]}
+    assert cited <= sent, f"dangling ids on real evidence: {sorted(cited - sent)}"
+
+    views = {a["view"] for a in payload["artifacts"]}
+    assert any(not v.startswith(("corner_", "edge_")) for v in views), (
+        f"no whole-card view of a real card reached the provider: {sorted(views)}")
+
+    # The index is what resolves a provider citation back to an artifact
+    # after a restart, so every id offered must be in it.
+    assert sent <= set(built.index), (
+        f"ids sent with no index entry: {sorted(sent - set(built.index))}")

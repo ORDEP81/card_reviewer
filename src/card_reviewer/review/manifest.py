@@ -36,6 +36,14 @@ VIEW_PRIORITY = ("surface_original", "front_face", "back_face",
 #: the category with the fewest crops and the most to read from the whole.
 OVERVIEW_TIERS = 3
 
+#: How many whole-card views are worth pinning, in total — NOT per
+#: photograph. Overviews are emitted per image, so pinning them by tier
+#: alone meant a six-photograph listing spent six of SMART's eight slots on
+#: six copies of the same view and sent one distinct crop. Two is a front
+#: and a back: enough for the provider to see the card, cheap enough to
+#: leave the budget to the evidence that differs between regions.
+MAX_PINNED_OVERVIEWS = 2
+
 
 class BuiltManifest(BaseModel):
     """The `manifest` stage's cached output.
@@ -87,8 +95,39 @@ def build_manifest(assembled: Any, mode: Mode, rubric_rules: list) -> BuiltManif
     # deterministic and the budget is unchanged — what moves is which
     # evidence is worth the room.
     backing = _anomaly_artifacts(assembled)
-    candidates.sort(key=lambda r: (_rank(r.view) >= OVERVIEW_TIERS,
+
+    def is_overview(ref: EvidenceRef) -> bool:
+        return _rank(ref.view) < OVERVIEW_TIERS
+
+    # Which overviews get pinned, decided before the sort so the rest fall
+    # back into ordinary competition rather than being dropped. One per
+    # photograph at most, so two pinned views are two different photographs.
+    pinned: list[str] = []
+    seen_images: set[str] = set()
+    for ref in sorted(candidates, key=lambda r: (_rank(r.view), r.view,
+                                                 r.artifact_id)):
+        if len(pinned) >= MAX_PINNED_OVERVIEWS:
+            break
+        if is_overview(ref) and ref.image_hash not in seen_images:
+            seen_images.add(ref.image_hash)
+            pinned.append(ref.artifact_id)
+
+    # How many times this view has already appeared ahead of a candidate.
+    # Sorting on it puts the FIRST of every view before the second of any,
+    # so the budget covers the regions before it repeats one. Without it a
+    # six-photograph listing spent every crop slot on `corner_bottom_left`:
+    # the same corner six times, and no view of the other three, on a card
+    # whose provider is asked to assess all four.
+    nth: dict[str, int] = {}
+    occurrence: dict[str, int] = {}
+    for ref in sorted(candidates, key=lambda r: (_rank(r.view), r.view,
+                                                 r.artifact_id)):
+        occurrence[ref.artifact_id] = nth.get(ref.view, 0)
+        nth[ref.view] = nth.get(ref.view, 0) + 1
+
+    candidates.sort(key=lambda r: (r.artifact_id not in pinned,
                                    r.artifact_id not in backing,
+                                   occurrence[r.artifact_id],
                                    _rank(r.view), r.view, r.artifact_id))
     selected = candidates[: BUDGETS[mode]]
     sent = {r.artifact_id for r in selected}

@@ -45,7 +45,9 @@ ROUTING_POLICY_VERSION = "1.1.0"
 # the provider is never told about an anomaly whose picture it was not sent.
 # 1.2.0: whole-card overviews are pinned ahead of those crops, and an
 # anomaly whose crop did not fit stops claiming one.
-MANIFEST_BUILDER_VERSION = "1.2.0"
+# 1.3.0: pinned overviews capped at two TOTAL rather than one per
+# photograph, and crops cover each region before repeating one.
+MANIFEST_BUILDER_VERSION = "1.3.0"
 # 1.1.0: _material_contradiction compares category AND defect_type, and
 # the policy grew several arms. The signature was byte-identical across
 # both changes, so cached combine rows kept the older adjudication.
