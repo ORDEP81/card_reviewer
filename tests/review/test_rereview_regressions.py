@@ -58,36 +58,33 @@ def test_a_white_bordered_card_reports_a_minority_of_glared_corners(
         assert result.reason_codes.get((region, "corners", "rounding")) == "GLARE"
 
 
-@pytest.mark.parametrize("count", [3, 4])
-def test_a_majority_glared_white_card_is_a_known_undetected_gap(count, store):
-    """A KNOWN GAP, recorded rather than papered over. This is an I2 hole.
+@pytest.mark.parametrize("count", [1, 2, 3])
+def test_a_majority_glared_white_card_is_now_detected(count, store):
+    """This WAS a recorded I2 hole. It is closed for a majority, and the
+    positive assertion replaces the one that pinned the gap.
 
-    Glare is found as excess over the card's own baseline — the median of
-    the sibling regions — so once half or more are glared the median moves
-    with them and nothing stands out. The absolute arm that would catch it
-    is disabled on near-white borders, because that is where a wide white
-    border is indistinguishable from a blown-out one.
+    Glare was found as excess over the MEDIAN of the sibling regions, so
+    once half or more were glared the median moved with them and nothing
+    stood out. A white card blown out on three corners reported HIGH
+    detectability and reached PASS — and reached it with a BETTER score
+    than the same card with one glared corner.
 
-    Four discriminators were calibrated over 5 seeds x 3 borders x 5
-    centerings (300 clean regions, 60 glared) and none separates:
+    Closed by comparing against the cleanest comparable sibling instead of
+    the median, which cannot be dragged up by the regions under test, and
+    by comparing only within a region's own kind. No threshold was fitted:
+    the four discriminators this docstring used to list all failed to
+    separate on measurement, and a fifth would only have moved the false
+    positives onto miscut cards. Over the 40 labelled clean and glare
+    photographs the minimum and the median flag identical corners, so the
+    robustness costs nothing.
 
-      absolute clipped fraction   clean reaches 0.664 (a MISCUT card's wide
-                                  white border), glared starts at 0.695 —
-                                  a 0.03 gap, fitted not separated
-      excess over the mid-edge    the reference is itself glared when the
-        border reference          glare is widespread: glared scores -0.173
-      residual texture outside    glared corners retain MORE texture
-        the clipped area          (min 18.2) than clean ones (min 12.7)
-      whole-image clipping        preflight sees 0.137 against a 0.6 floor
-        at preflight
+    Regions that are OBSTRUCTED are excluded from the reference — a thumb
+    over one corner reads as zero clipping, and without that exclusion the
+    card's three ordinary corners stood out from it as glare.
 
-    The consequence is real and should not be read as fixed: a white
-    bordered card blown out on three or four corners reports HIGH
-    detectability, and can reach PASS. Resolving it needs either real
-    photographs to calibrate against, or the vision layer — which in SMART
-    and DEEP does see the images. A fifth fitted threshold would only move
-    the false positives onto miscut cards, which are the population this
-    tool screens.
+    The all-four case remains open and is a question for the owner rather
+    than a bug: see
+    `test_glare_monotonicity.py::test_all_four_corners_blown_is_an_open_design_question`.
     """
     result = _observe(
         render_png(CardSpec(border_color=(255, 255, 255),
@@ -95,9 +92,9 @@ def test_a_majority_glared_white_card_is_a_known_undetected_gap(count, store):
     reported = sum(
         1 for region in ALL_CORNERS
         if result.reason_codes.get((region, "corners", "rounding")) == "GLARE")
-    assert reported < count, (
-        "this gap appears to have been closed — good. Replace this test with "
-        "the positive assertion and record how it was done.")
+    assert reported == count, (
+        f"{count} glared corners, {reported} reported — not seeing a defect "
+        f"must not read as evidence of a clean one")
 
 
 def test_a_clean_card_is_still_not_glared(store):

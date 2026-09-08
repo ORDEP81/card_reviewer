@@ -21,7 +21,11 @@ GEOMETRY_VERSION = "1.2.0"
 # centre), and an assumed boundary now records BOUNDARY_NOT_OBSERVED. Its
 # fingerprint contains geometry's OUTPUT, which also moved — but that is
 # luck, not a guarantee, and a stage whose behaviour changed bumps.
-OBSERVABILITY_VERSION = "1.1.0"
+# 1.2.0: glare is measured against the cleanest comparable sibling rather
+# than the median, within a region's own kind, excluding obstructed
+# regions. The median could be dragged up by the very regions under test,
+# so a card blown out on three corners read as fully assessable.
+OBSERVABILITY_VERSION = "1.2.0"
 # 1.1.0: corners and edges now consult boundary_observed before concluding.
 CV_VERSION = "1.1.0"
 ROLE_FEATURES_VERSION = "1.0.0"

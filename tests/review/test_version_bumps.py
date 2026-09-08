@@ -115,7 +115,7 @@ GUARDED = {
     "imaging/measure/corners.py": ("CV_VERSION", "1.1.0", "b3e814e23b9d164d"),
     "imaging/measure/edges.py": ("CV_VERSION", "1.1.0", "a600ff7a44aa99e4"),
     "imaging/measure/surface.py": ("CV_VERSION", "1.1.0", "7af402307cb20909"),
-    "imaging/observability.py": ("OBSERVABILITY_VERSION", "1.1.0", "7f2ef7eaa4866e02"),
+    "imaging/observability.py": ("OBSERVABILITY_VERSION", "1.2.0", "3c44fe89f7545c71"),
     "imaging/preflight.py": ("PREFLIGHT_VERSION", "1.1.0", "972ee68643548a61"),
     "imaging/role_features.py": ("ROLE_FEATURES_VERSION", "1.0.0", "692c039193292c2f"),
     "manifest.py": ("MANIFEST_BUILDER_VERSION", "1.6.0", "78bf737840ae437d"),

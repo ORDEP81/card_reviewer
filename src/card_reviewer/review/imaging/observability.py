@@ -226,7 +226,29 @@ def analyze(
             region: float((_patch(gray, region) >= GLARE_LUMA).mean())
             for region in regions
         }
-        baseline = float(np.median(list(fractions.values())))
+        # The MINIMUM sibling, not the median. The median is dragged up by
+        # the very regions being tested: once half of them clip, nothing
+        # stands out from it, and a white card blown out on three or four
+        # corners was reported fully assessable — PASS, rank 100, grade
+        # "10", zero limitations, while the SAME card with one glared
+        # corner correctly returned REVIEW. More damage produced a better
+        # verdict.
+        #
+        # The cleanest comparable region is the only honest reference, and
+        # it cannot be dragged up by the regions under test. No new
+        # threshold: the corpus shows glare separates from clean at 0-12%
+        # recall at zero false positives, so a tuned absolute cut-off is
+        # precisely what must not be invented here. Over the 40 labelled
+        # clean and glare photographs the minimum and the median flag
+        # identical CORNERS, so this robustness costs nothing measured.
+        #
+        # Compared only within a region's own KIND, which is what the
+        # occlusion path below already does. `surface` spans corners and
+        # the centre, and a white border's corner against the artwork's
+        # centre is not a comparison — taking the minimum across those
+        # reported GLARE on 28 regions of a perfectly clean white card.
+        # The median hid that by averaging the mismatch away rather than
+        # by being right.
         # Only regions with siblings of their own kind, and only against
         # those siblings.
         group = next((g for g in COMPARABLE_OCCLUSION_GROUPS
@@ -235,11 +257,42 @@ def analyze(
             region: float((_patch(gray, region) <= OCCLUSION_LUMA).mean())
             for region in regions if region in group
         }
+        # The MEDIAN here, not the minimum. The same change that fixed
+        # glare breaks occlusion: a dark card's regions vary by design, so
+        # the darkest becomes the reference and every other region reads as
+        # obstructed — `test_a_dark_card_design_is_not_reported_as_an_
+        # obstruction` catches it. Glare's minimum was measured against the
+        # corpus and costs nothing; this was not, and the guard says why it
+        # should not be changed on symmetry alone.
         dark_baseline = float(np.median(list(dark.values()))) if dark else 0.0
+
+        # An OBSTRUCTED region is not a brightness reference. A thumb over
+        # one corner reads as 0.0 clipped, and taking the plain minimum
+        # then made the card's three ordinary corners "stand out" from it
+        # as glare. Excluding them is a statement about what the regions
+        # are, not a threshold fitted to make cases come out right.
+        obstructed = {
+            region for region in dark
+            if dark[region] > dark_baseline + OCCLUSION_FRACTION
+        }
+
+        def _reference(region: str) -> float:
+            kin = next((g for g in COMPARABLE_OCCLUSION_GROUPS if region in g),
+                       None)
+            siblings = [f for r, f in fractions.items()
+                        if (kin is None or r in kin) and r not in obstructed]
+            if not siblings:
+                # Every comparable region is obstructed, so there is no
+                # reference at all. Fall back to the whole kind rather than
+                # inventing one.
+                siblings = [f for r, f in fractions.items()
+                            if kin is None or r in kin]
+            return float(min(siblings)) if siblings else 0.0
         for region in regions:
             patch = _patch(gray, region)
             clipped = fractions[region] > GLARE_FRACTION
-            stands_out = fractions[region] > baseline + GLARE_EXCESS_FRACTION
+            stands_out = (fractions[region]
+                          > _reference(region) + GLARE_EXCESS_FRACTION)
             bright = float(patch.mean()) >= WHITE_BORDER_LUMA
             # Everything that used to fall through to HIGH. The occlusion
             # mask was already being computed here and then thrown away.
@@ -247,10 +300,7 @@ def analyze(
             # the case the relative test cannot see — every region obstructed
             # at once, where there is no unobstructed sibling to stand out
             # from.
-            occluded = (
-                region in dark
-                and dark[region] > dark_baseline + OCCLUSION_FRACTION
-            )
+            occluded = region in obstructed
             too_small = min(patch.shape[:2]) * scale < REGION_MIN_PX
             for defect_type in defect_types_for(category):
                 key = (region, category, defect_type)

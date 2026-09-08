@@ -5,6 +5,14 @@
 # detect that today's behaviour is wrong. `rendered_centering` is
 # the one exception — it comes from the generator, so a measured
 # value can be read against what was actually drawn.
+#
+# The two miscut.png corner entries moved high -> low when glare
+# detectability began comparing against the cleanest comparable
+# sibling rather than the median. On this SYNTHETIC miscut the wide
+# left border reads as an excess; measured on the real corpus the
+# same change costs 2 extra flagged regions in 296 clean ones and
+# none at all on the 23 real miscut cards. Lower detectability can
+# never manufacture a REJECT, so the direction is safe.
 - file: white_border_clean.png
   synthetic: true
   preflight_usable: true
@@ -305,8 +313,8 @@
     top.edges.chipping: high
     top.edges.roughness: high
     top.edges.whitening: low
-    top_left.corners.fraying: high
-    top_left.corners.rounding: high
+    top_left.corners.fraying: low
+    top_left.corners.rounding: low
     top_left.corners.whitening: low
     top_left.surface.crease: low
     top_left.surface.dimples: low
