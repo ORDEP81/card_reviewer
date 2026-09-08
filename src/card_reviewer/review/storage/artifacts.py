@@ -42,6 +42,12 @@ class ArtifactStore:
         Content is part of the id, so two stages writing the same logical
         name with different bytes get different ids instead of one silently
         overwriting the other.
+
+        Changing this SCHEME changes every derived id, which flows into
+        `assembled_evidence` and re-keys every stage that reads it — the
+        vision call included, so it re-bills every card in an existing
+        database. That is not a stage bump, it is a migration; the version
+        below exists so the change cannot be made silently.
         """
         seed = f"{image_hash}|{kind}|{name}|{_sha(data)}"
         return _sha(seed.encode("utf-8"))[:32]

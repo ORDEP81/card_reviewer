@@ -42,30 +42,25 @@ def test_candidate_input_may_carry_price_as_listing_provenance():
 def test_the_adapter_drops_price_when_resolving(store, image):
     """Rule 10: no price reaches the grading core.
 
-    Asserted as a substring of the whole JSON, this was FLAKY — candidate
-    ids and image hashes are hex, so "9999" turns up in one about twice in
-    three thousand runs. Walk the structure and compare values instead: a
-    test that fails at random teaches people to re-run rather than look.
+    Scanned as a SUBSTRING of the whole document deliberately. Walking to
+    the leaves and comparing by equality reads as more precise and is
+    strictly weaker: it only catches a price standing alone as a whole
+    value, and the realistic way rule 10 breaks is a price APPENDED to
+    something — a title, a note, an explanation. Verified: with the adapter
+    mutated to append the price to the title, the substring scan fails and
+    the leaf-equality version passes.
+
+    The substring form was flaky at "9999" — candidate ids and image hashes
+    are hex, so those four digits turn up in one about twice in three
+    thousand runs. A decimal POINT cannot occur in hex, so "9999.99" keeps
+    the breadth and cannot collide.
     """
-    import json
-
     resolved = ManualAdapter(store).resolve(CandidateInput(
-        source="manual", title="t", asking_price="9999.00", image_paths=[image]))
+        source="manual", title="t", asking_price="9999.99", image_paths=[image]))
 
-    def values(node):
-        if isinstance(node, dict):
-            for key, value in node.items():
-                yield key
-                yield from values(value)
-        elif isinstance(node, list):
-            for item in node:
-                yield from values(item)
-        else:
-            yield node
-
-    seen = list(values(json.loads(resolved.model_dump_json())))
-    assert "9999.00" not in seen, "the asking price survived into the review"
-    assert "asking_price" not in seen, "the price FIELD survived into the review"
+    assert "9999.99" not in resolved.model_dump_json(), (
+        "the asking price reached the grading core")
+    assert "asking_price" not in resolved.model_dump_json()
 
 
 # --- identity --------------------------------------------------------------

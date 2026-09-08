@@ -11,8 +11,14 @@ import csv, sys, tempfile
 from collections import Counter
 from pathlib import Path
 
-PHOTOS = Path("training/photos")
-sys.path.insert(0, "src")
+# Resolved from THIS file's repository root. `parents[3]` walked out of a
+# worktree into the MAIN checkout and read ITS copy of the corpus, so the
+# figures described whichever tree happened to be checked out there rather
+# than the committed one. `parents[1]` is the repo root in a worktree and
+# in a plain clone alike.
+ROOT = Path(__file__).resolve().parents[1]
+PHOTOS = ROOT / "training" / "photos"
+sys.path.insert(0, str(ROOT / "src"))
 
 from card_reviewer.review.enums import Mode
 from card_reviewer.review.imaging.geometry import analyze

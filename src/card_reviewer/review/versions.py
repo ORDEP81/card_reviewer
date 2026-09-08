@@ -77,6 +77,10 @@ TAXONOMY_VERSION = "1.1.0"
 # 1.1.0: as above. Largely self-invalidating, since canonicalization
 # prefixes the fingerprint, but the rule does not have exceptions.
 CANON_SCHEME_VERSION = "1.1.0"
+#: The derived-artifact-id scheme. Not a stage version: changing it re-keys
+#: every stage that reads an artifact id, so it is a migration rather than a
+#: bump. It exists so that change cannot happen unnoticed.
+ARTIFACT_SCHEME_VERSION = "1.0.0"
 
 #: Stamped onto every CardReview (spec §16). Keyed by STAGE, so it can be
 #: compared directly against STAGE_SIGNATURE_INPUTS — a component-keyed map

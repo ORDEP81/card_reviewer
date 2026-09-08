@@ -19,7 +19,12 @@ from pathlib import Path
 
 import numpy as np
 
-PHOTOS = Path(__file__).resolve().parents[3] / "training" / "photos"
+# Resolved from THIS file's repository root. `parents[3]` walked out of a
+# worktree into the MAIN checkout and read ITS copy of the corpus, so the
+# figures described whichever tree happened to be checked out there rather
+# than the committed one. `parents[1]` is the repo root in a worktree and
+# in a plain clone alike.
+PHOTOS = Path(__file__).resolve().parents[1] / "training" / "photos"
 
 
 def rows():

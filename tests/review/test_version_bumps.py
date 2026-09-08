@@ -81,6 +81,14 @@ GUARDED = {
     # output, so nothing is stale today; a change that made one of them
     # compute rather than validate would need splitting this entry.
     "provenance.py": ("COMBINATION_POLICY_VERSION", "1.1.0", "f99e534d53f3c451"),
+    # KNOWN LIMIT, as for provenance.py: a TAXONOMY_VERSION bump reaches
+    # combine, coverage, coverage_provisional, cv_measurements, heuristic
+    # and observability — NOT evidence_assembly or routing, which also
+    # compare `Scale`. A reorder still invalidates those two, but through
+    # changed upstream VALUES rather than through the constant. Guarding by
+    # value propagation is weaker than guarding by signature: it holds only
+    # while some upstream output actually moves.
+    #
     # NOT "names and orderings, no decisions". `Scale` is an IntEnum
     # precisely so `>=` compares it against a declared threshold, so the
     # ORDER is the decision — and the persisted form is the label, which
@@ -89,6 +97,12 @@ GUARDED = {
     # card unassessable. `Authority` (INERT/ADVISORY/BINDING) is the same
     # shape. Keyed to the taxonomy, which shares its stages.
     "enums.py": ("TAXONOMY_VERSION", "1.1.0", "864e87a9dcc185fb"),
+    # Derived artifact ids flow into `assembled_evidence` and re-key every
+    # stage that reads it, the BILLED one included — a scheme change
+    # re-bills every card in an existing database while
+    # `test_dod4_a_cv_bump_does_not_rebill_an_unchanged_vision_call` keeps
+    # passing. Exempting it left that survivable in silence.
+    "storage/artifacts.py": ("ARTIFACT_SCHEME_VERSION", "1.0.0", "50c86e9babe317b8"),
     "roles.py": ("RESOLVER_VERSION", "1.0.0", "19d1c6fbe391afd2"),
     "findings.py": ("COMBINATION_POLICY_VERSION", "1.1.0", "f80b54635c10131b"),
     "evaluability.py": ("SCORER_VERSION", "1.2.0", "975083105bb28487"),
@@ -243,13 +257,6 @@ EXEMPT = {
     # but cannot make a stage compute a different answer.
     "storage/migrations.py",
     "storage/repository.py",
-    # Content-addressed store. Artifact ids are a pure function of
-    # (image_hash, kind, name, content digest) —
-    # so ids stay stable unless the SCHEME changes — and that
-    # invalidates every derived id at once, which is a deliberate global
-    # migration rather than a stage bump. If you change the scheme, this
-    # exemption is the thing to revisit.
-    "storage/artifacts.py",
     "models.py",           # the output record's shape
 
     "context.py",          # the CardContext container

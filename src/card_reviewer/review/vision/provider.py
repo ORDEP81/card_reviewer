@@ -88,7 +88,7 @@ class VisionProvider(Protocol):
         """Provider identity for the vision stage's producer signature.
 
         Exactly `provider`, `model`, `prompt_version`, `adapter_version`
-    and `inference_params`.
+        and `inference_params`.
         Exposing it here is what lets the pipeline cache a vision result
         without importing or knowing anything about Anthropic.
         """

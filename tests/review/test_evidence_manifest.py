@@ -532,9 +532,13 @@ def test_one_face_present_still_gets_two_photographs_pinned():
                  if not a["view"].startswith(("corner_", "edge_"))]
     assert len(overviews) == 2, (
         f"a front-only listing pinned {len(overviews)} whole-card views")
+    # Documentation, not a second guard: each image emits exactly one
+    # `surface_original`, so two pinned views ARE two photographs and this
+    # cannot fail while the assertion above passes. It states the property
+    # the pin is for, so a producer that ever emits two whole-card views
+    # for one image finds the claim already written down.
     by_id = {r.artifact_id: r for r in refs}
-    assert len({by_id[a["artifact_id"]].image_hash for a in overviews}) == 2, (
-        "both pinned views came from one photograph")
+    assert len({by_id[a["artifact_id"]].image_hash for a in overviews}) == 2
 
 
 def test_an_unresolved_photograph_does_not_take_a_real_faces_pinned_slot():
@@ -577,3 +581,55 @@ def test_an_unresolved_photograph_does_not_take_a_real_faces_pinned_slot():
                    if not a["view"].startswith(("corner_", "edge_")))
     assert faces == ["back", "front"], (
         f"an unresolved photograph displaced an identified face: {faces}")
+
+
+def test_every_view_a_producer_emits_has_a_declared_priority(tmp_path):
+    """`_rank` gives an unrecognized view the LOWEST priority silently.
+
+    So a producer adding a view name lands it at the bottom of the budget
+    with no signal — which is how `front_face` and `back_face` sat in
+    VIEW_PRIORITY for months while nothing emitted them, the mirror image
+    of the same gap. A vocabulary is a contract only if both halves are
+    checked against each other.
+    """
+    from card_reviewer.review.assembly import (
+        ImageStageOutputs, assemble, to_image_evidence,
+    )
+    from card_reviewer.review.enums import Provenance
+    from card_reviewer.review.imaging.geometry import analyze
+    from card_reviewer.review.imaging.measure import measure_all
+    from card_reviewer.review.imaging.observability import analyze as observe
+    from card_reviewer.review.imaging.synthetic import CardSpec, render_png
+    from card_reviewer.review.manifest import VIEW_PRIORITY, _rank
+    from card_reviewer.review.roles import ResolvedRole
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+
+    store = ArtifactStore(tmp_path / "store")
+    outputs, roles = [], {}
+    for spec, role in (
+        (CardSpec(border_color=(20, 20, 20), scratches=[0.8],
+                  corner_damage={"top_left": 0.9}), ImageRole.FRONT),
+        (CardSpec(text_heavy=True), ImageRole.BACK),
+    ):
+        data = render_png(spec)
+        image_hash = store.put_image(data)
+        geometry = analyze(data, store, image_hash)
+        outputs.append(ImageStageOutputs(
+            image_hash=image_hash, preflight={"global_sharpness": 120.0},
+            geometry=geometry.model_dump(),
+            observability=observe(geometry, store, image_hash).model_dump(),
+            cv_measurements=measure_all(geometry, store,
+                                        image_hash).model_dump()))
+        roles[image_hash] = ResolvedRole(
+            image_hash=image_hash, role=role,
+            provenance=Provenance.SUPPLIED, confidence=1.0)
+
+    assembled = assemble(to_image_evidence(outputs), roles)
+    emitted = {ref.view for refs in assembled.evidence_refs.values()
+               for ref in refs}
+    assert emitted, "the producers emitted no views at all"
+
+    unranked = sorted(v for v in emitted if _rank(v) == len(VIEW_PRIORITY))
+    assert not unranked, (
+        f"views the producers emit that VIEW_PRIORITY does not rank, so they "
+        f"sort last with no signal: {unranked}")
