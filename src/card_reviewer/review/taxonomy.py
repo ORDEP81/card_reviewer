@@ -116,6 +116,14 @@ REASON_CODES: dict[str, UndetectabilityClass] = {
     # framed with more margin around the card resolves it, which is what
     # makes it circumstantial rather than a property of the card.
     "BOUNDARY_NOT_OBSERVED": _C,
+    # The vision layer was wanted and did not run — no provider configured,
+    # or the call failed. STRUCTURAL because no photograph closes it: it is
+    # a system limitation, and classing it circumstantial asked the owner
+    # for a better picture of a card whose problem was a missing API key.
+    # Blocking is not lost — the assessability veto runs before coverage
+    # and is what stops the card passing.
+    "VISION_UNAVAILABLE": _S,
+    "VISION_FAILED": _S,
     # The opposite of GLARE, and it needs the opposite advice.
     "UNDEREXPOSED": _C,
     # A producer lowered detectability without recording why. Circumstantial

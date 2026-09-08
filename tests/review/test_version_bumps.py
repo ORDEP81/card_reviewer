@@ -96,7 +96,7 @@ GUARDED = {
     # `Scale` inverted, a cached PASS survived a change that makes the same
     # card unassessable. `Authority` (INERT/ADVISORY/BINDING) is the same
     # shape. Keyed to the taxonomy, which shares its stages.
-    "enums.py": ("TAXONOMY_VERSION", "1.1.0", "864e87a9dcc185fb"),
+    "enums.py": ("TAXONOMY_VERSION", "1.2.0", "864e87a9dcc185fb"),
     # Derived artifact ids flow into `assembled_evidence` and re-key every
     # stage that reads it, the BILLED one included — a scheme change
     # re-bills every card in an existing database while
@@ -128,7 +128,7 @@ GUARDED = {
     "policies/scoring_v1.py": ("SCORING_POLICY_VERSION", "1.1.0", "ed8fa6f1e35893aa"),
     "relevance.py": ("RELEVANCE_POLICY_VERSION", "1.0.0", "ea269f91d02dd57c"),
     "role_context.py": ("RESOLVER_VERSION", "1.0.0", "dd7d9e70e7ec808a"),
-    "taxonomy.py": ("TAXONOMY_VERSION", "1.1.0", "cf367536bf66499e"),
+    "taxonomy.py": ("TAXONOMY_VERSION", "1.2.0", "b641606454b54ef7"),
     "vision/prompt.py": ("PROMPT_VERSION", "1.1.0", "56d09acc4a109eb8"),
     "vocabulary.py": ("VOCABULARY_VERSION", "1.0.0", "040b976b969da81e"),
 }

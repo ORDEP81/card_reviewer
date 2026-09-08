@@ -493,15 +493,22 @@ class ReviewPipeline:
         from .models import CardReview
         from .versions import effective_versions
 
+        from .taxonomy import class_of
+
         limitations = [l.model_dump() for l in coverage.limitations]
         if vision_limit:
             # Recorded as a limitation so the owner sees WHY the card was not
             # fully assessed; the coverage veto above is what actually stops
             # it passing.
+            # The class comes from the taxonomy, not from here. Hardcoding
+            # "circumstantial" bypassed `class_of` — which raises on unknown
+            # codes precisely so a class is never guessed — and guessed
+            # wrong: circumstantial means image-resolvable, so a provider
+            # that never ran asked for a better photograph.
             limitations.append({
                 "face": "card", "category": "*", "defect_type": "*",
                 "reason_code": vision_limit,
-                "undetectability_class": "circumstantial"})
+                "undetectability_class": class_of(vision_limit).value})
 
         review = CardReview(
             candidate_id=candidate.candidate_id, title=candidate.title,

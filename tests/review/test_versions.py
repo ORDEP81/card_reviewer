@@ -92,7 +92,10 @@ def test_every_other_stage_version_is_carried_through_unchanged():
     # them: taxonomy, authority, relevance, scoring, fusion and
     # canonicalization all change the numbers, and calibration should not
     # have to reconstruct them by joining stage rows.
-    assert set(stamped) == set(VERSIONS) | set(SUPPORTING_VERSIONS)
+    # `rubric` joins them, read at run time from Subsystem B rather than
+    # declared in either map — see
+    # test_a_review_records_the_rubric_that_graded_it.
+    assert set(stamped) == set(VERSIONS) | set(SUPPORTING_VERSIONS) | {"rubric"}
     for stage, version in VERSIONS.items():
         if stage != "vision":
             assert stamped[stage] == version
@@ -137,3 +140,27 @@ def test_different_nested_parameters_still_render_differently():
     a = format_vision_version(base | {"inference_params": {"thinking": {"budget": 2}}})
     b = format_vision_version(base | {"inference_params": {"thinking": {"budget": 3}}})
     assert a != b
+
+
+def test_a_review_records_the_rubric_that_graded_it():
+    """Non-negotiable rule 7 names the rubric version explicitly, alongside
+    the model and analyzer versions.
+
+    Every OTHER version a verdict depends on is stamped, and the one that
+    supplied the grading RULES was not — so a stored review could say which
+    scorer and which prompt produced it and not which rubric, and Subsystem
+    B versions its rubric precisely because those rules change. A prediction
+    that cannot name its rubric cannot be compared against the PSA outcome
+    it predicted, which is the whole purpose of keeping it.
+
+    Read at run time, not declared as a constant: the active rubric is
+    whatever Subsystem B currently publishes, and a hardcoded copy would go
+    stale silently — the failure mode this branch has hit repeatedly.
+    """
+    from card_reviewer.knowledge import load_active_rubric
+    from card_reviewer.review.versions import effective_versions
+
+    stamped = effective_versions()
+    assert "rubric" in stamped, (
+        "a stored review cannot say which rubric produced its verdict")
+    assert stamped["rubric"] == load_active_rubric().version

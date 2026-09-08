@@ -188,3 +188,63 @@ def test_defects_found_is_the_fused_view_not_the_raw_one(tmp_path):
 
     assert len(review.raw_findings) > len(review.defects_found), (
         "two photographs of one corner were reported as two separate defects")
+
+
+def test_a_provider_that_did_not_run_is_not_a_photograph_problem(tmp_path):
+    """`VISION_UNAVAILABLE` and `VISION_FAILED` were invented at the point
+    of use: not declared in `taxonomy.py`, and appended with a hardcoded
+    `"circumstantial"` class that bypasses `class_of` — which exists, and
+    raises on unknown codes, precisely so a code's class is never guessed.
+
+    The guess was wrong in the direction that matters. Circumstantial means
+    image-resolvable, so a missing API key or a provider timeout asked the
+    owner for a better PHOTOGRAPH. CLAUDE.md draws that distinction
+    explicitly: do not convert a metadata or system problem into a
+    photography problem.
+
+    Blocking is not lost by fixing this — the assessability veto already
+    stops the card passing, and it runs before coverage.
+    """
+    from card_reviewer.review.enums import Mode
+    from card_reviewer.review.imaging.synthetic import CardSpec, render_png
+    from card_reviewer.review.ingest.adapter import ManualAdapter
+    from card_reviewer.review.models import CandidateInput
+    from card_reviewer.review.pipeline import ReviewPipeline
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+    from card_reviewer.review.storage.migrations import connect, migrate
+    from card_reviewer.review.storage.repository import SqliteRepository
+    from card_reviewer.review.taxonomy import class_of
+
+    store = ArtifactStore(tmp_path / "store")
+    conn = connect(tmp_path / "t.db")
+    migrate(conn)
+    path = tmp_path / "front.png"
+    path.write_bytes(render_png(CardSpec()))
+    resolved = ManualAdapter(store).resolve(CandidateInput(
+        source="manual", title="t", image_paths=[path],
+        supplied_roles={str(path): "front"}))
+
+    pipeline = ReviewPipeline(SqliteRepository(conn), store)
+    # OFF as the control: same card, same photographs, no vision expected.
+    # Whatever requests it produces are the card's own (it is front-only,
+    # so it legitimately asks for a back).
+    control = pipeline.review(resolved, Mode.OFF)
+    # DEEP with no provider: the vision layer was wanted and did not run.
+    review = pipeline.review(resolved, Mode.DEEP, provider=None)
+
+    vision_limits = [l for l in review.limitations
+                     if l["reason_code"].startswith("VISION_")]
+    assert vision_limits, "a provider that never ran was not recorded at all"
+
+    for limitation in vision_limits:
+        # Declared, so its class comes from the taxonomy rather than the
+        # call site.
+        assert class_of(limitation["reason_code"]).value == \
+            limitation["undetectability_class"]
+
+    added = (set(review.recommended_additional_photos)
+             - set(control.recommended_additional_photos))
+    conn.close()
+    assert not added, (
+        f"a provider that did not run asked for a photograph the same card "
+        f"did not need in OFF mode: {sorted(added)}")

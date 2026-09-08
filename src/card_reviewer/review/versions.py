@@ -73,7 +73,9 @@ FUSION_VERSION = "1.2.0"
 # observability, cv_measurements, heuristic, both coverage stages and
 # combine, so every one of them was serving rows built under the old
 # promotion rules.
-TAXONOMY_VERSION = "1.1.0"
+# 1.2.0: VISION_UNAVAILABLE and VISION_FAILED are declared codes rather
+# than strings invented at the call site with a guessed class.
+TAXONOMY_VERSION = "1.2.0"
 # 1.1.0: as above. Largely self-invalidating, since canonicalization
 # prefixes the fingerprint, but the rule does not have exceptions.
 CANON_SCHEME_VERSION = "1.1.0"
@@ -177,6 +179,14 @@ def effective_versions(
     """
     stamped = dict(VERSIONS)
     stamped.update(SUPPORTING_VERSIONS)
+    # The rubric is read at RUN TIME, not declared as a constant beside the
+    # others: it is whatever Subsystem B currently publishes, and a copy
+    # here would go stale silently. Rule 7 names it alongside the model and
+    # analyzer versions, and it was the one version a verdict depends on
+    # that a stored review could not name.
+    from card_reviewer.knowledge import load_active_rubric
+
+    stamped["rubric"] = load_active_rubric().version
     stamped["vision"] = (
         VISION_NOT_RUN
         if vision_signature is None
