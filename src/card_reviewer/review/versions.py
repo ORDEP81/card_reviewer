@@ -49,7 +49,9 @@ ROUTING_POLICY_VERSION = "1.1.0"
 # photograph, and crops cover each region before repeating one.
 # 1.4.0: the two pinned overviews are one per FACE where both exist —
 # capping at two without knowing the faces sent both views of one face.
-MANIFEST_BUILDER_VERSION = "1.4.0"
+# 1.5.0: an unresolved photograph no longer takes a pinned slot from an
+# identified face — UNKNOWN is not a third face.
+MANIFEST_BUILDER_VERSION = "1.5.0"
 # 1.1.0: _material_contradiction compares category AND defect_type, and
 # the policy grew several arms. The signature was byte-identical across
 # both changes, so cached combine rows kept the older adjudication.
@@ -116,7 +118,8 @@ VISION_PLACEHOLDER = "provider-supplied"
 VISION_NOT_RUN = "not_run"
 
 #: The four values that identify a vision run (spec §4).
-VISION_SIGNATURE_KEYS = ("provider", "model", "prompt_version", "inference_params")
+VISION_SIGNATURE_KEYS = ("provider", "model", "prompt_version",
+                         "adapter_version", "inference_params")
 
 
 def format_vision_version(signature: dict[str, object]) -> str:

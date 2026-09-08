@@ -39,6 +39,7 @@ def test_a_real_vision_run_preserves_provider_model_prompt_and_params():
             "provider": "anthropic",
             "model": "claude-sonnet-5",
             "prompt_version": "1.0.0",
+            "adapter_version": "1.0.0",
             "inference_params": {"max_tokens": 4096},
         }
     )
@@ -52,7 +53,8 @@ def test_the_placeholder_never_reaches_a_stamped_review():
     from card_reviewer.review.versions import effective_versions
 
     for signature in (None, {"provider": "fake", "model": "m",
-                             "prompt_version": "1", "inference_params": {}}):
+                             "prompt_version": "1", "adapter_version": "1.0.0",
+                             "inference_params": {}}):
         assert "provider-supplied" not in effective_versions(
             vision_signature=signature
         ).values()
@@ -92,7 +94,8 @@ def test_nested_inference_parameters_render_deterministically():
     same run reads as two different ones in the calibration record."""
     from card_reviewer.review.versions import format_vision_version
 
-    base = {"provider": "anthropic", "model": "m", "prompt_version": "1.0.0"}
+    base = {"provider": "anthropic", "model": "m", "prompt_version": "1.0.0",
+            "adapter_version": "1.0.0"}
     a = format_vision_version(
         base | {"inference_params": {"thinking": {"budget": 2, "type": "on"},
                                      "max_tokens": 4096}}
@@ -107,7 +110,8 @@ def test_nested_inference_parameters_render_deterministically():
 def test_different_nested_parameters_still_render_differently():
     from card_reviewer.review.versions import format_vision_version
 
-    base = {"provider": "anthropic", "model": "m", "prompt_version": "1.0.0"}
+    base = {"provider": "anthropic", "model": "m", "prompt_version": "1.0.0",
+            "adapter_version": "1.0.0"}
     a = format_vision_version(base | {"inference_params": {"thinking": {"budget": 2}}})
     b = format_vision_version(base | {"inference_params": {"thinking": {"budget": 3}}})
     assert a != b

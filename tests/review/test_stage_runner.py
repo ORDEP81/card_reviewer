@@ -63,6 +63,7 @@ def test_a_failure_is_recorded_and_never_cached(runner):
         raise RuntimeError("provider exploded")
 
     versions = {"provider": "anthropic", "model": "m", "prompt_version": "1",
+                "adapter_version": "1.0.0",
                 "inference_params": {}}
     with pytest.raises(RuntimeError):
         runner.run("vision", {"provider_evidence_payload": {}}, versions, boom,

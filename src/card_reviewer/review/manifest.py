@@ -17,6 +17,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from .enums import Mode
+from .roles import ImageRole
 from .provenance import EvidenceRef
 from .versions import MANIFEST_BUILDER_VERSION
 
@@ -115,8 +116,18 @@ def build_manifest(assembled: Any, mode: Mode, rubric_rules: list,
     # back into ordinary competition rather than being dropped. One per
     # photograph at most, so two pinned views are two different photographs.
     def face_of(ref: EvidenceRef):
+        """The face this photograph was resolved to, or None.
+
+        UNKNOWN is None, not a third face. The rest of the engine already
+        says so — `assemble` gives an unknown-role image its anomalies but
+        never lets it "claim a face", and `faces_present` excludes it — and
+        treating it as a peer let an unresolved photograph take a pinned
+        slot from the FRONT. `screen` supplies no roles, so every role is
+        inferred and UNKNOWN covers the whole ambiguous band by design.
+        """
         role = (image_roles or {}).get(ref.image_hash)
-        return getattr(role, "value", role)
+        face = getattr(role, "value", role)
+        return None if face in (None, ImageRole.UNKNOWN.value) else face
 
     ordered = sorted(candidates,
                      key=lambda r: (_rank(r.view), r.view, r.artifact_id))

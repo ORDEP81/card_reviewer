@@ -67,8 +67,12 @@ GUARDED = {
     # `_resolve` that ARE the role_context stage; `findings.py` holds
     # `enforce_i3`, which combine calls; `evaluability.py` decides
     # UNEVALUABLE, which the heuristic consumes.
-    "vision/anthropic.py": ("PROVIDER_ADAPTER_VERSION", "1.0.0", "672c4769d2847b6e"),
-    "vision/provider.py": ("PROVIDER_ADAPTER_VERSION", "1.0.0", "99223d56539b9040"),
+    "vision/anthropic.py": ("PROVIDER_ADAPTER_VERSION", "1.0.0", "028c37486b53cbbc"),
+    "vision/provider.py": ("PROVIDER_ADAPTER_VERSION", "1.0.0", "e8e88e1cf249de0a"),
+    # `overlaps` is I1's and fusion's correlation test and `is_enhanced` is
+    # I3's; both are consumed inside combine, so a change here changes
+    # combine's adjudication for identical inputs.
+    "provenance.py": ("COMBINATION_POLICY_VERSION", "1.1.0", "f99e534d53f3c451"),
     "roles.py": ("RESOLVER_VERSION", "1.0.0", "19d1c6fbe391afd2"),
     "findings.py": ("COMBINATION_POLICY_VERSION", "1.1.0", "f80b54635c10131b"),
     "evaluability.py": ("SCORER_VERSION", "1.2.0", "975083105bb28487"),
@@ -84,7 +88,7 @@ GUARDED = {
     "imaging/observability.py": ("OBSERVABILITY_VERSION", "1.1.0", "7f2ef7eaa4866e02"),
     "imaging/preflight.py": ("PREFLIGHT_VERSION", "1.1.0", "972ee68643548a61"),
     "imaging/role_features.py": ("ROLE_FEATURES_VERSION", "1.0.0", "692c039193292c2f"),
-    "manifest.py": ("MANIFEST_BUILDER_VERSION", "1.4.0", "1de15491a6d078ed"),
+    "manifest.py": ("MANIFEST_BUILDER_VERSION", "1.5.0", "ba0bb6d68eae633d"),
     "normalize.py": ("VOCABULARY_VERSION", "1.0.0", "7a710b0ced1b4cf4"),
     "policies/authority_v1.py": ("AUTHORITY_POLICY_VERSION", "1.0.0", "a38e410e720a6641"),
     "policies/combine_v1.py": ("COMBINATION_POLICY_VERSION", "1.1.0", "6a0b5dea7c7aa25d"),
@@ -125,13 +129,30 @@ def constant_value(module: str, constant: str):
     try:
         return getattr(import_module(dotted), constant)
     except AttributeError:
-        # A constant shared by sibling modules lives in one of them.
-        package = dotted.rsplit(".", 1)[0]
-        for sibling in ("anthropic", "prompt", "provider"):
-            module_obj = import_module(f"{package}.{sibling}")
-            if hasattr(module_obj, constant):
-                return getattr(module_obj, constant)
-        raise
+        pass
+    # A constant shared across a package lives in one of its modules. Scan
+    # the package rather than naming siblings: a hardcoded list raises
+    # ModuleNotFoundError for anything outside it, masking the real error,
+    # and would silently resolve a second adapter's guard to the first
+    # adapter's value.
+    package_dir = (SRC / module).parent
+    holders = {
+        name: getattr(import_module(
+            "card_reviewer.review."
+            + str(sibling.relative_to(SRC))[: -len(".py")].replace("/", ".")),
+            constant)
+        for sibling in sorted(package_dir.glob("*.py"))
+        if (name := sibling.name) != "__init__.py"
+        and hasattr(import_module(
+            "card_reviewer.review."
+            + str(sibling.relative_to(SRC))[: -len(".py")].replace("/", ".")),
+            constant)
+    }
+    if len(holders) != 1:
+        raise AssertionError(
+            f"{constant} for {module} resolves to {sorted(holders)} — a "
+            f"shared constant must have exactly one home")
+    return next(iter(holders.values()))
 
 
 def behaviour_digest(path: Path) -> str:
@@ -158,7 +179,7 @@ def test_a_stage_whose_code_changed_moved_its_version(module):
     actual = behaviour_digest(SRC / module)
     assert actual == recorded, (
         f"{module} changed but {constant} is still "
-        f"{getattr(versions, constant)!r}.\n"
+        f"{constant_value(module, constant)!r}.\n"
         f"Can this change alter the stage's output for an input it has "
         f"already seen? If so, bump {constant} and set the digest to "
         f"{actual!r} in the same commit. If it genuinely cannot — a pure "
@@ -202,20 +223,20 @@ EXEMPT = {
     # but cannot make a stage compute a different answer.
     "storage/migrations.py",
     "storage/repository.py",
-    # Content-addressed store. Artifact ids are a pure function of bytes,
-    # so ids stay stable unless the HASHING SCHEME changes — and that
+    # Content-addressed store. Artifact ids are a pure function of
+    # (image_hash, kind, name, content digest) —
+    # so ids stay stable unless the SCHEME changes — and that
     # invalidates every derived id at once, which is a deliberate global
     # migration rather than a stage bump. If you change the scheme, this
     # exemption is the thing to revisit.
     "storage/artifacts.py",
     "enums.py",            # names and orderings, no decisions
     "models.py",           # the output record's shape
-    "provenance.py",       # EvidenceRef and NormalizedBox
+
     "context.py",          # the CardContext container
     "versions.py",         # the constants themselves
     "fingerprint.py",      # covered by its own declaration tests
     "pipeline.py",         # orchestration; every stage it calls is guarded
-    "taxonomy.py",         # guarded above, listed for the walk below
 }
 
 
@@ -235,8 +256,12 @@ def test_every_module_is_either_guarded_or_deliberately_exempt():
         for path in SRC.rglob("*.py")
         if "__pycache__" not in path.parts
     }
+    # Path-exact, except `__init__.py`, which exists in every package.
+    # Matching on BASENAME wildcard-exempted a dozen filenames in every
+    # subpackage: a new threshold-bearing module escaped the check simply
+    # by being called `enums.py`.
     known = set(GUARDED) | EXEMPT | {
-        name for name in everything if Path(name).name in EXEMPT
+        name for name in everything if Path(name).name == "__init__.py"
     }
     unclassified = sorted(everything - known)
     assert not unclassified, (

@@ -3,7 +3,8 @@
 Measured with `.dev/calibrate.py` (framing), `.dev/separate.py` (detector
 separation) and `.dev/verdicts.py` (verdicts and rank scores). The last of
 those was written because neither of the first two runs the pipeline, so
-these figures were not reproducible from committed tooling. Framing and
+these figures were not reproducible from committed tooling — `.dev/` is
+gitignored, so all three are now unignored by name. Framing and
 detector-separation figures are unchanged since `a827d6b`; the verdict and
 rank-score figures were re-measured at `3aa48c5`, after splitting fused
 edge findings by region made each false corner anomaly cost more.
@@ -53,7 +54,8 @@ Clean-labelled cards, bucketed by how many corner anomalies fired:
     3 anomalies   n= 8   median rank score  0
     4 anomalies   n=11   median rank score  0
 
-The detector fires on 28 of 37 clean cards, and the score is very nearly a
+`.dev/verdicts.py` prints this table. The detector fires on 28 of 37 clean
+cards, and the score is very nearly a
 linear function of that false-positive count. Clean and defect-labelled
 cards therefore share a median rank score of 0: the ordering the score
 exists to provide does not exist yet.

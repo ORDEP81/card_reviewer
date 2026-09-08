@@ -22,6 +22,7 @@ def _vision(**params):
         "provider": "anthropic",
         "model": "claude-sonnet-5",
         "prompt_version": "1.0.0",
+        "adapter_version": "1.0.0",
         "inference_params": params,
     }
 
@@ -67,7 +68,8 @@ def test_dictionary_ordering_does_not_change_a_producer_signature():
     a = signature_for("vision", _vision(temperature=0.2, top_p=0.9))
     b = signature_for("vision", {
         "inference_params": {"top_p": 0.9, "temperature": 0.2},
-        "prompt_version": "1.0.0", "model": "claude-sonnet-5",
+        "prompt_version": "1.0.0",
+        "adapter_version": "1.0.0", "model": "claude-sonnet-5",
         "provider": "anthropic",
     })
     assert a == b

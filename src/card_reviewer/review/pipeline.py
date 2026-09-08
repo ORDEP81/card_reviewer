@@ -393,7 +393,12 @@ class ReviewPipeline:
              "detectability": asm["detectability_flat"],
              "card_context_known": context.is_known,
              "required_face_missing": missing_face,
-             "manifest_index": {k: v.model_dump() for k, v in index.items()}},
+             "manifest_index": {k: v.model_dump() for k, v in index.items()},
+             # Combine reads the roles directly — I1's adequacy prong and
+             # fusion's per-face separation both turn on them — so the same
+             # findings under different roles are a different adjudication.
+             "image_roles": {h: r.role.value
+                             for h, r in role_context.roles.items()}},
             {"combination_policy_version": COMBINATION_POLICY_VERSION,
              "scoring_policy_version": SCORING_POLICY_VERSION,
              "relevance_policy_version": RELEVANCE_POLICY_VERSION,

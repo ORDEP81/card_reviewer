@@ -1,3 +1,6 @@
+import itertools
+import json
+
 import pytest
 
 from card_reviewer.review.enums import Mode, Verdict
@@ -372,3 +375,62 @@ def test_a_borderless_back_does_not_rescue_a_miscut_front(rig, tmp_path):
         f"{centering[0]['state']}")
     assert review.verdict == "REJECT", (
         f"a measured 78/22 miscut did not reject: {review.verdict}")
+
+
+def test_the_provider_sees_a_whole_card_view_of_each_face(rig, tmp_path):
+    """The per-face pin is wired in `_vision`, and severing that wiring —
+    passing no roles to `build_manifest` — left the whole suite green.
+
+    The only per-face test called `build_manifest` directly with hand-built
+    refs, so nothing checked the seam that was actually changed, and
+    `pipeline.py` is exempt from the version digest guard. A refactor
+    dropping the argument would silently restore the defect: both pinned
+    whole-card views from one face, the other face unseen on a billed call.
+
+    This drives the real pipeline in DEEP and reads what the provider was
+    actually handed.
+    """
+    pipeline, store, repo = rig
+    # Damaged corners on purpose: they raise anomaly candidates, which is
+    # what puts the budget under pressure. With a clean card everything
+    # fits and the pin is never exercised — the first version of this test
+    # passed with the wiring severed for exactly that reason.
+    specs = [CardSpec(border_color=(20, 20, 20),
+                      corner_damage={"top_left": 0.9, "bottom_right": 0.9}),
+             CardSpec(border_color=(30, 30, 30),
+                      corner_damage={"top_right": 0.9}),
+             CardSpec(text_heavy=True, corner_damage={"bottom_left": 0.9}),
+             CardSpec(text_heavy=True, border_px=44,
+                      corner_damage={"top_left": 0.8})]
+
+    # EVERY two-front-two-back assignment, because artifact ids are content
+    # hashes: with the roles ignored the pinned pair is the same two
+    # artifacts whatever the assignment, so some assignment makes them one
+    # face. One arbitrary assignment can pass by luck — this cannot.
+    for fronts in itertools.combinations(range(4), 2):
+        roles = tuple("front" if i in fronts else "back" for i in range(4))
+        resolved = _candidate(tmp_path, store, specs, roles=roles)
+        pipeline.review(resolved, Mode.SMART, provider=_provider())
+        _assert_both_faces_shown(repo, resolved, roles)
+
+
+def _assert_both_faces_shown(repo, resolved, assignment):
+
+    # The stored manifest IS what the provider was handed, and its index is
+    # what resolves a citation back to a photograph.
+    row = repo._conn.execute(
+        "SELECT output_json FROM stage_result WHERE stage='manifest'"
+        " ORDER BY id DESC LIMIT 1").fetchone()
+    assert row, "no manifest was built, so nothing reached the provider"
+    built = json.loads(row[0])
+
+    by_hash = {image.image_hash: image.supplied_role
+               for image in resolved.images}
+    faces = {
+        by_hash.get(built["index"][artifact["artifact_id"]]["image_hash"])
+        for artifact in built["payload"]["artifacts"]
+        if not artifact["view"].startswith(("corner_", "edge_"))
+    }
+    assert faces == {"front", "back"}, (
+        f"with roles {assignment} the provider was sent whole-card views of "
+        f"{faces or 'no face'}; a face it must assess was never shown")

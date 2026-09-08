@@ -49,7 +49,13 @@ STAGE_SIGNATURE_INPUTS: dict[str, tuple[str, ...]] = {
     # part of its implementation identity, so it belongs in the FINGERPRINT.
     "routing": ("routing_policy_version",),
     "manifest": ("manifest_builder_version",),
-    "vision": ("provider", "model", "prompt_version", "inference_params"),
+    # `adapter_version` is here, not merely in the provider's signature
+    # dict: `signature_for` hashes ONLY declared keys, so a key present in
+    # the dict and absent from this tuple is silently dropped. The adapter
+    # holds `parse_assessment` and `resolve_vision_findings`, so a change
+    # there gives different output from the same response.
+    "vision": ("provider", "model", "prompt_version", "adapter_version",
+               "inference_params"),
     "coverage": ("coverage_policy_version", "taxonomy_version"),
     # Combine runs relevance, fusion and scoring inside itself, so every one
     # of those policies can change its output for identical inputs. Taxonomy
@@ -152,6 +158,9 @@ STAGE_FINGERPRINT_INPUTS: dict[str, tuple[str, ...]] = {
         "card_context_known",
         "required_face_missing",
         "manifest_index",
+        #   - image_roles decide I1's per-face adequacy and whether two
+        #     findings at the same corner of opposite faces are one defect
+        "image_roles",
     ),
 }
 

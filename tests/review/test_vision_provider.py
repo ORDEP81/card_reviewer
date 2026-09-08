@@ -140,7 +140,8 @@ def test_the_fake_provider_exposes_a_signature_with_the_declared_keys():
         category_assessability={"centering": True, "corners": True,
                                 "edges": True, "surface": True},
         gem_view=GemView.NO_DISQUALIFIER)).signature()
-    assert set(sig) == {"provider", "model", "prompt_version", "inference_params"}
+    assert set(sig) == {"provider", "model", "prompt_version",
+                        "adapter_version", "inference_params"}
 
 
 def test_a_signature_change_is_visible_to_the_cache():

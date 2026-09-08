@@ -529,3 +529,45 @@ def test_one_face_present_still_gets_two_photographs_pinned():
                  if not a["view"].startswith(("corner_", "edge_"))]
     assert len(overviews) == 2, (
         f"a front-only listing pinned {len(overviews)} whole-card views")
+
+
+def test_an_unresolved_photograph_does_not_take_a_real_faces_pinned_slot():
+    """`unknown` is not a face, and the rest of the engine already says so:
+    `assemble` gives an unknown-role image its anomalies but never lets it
+    "claim a face", and `faces_present` excludes it.
+
+    The pin did not, so a listing whose third photograph could not be
+    resolved spent a pinned slot on it and left the FRONT — the face that
+    decides PSA 10 — with no whole-card view. That is a live path, not a
+    corner: `screen` supplies no roles, so every role is inferred and
+    `roles.py` returns UNKNOWN for the whole ambiguous band by design.
+
+    An unresolved photograph still competes for the remaining budget; it
+    just cannot displace a face that was actually identified.
+    """
+    # Artifact ids are content hashes, so the unresolved photograph can
+    # sort FIRST — which is exactly how this reproduced on real evidence.
+    refs, roles = [], {}
+    for tag, face in (("a", ImageRole.UNKNOWN), ("m", ImageRole.FRONT),
+                      ("z", ImageRole.BACK)):
+        roles[f"h{tag}"] = face
+        refs.append(EvidenceRef(artifact_id=f"{tag}_ov", image_hash=f"h{tag}",
+                                origin=EvidenceOrigin.NORMALIZED,
+                                view="surface_original"))
+        for corner in ("bottom_left", "bottom_right", "top_left", "top_right"):
+            refs.append(EvidenceRef(
+                artifact_id=f"{tag}_c_{corner}", image_hash=f"h{tag}",
+                origin=EvidenceOrigin.NORMALIZED, view=f"corner_{corner}"))
+
+    crops = [r for r in refs if r.view.startswith("corner_")]
+    payload = build_manifest(
+        _assembled(refs, anomalies=[_anomaly(r, "corners", "rounding")
+                                    for r in crops]),
+        Mode.SMART, [], image_roles=roles).payload
+
+    by_id = {r.artifact_id: r for r in refs}
+    faces = sorted(roles[by_id[a["artifact_id"]].image_hash].value
+                   for a in payload["artifacts"]
+                   if not a["view"].startswith(("corner_", "edge_")))
+    assert faces == ["back", "front"], (
+        f"an unresolved photograph displaced an identified face: {faces}")

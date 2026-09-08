@@ -37,6 +37,17 @@ def test_a_conflict_is_quantized_at_centerings_declared_precision():
     assert fp(52.0, 61.5) != fp(52.0, 71.5)
 
 
+def _fake_provider():
+    """Never a real call: `FakeProvider` is the only provider tests use."""
+    from card_reviewer.review.vision.provider import (
+        Assessment, FakeProvider, GemView,
+    )
+
+    return FakeProvider(Assessment(
+        category_assessability={c: True for c in CATEGORIES},
+        gem_view=GemView.NO_DISQUALIFIER))
+
+
 def _detectability(value=Scale.HIGH):
     return {(f, "top_left", c, d): value for f in REQUIRED_FACES
             for c in CATEGORIES for d in defect_types_for(c)}
@@ -133,12 +144,22 @@ def test_every_stage_passes_exactly_the_inputs_it_declares(tmp_path):
             source="manual", title="2023 Topps Chrome", candidate_id="c",
             image_paths=paths,
             supplied_roles={str(paths[0]): "front", str(paths[1]): "back"}))
-        ReviewPipeline(SqliteRepository(conn), store).review(resolved, Mode.OFF)
+        pipeline = ReviewPipeline(SqliteRepository(conn), store)
+        pipeline.review(resolved, Mode.OFF)
+        # DEEP as well as OFF, with a fake provider. Running only OFF meant
+        # `manifest` and `vision` — the BILLED path — were never observed,
+        # so their declarations were never checked against the real calls:
+        # dropping `image_roles` from the manifest declaration survived the
+        # whole suite.
+        pipeline.review(resolved, Mode.DEEP, provider=_fake_provider())
         conn.close()
     finally:
         StageRunner.run_with_id = original
 
     assert seen, "no stage was observed running"
+    assert {"manifest", "vision"} <= set(seen), (
+        f"the billed path was never exercised, so its declarations went "
+        f"unchecked: {sorted(seen)}")
     for stage, passed in sorted(seen.items()):
         assert passed == set(STAGE_FINGERPRINT_INPUTS[stage]), (
             f"{stage} declares {sorted(STAGE_FINGERPRINT_INPUTS[stage])} "
@@ -191,3 +212,41 @@ def test_the_heuristic_stage_declares_the_unevaluable_rules_it_reads():
     from card_reviewer.review.fingerprint import STAGE_FINGERPRINT_INPUTS
 
     assert "unevaluable_rubric_rules" in STAGE_FINGERPRINT_INPUTS["heuristic"]
+
+
+def test_the_adapter_version_actually_reaches_the_vision_cache_key():
+    """`signature_for` hashes ONLY the keys a stage declares, so a key added
+    to a provider's `signature()` dict and not to
+    `STAGE_SIGNATURE_INPUTS["vision"]` is silently dropped.
+
+    That is how `PROVIDER_ADAPTER_VERSION` arrived: it went into the dict,
+    the guard table began demanding a bump whenever the adapter changed,
+    and the bump invalidated nothing. Worse than not having it, because the
+    protection was asserted rather than merely absent.
+
+    `provider.py` holds `parse_assessment` AND `resolve_vision_findings`,
+    which combine calls — so a change there alters both the cached vision
+    output and combine's adjudication.
+    """
+    from card_reviewer.review.fingerprint import signature_for
+
+    base = {"provider": "anthropic", "model": "m", "prompt_version": "1.0.0",
+            "adapter_version": "1.0.0", "inference_params": {}}
+    changed = base | {"adapter_version": "2.0.0"}
+
+    assert signature_for("vision", base) != signature_for("vision", changed), (
+        "the adapter version does not participate in the vision cache key")
+
+
+def test_the_stamped_vision_version_records_the_adapter_that_parsed_it():
+    """The stamp is calibration ground truth: comparing a prediction against
+    a PSA outcome later means knowing which adapter parsed the response."""
+    from card_reviewer.review.versions import (
+        VISION_SIGNATURE_KEYS, format_vision_version,
+    )
+
+    assert "adapter_version" in VISION_SIGNATURE_KEYS
+    stamped = format_vision_version(
+        {"provider": "anthropic", "model": "m", "prompt_version": "1.0.0",
+         "adapter_version": "1.0.0", "inference_params": {}})
+    assert "1.0.0" in stamped

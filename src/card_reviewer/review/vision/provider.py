@@ -24,6 +24,16 @@ from ..findings import Finding, FindingProducer, Severity
 from ..provenance import EvidenceRef, NormalizedBox
 from ..taxonomy import CATEGORIES
 
+#: The provider layer's own behaviour: how a payload becomes image blocks,
+#: how a response becomes an Assessment, and how those findings resolve for
+#: combine. The vision signature named the model and the prompt but not
+#: this, so a change to `parse_assessment` or `resolve_vision_findings`
+#: gave different output from the same response under an unchanged key.
+#:
+#: It lives here rather than in an adapter because every provider shares
+#: this contract; an adapter with its own quirks adds its own key.
+PROVIDER_ADAPTER_VERSION = "1.0.0"
+
 __all__ = [
     "Assessment",
     "FakeProvider",
@@ -193,5 +203,9 @@ class FakeProvider:
     def signature(self) -> dict[str, Any]:
         return {
             "provider": "fake", "model": self._model,
-            "prompt_version": self._prompt_version, "inference_params": {},
+            "prompt_version": self._prompt_version,
+            # Declared by the vision stage, so a signature omitting it
+            # raises rather than caching under a partial key.
+            "adapter_version": PROVIDER_ADAPTER_VERSION,
+            "inference_params": {},
         }

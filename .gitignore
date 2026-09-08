@@ -33,6 +33,12 @@ dist/
 build/
 
 .dev/
+# ...except the corpus harnesses. The findings documents quote their
+# figures, and a number nobody else can reproduce is not evidence. The
+# scratch tools in .dev/ (mutate.py and anything transient) stay ignored.
+!.dev/calibrate.py
+!.dev/separate.py
+!.dev/verdicts.py
 
 # macOS
 .DS_Store
