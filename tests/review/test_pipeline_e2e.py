@@ -424,12 +424,22 @@ def _assert_both_faces_shown(repo, resolved, assignment):
     assert row, "no manifest was built, so nothing reached the provider"
     built = json.loads(row[0])
 
+    overviews = [a for a in built["payload"]["artifacts"]
+                 if not a["view"].startswith(("corner_", "edge_"))]
+    # The budget must actually be under pressure, or this test proves
+    # nothing: with room for every overview both faces arrive whatever the
+    # roles say, and the severed wiring passes. It depends on the corner
+    # detector's false positives to create that pressure, and the findings
+    # doc says that noise floor is the next thing to move.
+    assert len(overviews) == 2, (
+        f"{len(overviews)} whole-card views were sent, so the pin was never "
+        f"exercised and this test cannot detect the wiring being severed")
+
     by_hash = {image.image_hash: image.supplied_role
                for image in resolved.images}
     faces = {
         by_hash.get(built["index"][artifact["artifact_id"]]["image_hash"])
-        for artifact in built["payload"]["artifacts"]
-        if not artifact["view"].startswith(("corner_", "edge_"))
+        for artifact in overviews
     }
     assert faces == {"front", "back"}, (
         f"with roles {assignment} the provider was sent whole-card views of "

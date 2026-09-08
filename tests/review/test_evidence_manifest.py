@@ -506,13 +506,16 @@ def test_one_face_present_still_gets_two_photographs_pinned():
     """The fallback: with only fronts, "one per face" must not collapse to
     a single view — two photographs of the front are still worth more than
     one, and the cap is two."""
+    # Four corners each, not two: with only two the budget had slack, so
+    # the second overview arrived on ordinary competition and removing the
+    # distinct-image clause changed nothing the test could see.
     refs, roles = [], {}
     for i in range(3):
         roles[f"h{i}"] = ImageRole.FRONT
         refs.append(EvidenceRef(artifact_id=f"ov{i}", image_hash=f"h{i}",
                                 origin=EvidenceOrigin.NORMALIZED,
                                 view="surface_original"))
-        for corner in ("bottom_left", "top_right"):
+        for corner in ("bottom_left", "bottom_right", "top_left", "top_right"):
             refs.append(EvidenceRef(
                 artifact_id=f"c{i}_{corner}", image_hash=f"h{i}",
                 origin=EvidenceOrigin.NORMALIZED, view=f"corner_{corner}"))
@@ -529,6 +532,9 @@ def test_one_face_present_still_gets_two_photographs_pinned():
                  if not a["view"].startswith(("corner_", "edge_"))]
     assert len(overviews) == 2, (
         f"a front-only listing pinned {len(overviews)} whole-card views")
+    by_id = {r.artifact_id: r for r in refs}
+    assert len({by_id[a["artifact_id"]].image_hash for a in overviews}) == 2, (
+        "both pinned views came from one photograph")
 
 
 def test_an_unresolved_photograph_does_not_take_a_real_faces_pinned_slot():

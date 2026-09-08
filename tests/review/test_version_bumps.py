@@ -72,7 +72,23 @@ GUARDED = {
     # `overlaps` is I1's and fusion's correlation test and `is_enhanced` is
     # I3's; both are consumed inside combine, so a change here changes
     # combine's adjudication for identical inputs.
+    #
+    # KNOWN LIMIT: this file also holds model validators (`_ordered`,
+    # `_enhancement_matches_origin`) that run inside cv_measurements and
+    # vision, and one constant cannot invalidate several stages. Bumping
+    # COMBINATION_POLICY_VERSION re-runs combine alone. The validators
+    # currently only REJECT malformed values rather than changing well-formed
+    # output, so nothing is stale today; a change that made one of them
+    # compute rather than validate would need splitting this entry.
     "provenance.py": ("COMBINATION_POLICY_VERSION", "1.1.0", "f99e534d53f3c451"),
+    # NOT "names and orderings, no decisions". `Scale` is an IntEnum
+    # precisely so `>=` compares it against a declared threshold, so the
+    # ORDER is the decision — and the persisted form is the label, which
+    # makes a reorder invisible to every fingerprint. Demonstrated: with
+    # `Scale` inverted, a cached PASS survived a change that makes the same
+    # card unassessable. `Authority` (INERT/ADVISORY/BINDING) is the same
+    # shape. Keyed to the taxonomy, which shares its stages.
+    "enums.py": ("TAXONOMY_VERSION", "1.1.0", "864e87a9dcc185fb"),
     "roles.py": ("RESOLVER_VERSION", "1.0.0", "19d1c6fbe391afd2"),
     "findings.py": ("COMBINATION_POLICY_VERSION", "1.1.0", "f80b54635c10131b"),
     "evaluability.py": ("SCORER_VERSION", "1.2.0", "975083105bb28487"),
@@ -88,7 +104,7 @@ GUARDED = {
     "imaging/observability.py": ("OBSERVABILITY_VERSION", "1.1.0", "7f2ef7eaa4866e02"),
     "imaging/preflight.py": ("PREFLIGHT_VERSION", "1.1.0", "972ee68643548a61"),
     "imaging/role_features.py": ("ROLE_FEATURES_VERSION", "1.0.0", "692c039193292c2f"),
-    "manifest.py": ("MANIFEST_BUILDER_VERSION", "1.5.0", "ba0bb6d68eae633d"),
+    "manifest.py": ("MANIFEST_BUILDER_VERSION", "1.6.0", "78bf737840ae437d"),
     "normalize.py": ("VOCABULARY_VERSION", "1.0.0", "7a710b0ced1b4cf4"),
     "policies/authority_v1.py": ("AUTHORITY_POLICY_VERSION", "1.0.0", "a38e410e720a6641"),
     "policies/combine_v1.py": ("COMBINATION_POLICY_VERSION", "1.1.0", "6a0b5dea7c7aa25d"),
@@ -135,6 +151,11 @@ def constant_value(module: str, constant: str):
     # ModuleNotFoundError for anything outside it, masking the real error,
     # and would silently resolve a second adapter's guard to the first
     # adapter's value.
+    #
+    # Currently unreached — `anthropic.py` imports PROVIDER_ADAPTER_VERSION,
+    # so the direct lookup finds it. Kept because the alternative is for the
+    # next shared constant to fail with an unhelpful AttributeError, and
+    # `test_a_shared_constant_must_have_exactly_one_home` exercises it.
     package_dir = (SRC / module).parent
     holders = {
         name: getattr(import_module(
@@ -207,7 +228,6 @@ def test_every_guarded_module_exists():
 #: claim, not a convenience: if any of these grows a threshold or a branch
 #: that changes a stage's output, it belongs in GUARDED instead.
 EXEMPT = {
-    "__init__.py",
     # Presentation and orchestration. None of them is an input to a cached
     # stage: they read stage output and render or route it.
     "cli.py",
@@ -230,7 +250,6 @@ EXEMPT = {
     # migration rather than a stage bump. If you change the scheme, this
     # exemption is the thing to revisit.
     "storage/artifacts.py",
-    "enums.py",            # names and orderings, no decisions
     "models.py",           # the output record's shape
 
     "context.py",          # the CardContext container
@@ -268,3 +287,16 @@ def test_every_module_is_either_guarded_or_deliberately_exempt():
         f"modules neither guarded nor exempt: {unclassified}. Does a change "
         f"here alter a cached stage's output? If so add it to GUARDED with "
         f"its constant; if not, add it to EXEMPT and say why.")
+
+
+def test_a_shared_constant_must_have_exactly_one_home():
+    """The package scan's error path, which nothing else reaches.
+
+    `vision/prompt.py` does not define PROVIDER_ADAPTER_VERSION, so the
+    lookup falls through to the scan — which finds it in `provider.py`,
+    its real home, AND in `anthropic.py`, which imports it. Two homes means
+    the guard could bind a module to another module's value silently, and
+    in the direction that reads as "already guarded", so it refuses.
+    """
+    with pytest.raises(AssertionError, match="exactly one home"):
+        constant_value("vision/prompt.py", "PROVIDER_ADAPTER_VERSION")

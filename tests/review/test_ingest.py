@@ -40,9 +40,32 @@ def test_candidate_input_may_carry_price_as_listing_provenance():
 
 
 def test_the_adapter_drops_price_when_resolving(store, image):
+    """Rule 10: no price reaches the grading core.
+
+    Asserted as a substring of the whole JSON, this was FLAKY — candidate
+    ids and image hashes are hex, so "9999" turns up in one about twice in
+    three thousand runs. Walk the structure and compare values instead: a
+    test that fails at random teaches people to re-run rather than look.
+    """
+    import json
+
     resolved = ManualAdapter(store).resolve(CandidateInput(
         source="manual", title="t", asking_price="9999.00", image_paths=[image]))
-    assert "9999" not in resolved.model_dump_json()
+
+    def values(node):
+        if isinstance(node, dict):
+            for key, value in node.items():
+                yield key
+                yield from values(value)
+        elif isinstance(node, list):
+            for item in node:
+                yield from values(item)
+        else:
+            yield node
+
+    seen = list(values(json.loads(resolved.model_dump_json())))
+    assert "9999.00" not in seen, "the asking price survived into the review"
+    assert "asking_price" not in seen, "the price FIELD survived into the review"
 
 
 # --- identity --------------------------------------------------------------

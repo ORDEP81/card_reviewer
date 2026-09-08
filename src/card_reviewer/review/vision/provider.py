@@ -87,7 +87,8 @@ class VisionProvider(Protocol):
     def signature(self) -> dict[str, Any]:
         """Provider identity for the vision stage's producer signature.
 
-        Exactly `provider`, `model`, `prompt_version` and `inference_params`.
+        Exactly `provider`, `model`, `prompt_version`, `adapter_version`
+    and `inference_params`.
         Exposing it here is what lets the pipeline cache a vision result
         without importing or knowing anything about Anthropic.
         """

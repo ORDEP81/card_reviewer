@@ -51,7 +51,10 @@ ROUTING_POLICY_VERSION = "1.1.0"
 # capping at two without knowing the faces sent both views of one face.
 # 1.5.0: an unresolved photograph no longer takes a pinned slot from an
 # identified face — UNKNOWN is not a third face.
-MANIFEST_BUILDER_VERSION = "1.5.0"
+# 1.6.0: VIEW_PRIORITY dropped `front_face`/`back_face`, which no producer
+# ever emitted, so OVERVIEW_TIERS is 1 rather than a tier count nothing
+# reached.
+MANIFEST_BUILDER_VERSION = "1.6.0"
 # 1.1.0: _material_contradiction compares category AND defect_type, and
 # the policy grew several arms. The signature was byte-identical across
 # both changes, so cached combine rows kept the older adjudication.
@@ -117,7 +120,7 @@ VISION_PLACEHOLDER = "provider-supplied"
 #: model" are different facts and calibration has to tell them apart.
 VISION_NOT_RUN = "not_run"
 
-#: The four values that identify a vision run (spec §4).
+#: The five values that identify a vision run (spec §4).
 VISION_SIGNATURE_KEYS = ("provider", "model", "prompt_version",
                          "adapter_version", "inference_params")
 
@@ -127,9 +130,10 @@ def format_vision_version(signature: dict[str, object]) -> str:
     missing = [k for k in VISION_SIGNATURE_KEYS if k not in signature]
     if missing:
         raise KeyError(
-            f"vision signature is missing {missing} — a run stamped without its "
-            "provider, model, prompt version and inference parameters cannot be "
-            "compared against the PSA outcome it predicted"
+            f"vision signature is missing {missing} — a run stamped without "
+            "its provider, model, prompt version, adapter version and "
+            "inference parameters cannot be compared against the PSA outcome "
+            "it predicted"
         )
     # Render each value as canonical JSON rather than with str(), so a nested
     # parameter dict produces one stable string whatever order it was built
@@ -140,9 +144,14 @@ def format_vision_version(signature: dict[str, object]) -> str:
         f"{k}={json.dumps(v, sort_keys=True, separators=(',', ':'))}"
         for k, v in sorted(dict(params).items())
     )
+    # The adapter is rendered, not merely required. Demanding the key and
+    # dropping it made the stamp claim a provenance it did not carry: two
+    # adapters parsing the same response read as one run in the calibration
+    # record, which is the ground truth a later PSA outcome is compared to.
     return (
         f"{signature['provider']}/{signature['model']}"
-        f"@{signature['prompt_version']}[{rendered}]"
+        f"@{signature['prompt_version']}"
+        f"+{signature['adapter_version']}[{rendered}]"
     )
 
 

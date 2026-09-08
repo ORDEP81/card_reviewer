@@ -124,10 +124,16 @@ def test_every_stage_passes_exactly_the_inputs_it_declares(tmp_path):
     from card_reviewer.review.storage.repository import SqliteRepository
 
     seen: dict[str, set[str]] = {}
+    signatures: dict[str, set[str]] = {}
     original = StageRunner.run_with_id
 
     def recording(self, stage, inputs, signature, compute, **kw):
         seen.setdefault(stage, set()).update(inputs)
+        # Signatures too. `signature_for` IGNORES undeclared keys, so a
+        # value supplied and not declared is silently dropped — which is
+        # exactly how the adapter version spent a round doing nothing.
+        # Recording only `inputs` left that whole class unobserved.
+        signatures.setdefault(stage, set()).update(signature)
         return original(self, stage, inputs, signature, compute, **kw)
 
     StageRunner.run_with_id = recording
@@ -164,6 +170,16 @@ def test_every_stage_passes_exactly_the_inputs_it_declares(tmp_path):
         assert passed == set(STAGE_FINGERPRINT_INPUTS[stage]), (
             f"{stage} declares {sorted(STAGE_FINGERPRINT_INPUTS[stage])} "
             f"but the pipeline passes {sorted(passed)}")
+
+    from card_reviewer.review.fingerprint import STAGE_SIGNATURE_INPUTS
+
+    for stage, passed in sorted(signatures.items()):
+        assert passed == set(STAGE_SIGNATURE_INPUTS[stage]), (
+            f"{stage}'s signature declares "
+            f"{sorted(STAGE_SIGNATURE_INPUTS[stage])} but the pipeline "
+            f"supplies {sorted(passed)} — an undeclared key is dropped "
+            f"without a word, so whatever it was meant to invalidate "
+            f"stays cached")
 
 
 def test_two_readings_in_one_precision_bucket_share_a_conflict_fingerprint():
@@ -246,7 +262,17 @@ def test_the_stamped_vision_version_records_the_adapter_that_parsed_it():
     )
 
     assert "adapter_version" in VISION_SIGNATURE_KEYS
-    stamped = format_vision_version(
-        {"provider": "anthropic", "model": "m", "prompt_version": "1.0.0",
-         "adapter_version": "1.0.0", "inference_params": {}})
-    assert "1.0.0" in stamped
+
+    def stamp(adapter):
+        return format_vision_version(
+            {"provider": "anthropic", "model": "m", "prompt_version": "1.0.0",
+             "adapter_version": adapter, "inference_params": {}})
+
+    # Asserting a substring of "1.0.0" passed off the PROMPT version and
+    # proved nothing — the stamp demanded the key and then dropped it,
+    # which is the same asserted-but-absent protection the sibling test
+    # above exists to name.
+    assert stamp("7.7.7") != stamp("1.0.0"), (
+        "the stamped version does not record which adapter parsed the "
+        "response, so a calibration record cannot tell two adapters apart")
+    assert "7.7.7" in stamp("7.7.7")

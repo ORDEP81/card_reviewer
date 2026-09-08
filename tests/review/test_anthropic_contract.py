@@ -53,3 +53,30 @@ def test_no_test_in_this_suite_constructs_a_live_client():
 
     # Assembled at runtime, so this line is not itself an offender.
     assert CONSTRUCTORS.search("client = AsyncAnthro" + "pic()")
+
+
+def test_the_real_provider_supplies_exactly_the_declared_signature_keys(tmp_path):
+    """`FakeProvider` had this test; the BILLED provider did not.
+
+    Dropping `adapter_version` — or even `model` — from
+    `AnthropicVisionProvider.signature()` passed the whole suite, because
+    every pipeline test uses the fake. `signature_for` raises on a missing
+    declared key, so the failure is loud, but it arrives on the first real
+    call rather than in CI.
+
+    Constructing the provider makes no network call: the client is built
+    lazily and `assess` is never invoked here.
+    """
+    from card_reviewer.review.fingerprint import STAGE_SIGNATURE_INPUTS, signature_for
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+
+    provider = AnthropicVisionProvider(
+        model="m", store=ArtifactStore(tmp_path / "store"), api_key="unused")
+    signature = provider.signature()
+
+    assert set(signature) == set(STAGE_SIGNATURE_INPUTS["vision"]), (
+        f"the billed provider supplies {sorted(signature)} against a stage "
+        f"declaring {sorted(STAGE_SIGNATURE_INPUTS['vision'])}")
+    # It must also HASH — a declared key missing here raises rather than
+    # caching a real call under a partial identity.
+    assert signature_for("vision", signature)

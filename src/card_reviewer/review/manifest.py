@@ -27,15 +27,19 @@ __all__ = ["BUDGETS", "MANIFEST_BUILDER_VERSION", "BuiltManifest", "build_manife
 BUDGETS: dict[Mode, int] = {Mode.OFF: 0, Mode.SMART: 8, Mode.DEEP: 20}
 
 #: Fixed priority so selection is deterministic rather than "whatever fits".
-VIEW_PRIORITY = ("surface_original", "front_face", "back_face",
-                 "corner_", "edge_", "surface_")
+#: `front_face` and `back_face` were here and NO producer emits them, so
+#: the tiers below them were dead weight and `OVERVIEW_TIERS` could be 1 or
+#: 3 with identical behaviour. Removed rather than guarded: a vocabulary
+#: nothing speaks is not a contract, and it made the overview tier look
+#: broader than it is.
+VIEW_PRIORITY = ("surface_original", "corner_", "edge_", "surface_")
 
 #: How many entries of VIEW_PRIORITY are whole-card OVERVIEWS. They are
 #: pinned ahead of anomaly crops: a card whose every region raised a
 #: candidate filled the entire SMART budget with crops and sent no view of
 #: the card at all, which left the provider unable to answer for surface —
 #: the category with the fewest crops and the most to read from the whole.
-OVERVIEW_TIERS = 3
+OVERVIEW_TIERS = 1
 
 #: How many whole-card views are worth pinning, in total — NOT per
 #: photograph. Overviews are emitted per image, so pinning them by tier
