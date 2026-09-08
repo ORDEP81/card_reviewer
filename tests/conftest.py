@@ -1,4 +1,4 @@
-"""No test in this repository opens a network connection.
+"""No test in this PROCESS opens a network connection.
 
 `tests/review/test_no_live_api.py` scans the source for constructor
 SPELLINGS. That catches the shapes it can name and cannot express an
@@ -15,9 +15,18 @@ sort of thing written at session scope.
 It patches `socket.socket`, which every library in this tree reaches the
 network through, verified against `http.client`, `urllib`, `httpx` sync
 and async, `asyncio.open_connection`, `ssl`, and the real `anthropic` SDK.
-It does NOT patch the C-level `_socket.socket`, so code deliberately
-importing that could still connect; nothing here does, and this stops
-mistakes rather than evasion.
+
+Two gaps, named rather than implied:
+
+`_socket.socket` is an immutable C type and cannot be patched at all, so
+code deliberately importing it could still connect. Nothing here does, and
+that route is evasion rather than mistake.
+
+A SUBPROCESS is a different process and this cannot reach it. That one IS
+a plausible mistake — tests already shell out, and a test running the CLI
+in SMART mode with a key in the environment would bill with this none the
+wiser. `test_no_live_api.py`'s source scan is the guard that covers that
+shape; the two are complementary, and neither is sufficient alone.
 """
 
 import socket

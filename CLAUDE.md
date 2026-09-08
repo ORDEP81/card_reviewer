@@ -336,6 +336,48 @@ Do not rely solely on hand-built fixtures once the real producer exists.
 
 ---
 
+# Mutate a review fix back to the LITERAL pre-fix state
+
+This is the highest-value mutation in the repository and the one most
+often skipped.
+
+A commit that closes a review finding is the last line of defence for a
+defect a human already found once. Its test must be run against the exact
+code the reviewer was looking at — not a plausible variant, the literal
+revert:
+
+    1. apply the fix and its test;
+    2. revert ONLY the production change, by hand, to what it was;
+    3. run the new test and watch it FAIL;
+    4. restore the fix.
+
+Three consecutive review rounds on the Card Review Engine branch found
+tests that were written to prove a fix and passed under the pre-fix state:
+
+- a no-network block with no test at all — replacing its body with `pass`
+  passed 1318 tests;
+- the test written to prove that fix, which read the patch's identity
+  inside the test body, where a LATE-installed patch looks identical — it
+  passed under the precise function-scoped arrangement it was named after;
+- a constant added to the stamped version map in the same commit, which
+  deleted cleanly with nothing red.
+
+Each took under a minute to detect this way.
+
+Two specific traps behind those:
+
+**Constant tables are exempt from the AST bump guard**, correctly — they
+ARE the constants. So a key added to `VERSIONS` or `SUPPORTING_VERSIONS`
+is invisible to it, and tests that iterate the map are tautological about
+membership. Assert the key BY NAME in the same commit.
+
+**A test that constructs a real external client must pin its endpoint**
+somewhere harmless. When the only thing between such a test and
+production is the guard being tested, the test reaches the wire precisely
+when the guard breaks.
+
+---
+
 # Mutation-test every new guard
 
 Before requesting review, mutate every guard added by the current diff.

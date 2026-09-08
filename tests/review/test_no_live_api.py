@@ -10,10 +10,19 @@ reviewer demonstrated both by adding a file that would have billed.
 """
 
 import re
+import socket
 import subprocess
 from pathlib import Path
 
 import pytest
+
+#: Captured at MODULE IMPORT, which is the instant that matters. Read
+#: inside a test body instead, a late-installed patch is already present
+#: and also lives in a conftest, so the check cannot tell early from late —
+#: it passed under the exact function-scoped arrangement it exists to
+#: reject.
+_CREATE_AT_IMPORT = socket.create_connection
+_CONNECT_AT_IMPORT = socket.socket.connect
 
 REPO = Path(__file__).resolve().parents[2]
 
@@ -112,12 +121,20 @@ def test_a_socket_connection_is_refused(live_api_error):
         sock.connect_ex(("127.0.0.1", 9))
 
 
-def test_the_real_provider_cannot_reach_the_wire(tmp_path, live_api_error):
+def test_the_real_provider_cannot_reach_the_wire(tmp_path, monkeypatch,
+                                                 live_api_error):
     """The route the source scan cannot express: construct the provider,
     bind it, call `.assess()` later. The scan sees no constructor spelling
     it recognizes; the block sees the connection."""
     from card_reviewer.review.storage.artifacts import ArtifactStore
     from card_reviewer.review.vision.anthropic import AnthropicVisionProvider
+
+    # The endpoint is pinned somewhere harmless, because the ONLY thing
+    # between this test and api.anthropic.com is the block it is testing —
+    # so precisely when the block breaks, this test reaches the wire. The
+    # SDK builds its client with no base_url, so it is hard-wired to
+    # production; the environment variable is where that can be overridden.
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", "http://127.0.0.1:1")
 
     provider = AnthropicVisionProvider(
         model="m", store=ArtifactStore(tmp_path / "store"), api_key="unused")
@@ -138,12 +155,12 @@ def test_the_block_is_installed_before_collection():
     installed after collection and after session-scoped fixtures, so a
     connection at import time or from a `provider` fixture went straight
     through. `pytest_configure` runs before both."""
-    import socket
-
-    # Identity against the real stdlib functions: if the block were
-    # installed late — or not at all — these would still be the originals
-    # at the moment this module was collected.
-    assert socket.create_connection.__module__.endswith("conftest"), (
-        f"the block is not installed: create_connection is "
-        f"{socket.create_connection!r}")
-    assert socket.socket.connect.__module__.endswith("conftest")
+    # `getattr(..., "")` because the UNPATCHED `socket.socket.connect` is a
+    # method_descriptor with no `__module__` — reading it directly would
+    # fail with an AttributeError rather than saying what is wrong.
+    assert getattr(_CREATE_AT_IMPORT, "__module__", "").endswith("conftest"), (
+        f"installed AFTER collection: at import, create_connection was "
+        f"{_CREATE_AT_IMPORT!r}")
+    assert getattr(_CONNECT_AT_IMPORT, "__module__", "").endswith("conftest"), (
+        f"installed AFTER collection: at import, socket.connect was "
+        f"{_CONNECT_AT_IMPORT!r}")

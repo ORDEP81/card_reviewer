@@ -18,6 +18,28 @@ def test_supporting_versions_are_separate_from_stage_versions():
     assert "taxonomy" in SUPPORTING_VERSIONS
 
 
+def test_every_supporting_component_a_review_needs_is_stamped():
+    """Membership, asserted by name.
+
+    `versions.py` is EXEMPT from the AST bump guard — correctly, it IS the
+    constant table — so a key added to or dropped from these maps is
+    invisible to it. The tests that walk the map iterate whatever is there
+    and so are tautological about membership. `artifact_scheme` was added
+    in the same commit that repaired an asserted-but-absent guard, and
+    deleting it survived the entire suite.
+
+    A stored review that cannot name the id scheme its artifact references
+    were built under cannot be compared across the migration that scheme
+    change would be.
+    """
+    required = {"taxonomy", "vocabulary", "authority", "relevance",
+                "scoring", "fusion", "canonicalization", "artifact_scheme"}
+    missing = required - set(SUPPORTING_VERSIONS)
+    assert not missing, (
+        f"a review would be stamped without {sorted(missing)}, so its "
+        f"prediction cannot be compared against a later PSA outcome")
+
+
 # --- the effective run-version map ------------------------------------------
 
 
