@@ -35,16 +35,48 @@ from card_reviewer.review import versions
 
 SRC = Path(versions.__file__).parent
 
-#: module path -> (version constant name, AST digest at that version)
+#: module path -> (constant name, its value, AST digest at that value)
+#:
+#: The VALUE is recorded too, and that is the whole point. An earlier
+#: version of this table held only (constant, digest), which bound the
+#: module to a digest and never bound the constant to anything — so
+#: reverting FUSION_VERSION to 1.1.0, the exact failure this file was
+#: written for, passed the entire suite.
+#:
+#: Several modules share one constant on purpose — the four measure/*
+#: modules and their package all ship as CV_VERSION, because they are one
+#: stage. A change to any of them must move that one constant.
+#:
+#: With both halves recorded, a stale bump fails outright, and the weaker
+#: evasion — updating the digest and leaving the version alone — becomes a
+#: one-line anomaly in the diff, visible to a reviewer: a changed digest
+#: beside an unchanged version is the thing to question.
 GUARDED = {
-    "assembly.py": ("ASSEMBLY_VERSION", "5596999abb728daa"),
-    "fusion.py": ("FUSION_VERSION", "ed79215c86f7d1b6"),
-    "heuristic.py": ("SCORER_VERSION", "f22b4d937bc61a60"),
-    "imaging/geometry.py": ("GEOMETRY_VERSION", "d86f6b3b9216b7c0"),
-    "imaging/observability.py": ("OBSERVABILITY_VERSION", "7f2ef7eaa4866e02"),
-    "manifest.py": ("MANIFEST_BUILDER_VERSION", "d7f8d7b370e8dbe9"),
-    "policies/combine_v1.py": ("COMBINATION_POLICY_VERSION", "6a0b5dea7c7aa25d"),
-    "policies/coverage_v1.py": ("COVERAGE_POLICY_VERSION", "8649ac47d5601daa"),
+    "assembly.py": ("ASSEMBLY_VERSION", "1.1.0", "5596999abb728daa"),
+    "canonical.py": ("CANON_SCHEME_VERSION", "1.1.0", "00b8ab6d4331d969"),
+    "fusion.py": ("FUSION_VERSION", "1.2.0", "ed79215c86f7d1b6"),
+    "heuristic.py": ("SCORER_VERSION", "1.2.0", "f22b4d937bc61a60"),
+    "imaging/geometry.py": ("GEOMETRY_VERSION", "1.2.0", "d86f6b3b9216b7c0"),
+    "imaging/measure/__init__.py": ("CV_VERSION", "1.1.0", "8a6651730d4e2cf8"),
+    "imaging/measure/centering.py": ("CV_VERSION", "1.1.0", "a32346125ae0d9ea"),
+    "imaging/measure/corners.py": ("CV_VERSION", "1.1.0", "b3e814e23b9d164d"),
+    "imaging/measure/edges.py": ("CV_VERSION", "1.1.0", "a600ff7a44aa99e4"),
+    "imaging/measure/surface.py": ("CV_VERSION", "1.1.0", "7af402307cb20909"),
+    "imaging/observability.py": ("OBSERVABILITY_VERSION", "1.1.0", "7f2ef7eaa4866e02"),
+    "imaging/preflight.py": ("PREFLIGHT_VERSION", "1.1.0", "972ee68643548a61"),
+    "imaging/role_features.py": ("ROLE_FEATURES_VERSION", "1.0.0", "692c039193292c2f"),
+    "manifest.py": ("MANIFEST_BUILDER_VERSION", "1.2.0", "d7f8d7b370e8dbe9"),
+    "normalize.py": ("VOCABULARY_VERSION", "1.0.0", "7a710b0ced1b4cf4"),
+    "policies/authority_v1.py": ("AUTHORITY_POLICY_VERSION", "1.0.0", "a38e410e720a6641"),
+    "policies/combine_v1.py": ("COMBINATION_POLICY_VERSION", "1.1.0", "6a0b5dea7c7aa25d"),
+    "policies/coverage_v1.py": ("COVERAGE_POLICY_VERSION", "1.1.0", "8649ac47d5601daa"),
+    "policies/relevance_v1.py": ("RELEVANCE_POLICY_VERSION", "1.0.0", "bde3330ebb7cd704"),
+    "policies/routing_v1.py": ("ROUTING_POLICY_VERSION", "1.1.0", "adfb0a768010388b"),
+    "policies/scoring_v1.py": ("SCORING_POLICY_VERSION", "1.1.0", "ed8fa6f1e35893aa"),
+    "relevance.py": ("RELEVANCE_POLICY_VERSION", "1.0.0", "ea269f91d02dd57c"),
+    "role_context.py": ("RESOLVER_VERSION", "1.0.0", "dd7d9e70e7ec808a"),
+    "taxonomy.py": ("TAXONOMY_VERSION", "1.1.0", "cf367536bf66499e"),
+    "vocabulary.py": ("VOCABULARY_VERSION", "1.0.0", "040b976b969da81e"),
 }
 
 
@@ -67,8 +99,21 @@ def behaviour_digest(path: Path) -> str:
 
 
 @pytest.mark.parametrize("module", sorted(GUARDED))
+def test_a_guarded_constant_still_holds_the_value_recorded_beside_its_code(
+        module):
+    """The half that was missing. Reverting a bump used to pass."""
+    constant, recorded_value, _ = GUARDED[module]
+    actual = getattr(versions, constant)
+    assert actual == recorded_value, (
+        f"{constant} is {actual!r} but this table records {recorded_value!r} "
+        f"for the current {module}. If you are deliberately changing the "
+        f"version, update the value here in the same commit; if you did not "
+        f"mean to change it, a bump has been lost.")
+
+
+@pytest.mark.parametrize("module", sorted(GUARDED))
 def test_a_stage_whose_code_changed_moved_its_version(module):
-    constant, recorded = GUARDED[module]
+    constant, _, recorded = GUARDED[module]
     actual = behaviour_digest(SRC / module)
     assert actual == recorded, (
         f"{module} changed but {constant} is still "
@@ -82,7 +127,7 @@ def test_a_stage_whose_code_changed_moved_its_version(module):
 def test_every_guarded_constant_exists():
     """The table is itself a place to drift: a renamed constant would make
     the guard above pass against nothing."""
-    missing = [c for c, _ in GUARDED.values() if not hasattr(versions, c)]
+    missing = [c for c, _, _ in GUARDED.values() if not hasattr(versions, c)]
     assert not missing, f"guarded constants that no longer exist: {missing}"
 
 

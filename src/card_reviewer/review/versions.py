@@ -8,11 +8,15 @@ from __future__ import annotations
 
 import json
 
-PREFLIGHT_VERSION = "1.0.0"
+# 1.1.0: the same — the module drifted from the constant declared before
+# it existed.
+PREFLIGHT_VERSION = "1.1.0"
 # 1.1.0: GeometryResult gained boundary_observed, which changes whether the
 # border-relative producers run at all. Cached rows from 1.0.0 cannot answer
 # the question, so they must be recomputed rather than defaulted.
-GEOMETRY_VERSION = "1.1.0"
+# 1.2.0: _detect_quad returns `observed` itself, so a real boundary whose
+# rectangularity is exactly ASSUMED_BOUNDARY_CONFIDENCE flips False -> True.
+GEOMETRY_VERSION = "1.2.0"
 # 1.1.0: each edge region gained a real band (they all read the card's
 # centre), and an assumed boundary now records BOUNDARY_NOT_OBSERVED. Its
 # fingerprint contains geometry's OUTPUT, which also moved — but that is
@@ -27,27 +31,43 @@ VOCABULARY_VERSION = "1.0.0"
 # taken from rather than fronts[0], and an unknown-role image contributes
 # its evidence refs.
 ASSEMBLY_VERSION = "1.1.0"
-SCORER_VERSION = "1.1.0"
+# 1.2.0: heuristic.py changed again after the 1.1.0 bump — the cross-face
+# evidence fallback removed and centering refs narrowed to one image.
+SCORER_VERSION = "1.2.0"
 AUTHORITY_POLICY_VERSION = "1.0.0"
 RELEVANCE_POLICY_VERSION = "1.0.0"
 # 1.1.0: a category with a structural waiver is no longer penalized twice.
 COVERAGE_POLICY_VERSION = "1.1.0"
-ROUTING_POLICY_VERSION = "1.0.0"
+# 1.1.0: the policy changed after this constant was first written and was
+# never moved with it.
+ROUTING_POLICY_VERSION = "1.1.0"
 # 1.1.0: artifacts backing anomaly candidates outrank generic views, so
 # the provider is never told about an anomaly whose picture it was not sent.
 # 1.2.0: whole-card overviews are pinned ahead of those crops, and an
 # anomaly whose crop did not fit stops claiming one.
 MANIFEST_BUILDER_VERSION = "1.2.0"
-COMBINATION_POLICY_VERSION = "1.0.0"
-SCORING_POLICY_VERSION = "1.0.0"
+# 1.1.0: _material_contradiction compares category AND defect_type, and
+# the policy grew several arms. The signature was byte-identical across
+# both changes, so cached combine rows kept the older adjudication.
+COMBINATION_POLICY_VERSION = "1.1.0"
+# 1.1.0: estimated_grade returns "9-10" where it returned "10" for a card
+# with open questions — a different answer for the same evidence.
+SCORING_POLICY_VERSION = "1.1.0"
 # 1.1.0: correlation needs positive evidence of a shared face, and a group
 # is a clique rather than everything matching its first member.
 # 1.2.0: two NAMED regions are two places. This changed combine's output on
 # 62 of 117 corpus photographs and the constant did not move with it, so a
 # cached row kept reporting a minor top edge as severe.
 FUSION_VERSION = "1.2.0"
-TAXONOMY_VERSION = "1.0.0"
-CANON_SCHEME_VERSION = "1.0.0"
+# 1.1.0: corners and edges reclassified MEASUREMENT -> INTERPRETIVE, and
+# defect types and reason codes were added. It sits in the signature of
+# observability, cv_measurements, heuristic, both coverage stages and
+# combine, so every one of them was serving rows built under the old
+# promotion rules.
+TAXONOMY_VERSION = "1.1.0"
+# 1.1.0: as above. Largely self-invalidating, since canonicalization
+# prefixes the fingerprint, but the rule does not have exceptions.
+CANON_SCHEME_VERSION = "1.1.0"
 
 #: Stamped onto every CardReview (spec §16). Keyed by STAGE, so it can be
 #: compared directly against STAGE_SIGNATURE_INPUTS — a component-keyed map
