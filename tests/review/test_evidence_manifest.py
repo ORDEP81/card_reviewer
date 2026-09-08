@@ -402,6 +402,13 @@ def test_a_real_assembled_card_produces_a_usable_manifest(tmp_path):
     observability and measurement producers into `assemble` and then into
     the manifest, so the payload is checked against evidence the engine
     actually makes.
+
+    What it does NOT do is guard the selection POLICY: its fixture has two
+    anomalies against an eight-slot budget, so `cited <= sent` holds by
+    construction and every mutation of the cap or the ordering leaves it
+    green. It catches shape, type and view-name drift between the producers
+    and the manifest. The budget rules are guarded by the tests above,
+    which is where a cap mutation is meant to fail.
     """
     from card_reviewer.review.assembly import (
         ImageStageOutputs, assemble, to_image_evidence,
@@ -453,3 +460,72 @@ def test_a_real_assembled_card_produces_a_usable_manifest(tmp_path):
     # after a restart, so every id offered must be in it.
     assert sent <= set(built.index), (
         f"ids sent with no index entry: {sorted(sent - set(built.index))}")
+
+
+def test_both_faces_get_a_whole_card_view_when_both_are_present():
+    """Capping pinned overviews at two fixed duplication and introduced a
+    worse failure on an ordinary listing: the two pinned views could be the
+    SAME face, leaving the other with no whole-card view at all.
+
+    Reproduced end to end on four real photographs — two fronts, two backs
+    — where both overviews came from one face in SMART and in DEEP alike.
+    The face that decides PSA 10 can be the one that loses its view, and
+    its categories then come back not_assessable: recall-safe, but a billed
+    call spent on half a card.
+
+    `EvidenceRef` carries no role, so the roles have to be handed in. Two
+    pinned views mean one per face wherever both exist.
+    """
+    refs, roles = [], {}
+    for i, face in enumerate((ImageRole.FRONT, ImageRole.FRONT,
+                              ImageRole.BACK, ImageRole.BACK)):
+        roles[f"h{i}"] = face
+        refs.append(EvidenceRef(artifact_id=f"ov{i}", image_hash=f"h{i}",
+                                origin=EvidenceOrigin.NORMALIZED,
+                                view="surface_original"))
+        for corner in ("bottom_left", "bottom_right", "top_left", "top_right"):
+            refs.append(EvidenceRef(
+                artifact_id=f"c{i}_{corner}", image_hash=f"h{i}",
+                origin=EvidenceOrigin.NORMALIZED, view=f"corner_{corner}"))
+
+    crops = [r for r in refs if r.view.startswith("corner_")]
+    payload = build_manifest(
+        _assembled(refs, anomalies=[_anomaly(r, "corners", "rounding")
+                                    for r in crops]),
+        Mode.SMART, [], image_roles=roles).payload
+
+    by_id = {r.artifact_id: r for r in refs}
+    faces = sorted(roles[by_id[a["artifact_id"]].image_hash].value
+                   for a in payload["artifacts"]
+                   if not a["view"].startswith(("corner_", "edge_")))
+    assert faces == ["back", "front"], (
+        f"the two whole-card views sent were {faces}; one face has none")
+
+
+def test_one_face_present_still_gets_two_photographs_pinned():
+    """The fallback: with only fronts, "one per face" must not collapse to
+    a single view — two photographs of the front are still worth more than
+    one, and the cap is two."""
+    refs, roles = [], {}
+    for i in range(3):
+        roles[f"h{i}"] = ImageRole.FRONT
+        refs.append(EvidenceRef(artifact_id=f"ov{i}", image_hash=f"h{i}",
+                                origin=EvidenceOrigin.NORMALIZED,
+                                view="surface_original"))
+        for corner in ("bottom_left", "top_right"):
+            refs.append(EvidenceRef(
+                artifact_id=f"c{i}_{corner}", image_hash=f"h{i}",
+                origin=EvidenceOrigin.NORMALIZED, view=f"corner_{corner}"))
+
+    # Anomalies on every crop, so the crops compete for the budget — with
+    # nothing competing, overviews win on ordinary priority and the pin is
+    # not what is being measured.
+    crops = [r for r in refs if r.view.startswith("corner_")]
+    payload = build_manifest(
+        _assembled(refs, anomalies=[_anomaly(r, "corners", "rounding")
+                                    for r in crops]),
+        Mode.SMART, [], image_roles=roles).payload
+    overviews = [a for a in payload["artifacts"]
+                 if not a["view"].startswith(("corner_", "edge_"))]
+    assert len(overviews) == 2, (
+        f"a front-only listing pinned {len(overviews)} whole-card views")

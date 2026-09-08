@@ -120,6 +120,9 @@ STAGE_FINGERPRINT_INPUTS: dict[str, tuple[str, ...]] = {
         "assembled_evidence",
         "routing_decision",
         "applicable_rubric_rule_content",
+        # The faces decide which whole-card views are pinned, so the same
+        # photographs under different roles are a different payload.
+        "image_roles",
     ),
     # ONLY what the provider actually consumes. The builder's own version
     # lives in the MANIFEST stage's signature, never here: a builder bump

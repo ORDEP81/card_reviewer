@@ -18,6 +18,13 @@ from typing import Any
 
 from ..storage.artifacts import ArtifactStore
 from .prompt import PROMPT_VERSION, build_prompt
+
+#: The adapter's own behaviour: how the payload becomes image blocks and
+#: how a response becomes an Assessment. The signature named the model and
+#: the prompt but not this, so a change to `parse_assessment` or to block
+#: construction produced different output from the same response under an
+#: unchanged cache key.
+PROVIDER_ADAPTER_VERSION = "1.0.0"
 from .provider import Assessment, ProviderContractError, parse_assessment
 
 __all__ = ["DEFAULT_MODEL", "AnthropicVisionProvider", "build_request"]
@@ -136,5 +143,6 @@ class AnthropicVisionProvider:
         return {
             "provider": "anthropic", "model": self.model,
             "prompt_version": self.prompt_version,
+            "adapter_version": PROVIDER_ADAPTER_VERSION,
             "inference_params": self.inference_params,
         }

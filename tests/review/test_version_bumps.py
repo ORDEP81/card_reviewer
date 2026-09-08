@@ -62,6 +62,16 @@ SRC = Path(versions.__file__).parent
 #: beside an unchanged version is the thing to question.
 GUARDED = {
     "assembly.py": ("ASSEMBLY_VERSION", "1.1.0", "5596999abb728daa"),
+    # Behaviour that belongs to a stage but lives outside the module the
+    # constant is named for. `roles.py` holds the density thresholds and
+    # `_resolve` that ARE the role_context stage; `findings.py` holds
+    # `enforce_i3`, which combine calls; `evaluability.py` decides
+    # UNEVALUABLE, which the heuristic consumes.
+    "vision/anthropic.py": ("PROVIDER_ADAPTER_VERSION", "1.0.0", "672c4769d2847b6e"),
+    "vision/provider.py": ("PROVIDER_ADAPTER_VERSION", "1.0.0", "99223d56539b9040"),
+    "roles.py": ("RESOLVER_VERSION", "1.0.0", "19d1c6fbe391afd2"),
+    "findings.py": ("COMBINATION_POLICY_VERSION", "1.1.0", "f80b54635c10131b"),
+    "evaluability.py": ("SCORER_VERSION", "1.2.0", "975083105bb28487"),
     "canonical.py": ("CANON_SCHEME_VERSION", "1.1.0", "00b8ab6d4331d969"),
     "fusion.py": ("FUSION_VERSION", "1.2.0", "ed79215c86f7d1b6"),
     "heuristic.py": ("SCORER_VERSION", "1.2.0", "f22b4d937bc61a60"),
@@ -74,7 +84,7 @@ GUARDED = {
     "imaging/observability.py": ("OBSERVABILITY_VERSION", "1.1.0", "7f2ef7eaa4866e02"),
     "imaging/preflight.py": ("PREFLIGHT_VERSION", "1.1.0", "972ee68643548a61"),
     "imaging/role_features.py": ("ROLE_FEATURES_VERSION", "1.0.0", "692c039193292c2f"),
-    "manifest.py": ("MANIFEST_BUILDER_VERSION", "1.3.0", "f8f82f93307266f8"),
+    "manifest.py": ("MANIFEST_BUILDER_VERSION", "1.4.0", "1de15491a6d078ed"),
     "normalize.py": ("VOCABULARY_VERSION", "1.0.0", "7a710b0ced1b4cf4"),
     "policies/authority_v1.py": ("AUTHORITY_POLICY_VERSION", "1.0.0", "a38e410e720a6641"),
     "policies/combine_v1.py": ("COMBINATION_POLICY_VERSION", "1.1.0", "6a0b5dea7c7aa25d"),
@@ -112,7 +122,16 @@ def constant_value(module: str, constant: str):
     if hasattr(versions, constant):
         return getattr(versions, constant)
     dotted = "card_reviewer.review." + module[: -len(".py")].replace("/", ".")
-    return getattr(import_module(dotted), constant)
+    try:
+        return getattr(import_module(dotted), constant)
+    except AttributeError:
+        # A constant shared by sibling modules lives in one of them.
+        package = dotted.rsplit(".", 1)[0]
+        for sibling in ("anthropic", "prompt", "provider"):
+            module_obj = import_module(f"{package}.{sibling}")
+            if hasattr(module_obj, constant):
+                return getattr(module_obj, constant)
+        raise
 
 
 def behaviour_digest(path: Path) -> str:
@@ -161,3 +180,66 @@ def test_every_guarded_constant_exists():
 def test_every_guarded_module_exists():
     missing = [m for m in GUARDED if not (SRC / m).exists()]
     assert not missing, f"guarded modules that no longer exist: {missing}"
+
+
+#: Files that carry no behaviour a cached stage depends on. Each one is a
+#: claim, not a convenience: if any of these grows a threshold or a branch
+#: that changes a stage's output, it belongs in GUARDED instead.
+EXEMPT = {
+    "__init__.py",
+    # Presentation and orchestration. None of them is an input to a cached
+    # stage: they read stage output and render or route it.
+    "cli.py",
+    "report.py",
+    "service.py",
+    # Test-fixture generation, never imported by production paths.
+    "imaging/synthetic.py",
+    # Ingest resolves a candidate into content-addressed images. What the
+    # stages fingerprint is the image CONTENT, so a change here changes
+    # which photographs arrive, not what a stage computes from one.
+    "ingest/adapter.py",
+    # Persistence: schema and row access. A change here can break storage
+    # but cannot make a stage compute a different answer.
+    "storage/migrations.py",
+    "storage/repository.py",
+    # Content-addressed store. Artifact ids are a pure function of bytes,
+    # so ids stay stable unless the HASHING SCHEME changes — and that
+    # invalidates every derived id at once, which is a deliberate global
+    # migration rather than a stage bump. If you change the scheme, this
+    # exemption is the thing to revisit.
+    "storage/artifacts.py",
+    "enums.py",            # names and orderings, no decisions
+    "models.py",           # the output record's shape
+    "provenance.py",       # EvidenceRef and NormalizedBox
+    "context.py",          # the CardContext container
+    "versions.py",         # the constants themselves
+    "fingerprint.py",      # covered by its own declaration tests
+    "pipeline.py",         # orchestration; every stage it calls is guarded
+    "taxonomy.py",         # guarded above, listed for the walk below
+}
+
+
+def test_every_module_is_either_guarded_or_deliberately_exempt():
+    """The guard's premise — "any change to what the code DOES demands a
+    bump" — is only true for the modules it lists. A file added tomorrow is
+    unguarded by DEFAULT, and silently so.
+
+    This turns that silence into a failing test: a new module must be
+    guarded or written down as exempt, and either way a human decides which
+    rather than nobody noticing. `roles.py` reached this project's role
+    resolution thresholds without either, and changing BACK_TEXT_DENSITY
+    passed the entire suite.
+    """
+    everything = {
+        str(path.relative_to(SRC))
+        for path in SRC.rglob("*.py")
+        if "__pycache__" not in path.parts
+    }
+    known = set(GUARDED) | EXEMPT | {
+        name for name in everything if Path(name).name in EXEMPT
+    }
+    unclassified = sorted(everything - known)
+    assert not unclassified, (
+        f"modules neither guarded nor exempt: {unclassified}. Does a change "
+        f"here alter a cached stage's output? If so add it to GUARDED with "
+        f"its constant; if not, add it to EXEMPT and say why.")

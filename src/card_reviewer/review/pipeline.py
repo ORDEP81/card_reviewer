@@ -354,7 +354,8 @@ class ReviewPipeline:
         vision_signature = None
         if routing.call_vision:
             vision, index, vision_id, vision_limit = self._vision(
-                cid, mode, assembled, asm, rout, scoped, provider)
+                cid, mode, assembled, asm, rout, scoped, provider,
+                role_context.roles)
             if vision is not None and provider is not None:
                 vision_signature = provider.signature()
 
@@ -419,7 +420,7 @@ class ReviewPipeline:
             vision_id, vision_limit, vision_signature)
 
     def _vision(self, cid, mode, assembled, assembled_json, routing_json,
-                scoped, provider):
+                scoped, provider, image_roles):
         """Cache lookup BEFORE any call.
 
         A provider invoked before the lookup bills every re-review of an
@@ -434,10 +435,16 @@ class ReviewPipeline:
             "manifest",
             {"mode_budget": BUDGETS[mode], "assembled_evidence": assembled_json,
              "routing_decision": routing_json,
-             "applicable_rubric_rule_content": rule_content(scoped)},
+             "applicable_rubric_rule_content": rule_content(scoped),
+             # Which face each photograph is decides which whole-card views
+             # get pinned, so it changes the payload the provider sees.
+             "image_roles": {h: r.role.value
+                             for h, r in image_roles.items()}},
             {"manifest_builder_version": MANIFEST_BUILDER_VERSION},
-            lambda: build_manifest(assembled, mode,
-                                   applicable(scoped)).model_dump(),
+            lambda: build_manifest(assembled, mode, applicable(scoped),
+                                   image_roles={h: r.role for h, r
+                                                in image_roles.items()}
+                                   ).model_dump(),
             schema=BuiltManifest, candidate_id=cid)
         built = BuiltManifest.model_validate(man)
 

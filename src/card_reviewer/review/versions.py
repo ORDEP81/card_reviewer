@@ -47,7 +47,9 @@ ROUTING_POLICY_VERSION = "1.1.0"
 # anomaly whose crop did not fit stops claiming one.
 # 1.3.0: pinned overviews capped at two TOTAL rather than one per
 # photograph, and crops cover each region before repeating one.
-MANIFEST_BUILDER_VERSION = "1.3.0"
+# 1.4.0: the two pinned overviews are one per FACE where both exist —
+# capping at two without knowing the faces sent both views of one face.
+MANIFEST_BUILDER_VERSION = "1.4.0"
 # 1.1.0: _material_contradiction compares category AND defect_type, and
 # the policy grew several arms. The signature was byte-identical across
 # both changes, so cached combine rows kept the older adjudication.

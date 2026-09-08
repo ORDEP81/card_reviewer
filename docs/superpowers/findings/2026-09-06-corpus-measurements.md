@@ -1,6 +1,9 @@
 # What the 120-photo corpus says (2026-09-06)
 
-Measured with `.dev/calibrate.py` and `.dev/separate.py`. Framing and
+Measured with `.dev/calibrate.py` (framing), `.dev/separate.py` (detector
+separation) and `.dev/verdicts.py` (verdicts and rank scores). The last of
+those was written because neither of the first two runs the pipeline, so
+these figures were not reproducible from committed tooling. Framing and
 detector-separation figures are unchanged since `a827d6b`; the verdict and
 rank-score figures were re-measured at `3aa48c5`, after splitting fused
 edge findings by region made each false corner anomaly cost more.
@@ -17,8 +20,17 @@ the numbers.
 
 ## Verdicts, single front photograph, OFF mode
 
-    clean-labelled     REVIEW 31   INSUFFICIENT_IMAGES 21   REJECT 1
-    defect-labelled    REVIEW 41   INSUFFICIENT_IMAGES 22   REJECT 0
+    clean-labelled     REVIEW 31   INSUFFICIENT_IMAGES 21   REJECT 1   = 53
+    defect-labelled    REVIEW 41   INSUFFICIENT_IMAGES 22   REJECT 0   = 63
+    neither            REVIEW  1                                       =  1
+
+The three rows sum to 117. "clean-labelled" means the `clean` label is
+present; "defect-labelled" means at least one namespaced defect token is.
+The third row is one card, `listings/corner_wear/card15.webp`, carrying
+only `photo_ok` — filed under corner wear with no defect ticked, so it is
+a labelling gap rather than a result. Counting it either way moves no
+conclusion here, but the row is shown rather than folded, because a
+population that does not sum is a population nobody can check.
 
 Unchanged since `a827d6b`. The rank scores below have moved.
 

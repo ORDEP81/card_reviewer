@@ -42,6 +42,11 @@ OVERVIEW_TIERS = 3
 #: six copies of the same view and sent one distinct crop. Two is a front
 #: and a back: enough for the provider to see the card, cheap enough to
 #: leave the budget to the evidence that differs between regions.
+#:
+#: Two is only "a front and a back" if the choice knows the faces. Capping
+#: at two without that sent BOTH views of one face on an ordinary
+#: two-front-two-back listing, leaving the other face — possibly the front,
+#: which decides PSA 10 — with no whole-card view at all.
 MAX_PINNED_OVERVIEWS = 2
 
 
@@ -80,7 +85,14 @@ def _anomaly_artifacts(assembled: Any) -> set[str]:
             if a.get("artifact_id")}
 
 
-def build_manifest(assembled: Any, mode: Mode, rubric_rules: list) -> BuiltManifest:
+def build_manifest(assembled: Any, mode: Mode, rubric_rules: list,
+                   image_roles: dict | None = None) -> BuiltManifest:
+    """`image_roles` maps image_hash to its resolved face.
+
+    `EvidenceRef` carries no role, so without this the pin cannot tell one
+    face's overview from another's and both pinned views can come from the
+    same face.
+    """
     seen: set[str] = set()
     candidates: list[EvidenceRef] = []
     for refs in assembled.evidence_refs.values():
@@ -102,10 +114,28 @@ def build_manifest(assembled: Any, mode: Mode, rubric_rules: list) -> BuiltManif
     # Which overviews get pinned, decided before the sort so the rest fall
     # back into ordinary competition rather than being dropped. One per
     # photograph at most, so two pinned views are two different photographs.
+    def face_of(ref: EvidenceRef):
+        role = (image_roles or {}).get(ref.image_hash)
+        return getattr(role, "value", role)
+
+    ordered = sorted(candidates,
+                     key=lambda r: (_rank(r.view), r.view, r.artifact_id))
     pinned: list[str] = []
+    seen_faces: set[Any] = set()
     seen_images: set[str] = set()
-    for ref in sorted(candidates, key=lambda r: (_rank(r.view), r.view,
-                                                 r.artifact_id)):
+    # One per FACE first, so both faces are represented before either gets a
+    # second view.
+    for ref in ordered:
+        if len(pinned) >= MAX_PINNED_OVERVIEWS:
+            break
+        face = face_of(ref)
+        if is_overview(ref) and face is not None and face not in seen_faces:
+            seen_faces.add(face)
+            seen_images.add(ref.image_hash)
+            pinned.append(ref.artifact_id)
+    # Then fill any remaining slot from a photograph not already pinned —
+    # a front-only listing has one face, and two views of it still beat one.
+    for ref in ordered:
         if len(pinned) >= MAX_PINNED_OVERVIEWS:
             break
         if is_overview(ref) and ref.image_hash not in seen_images:
