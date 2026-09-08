@@ -1,6 +1,9 @@
 # What the 120-photo corpus says (2026-09-06)
 
-Measured with `.dev/calibrate.py` and `.dev/separate.py` at commit `a827d6b`.
+Measured with `.dev/calibrate.py` and `.dev/separate.py`. Framing and
+detector-separation figures are unchanged since `a827d6b`; the verdict and
+rank-score figures were re-measured at `3aa48c5`, after splitting fused
+edge findings by region made each false corner anomaly cost more.
 Populations selected by the `clean` label, not by absence of other labels —
 see `tests/review/test_label_vocabulary.py` for why that distinction changed
 the numbers.
@@ -17,6 +20,8 @@ the numbers.
     clean-labelled     REVIEW 31   INSUFFICIENT_IMAGES 21   REJECT 1
     defect-labelled    REVIEW 41   INSUFFICIENT_IMAGES 22   REJECT 0
 
+Unchanged since `a827d6b`. The rank scores below have moved.
+
 No PASS is possible here: every candidate is front-only, and a missing back
 prevents PASS by policy. REVIEW is the correct ceiling.
 
@@ -31,15 +36,21 @@ and no wear, because it came from the glare batch.
 Clean-labelled cards, bucketed by how many corner anomalies fired:
 
     0 anomalies   n= 9   median rank score 90
-    1 anomaly     n= 3   median rank score 60
-    2 anomalies   n= 6   median rank score 30
-    3 anomalies   n= 8   median rank score 15
+    1 anomaly     n= 3   median rank score 45
+    2 anomalies   n= 6   median rank score 15
+    3 anomalies   n= 8   median rank score  0
     4 anomalies   n=11   median rank score  0
 
 The detector fires on 28 of 37 clean cards, and the score is very nearly a
 linear function of that false-positive count. Clean and defect-labelled
-cards therefore share a median rank score of 15: the ordering the score
+cards therefore share a median rank score of 0: the ordering the score
 exists to provide does not exist yet.
+
+The slope steepened at `3aa48c5`. Fusion used to merge distinct edges
+through the corner they share, which masked some of the false positives by
+collapsing them; splitting them by region is correct, and it makes each
+false corner anomaly cost about three times what it did. The detector's
+noise floor, not the scoring policy, is what has to move.
 
 This does NOT breach I1. False anomaly candidates are not promoted to
 confirmed defects and do not manufacture REJECTs — one reject in 53 clean

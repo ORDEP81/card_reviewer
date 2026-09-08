@@ -23,10 +23,19 @@ When this fails, do not just update the hash. Ask whether the change can
 alter the stage's output for inputs it has already seen. It almost always
 can — that is what these modules are. Bump the constant, then update the
 hash in the same commit.
+
+MUTATION TESTING: this file fires on EVERY source mutation of a guarded
+module, so it co-fires with whatever real test kills a mutation, and a
+mutation that only trips this one has SURVIVED. CLAUDE.md's rule already
+says to check which test killed a mutation rather than accepting that one
+did; here that is not pedantry but the only way to read the result.
+Deselect it when mutating: `-p no:cacheprovider --deselect
+tests/review/test_version_bumps.py`.
 """
 
 import ast
 import hashlib
+from importlib import import_module
 from pathlib import Path
 
 import pytest
@@ -76,6 +85,7 @@ GUARDED = {
     "relevance.py": ("RELEVANCE_POLICY_VERSION", "1.0.0", "ea269f91d02dd57c"),
     "role_context.py": ("RESOLVER_VERSION", "1.0.0", "dd7d9e70e7ec808a"),
     "taxonomy.py": ("TAXONOMY_VERSION", "1.1.0", "cf367536bf66499e"),
+    "vision/prompt.py": ("PROMPT_VERSION", "1.1.0", "56d09acc4a109eb8"),
     "vocabulary.py": ("VOCABULARY_VERSION", "1.0.0", "040b976b969da81e"),
 }
 
@@ -93,6 +103,18 @@ def _strip_docstrings(tree: ast.AST) -> ast.AST:
     return tree
 
 
+def constant_value(module: str, constant: str):
+    """Most stage constants live in `versions.py`; PROMPT_VERSION lives in
+    the module it versions. Look in `versions` first, then in the module
+    itself — the BILLED stage is the last one that should go unguarded
+    because its constant is kept somewhere else.
+    """
+    if hasattr(versions, constant):
+        return getattr(versions, constant)
+    dotted = "card_reviewer.review." + module[: -len(".py")].replace("/", ".")
+    return getattr(import_module(dotted), constant)
+
+
 def behaviour_digest(path: Path) -> str:
     tree = _strip_docstrings(ast.parse(path.read_text()))
     return hashlib.sha256(ast.dump(tree).encode()).hexdigest()[:16]
@@ -103,7 +125,7 @@ def test_a_guarded_constant_still_holds_the_value_recorded_beside_its_code(
         module):
     """The half that was missing. Reverting a bump used to pass."""
     constant, recorded_value, _ = GUARDED[module]
-    actual = getattr(versions, constant)
+    actual = constant_value(module, constant)
     assert actual == recorded_value, (
         f"{constant} is {actual!r} but this table records {recorded_value!r} "
         f"for the current {module}. If you are deliberately changing the "
@@ -127,7 +149,12 @@ def test_a_stage_whose_code_changed_moved_its_version(module):
 def test_every_guarded_constant_exists():
     """The table is itself a place to drift: a renamed constant would make
     the guard above pass against nothing."""
-    missing = [c for c, _, _ in GUARDED.values() if not hasattr(versions, c)]
+    missing = []
+    for module, (constant, _, _) in GUARDED.items():
+        try:
+            constant_value(module, constant)
+        except AttributeError:
+            missing.append(constant)
     assert not missing, f"guarded constants that no longer exist: {missing}"
 
 

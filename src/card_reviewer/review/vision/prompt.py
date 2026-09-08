@@ -13,7 +13,7 @@ from ..versions import VERSIONS
 
 __all__ = ["PROMPT_VERSION", "build_prompt"]
 
-PROMPT_VERSION = "1.0.0"
+PROMPT_VERSION = "1.1.0"
 
 _BRIEF = """You are assessing a raw trading card from photographs, to help decide
 whether it has a realistic chance of grading PSA 10.
@@ -40,7 +40,15 @@ confirmed defect — say `suspected` unless you can see it in an unenhanced
 view.
 
 For EVERY finding, cite the artifact_id values you relied on. Cite only ids
-that appear in the artifact list below. Give the finding's normalized
+that appear in the artifact list below.
+
+An anomaly candidate may carry "artifact_id": null. That means its close-up
+did not fit in this request, NOT that the evidence is unavailable to you —
+look for it in the whole-card views, which are always included. If you can
+see it there, report the finding citing the id of the view you actually saw
+it in. If you cannot, do not report it as a finding: say the region or
+category could not be assessed. Never cite an id that is not in the artifact
+list, and never return a finding with no ids at all. Give the finding's normalized
 location as {"x0","y0","x1","y1"} in card coordinates, and its severity as
 one of minor / moderate / severe.
 

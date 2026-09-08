@@ -67,3 +67,26 @@ def test_a_finding_is_never_silently_dropped_for_its_category():
 
     assessment = parse_assessment(_payload(), ALLOWED)
     assert all(f.category in CATEGORIES for f in assessment.findings)
+
+
+def test_the_brief_explains_an_anomaly_candidate_with_no_picture():
+    """A candidate whose crop did not fit the budget arrives with
+    `artifact_id: null`, and the brief said only "cite the ids you relied
+    on; cite only ids in the artifact list".
+
+    A provider reporting that candidate has no id it is allowed to cite,
+    and `VisionFinding.evidence_artifact_ids` has `min_length=1` — so the
+    response fails validation and the WHOLE assessment is rejected. That
+    discards a billed call and drops the card's entire vision layer over a
+    candidate the payload itself put there.
+
+    The brief has to say what to do instead.
+    """
+    from card_reviewer.review.vision.prompt import build_prompt
+
+    text = build_prompt({"artifacts": [], "anomaly_candidates": [],
+                         "rubric_rules": []})
+
+    assert "null" in text and "artifact_id" in text, (
+        "the brief never explains a null artifact_id, so a provider "
+        "reporting that candidate produces a response that cannot validate")
