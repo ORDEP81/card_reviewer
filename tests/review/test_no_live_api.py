@@ -88,3 +88,62 @@ def test_the_provider_imports_anthropic_lazily_so_import_alone_cannot_bill():
                    for line in module_level), (
         "the SDK is imported at module scope; it must be imported inside the "
         "call so importing this package cannot reach the network")
+
+
+# --- the block itself ------------------------------------------------------
+
+
+def test_a_socket_connection_is_refused(live_api_error):
+    """The block had no test, so gutting it passed the whole suite.
+
+    That is the asserted-but-absent pattern this project keeps finding:
+    protection claimed and never proved to fire. Two rounds of review named
+    it before this one existed.
+    """
+    import socket
+
+    with pytest.raises(live_api_error):
+        socket.create_connection(("127.0.0.1", 9), timeout=0.1)
+
+    with socket.socket() as sock, pytest.raises(live_api_error):
+        sock.connect(("127.0.0.1", 9))
+
+    with socket.socket() as sock, pytest.raises(live_api_error):
+        sock.connect_ex(("127.0.0.1", 9))
+
+
+def test_the_real_provider_cannot_reach_the_wire(tmp_path, live_api_error):
+    """The route the source scan cannot express: construct the provider,
+    bind it, call `.assess()` later. The scan sees no constructor spelling
+    it recognizes; the block sees the connection."""
+    from card_reviewer.review.storage.artifacts import ArtifactStore
+    from card_reviewer.review.vision.anthropic import AnthropicVisionProvider
+
+    provider = AnthropicVisionProvider(
+        model="m", store=ArtifactStore(tmp_path / "store"), api_key="unused")
+
+    with pytest.raises(Exception) as raised:
+        provider.assess({"artifacts": [], "anomaly_candidates": [],
+                         "rubric_rules": []})
+    chain, error = [], raised.value
+    while error is not None:
+        chain.append(type(error))
+        error = error.__cause__ or error.__context__
+    assert live_api_error in chain, (
+        f"the call reached the wire instead of being refused: {chain}")
+
+
+def test_the_block_is_installed_before_collection():
+    """A function-scoped autouse fixture — the obvious first attempt — is
+    installed after collection and after session-scoped fixtures, so a
+    connection at import time or from a `provider` fixture went straight
+    through. `pytest_configure` runs before both."""
+    import socket
+
+    # Identity against the real stdlib functions: if the block were
+    # installed late — or not at all — these would still be the originals
+    # at the moment this module was collected.
+    assert socket.create_connection.__module__.endswith("conftest"), (
+        f"the block is not installed: create_connection is "
+        f"{socket.create_connection!r}")
+    assert socket.socket.connect.__module__.endswith("conftest")

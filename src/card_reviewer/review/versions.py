@@ -111,6 +111,11 @@ SUPPORTING_VERSIONS: dict[str, str] = {
     "scoring": SCORING_POLICY_VERSION,
     "fusion": FUSION_VERSION,
     "canonicalization": CANON_SCHEME_VERSION,
+    # Stamped so a stored review says which id scheme produced its artifact
+    # references. A scheme change re-keys every stage that reads one, and a
+    # historical record that cannot name its scheme cannot be compared
+    # across the migration.
+    "artifact_scheme": ARTIFACT_SCHEME_VERSION,
 }
 
 

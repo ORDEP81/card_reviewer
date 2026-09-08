@@ -534,9 +534,11 @@ def test_one_face_present_still_gets_two_photographs_pinned():
         f"a front-only listing pinned {len(overviews)} whole-card views")
     # Documentation, not a second guard: each image emits exactly one
     # `surface_original`, so two pinned views ARE two photographs and this
-    # cannot fail while the assertion above passes. It states the property
-    # the pin is for, so a producer that ever emits two whole-card views
-    # for one image finds the claim already written down.
+    # cannot fail while the assertion above passes. These are hand-built
+    # refs, so it would not notice a PRODUCER emitting two whole-card views
+    # for one image either — `test_every_view_a_producer_emits_has_a_
+    # declared_priority` is what watches the producers' vocabulary. This
+    # line only writes down the property the pin exists for.
     by_id = {r.artifact_id: r for r in refs}
     assert len({by_id[a["artifact_id"]].image_hash for a in overviews}) == 2
 
