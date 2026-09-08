@@ -45,7 +45,7 @@ def rig_factory(tmp_path):
     db = tmp_path / "t.db"
     opened = []
 
-    def make(cv_version=None, provider=None, monkeypatch=None):
+    def make(cv_version=None, provider=None, monkeypatch=None, specs=None):
         if cv_version and monkeypatch:
             # Patch where pipeline BOUND the name, not where it is defined:
             # the module imports it at call time from .imaging.measure.
@@ -57,13 +57,17 @@ def rig_factory(tmp_path):
         migrate(conn)
         repo = SqliteRepository(conn)
         paths = []
-        for i, spec in enumerate((CardSpec(), CardSpec(text_heavy=True))):
-            path = tmp_path / f"img{i}.png"
+        chosen = specs or (CardSpec(), CardSpec(text_heavy=True))
+        stem = "img" if specs is None else f"img{abs(hash(str(chosen)))}"
+        for i, spec in enumerate(chosen):
+            path = tmp_path / f"{stem}{i}.png"
             path.write_bytes(render_png(spec))
             paths.append(path)
         resolved = ManualAdapter(store).resolve(CandidateInput(
             source="manual", title="2023 Topps Chrome test",
-            candidate_id="fixed-candidate", image_paths=paths,
+            candidate_id="fixed-candidate" if specs is None
+            else f"candidate-{stem}",
+            image_paths=paths,
             supplied_roles={str(paths[0]): "front", str(paths[1]): "back"}))
         return (ReviewPipeline(repo, store), resolved,
                 provider or _provider())
@@ -76,7 +80,10 @@ def rig_factory(tmp_path):
 def test_dod1_a_card_runs_end_to_end_in_off_mode_and_persists(rig_factory):
     pipeline, resolved, _ = rig_factory()
     review = pipeline.review(resolved, Mode.OFF)
-    assert review.verdict in {v.value for v in Verdict}
+    # NOT `verdict in {every verdict}`, which cannot fail. This card is
+    # clean, so the run is only end-to-end if it reaches the conclusion a
+    # clean card should reach.
+    assert review.verdict == Verdict.PASS.value, review.verdict
     assert review.review_id is not None
 
 
@@ -208,6 +215,29 @@ def test_dod10_a_white_bordered_card_can_still_reach_sufficient_coverage():
             reasons[(face, "top_left", category, "whitening")] = "WHITE_BORDER"
     assert evaluate_coverage(det, reasons, {}, REQUIRED_FACES).outcome is (
         Coverage.SUFFICIENT)
+
+
+def test_dod10_a_white_bordered_card_can_pass(rig_factory):
+    """The "and PASS" half of DoD 10, which was tested nowhere.
+
+    The plan's name for this was `..._can_pass`; it was renamed to
+    `..._can_still_reach_sufficient_coverage` and narrowed to a direct
+    `evaluate_coverage` call. Coverage is a precondition for PASS, not
+    PASS — and spec section 19 item 10 asks for both. A white border is
+    the modern base-card population, so if it cannot pass, the engine
+    cannot do its job for most of what it will see.
+    """
+    from card_reviewer.review.enums import Verdict
+
+    pipeline, resolved, _ = rig_factory(
+        specs=[CardSpec(border_color=(255, 255, 255)),
+               CardSpec(border_color=(255, 255, 255), text_heavy=True)])
+    review = pipeline.review(resolved, Mode.OFF)
+
+    assert review.verdict == Verdict.PASS.value, (
+        f"a clean white-bordered card returned {review.verdict}: "
+        f"{[l['reason_code'] for l in review.limitations]}")
+    assert review.coverage == Coverage.SUFFICIENT.value
 
 
 def test_dod11_an_off_run_never_satisfies_a_deep_lookup(rig_factory):

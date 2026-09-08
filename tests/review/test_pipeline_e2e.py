@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from card_reviewer.review.enums import Mode, Verdict
+from card_reviewer.review.enums import Coverage, Mode, Verdict
 from card_reviewer.review.imaging.synthetic import CardSpec, render_png
 from card_reviewer.review.ingest.adapter import ManualAdapter
 from card_reviewer.review.models import CandidateInput
@@ -57,11 +57,27 @@ def _rows_by_stage(repo):
 
 # --- end to end ------------------------------------------------------------
 
-def test_a_front_and_back_card_runs_end_to_end_in_off_mode(rig, tmp_path):
+def test_a_clean_front_and_back_card_passes_end_to_end_in_off_mode(rig, tmp_path):
+    """`assert verdict in {every verdict}` cannot fail, and it was the only
+    pipeline-level assertion about a clean card.
+
+    PASS is the engine's useful conclusion and NOTHING asserted it end to
+    end. Every other pipeline assertion is `!= PASS` or `== REVIEW`, so a
+    regression making PASS unreachable would turn them all green — the
+    `!= PASS` ones would pass more strongly. The six positive assertions
+    that exist all call `combine`/`decide_verdict` directly on hand-built
+    inputs, which cannot see a pipeline that never reaches them.
+    """
     pipeline, store, repo = rig
     resolved = _candidate(tmp_path, store, [CardSpec(), CardSpec(text_heavy=True)])
     review = pipeline.review(resolved, Mode.OFF)
-    assert review.verdict in {v.value for v in Verdict}
+
+    assert review.verdict == Verdict.PASS.value, (
+        f"a clean front and back returned {review.verdict} with "
+        f"{len(review.limitations)} limitations")
+    assert review.coverage == Coverage.SUFFICIENT.value
+    assert review.psa10_candidate == "yes"
+    assert review.rankable and review.psa10_rank_score == 100
     assert repo.reviews_for(resolved.candidate_id)
 
 
