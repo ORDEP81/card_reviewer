@@ -98,6 +98,11 @@ decision.
 
 ## Before writing code
 
+**`superpowers:brainstorming`** — before any feature, component, or behavior
+change, and before entering plan mode.
+
+Skip it only when the approved spec already settles the design question.
+
 **`superpowers:using-git-worktrees`** — branch first.
 
 Never start implementation directly on `main`.
@@ -127,9 +132,107 @@ Examples:
 - broken fixture while testing cache behavior → does not count
 - assertion fails because intended behavior is missing → counts
 
+## Ponytail and TDD run as one cycle
+
+**`ponytail:ponytail`** — invoke it together with
+`superpowers:test-driven-development` on every implementation task.
+
+These are not competing rulesets. TDD supplies the cycle; ponytail supplies
+the judgement about how much code each phase needs. They apply at the same
+time, phase by phase.
+
+Ponytail applies at **every step that produces code**, not only the first
+draft. A review fix, a regression test, a follow-up commit, and a rebase
+conflict resolution are each a place where over-building creeps back in.
+
+**RED** — the smallest test that fails for the intended reason.
+
+One behavior per test. No fixture scaffolding the behavior does not need.
+Ponytail's "does this need to exist at all?" applies to tests as well: do not
+write a test for a behavior nobody asked for.
+
+The required contract, round-trip, and invariant tests were asked for. They
+are never the speculative kind ponytail cuts.
+
+**GREEN** — ponytail's strongest phase.
+
+Write the minimum that turns the test green, climbing ponytail's ladder in
+order. Rung 2 — "is it already in this codebase?" — is the one that matters
+most here: this repository has repeatedly grown a second implementation of an
+existing helper, and a duplicate producer is exactly what breaks a consumer.
+Look before writing.
+
+**REFACTOR** — deletion over addition.
+
+Remove the abstraction the implementation turned out not to need, before the
+guard is mutation-tested and the work goes to review.
+
+**Debugging** — pair ponytail's "fix the root cause, not the symptom" with
+`superpowers:systematic-debugging`.
+
+Grep every caller before editing a shared function. One guard where all
+callers route through beats a guard per caller.
+
+**Review fixes** — the highest-risk step for over-building.
+
+A verified finding gets the smallest change that resolves it, plus the
+regression test that guards it. It does not get a refactor of the surrounding
+module, a new abstraction "while we are in here", or defensive code for a
+case the reviewer did not raise.
+
+A finding that would require changing an approved product decision is not a
+fix at all. Stop and ask.
+
+Ponytail decides nothing about the workflow.
+
+It can never justify skipping:
+
+- the worktree/branch
+- an observed RED
+- a producer → consumer contract test
+- a persistence round-trip
+- mutation-testing a new guard
+- the complete suite
+- independent review or scoped re-review
+
+Ponytail's own rule that one small self-check is enough, with no frameworks
+and no fixtures, is **weaker than this repository's bar and does not apply
+here.**
+
+The invariant, provenance, and detectability machinery is explicitly required
+work. Ponytail never simplifies away what was explicitly requested.
+
+Where ponytail and this file disagree, this file wins.
+
+## Subagents that write code
+
+A plugin hook injects ponytail into every subagent automatically, including
+its weaker testing rule.
+
+So any subagent dispatched to write code must be told, in its prompt, that
+this file governs and that the section above is the tie-breaker.
+
+State in the dispatch prompt:
+
+- the branch/worktree it must work in
+- RED observed first, for the intended reason
+- which contract, round-trip, and mutation checks the task requires
+- ponytail applies to implementation size only
+
+A reviewer subagent checks the work against this file, not against ponytail.
+
 ---
 
 # Before merging
+
+**`superpowers:verification-before-completion`** — run the command and read
+the output before claiming anything passes.
+
+This fires at the moment of the claim: before saying done, fixed, green, or
+passing, before committing, and before opening a PR.
+
+Evidence precedes the assertion, always. A remembered green suite is not a
+green suite.
 
 **`superpowers:requesting-code-review`** — dispatch an independent reviewer
 subagent.
