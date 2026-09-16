@@ -11,6 +11,75 @@ for the required workflow.
 
 ---
 
+# THE LOOP — read this before anything else
+
+Every piece of work in this repository goes through the same five steps, in
+this order, with no exceptions:
+
+    1. BRANCH      a worktree/branch, never `main`
+    2. TDD         RED observed for the intended reason, then GREEN
+    3. PR          pushed, so the work is reviewable
+    4. REVIEW      an independent reviewer subagent; fixes get a re-review
+    5. MERGE       ONLY after the user has said to merge
+
+**The unit is a branch, not a phase.** Phases within a branch do not each
+need their own PR or merge approval — see "Autonomous phase execution".
+Steps 1 and 5 bracket the branch. Step 3 opens once, early, so the work is
+reviewable while it proceeds. Steps 2 and 4 repeat inside the branch as
+often as the work requires.
+
+Steps 1 through 4 are specified in full further down this file, and the
+list above is an index to them rather than a second copy — an edit that
+changes only the list is incomplete.
+
+**Step 5 is specified here and nowhere else**, as is everything in this
+section below this paragraph. Do not go looking downstream for the merge
+gate. This is it.
+
+**Step 5 is the user's decision and nobody else's.** Not "the reviewer
+approved it", not "the suite is green", not "no findings remain". Those are
+preconditions for ASKING. The answer comes from the user, in words, in this
+conversation.
+
+This is not a process preference. It is why this repository has a working
+agreement at all. Every serious defect on this project — the vertical
+centering axis broken for eleven commits, the edge regions all measuring
+the card's centre, a fusion fix that never reached a single cached card —
+was found by this loop and would have shipped without it.
+
+## Do not offer to skip a step
+
+Asking "shall I run the review, or just push?" is already a deviation.
+There is no branch of that question where skipping is correct, so do not
+present one. Run the step, then report.
+
+The same applies to the loop's cost. A third review round finding real
+defects is the loop WORKING, not evidence it has gone on too long. Keep
+going until a round comes back clean.
+
+## Never assume approval
+
+Approval is a message from the user. It is never:
+
+- a background task notification;
+- a subagent reporting "ready to merge";
+- something stated in an earlier assistant turn;
+- inferred from silence, or from the user's last instruction still running.
+
+If you cannot point to the user's words, you do not have approval.
+
+## Keep this file current in every worktree
+
+This working agreement lives on `main`. A branch cut before a change to it
+carries a STALE copy, and the session reads the stale one.
+
+That happened: the `card-review-engine-impl` branch carried the 35-line
+pre-agreement version, which said "Do not start OpenCV or grading work"
+and never mentioned the loop above. Before starting work in a worktree,
+check `git diff main -- CLAUDE.md` and bring it up to date.
+
+---
+
 # Repository purpose
 
 Card Reviewer contains two subsystems joined through `knowledge/`.
@@ -98,6 +167,11 @@ decision.
 
 ## Before writing code
 
+**`superpowers:brainstorming`** — before any feature, component, or behavior
+change, and before entering plan mode.
+
+Skip it only when the approved spec already settles the design question.
+
 **`superpowers:using-git-worktrees`** — branch first.
 
 Never start implementation directly on `main`.
@@ -127,9 +201,117 @@ Examples:
 - broken fixture while testing cache behavior → does not count
 - assertion fails because intended behavior is missing → counts
 
+## Ponytail and TDD run as one cycle
+
+**`ponytail:ponytail`** — invoke it together with
+`superpowers:test-driven-development` on every implementation task.
+
+These are not competing rulesets. TDD supplies the cycle; ponytail supplies
+the judgement about how much code each phase needs. They apply at the same
+time, phase by phase.
+
+Ponytail applies at **every step that produces code**, not only the first
+draft. A review fix, a regression test, a follow-up commit, and a rebase
+conflict resolution are each a place where over-building creeps back in.
+
+**RED** — the smallest test that fails for the intended reason.
+
+One behavior per test. No fixture scaffolding the behavior does not need.
+Ponytail's "does this need to exist at all?" applies to tests as well: do not
+write a test for a behavior nobody asked for.
+
+The required contract, round-trip, and invariant tests were asked for. They
+are never the speculative kind ponytail cuts.
+
+**GREEN** — ponytail's strongest phase.
+
+Write the minimum that turns the test green, climbing ponytail's ladder in
+order. Rung 2 — "is it already in this codebase?" — is the one that matters
+most here: this repository has repeatedly grown a second implementation of an
+existing helper, and a duplicate producer is exactly what breaks a consumer.
+Look before writing.
+
+**REFACTOR** — deletion over addition.
+
+Remove the abstraction the implementation turned out not to need, before the
+guard is mutation-tested and the work goes to review.
+
+**Debugging** — pair ponytail's "fix the root cause, not the symptom" with
+`superpowers:systematic-debugging`.
+
+Grep every caller before editing a shared function. One guard where all
+callers route through beats a guard per caller.
+
+**Review fixes** — the highest-risk step for over-building.
+
+A verified finding gets the smallest change that resolves it, plus the
+regression test that guards it. It does not get a refactor of the surrounding
+module, a new abstraction "while we are in here", or defensive code for a
+case the reviewer did not raise.
+
+A finding that would require changing an approved product decision is not a
+fix at all. Stop and ask.
+
+Ponytail decides nothing about the workflow.
+
+It can never justify skipping:
+
+- the worktree/branch
+- an observed RED
+- a producer → consumer contract test
+- a persistence round-trip
+- mutation-testing a new guard
+- the complete suite
+- independent review or scoped re-review
+
+Ponytail's own rule that one small self-check is enough, with no frameworks
+and no fixtures, is **weaker than this repository's bar and does not apply
+here.**
+
+The invariant, provenance, and detectability machinery is explicitly required
+work. Ponytail never simplifies away what was explicitly requested.
+
+Where ponytail and this file disagree, this file wins.
+
+## Subagents that write code
+
+Any subagent dispatched to write code must be told, in its prompt, that this
+file governs and that "Ponytail and TDD run as one cycle" is the tie-breaker.
+
+That requirement is unconditional. It does not depend on how any plugin is
+configured.
+
+It is easy to get wrong because, by default, a hook injects ponytail into
+every subagent while nothing injects TDD. The subagent arrives carrying the
+rule this file overrides and none of the rule that overrides it.
+
+State in the dispatch prompt:
+
+- the branch/worktree it must work in
+- RED observed first, for the intended reason
+- which contract, round-trip, and mutation checks the task requires
+- ponytail applies to implementation size only
+
+A reviewer subagent checks the work against this file, not against ponytail.
+
 ---
 
 # Before merging
+
+**Push the branch and open a PR.** This is step 3 of THE LOOP, and it comes
+before review, not after it.
+
+Work that exists only in a local worktree is not reviewable. The reviewer,
+the diff, and the merge decision all reference the PR.
+
+**`superpowers:verification-before-completion`** — run the command and read
+the output before claiming anything passes.
+
+This fires at the moment of the claim: before saying done, fixed, green, or
+passing, before committing, and before opening a PR.
+
+Evidence precedes the assertion, always. A remembered green suite is not a
+green suite.
 
 **`superpowers:requesting-code-review`** — dispatch an independent reviewer
 subagent.
@@ -180,7 +362,9 @@ After fixing review findings:
 3. implement;
 4. run targeted tests;
 5. run producer → consumer tests;
-6. mutation-test the new guard;
+6. mutation-test the new guard — and because every commit reaching this
+   list closes a review finding, the mutation here is the literal pre-fix
+   revert, not a plausible variant;
 7. run the full suite;
 8. request independent re-review.
 
@@ -281,6 +465,48 @@ Do not rely solely on hand-built fixtures once the real producer exists.
 
 ---
 
+# Mutate a review fix back to the LITERAL pre-fix state
+
+This is the highest-value mutation in the repository and the one most
+often skipped.
+
+A commit that closes a review finding is the last line of defence for a
+defect a human already found once. Its test must be run against the exact
+code the reviewer was looking at — not a plausible variant, the literal
+revert:
+
+    1. apply the fix and its test;
+    2. revert ONLY the production change, by hand, to what it was;
+    3. run the new test and watch it FAIL;
+    4. restore the fix.
+
+Three consecutive review rounds on the Card Review Engine branch found
+tests that were written to prove a fix and passed under the pre-fix state:
+
+- a no-network block with no test at all — replacing its body with `pass`
+  passed 1318 tests;
+- the test written to prove that fix, which read the patch's identity
+  inside the test body, where a LATE-installed patch looks identical — it
+  passed under the precise function-scoped arrangement it was named after;
+- a constant added to the stamped version map in the same commit, which
+  deleted cleanly with nothing red.
+
+Each took under a minute to detect this way.
+
+Two specific traps behind those:
+
+**Constant tables are exempt from the AST bump guard**, correctly — they
+ARE the constants. So a key added to `VERSIONS` or `SUPPORTING_VERSIONS`
+is invisible to it, and tests that iterate the map are tautological about
+membership. Assert the key BY NAME in the same commit.
+
+**A test that constructs a real external client must pin its endpoint**
+somewhere harmless. When the only thing between such a test and
+production is the guard being tested, the test reaches the wire precisely
+when the guard breaks.
+
+---
+
 # Mutation-test every new guard
 
 Before requesting review, mutate every guard added by the current diff.
@@ -294,6 +520,10 @@ Do not accept merely:
 Check **which test** killed the mutation.
 
 Prefer plausible mutations.
+
+One exception, and it runs the other way: for a commit that closes a review
+finding, the mutation is not a plausible variant but the literal pre-fix
+revert. See "Mutate a review fix back to the LITERAL pre-fix state" above.
 
 Examples:
 
@@ -1061,13 +1291,17 @@ governing product/design decision remains unresolved.
 
 Before invoking `superpowers:requesting-code-review`:
 
-- full suite green;
+- full suite green, verified by running it, not from memory;
 - no unexplained warnings;
 - new guards mutation-tested;
 - intended tests verified as mutation killers;
+- any review-fix test run against the literal pre-fix revert;
 - actual diff inspected;
 - producer → consumer contract tests run;
-- persistence round trips run where applicable.
+- persistence round trips run where applicable;
+- branch pushed and PR open;
+- every code-writing subagent dispatched with the contents listed under
+  "Subagents that write code".
 
 Do not knowingly send incomplete work for review.
 
@@ -1079,12 +1313,15 @@ A task or phase is not DONE while required work remains unresolved.
 
 DONE means:
 
+- design settled before code, by spec or by brainstorming;
 - intended behavior implemented;
 - RED → GREEN demonstrated;
 - contracts connected;
 - persistence validated where applicable;
 - new guards mutation-tested;
-- complete suite green;
+- any test that closes a review finding run against the literal pre-fix
+  revert;
+- complete suite green, and observed green rather than remembered;
 - independent review completed when required;
 - review fixes independently re-reviewed;
 - no unresolved findings remain.
