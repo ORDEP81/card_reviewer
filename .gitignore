@@ -38,9 +38,3 @@ graphify-out/
 
 # macOS
 .DS_Store
-
-# Serena LSP workspace
-.serena/
-
-# Card photographs — large, original captures (back up outside git)
-training/photos/
