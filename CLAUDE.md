@@ -22,6 +22,15 @@ this order, with no exceptions:
     4. REVIEW      an independent reviewer subagent; fixes get a re-review
     5. MERGE       ONLY after the user has said to merge
 
+**The unit is a branch, not a phase.** Phases within a branch do not each
+need their own PR or merge approval — see "Autonomous phase execution".
+Steps 1 and 5 bracket the branch; steps 2 and 4 repeat inside it as often
+as the work requires.
+
+Each step is specified in full further down this file. This section is the
+index, not a second authority. An edit to a step that changes only this
+copy is incomplete.
+
 **Step 5 is the user's decision and nobody else's.** Not "the reviewer
 approved it", not "the suite is green", not "no findings remain". Those are
 preconditions for ASKING. The answer comes from the user, in words, in this
@@ -261,11 +270,16 @@ Where ponytail and this file disagree, this file wins.
 
 ## Subagents that write code
 
-A plugin hook injects ponytail into every subagent automatically, including
-its weaker testing rule.
+Any subagent dispatched to write code must be told, in its prompt, that this
+file governs and that "Ponytail and TDD run as one cycle" is the tie-breaker.
 
-So any subagent dispatched to write code must be told, in its prompt, that
-this file governs and that the section above is the tie-breaker.
+That requirement is unconditional. It does not depend on how any plugin is
+configured.
+
+It matters doubly under the current configuration: a hook injects ponytail
+into every subagent by default, including its weaker testing rule, while
+nothing injects TDD. So the subagent arrives already carrying the rule this
+file overrides, and carrying nothing of the rule that overrides it.
 
 State in the dispatch prompt:
 
@@ -279,6 +293,12 @@ A reviewer subagent checks the work against this file, not against ponytail.
 ---
 
 # Before merging
+
+**Push the branch and open a PR.** This is step 3 of THE LOOP, and it comes
+before review, not after it.
+
+Work that exists only in a local worktree is not reviewable. The reviewer,
+the diff, and the merge decision all reference the PR.
 
 **`superpowers:verification-before-completion`** — run the command and read
 the output before claiming anything passes.
@@ -494,6 +514,10 @@ Do not accept merely:
 Check **which test** killed the mutation.
 
 Prefer plausible mutations.
+
+One exception, and it runs the other way: for a commit that closes a review
+finding, the mutation is not a plausible variant but the literal pre-fix
+revert. See "Mutate a review fix back to the LITERAL pre-fix state" above.
 
 Examples:
 
@@ -1261,13 +1285,17 @@ governing product/design decision remains unresolved.
 
 Before invoking `superpowers:requesting-code-review`:
 
-- full suite green;
+- full suite green, verified by running it, not from memory;
 - no unexplained warnings;
 - new guards mutation-tested;
 - intended tests verified as mutation killers;
+- any review-fix test run against the literal pre-fix revert;
 - actual diff inspected;
 - producer → consumer contract tests run;
-- persistence round trips run where applicable.
+- persistence round trips run where applicable;
+- branch pushed and PR open;
+- every code-writing subagent dispatched with the branch, the required RED,
+  and the checks its task needed.
 
 Do not knowingly send incomplete work for review.
 
@@ -1279,12 +1307,14 @@ A task or phase is not DONE while required work remains unresolved.
 
 DONE means:
 
+- design settled before code, by spec or by brainstorming;
 - intended behavior implemented;
 - RED → GREEN demonstrated;
 - contracts connected;
 - persistence validated where applicable;
 - new guards mutation-tested;
-- complete suite green;
+- review-fix tests run against the literal pre-fix revert;
+- complete suite green, and observed green rather than remembered;
 - independent review completed when required;
 - review fixes independently re-reviewed;
 - no unresolved findings remain.
