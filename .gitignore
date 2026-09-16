@@ -32,7 +32,6 @@ __pycache__/
 dist/
 build/
 
-
 # Knowledge graph outputs — regenerable via /graphify
 graphify-out/
 
