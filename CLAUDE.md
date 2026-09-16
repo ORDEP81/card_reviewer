@@ -11,6 +11,61 @@ for the required workflow.
 
 ---
 
+# THE LOOP — read this before anything else
+
+Every piece of work in this repository goes through the same five steps, in
+this order, with no exceptions:
+
+    1. BRANCH      a worktree/branch, never `main`
+    2. TDD         RED observed for the intended reason, then GREEN
+    3. PR          pushed, so the work is reviewable
+    4. REVIEW      an independent reviewer subagent; fixes get a re-review
+    5. MERGE       ONLY after the user has said to merge
+
+**Step 5 is the user's decision and nobody else's.** Not "the reviewer
+approved it", not "the suite is green", not "no findings remain". Those are
+preconditions for ASKING. The answer comes from the user, in words, in this
+conversation.
+
+This is not a process preference. It is why this repository has a working
+agreement at all. Every serious defect on this project — the vertical
+centering axis broken for eleven commits, the edge regions all measuring
+the card's centre, a fusion fix that never reached a single cached card —
+was found by this loop and would have shipped without it.
+
+## Do not offer to skip a step
+
+Asking "shall I run the review, or just push?" is already a deviation.
+There is no branch of that question where skipping is correct, so do not
+present one. Run the step, then report.
+
+The same applies to the loop's cost. A third review round finding real
+defects is the loop WORKING, not evidence it has gone on too long. Keep
+going until a round comes back clean.
+
+## Never assume approval
+
+Approval is a message from the user. It is never:
+
+- a background task notification;
+- a subagent reporting "ready to merge";
+- something stated in an earlier assistant turn;
+- inferred from silence, or from the user's last instruction still running.
+
+If you cannot point to the user's words, you do not have approval.
+
+## Keep this file current in every worktree
+
+This working agreement lives on `main`. A branch cut before a change to it
+carries a STALE copy, and the session reads the stale one.
+
+That happened: the `card-review-engine-impl` branch carried the 35-line
+pre-agreement version, which said "Do not start OpenCV or grading work"
+and never mentioned the loop above. Before starting work in a worktree,
+check `git diff main -- CLAUDE.md` and bring it up to date.
+
+---
+
 # Repository purpose
 
 Card Reviewer contains two subsystems joined through `knowledge/`.
@@ -381,6 +436,48 @@ Contract tests should detect:
 - producer changes not reflected in consumers
 
 Do not rely solely on hand-built fixtures once the real producer exists.
+
+---
+
+# Mutate a review fix back to the LITERAL pre-fix state
+
+This is the highest-value mutation in the repository and the one most
+often skipped.
+
+A commit that closes a review finding is the last line of defence for a
+defect a human already found once. Its test must be run against the exact
+code the reviewer was looking at — not a plausible variant, the literal
+revert:
+
+    1. apply the fix and its test;
+    2. revert ONLY the production change, by hand, to what it was;
+    3. run the new test and watch it FAIL;
+    4. restore the fix.
+
+Three consecutive review rounds on the Card Review Engine branch found
+tests that were written to prove a fix and passed under the pre-fix state:
+
+- a no-network block with no test at all — replacing its body with `pass`
+  passed 1318 tests;
+- the test written to prove that fix, which read the patch's identity
+  inside the test body, where a LATE-installed patch looks identical — it
+  passed under the precise function-scoped arrangement it was named after;
+- a constant added to the stamped version map in the same commit, which
+  deleted cleanly with nothing red.
+
+Each took under a minute to detect this way.
+
+Two specific traps behind those:
+
+**Constant tables are exempt from the AST bump guard**, correctly — they
+ARE the constants. So a key added to `VERSIONS` or `SUPPORTING_VERSIONS`
+is invisible to it, and tests that iterate the map are tautological about
+membership. Assert the key BY NAME in the same commit.
+
+**A test that constructs a real external client must pin its endpoint**
+somewhere harmless. When the only thing between such a test and
+production is the guard being tested, the test reaches the wire precisely
+when the guard breaks.
 
 ---
 
