@@ -24,12 +24,17 @@ this order, with no exceptions:
 
 **The unit is a branch, not a phase.** Phases within a branch do not each
 need their own PR or merge approval — see "Autonomous phase execution".
-Steps 1 and 5 bracket the branch; steps 2 and 4 repeat inside it as often
-as the work requires.
+Steps 1 and 5 bracket the branch. Step 3 opens once, early, so the work is
+reviewable while it proceeds. Steps 2 and 4 repeat inside the branch as
+often as the work requires.
 
-Each step is specified in full further down this file. This section is the
-index, not a second authority. An edit to a step that changes only this
-copy is incomplete.
+Steps 1 through 4 are specified in full further down this file, and the
+list above is an index to them rather than a second copy — an edit that
+changes only the list is incomplete.
+
+**Step 5 is specified here and nowhere else**, as is everything in this
+section below this paragraph. Do not go looking downstream for the merge
+gate. This is it.
 
 **Step 5 is the user's decision and nobody else's.** Not "the reviewer
 approved it", not "the suite is green", not "no findings remain". Those are
@@ -276,10 +281,9 @@ file governs and that "Ponytail and TDD run as one cycle" is the tie-breaker.
 That requirement is unconditional. It does not depend on how any plugin is
 configured.
 
-It matters doubly under the current configuration: a hook injects ponytail
-into every subagent by default, including its weaker testing rule, while
-nothing injects TDD. So the subagent arrives already carrying the rule this
-file overrides, and carrying nothing of the rule that overrides it.
+It is easy to get wrong because, by default, a hook injects ponytail into
+every subagent while nothing injects TDD. The subagent arrives carrying the
+rule this file overrides and none of the rule that overrides it.
 
 State in the dispatch prompt:
 
@@ -358,7 +362,9 @@ After fixing review findings:
 3. implement;
 4. run targeted tests;
 5. run producer → consumer tests;
-6. mutation-test the new guard;
+6. mutation-test the new guard — and because every commit reaching this
+   list closes a review finding, the mutation here is the literal pre-fix
+   revert, not a plausible variant;
 7. run the full suite;
 8. request independent re-review.
 
@@ -1294,8 +1300,8 @@ Before invoking `superpowers:requesting-code-review`:
 - producer → consumer contract tests run;
 - persistence round trips run where applicable;
 - branch pushed and PR open;
-- every code-writing subagent dispatched with the branch, the required RED,
-  and the checks its task needed.
+- every code-writing subagent dispatched with the contents listed under
+  "Subagents that write code".
 
 Do not knowingly send incomplete work for review.
 
@@ -1313,7 +1319,8 @@ DONE means:
 - contracts connected;
 - persistence validated where applicable;
 - new guards mutation-tested;
-- review-fix tests run against the literal pre-fix revert;
+- any test that closes a review finding run against the literal pre-fix
+  revert;
 - complete suite green, and observed green rather than remembered;
 - independent review completed when required;
 - review fixes independently re-reviewed;
