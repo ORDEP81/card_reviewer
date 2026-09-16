@@ -37,3 +37,6 @@ graphify-out/
 
 # macOS
 .DS_Store
+
+# Serena LSP workspace — local per-developer state
+.serena/
