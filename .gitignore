@@ -32,3 +32,11 @@ __pycache__/
 dist/
 build/
 
+# Knowledge graph outputs — regenerable via /graphify
+graphify-out/
+
+# macOS
+.DS_Store
+
+# Serena LSP workspace — local per-developer state
+.serena/
